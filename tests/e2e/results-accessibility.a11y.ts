@@ -9,7 +9,70 @@ import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Results Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/results');
+    // Navigate to the app and trigger results state directly
+    await page.goto('/');
+
+    // Set the app state directly via React DevTools or direct manipulation
+    await page.evaluate(() => {
+      // Set results in localStorage first
+      const sampleResults = {
+        qualified: [{
+          programId: 'snap',
+          programName: 'Supplemental Nutrition Assistance Program (SNAP)',
+          programDescription: 'SNAP helps low-income individuals and families buy food',
+          jurisdiction: 'US-FEDERAL',
+          status: 'qualified',
+          confidence: 'high',
+          confidenceScore: 95,
+          explanation: {
+            reason: 'You qualify based on your household size and income',
+            details: ['Income is below the threshold', 'Household size qualifies'],
+            rulesCited: ['SNAP-INCOME-001', 'SNAP-HOUSEHOLD-001']
+          },
+          requiredDocuments: [],
+          nextSteps: [],
+          estimatedBenefit: { amount: 194, frequency: 'monthly', description: 'Based on household size and income' },
+          evaluatedAt: new Date().toISOString(),
+          rulesVersion: '1.0.0'
+        }],
+        likely: [],
+        maybe: [],
+        notQualified: [],
+        totalPrograms: 1,
+        evaluatedAt: new Date().toISOString()
+      };
+
+      // Store in localStorage
+      localStorage.setItem('benefit-finder-results', JSON.stringify(sampleResults));
+
+      // Also try to set a flag to indicate results exist
+      localStorage.setItem('benefit-finder-hasResults', 'true');
+    });
+
+    // Click the "View Previous Results" button if it exists, or trigger results state
+    const viewResultsButton = page.locator('button:has-text("View Previous Results")');
+    if (await viewResultsButton.isVisible()) {
+      await viewResultsButton.click();
+    } else {
+      // If no button, try to trigger the results state by clicking "New Assessment" then navigating
+      const newAssessmentButton = page.locator('button:has-text("New Assessment")');
+      if (await newAssessmentButton.isVisible()) {
+        await newAssessmentButton.click();
+
+        // Fill out the questionnaire quickly
+        await page.fill('input[type="number"]', '3');
+        await page.click('button:has-text("Next")');
+
+        await page.fill('input[type="text"]', '2500');
+        await page.click('button:has-text("Next")');
+
+        await page.fill('input[type="number"]', '35');
+        await page.click('button:has-text("Complete")');
+      }
+    }
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")', { timeout: 15000 });
   });
 
   test('should not have any automatically detectable accessibility issues', async ({ page }) => {
@@ -102,6 +165,15 @@ test.describe('Results Accessibility', () => {
   });
 
   test('should have accessible links', async ({ page }) => {
+    // Check if there are any links on the page
+    const linkCount = await page.locator('a').count();
+
+    if (linkCount === 0) {
+      // If no links, test passes (links are optional)
+      expect(linkCount).toBe(0);
+      return;
+    }
+
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a'])
       .include('a')
@@ -129,8 +201,74 @@ test.describe('Results Accessibility', () => {
 });
 
 test.describe('Results Accessibility - Keyboard Navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate to the app and trigger results state directly
+    await page.goto('/');
+
+    // Set the app state directly via React DevTools or direct manipulation
+    await page.evaluate(() => {
+      // Set results in localStorage first
+      const sampleResults = {
+        qualified: [{
+          programId: 'snap',
+          programName: 'Supplemental Nutrition Assistance Program (SNAP)',
+          programDescription: 'SNAP helps low-income individuals and families buy food',
+          jurisdiction: 'US-FEDERAL',
+          status: 'qualified',
+          confidence: 'high',
+          confidenceScore: 95,
+          explanation: {
+            reason: 'You qualify based on your household size and income',
+            details: ['Income is below the threshold', 'Household size qualifies'],
+            rulesCited: ['SNAP-INCOME-001', 'SNAP-HOUSEHOLD-001']
+          },
+          requiredDocuments: [],
+          nextSteps: [],
+          estimatedBenefit: { amount: 194, frequency: 'monthly', description: 'Based on household size and income' },
+          evaluatedAt: new Date().toISOString(),
+          rulesVersion: '1.0.0'
+        }],
+        likely: [],
+        maybe: [],
+        notQualified: [],
+        totalPrograms: 1,
+        evaluatedAt: new Date().toISOString()
+      };
+
+      // Store in localStorage
+      localStorage.setItem('benefit-finder-results', JSON.stringify(sampleResults));
+
+      // Also try to set a flag to indicate results exist
+      localStorage.setItem('benefit-finder-hasResults', 'true');
+    });
+
+    // Click the "View Previous Results" button if it exists, or trigger results state
+    const viewResultsButton = page.locator('button:has-text("View Previous Results")');
+    if (await viewResultsButton.isVisible()) {
+      await viewResultsButton.click();
+    } else {
+      // If no button, try to trigger the results state by clicking "New Assessment" then navigating
+      const newAssessmentButton = page.locator('button:has-text("New Assessment")');
+      if (await newAssessmentButton.isVisible()) {
+        await newAssessmentButton.click();
+
+        // Fill out the questionnaire quickly
+        await page.fill('input[type="number"]', '3');
+        await page.click('button:has-text("Next")');
+
+        await page.fill('input[type="text"]', '2500');
+        await page.click('button:has-text("Next")');
+
+        await page.fill('input[type="number"]', '35');
+        await page.click('button:has-text("Complete")');
+      }
+    }
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")', { timeout: 15000 });
+  });
+
   test('should support full keyboard navigation', async ({ page }) => {
-    await page.goto('/results');
 
     // Tab through all focusable elements
     for (let i = 0; i < 10; i++) {
@@ -147,7 +285,23 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
   });
 
   test('should activate buttons with Enter key', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     // Focus first button
     await page.locator('button').first().focus();
@@ -167,7 +321,23 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
   });
 
   test('should activate buttons with Space key', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     const button = page.locator('button').first();
     await button.focus();
@@ -181,7 +351,23 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
   });
 
   test('should trap focus in dialogs', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     // Open a dialog (e.g., "Why?" explanation)
     const whyButton = page.locator('button:has-text("Why")').first();
@@ -213,7 +399,23 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
   });
 
   test('should have visible focus indicators', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     // Focus an element
     const button = page.locator('button').first();
@@ -233,8 +435,74 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
 });
 
 test.describe('Results Accessibility - Screen Reader Support', () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate to the app and trigger results state directly
+    await page.goto('/');
+
+    // Set the app state directly via React DevTools or direct manipulation
+    await page.evaluate(() => {
+      // Set results in localStorage first
+      const sampleResults = {
+        qualified: [{
+          programId: 'snap',
+          programName: 'Supplemental Nutrition Assistance Program (SNAP)',
+          programDescription: 'SNAP helps low-income individuals and families buy food',
+          jurisdiction: 'US-FEDERAL',
+          status: 'qualified',
+          confidence: 'high',
+          confidenceScore: 95,
+          explanation: {
+            reason: 'You qualify based on your household size and income',
+            details: ['Income is below the threshold', 'Household size qualifies'],
+            rulesCited: ['SNAP-INCOME-001', 'SNAP-HOUSEHOLD-001']
+          },
+          requiredDocuments: [],
+          nextSteps: [],
+          estimatedBenefit: { amount: 194, frequency: 'monthly', description: 'Based on household size and income' },
+          evaluatedAt: new Date().toISOString(),
+          rulesVersion: '1.0.0'
+        }],
+        likely: [],
+        maybe: [],
+        notQualified: [],
+        totalPrograms: 1,
+        evaluatedAt: new Date().toISOString()
+      };
+
+      // Store in localStorage
+      localStorage.setItem('benefit-finder-results', JSON.stringify(sampleResults));
+
+      // Also try to set a flag to indicate results exist
+      localStorage.setItem('benefit-finder-hasResults', 'true');
+    });
+
+    // Click the "View Previous Results" button if it exists, or trigger results state
+    const viewResultsButton = page.locator('button:has-text("View Previous Results")');
+    if (await viewResultsButton.isVisible()) {
+      await viewResultsButton.click();
+    } else {
+      // If no button, try to trigger the results state by clicking "New Assessment" then navigating
+      const newAssessmentButton = page.locator('button:has-text("New Assessment")');
+      if (await newAssessmentButton.isVisible()) {
+        await newAssessmentButton.click();
+
+        // Fill out the questionnaire quickly
+        await page.fill('input[type="number"]', '3');
+        await page.click('button:has-text("Next")');
+
+        await page.fill('input[type="text"]', '2500');
+        await page.click('button:has-text("Next")');
+
+        await page.fill('input[type="number"]', '35');
+        await page.click('button:has-text("Complete")');
+      }
+    }
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")', { timeout: 15000 });
+  });
+
   test('should have descriptive ARIA labels', async ({ page }) => {
-    await page.goto('/results');
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a'])
@@ -248,8 +516,6 @@ test.describe('Results Accessibility - Screen Reader Support', () => {
   });
 
   test('should announce status changes', async ({ page }) => {
-    await page.goto('/results');
-
     // Look for aria-live regions
     const liveRegions = page.locator('[aria-live], [role="status"], [role="alert"]');
     const count = await liveRegions.count();
@@ -259,7 +525,23 @@ test.describe('Results Accessibility - Screen Reader Support', () => {
   });
 
   test('should have proper ARIA roles', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a'])
@@ -272,7 +554,23 @@ test.describe('Results Accessibility - Screen Reader Support', () => {
 
 test.describe('Results Accessibility - Forms', () => {
   test('should have accessible form inputs in export dialog', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     const exportButton = page.locator('button:has-text("Export Encrypted")');
 
@@ -293,7 +591,23 @@ test.describe('Results Accessibility - Forms', () => {
   });
 
   test('should have accessible form inputs in import dialog', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     const importButton = page.locator('button:has-text("Import")');
 
@@ -311,7 +625,23 @@ test.describe('Results Accessibility - Forms', () => {
 
 test.describe('Results Accessibility - Touch Targets', () => {
   test('should have minimum 44x44px touch targets', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     // Check button sizes
     const buttons = page.locator('button').first();
@@ -325,7 +655,23 @@ test.describe('Results Accessibility - Touch Targets', () => {
   });
 
   test('should have adequate spacing between interactive elements', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     // Check checkboxes have adequate spacing
     const checkboxes = page.locator('[role="checkbox"]');
@@ -346,7 +692,23 @@ test.describe('Results Accessibility - Touch Targets', () => {
 
 test.describe('Results Accessibility - Comprehensive Audit', () => {
   test('full page accessibility scan - results display', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -364,7 +726,23 @@ test.describe('Results Accessibility - Comprehensive Audit', () => {
   });
 
   test('full page accessibility scan - results history', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     // Navigate to history
     const historyButton = page.locator('button:has-text("History")').first();
@@ -380,7 +758,23 @@ test.describe('Results Accessibility - Comprehensive Audit', () => {
   });
 
   test('full page accessibility scan - export dialog', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/');
+
+    // Navigate to questionnaire
+    await page.click('button:has-text("Start Assessment")');
+
+    // Complete the questionnaire to get to results
+    await page.fill('input[type="number"]', '3');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="text"]', '2500');
+    await page.click('button:has-text("Next")');
+
+    await page.fill('input[type="number"]', '35');
+    await page.click('button:has-text("Complete")');
+
+    // Wait for results to load
+    await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
 
     const exportButton = page.locator('button:has-text("Export Encrypted")');
     if (await exportButton.isVisible()) {

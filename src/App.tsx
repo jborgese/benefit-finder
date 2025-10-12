@@ -3,6 +3,7 @@ import { SimpleQuestionnaire } from './questionnaire/ui';
 import { ResultsSummary, ProgramCard, ResultsExport } from './components/results';
 import { useResultsManagement } from './components/results/useResultsManagement';
 import { Button } from './components/Button';
+import { LiveRegion } from './questionnaire/accessibility';
 import type { QuestionFlow, FlowNode } from './questionnaire/types';
 
 // Sample questionnaire flow for testing - helper nodes
@@ -168,6 +169,7 @@ type AppState = 'home' | 'questionnaire' | 'results';
 function App(): React.ReactElement {
   const [appState, setAppState] = useState<AppState>('home');
   const [hasResults, setHasResults] = useState(false);
+  const [announcementMessage, setAnnouncementMessage] = useState('');
 
   const { saveResults } = useResultsManagement();
 
@@ -185,10 +187,12 @@ function App(): React.ReactElement {
     void saveResults({ results });
     setHasResults(true);
     setAppState('results');
+    setAnnouncementMessage('Assessment completed. Results are ready.');
   };
 
   const handleViewResults = (): void => {
     setAppState('results');
+    setAnnouncementMessage('Viewing benefit eligibility results.');
   };
 
   const handleBackToHome = (): void => {
@@ -202,6 +206,13 @@ function App(): React.ReactElement {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
+      {/* Screen reader announcements */}
+      <LiveRegion
+        message={announcementMessage}
+        priority="polite"
+        clearAfter={3000}
+      />
+
       <nav className="bg-slate-900 border-b border-slate-800 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-xl font-semibold">BenefitFinder</h1>
@@ -338,6 +349,65 @@ function App(): React.ReactElement {
                   className="max-w-4xl mx-auto"
                 />
               ))}
+            </div>
+
+            {/* Helpful links for accessibility */}
+            <div className="mt-8 bg-slate-800 rounded-lg p-6 max-w-4xl mx-auto">
+              <h3 className="text-lg font-semibold mb-4">Additional Resources</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium mb-2">Government Resources</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li>
+                      <a
+                        href="https://www.benefits.gov"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        aria-label="Visit Benefits.gov to learn about federal benefits"
+                      >
+                        Benefits.gov - Federal Benefits Information
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.usa.gov/benefits"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        aria-label="Visit USA.gov benefits page for comprehensive benefit information"
+                      >
+                        USA.gov - Government Benefits Guide
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Support & Assistance</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li>
+                      <a
+                        href="tel:211"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        aria-label="Call 211 for local assistance with benefits and services"
+                      >
+                        211 - Local Assistance Hotline
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.healthcare.gov"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        aria-label="Visit Healthcare.gov for health insurance information"
+                      >
+                        Healthcare.gov - Health Insurance
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         )}

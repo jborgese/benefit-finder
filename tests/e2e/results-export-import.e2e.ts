@@ -8,53 +8,90 @@ import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import type { Page } from '@playwright/test';
 
+// Helper to fill a form field and wait
+async function fillFormField(
+  page: Page,
+  selector: string,
+  value: string,
+  waitMs = 200
+): Promise<boolean> {
+  const input = page.locator(selector).first();
+  if (!(await input.isVisible())) {
+    return false;
+  }
+  await input.fill(value);
+  await page.waitForTimeout(waitMs);
+  return true;
+}
+
+// Helper to click a button and wait
+async function clickButton(
+  page: Page,
+  selector: string,
+  waitMs = 500
+): Promise<boolean> {
+  const button = page.locator(selector).first();
+  if (!(await button.isVisible())) {
+    return false;
+  }
+  await button.click();
+  await page.waitForTimeout(waitMs);
+  return true;
+}
+
+// Helper to fill household size step
+async function fillHouseholdStep(page: Page): Promise<boolean> {
+  const filled = await fillFormField(
+    page,
+    'input[name="householdSize"], input[type="number"]',
+    '2'
+  );
+  if (!filled) return false;
+
+  return clickButton(page, 'button', 500);
+}
+
+// Helper to fill income step
+async function fillIncomeStep(page: Page): Promise<boolean> {
+  const filled = await fillFormField(
+    page,
+    'input[name="monthlyIncome"], input[type="number"]',
+    '1500'
+  );
+  if (!filled) return false;
+
+  return clickButton(page, 'button', 500);
+}
+
+// Helper to fill age step and submit
+async function fillAgeStepAndSubmit(page: Page): Promise<boolean> {
+  const filled = await fillFormField(
+    page,
+    'input[name="age"], input[type="number"]',
+    '30'
+  );
+  if (!filled) return false;
+
+  return clickButton(page, 'button', 1000);
+}
+
 // Helper to navigate to results through the app flow
 async function navigateToResults(page: Page): Promise<void> {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
 
   // Click start assessment button
-  const startButton = page.locator('button', { hasText: /Start Assessment/i });
-  if (await startButton.isVisible()) {
-    await startButton.click();
-    await page.waitForTimeout(500);
+  const started = await clickButton(page, 'button');
+  if (!started) return;
 
-    // Fill out questionnaire quickly to get to results
-    const householdInput = page.locator('input[name="householdSize"], input[type="number"]').first();
-    if (await householdInput.isVisible()) {
-      await householdInput.fill('2');
-      await page.waitForTimeout(200);
+  // Fill questionnaire steps sequentially
+  const householdFilled = await fillHouseholdStep(page);
+  if (!householdFilled) return;
 
-      const nextButton = page.locator('button', { hasText: /next/i }).first();
-      if (await nextButton.isVisible()) {
-        await nextButton.click();
-        await page.waitForTimeout(500);
+  const incomeFilled = await fillIncomeStep(page);
+  if (!incomeFilled) return;
 
-        const incomeInput = page.locator('input[name="monthlyIncome"], input[type="number"]').first();
-        if (await incomeInput.isVisible()) {
-          await incomeInput.fill('1500');
-          await page.waitForTimeout(200);
-
-          if (await nextButton.isVisible()) {
-            await nextButton.click();
-            await page.waitForTimeout(500);
-
-            const ageInput = page.locator('input[name="age"], input[type="number"]').first();
-            if (await ageInput.isVisible()) {
-              await ageInput.fill('30');
-              await page.waitForTimeout(200);
-
-              const submitButton = page.locator('button', { hasText: /submit|finish/i }).first();
-              if (await submitButton.isVisible()) {
-                await submitButton.click();
-                await page.waitForTimeout(1000);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  await fillAgeStepAndSubmit(page);
 }
 
 test.describe('Results Export', () => {
