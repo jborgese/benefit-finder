@@ -1,110 +1,166 @@
 import React, { useState } from 'react';
 import { SimpleQuestionnaire } from './questionnaire/ui';
 import { ResultsSummary, ProgramCard, ResultsExport } from './components/results';
-import { useQuestionFlowStore } from './questionnaire/store';
 import { useResultsManagement } from './components/results/useResultsManagement';
 import { Button } from './components/Button';
+import type { QuestionFlow, FlowNode } from './questionnaire/types';
 
-// Sample questionnaire flow for testing
-const sampleFlow = {
+// Sample questionnaire flow for testing - helper nodes
+const nodes: FlowNode[] = [
+  {
+    id: 'household-size',
+    question: {
+      id: 'household-size',
+      text: 'How many people are in your household?',
+      inputType: 'number',
+      fieldName: 'householdSize',
+      required: true,
+      min: 1,
+      max: 20
+    },
+    nextId: 'income'
+  },
+  {
+    id: 'income',
+    question: {
+      id: 'income',
+      text: 'What is your total monthly household income?',
+      inputType: 'currency',
+      fieldName: 'monthlyIncome',
+      required: true,
+      min: 0
+    },
+    nextId: 'age'
+  },
+  {
+    id: 'age',
+    question: {
+      id: 'age',
+      text: 'What is your age?',
+      inputType: 'number',
+      fieldName: 'age',
+      required: true,
+      min: 0,
+      max: 120
+    },
+    isTerminal: true
+  }
+];
+
+const sampleFlow: QuestionFlow = {
   id: 'benefit-eligibility',
   name: 'Benefit Eligibility Assessment',
   version: '1.0.0',
   description: 'Complete assessment to check eligibility for government benefits',
-  nodes: [
-    {
-      id: 'start',
-      type: 'start',
-      title: 'Welcome',
-      description: 'Let\'s check your eligibility for government benefits',
-      next: 'household-size'
-    },
-    {
-      id: 'household-size',
-      type: 'question',
-      title: 'Household Size',
-      question: 'How many people are in your household?',
-      inputType: 'number',
-      required: true,
-      validation: { min: 1, max: 20 },
-      next: 'income'
-    },
-    {
-      id: 'income',
-      type: 'question',
-      title: 'Monthly Income',
-      question: 'What is your total monthly household income?',
-      inputType: 'currency',
-      required: true,
-      validation: { min: 0 },
-      next: 'age'
-    },
-    {
-      id: 'age',
-      type: 'question',
-      title: 'Age',
-      question: 'What is your age?',
-      inputType: 'number',
-      required: true,
-      validation: { min: 0, max: 120 },
-      next: 'end'
-    },
-    {
-      id: 'end',
-      type: 'end',
-      title: 'Assessment Complete',
-      description: 'Thank you for completing the assessment'
-    }
-  ]
+  startNodeId: 'household-size',
+  nodes: new Map(nodes.map(node => [node.id, node]))
 };
 
 // Sample results for testing
 const sampleResults = {
-  id: 'sample-results-1',
-  timestamp: new Date().toISOString(),
-  programs: [
+  qualified: [
     {
-      id: 'snap',
-      name: 'Supplemental Nutrition Assistance Program (SNAP)',
+      programId: 'snap',
+      programName: 'Supplemental Nutrition Assistance Program (SNAP)',
+      programDescription: 'SNAP helps low-income individuals and families buy food',
+      jurisdiction: 'US-FEDERAL',
       status: 'qualified' as const,
       confidence: 'high' as const,
-      estimatedAmount: '$194',
-      explanation: 'You qualify based on your household size and income',
+      confidenceScore: 95,
+      explanation: {
+        reason: 'You qualify based on your household size and income',
+        details: ['Income is below the threshold', 'Household size qualifies'],
+        rulesCited: ['SNAP-INCOME-001', 'SNAP-HOUSEHOLD-001']
+      },
       requiredDocuments: [
-        'Proof of income',
-        'Social Security card',
-        'Proof of residency'
+        {
+          id: 'snap-doc-1',
+          name: 'Proof of income',
+          required: true
+        },
+        {
+          id: 'snap-doc-2',
+          name: 'Social Security card',
+          required: true
+        },
+        {
+          id: 'snap-doc-3',
+          name: 'Proof of residency',
+          required: true
+        }
       ],
       nextSteps: [
-        'Contact your local SNAP office',
-        'Schedule an interview',
-        'Gather required documents'
-      ]
+        {
+          step: 'Contact your local SNAP office',
+          priority: 'high' as const
+        },
+        {
+          step: 'Schedule an interview',
+          priority: 'high' as const
+        },
+        {
+          step: 'Gather required documents',
+          priority: 'medium' as const
+        }
+      ],
+      estimatedBenefit: {
+        amount: 194,
+        frequency: 'monthly' as const,
+        description: 'Based on household size and income'
+      },
+      evaluatedAt: new Date(),
+      rulesVersion: '1.0.0'
     },
     {
-      id: 'medicaid',
-      name: 'Medicaid',
+      programId: 'medicaid',
+      programName: 'Medicaid',
+      programDescription: 'Health coverage for low-income individuals and families',
+      jurisdiction: 'US-FEDERAL',
       status: 'qualified' as const,
       confidence: 'medium' as const,
-      estimatedAmount: 'Coverage',
-      explanation: 'You may qualify for Medicaid coverage',
+      confidenceScore: 75,
+      explanation: {
+        reason: 'You may qualify for Medicaid coverage',
+        details: ['Income is within Medicaid threshold', 'State eligibility requirements met'],
+        rulesCited: ['MEDICAID-INCOME-001']
+      },
       requiredDocuments: [
-        'Proof of income',
-        'Birth certificate',
-        'Social Security card'
+        {
+          id: 'medicaid-doc-1',
+          name: 'Proof of income',
+          required: true
+        },
+        {
+          id: 'medicaid-doc-2',
+          name: 'Birth certificate',
+          required: true
+        },
+        {
+          id: 'medicaid-doc-3',
+          name: 'Social Security card',
+          required: true
+        }
       ],
       nextSteps: [
-        'Apply online at healthcare.gov',
-        'Contact state Medicaid office'
-      ]
+        {
+          step: 'Apply online at healthcare.gov',
+          url: 'https://www.healthcare.gov',
+          priority: 'high' as const
+        },
+        {
+          step: 'Contact state Medicaid office',
+          priority: 'medium' as const
+        }
+      ],
+      evaluatedAt: new Date(),
+      rulesVersion: '1.0.0'
     }
   ],
-  summary: {
-    totalPrograms: 2,
-    qualified: 2,
-    maybeQualified: 0,
-    notQualified: 0
-  }
+  likely: [],
+  maybe: [],
+  notQualified: [],
+  totalPrograms: 2,
+  evaluatedAt: new Date()
 };
 
 type AppState = 'home' | 'questionnaire' | 'results';
@@ -113,22 +169,21 @@ function App(): React.ReactElement {
   const [appState, setAppState] = useState<AppState>('home');
   const [hasResults, setHasResults] = useState(false);
 
-  const { isComplete, answers } = useQuestionFlowStore();
-  const { saveResults, loadResults } = useResultsManagement();
+  const { saveResults } = useResultsManagement();
 
   const handleStartQuestionnaire = () => {
     setAppState('questionnaire');
   };
 
-  const handleCompleteQuestionnaire = () => {
+  const handleCompleteQuestionnaire = (answers: Record<string, unknown>) => {
+    console.log('Questionnaire completed with answers:', answers);
     // Generate sample results based on answers
     const results = {
       ...sampleResults,
-      id: `results-${Date.now()}`,
-      timestamp: new Date().toISOString()
+      evaluatedAt: new Date()
     };
 
-    saveResults(results);
+    saveResults({ results });
     setHasResults(true);
     setAppState('results');
   };
@@ -244,7 +299,6 @@ function App(): React.ReactElement {
             <SimpleQuestionnaire
               flow={sampleFlow}
               onComplete={handleCompleteQuestionnaire}
-              className="max-w-2xl mx-auto"
             />
           </div>
         )}
@@ -278,10 +332,10 @@ function App(): React.ReactElement {
             <ResultsSummary results={sampleResults} />
 
             <div className="mt-8 space-y-6">
-              {sampleResults.programs.map((program) => (
+              {sampleResults.qualified.map((result) => (
                 <ProgramCard
-                  key={program.id}
-                  program={program}
+                  key={result.programId}
+                  result={result}
                   className="max-w-4xl mx-auto"
                 />
               ))}
