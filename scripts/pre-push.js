@@ -56,7 +56,7 @@ function runSmartTests(scope) {
   if (scope.runUnitTests) {
     if (scope.changedFiles.length > 0) {
       // Run only tests related to changed files
-      commands.push({ name: '🧪 Running related unit tests...', cmd: 'npm run test:run -- --related' });
+      commands.push({ name: '🧪 Running related unit tests...', cmd: 'npx vitest related --run' });
     } else {
       commands.push({ name: '🧪 Running unit tests...', cmd: 'npm run test:run' });
     }

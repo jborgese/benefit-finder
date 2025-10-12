@@ -44,7 +44,7 @@
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:run": "vitest run",
-        "test:related": "vitest run --related",
+        "test:related": "vitest related --run",
         "test:smart": "node scripts/test-related.js",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest watch",
