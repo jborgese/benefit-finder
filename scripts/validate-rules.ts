@@ -74,6 +74,7 @@ const colors = {
  */
 function loadRulePackage(filepath: string): RulePackage | null {
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- filepath is validated CLI argument
     const content = readFileSync(filepath, 'utf-8');
     return JSON.parse(content) as RulePackage;
   } catch (error) {
@@ -107,7 +108,7 @@ function validatePackageStructure(pkg: RulePackage, filepath: string): Validatio
   }
 
   // Additional validation checks
-  if (pkg.rules) {
+  if (pkg.rules.length > 0) {
     report.ruleCount = pkg.rules.length;
 
     // Check for duplicate rule IDs
@@ -221,7 +222,7 @@ function testRulePackage(pkg: RulePackage): TestSuiteReport {
 /**
  * Print validation report
  */
-function printValidationReport(report: ValidationReport) {
+function printValidationReport(report: ValidationReport): void {
   console.log(`\n${colors.bright}${colors.blue}═══════════════════════════════════════════════════${colors.reset}`);
   console.log(`${colors.bright}File: ${colors.cyan}${report.file}${colors.reset}`);
   console.log(`${colors.bright}${colors.blue}═══════════════════════════════════════════════════${colors.reset}\n`);
@@ -260,7 +261,7 @@ function printValidationReport(report: ValidationReport) {
 /**
  * Print test report
  */
-function printTestReport(report: TestSuiteReport) {
+function printTestReport(report: TestSuiteReport): void {
   console.log(`\n${colors.bright}Test Results:${colors.reset}`);
   console.log(`  Total Rules: ${report.totalRules}`);
   console.log(`  Total Tests: ${report.totalTests}`);
@@ -294,7 +295,7 @@ function printTestReport(report: TestSuiteReport) {
 /**
  * Print summary of all validated files
  */
-function printSummary(reports: ValidationReport[]) {
+function printSummary(reports: ValidationReport[]): void {
   console.log(`\n${colors.bright}${colors.blue}═══════════════════════════════════════════════════${colors.reset}`);
   console.log(`${colors.bright}SUMMARY${colors.reset}`);
   console.log(`${colors.bright}${colors.blue}═══════════════════════════════════════════════════${colors.reset}\n`);
@@ -303,9 +304,9 @@ function printSummary(reports: ValidationReport[]) {
   const validFiles = reports.filter((r) => r.valid && r.errors.length === 0).length;
   const filesWithWarnings = reports.filter((r) => r.warnings.length > 0).length;
   const totalRules = reports.reduce((sum, r) => sum + r.ruleCount, 0);
-  const totalTests = reports.reduce((sum, r) => sum + (r.testResults?.totalTests || 0), 0);
-  const passedTests = reports.reduce((sum, r) => sum + (r.testResults?.passedTests || 0), 0);
-  const failedTests = reports.reduce((sum, r) => sum + (r.testResults?.failedTests || 0), 0);
+  const totalTests = reports.reduce((sum, r) => sum + (r.testResults?.totalTests ?? 0), 0);
+  const passedTests = reports.reduce((sum, r) => sum + (r.testResults?.passedTests ?? 0), 0);
+  const failedTests = reports.reduce((sum, r) => sum + (r.testResults?.failedTests ?? 0), 0);
 
   console.log(`Files: ${validFiles}/${totalFiles} valid`);
   if (filesWithWarnings > 0) {
@@ -330,7 +331,7 @@ function printSummary(reports: ValidationReport[]) {
 /**
  * Main function
  */
-function main() {
+function main(): void {
   const args = process.argv.slice(2);
 
   let filesToValidate: string[] = [];
@@ -341,7 +342,7 @@ function main() {
     try {
       const files = readdirSync(examplesDir).filter((f) => f.endsWith('.json'));
       filesToValidate = files.map((f) => join(examplesDir, f));
-    } catch (error) {
+    } catch {
       console.error(`${colors.red}Failed to read examples directory${colors.reset}`);
       process.exit(1);
     }
