@@ -9,11 +9,41 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, beforeAll, vi } from 'vitest';
 import 'fake-indexeddb/auto';
+import { webcrypto } from 'crypto';
+import { Buffer } from 'buffer';
 
 // Cleanup after each test
 afterEach(() => {
   cleanup();
 });
+
+// Setup Web Crypto API BEFORE all tests
+// This needs to happen at module load time, not in beforeAll
+if (!('crypto' in global) || !(global as any).crypto?.subtle) {
+  Object.defineProperty(global, 'crypto', {
+    value: webcrypto as unknown as Crypto,
+    writable: false,
+    configurable: true,
+  });
+}
+
+// Also set on window for jsdom
+if (typeof window !== 'undefined' && (!('crypto' in window) || !(window as any).crypto?.subtle)) {
+  Object.defineProperty(window, 'crypto', {
+    value: webcrypto as unknown as Crypto,
+    writable: false,
+    configurable: true,
+  });
+}
+
+// Ensure btoa and atob are available globally (for Node.js environment)
+if (typeof global.btoa === 'undefined') {
+  global.btoa = (str: string) => Buffer.from(str, 'binary').toString('base64');
+}
+
+if (typeof global.atob === 'undefined') {
+  global.atob = (str: string) => Buffer.from(str, 'base64').toString('binary');
+}
 
 // Global test setup
 beforeAll(() => {
@@ -50,29 +80,6 @@ beforeAll(() => {
     observe(): void {}
     unobserve(): void {}
   } as any;
-
-  // Mock crypto.getRandomValues (for encryption tests)
-  // Use type assertion to handle environments where crypto might not be fully available
-  const globalWithCrypto = global as typeof global & {
-    crypto: Crypto & { getRandomValues?: <T extends ArrayBufferView | null>(array: T) => T };
-  };
-
-  if (typeof globalWithCrypto.crypto === 'undefined') {
-    globalWithCrypto.crypto = {} as typeof globalWithCrypto.crypto;
-  }
-  if (typeof globalWithCrypto.crypto.getRandomValues === 'undefined') {
-    globalWithCrypto.crypto.getRandomValues = <T extends ArrayBufferView | null>(array: T): T => {
-      if (array && 'length' in array && 'BYTES_PER_ELEMENT' in array) {
-        const typedArray = array as unknown as Uint8Array;
-        for (let i = 0; i < typedArray.length; i++) {
-          // Safe: i is a controlled loop counter within array bounds
-          // eslint-disable-next-line security/detect-object-injection
-          typedArray[i] = Math.floor(Math.random() * 256);
-        }
-      }
-      return array;
-    };
-  }
 
   // Mock localStorage (already available in jsdom, but ensure clean state)
   localStorage.clear();

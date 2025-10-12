@@ -1,0 +1,601 @@
+{
+  "metadata": {
+    "id": "wic-federal-rules-2024",
+    "name": "WIC Federal Eligibility Rules (2024)",
+    "description": "Federal baseline WIC (Special Supplemental Nutrition Program for Women, Infants, and Children) eligibility rules for 2024. WIC provides nutrition assistance, education, and healthcare referrals for pregnant women, new mothers, infants, and children up to age 5.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": ["wic-federal"],
+    "tags": ["wic", "nutrition", "federal", "2024", "maternal-health", "children"],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "wic-federal-categorical-eligibility",
+      "programId": "wic-federal",
+      "name": "WIC Categorical Eligibility",
+      "description": "Must be pregnant, postpartum (up to 6 months), breastfeeding (up to 1 year), infant (under 1 year), or child (1-5 years)",
+      "ruleLogic": {
+        "or": [
+          { "var": "isPregnant" },
+          {
+            "and": [
+              { "var": "isPostpartum" },
+              { "<=": [{ "var": "monthsSinceBirth" }, 6] }
+            ]
+          },
+          {
+            "and": [
+              { "var": "isBreastfeeding" },
+              { "<=": [{ "var": "monthsSinceBirth" }, 12] }
+            ]
+          },
+          {
+            "and": [
+              { "var": "isInfant" },
+              { "<": [{ "var": "ageInMonths" }, 12] }
+            ]
+          },
+          {
+            "and": [
+              { "var": "isChild" },
+              { ">=": [{ "var": "ageInMonths" }, 12] },
+              { "<": [{ "var": "ageInMonths" }, 60] }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "WIC serves specific groups: pregnant women (throughout pregnancy and up to 6 weeks after), postpartum women (up to 6 months after delivery), breastfeeding women (up to 1 year after delivery), infants (under 1 year old), and children (ages 1 to 5 years old). You must fall into one of these categories to be eligible.",
+      "requiredFields": [
+        "isPregnant",
+        "isPostpartum",
+        "monthsSinceBirth",
+        "isBreastfeeding",
+        "isInfant",
+        "isChild",
+        "ageInMonths"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-identity-wic",
+          "name": "Proof of Identity",
+          "description": "Photo ID, driver's license, or other identification",
+          "required": true,
+          "alternatives": ["Passport", "State ID", "Work ID badge", "Student ID"],
+          "where": "DMV or issuing organization"
+        },
+        {
+          "id": "proof-pregnancy-wic",
+          "name": "Proof of Pregnancy (if applicable)",
+          "description": "Doctor's note or positive pregnancy test",
+          "required": false,
+          "alternatives": ["Prenatal clinic verification", "Hospital records"],
+          "where": "Healthcare provider"
+        },
+        {
+          "id": "child-birth-certificate",
+          "name": "Child's Birth Certificate or Hospital Records (if applicable)",
+          "description": "Proof of child's age",
+          "required": false,
+          "alternatives": ["Immunization records", "Hospital discharge papers", "Passport"],
+          "where": "Vital records office or hospital"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Find your local WIC clinic",
+          "url": "https://www.fns.usda.gov/wic/wic-contacts",
+          "priority": "high",
+          "estimatedTime": "5 minutes"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "WIC Eligibility Requirements",
+          "url": "https://www.fns.usda.gov/wic/wic-eligibility-requirements",
+          "legalReference": "7 CFR § 246.7",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-pregnant-woman",
+          "description": "Pregnant woman is categorically eligible",
+          "input": {
+            "isPregnant": true,
+            "isPostpartum": false,
+            "monthsSinceBirth": 0,
+            "isBreastfeeding": false,
+            "isInfant": false,
+            "isChild": false,
+            "ageInMonths": 0
+          },
+          "expected": true,
+          "tags": ["eligible", "pregnant"]
+        },
+        {
+          "id": "test-infant",
+          "description": "6-month-old infant is eligible",
+          "input": {
+            "isPregnant": false,
+            "isPostpartum": false,
+            "monthsSinceBirth": 0,
+            "isBreastfeeding": false,
+            "isInfant": true,
+            "isChild": false,
+            "ageInMonths": 6
+          },
+          "expected": true,
+          "tags": ["eligible", "infant"]
+        },
+        {
+          "id": "test-toddler",
+          "description": "2-year-old child is eligible",
+          "input": {
+            "isPregnant": false,
+            "isPostpartum": false,
+            "monthsSinceBirth": 0,
+            "isBreastfeeding": false,
+            "isInfant": false,
+            "isChild": true,
+            "ageInMonths": 24
+          },
+          "expected": true,
+          "tags": ["eligible", "child", "toddler"]
+        },
+        {
+          "id": "test-breastfeeding-within-year",
+          "description": "Breastfeeding mother within 1 year",
+          "input": {
+            "isPregnant": false,
+            "isPostpartum": false,
+            "monthsSinceBirth": 8,
+            "isBreastfeeding": true,
+            "isInfant": false,
+            "isChild": false,
+            "ageInMonths": 0
+          },
+          "expected": true,
+          "tags": ["eligible", "breastfeeding"]
+        },
+        {
+          "id": "test-child-too-old",
+          "description": "6-year-old is not eligible",
+          "input": {
+            "isPregnant": false,
+            "isPostpartum": false,
+            "monthsSinceBirth": 0,
+            "isBreastfeeding": false,
+            "isInfant": false,
+            "isChild": true,
+            "ageInMonths": 72
+          },
+          "expected": false,
+          "tags": ["ineligible", "age-limit"]
+        },
+        {
+          "id": "test-postpartum-past-limit",
+          "description": "Postpartum woman past 6 months",
+          "input": {
+            "isPregnant": false,
+            "isPostpartum": true,
+            "monthsSinceBirth": 8,
+            "isBreastfeeding": false,
+            "isInfant": false,
+            "isChild": false,
+            "ageInMonths": 0
+          },
+          "expected": false,
+          "tags": ["ineligible", "postpartum", "time-limit"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["categorical", "pregnancy", "infants", "children", "postpartum", "breastfeeding"],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "wic-federal-income-limit",
+      "programId": "wic-federal",
+      "name": "WIC Income Limit",
+      "description": "Household income must be at or below 185% of the federal poverty level",
+      "ruleLogic": {
+        "<=": [
+          { "var": "householdIncome" },
+          {
+            "*": [
+              { "var": "householdSize" },
+              2743
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for WIC, your household's gross income must be at or below 185% of the federal poverty level. For 2024, this means: 1 person = $2,743/month, 2 people = $3,707/month, 3 people = $4,671/month, 4 people = $5,635/month. Add $964 per additional person. If you're already receiving SNAP, Medicaid, or TANF, you automatically meet the income requirement.",
+      "requiredFields": ["householdIncome", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-wic",
+          "name": "Proof of Income",
+          "description": "Pay stubs from the last 4 weeks, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2 forms",
+            "1099 forms",
+            "SNAP award letter",
+            "Medicaid card",
+            "TANF award letter",
+            "Unemployment benefits statement",
+            "Child support records"
+          ],
+          "where": "Employer, government agency, or your own records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you receive SNAP, Medicaid, or TANF, bring proof - you automatically meet WIC income requirements",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "WIC Income Eligibility Guidelines",
+          "url": "https://www.fns.usda.gov/wic/wic-income-eligibility-guidelines",
+          "legalReference": "7 CFR § 246.7(d)",
+          "date": "2024-07-01",
+          "notes": "Income limit is 185% of Federal Poverty Level"
+        },
+        {
+          "title": "Federal Poverty Guidelines 2024",
+          "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+          "date": "2024-01-18"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-wic-income-eligible-single",
+          "description": "Single person with qualifying income",
+          "input": {
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "low-income"]
+        },
+        {
+          "id": "test-wic-income-eligible-family",
+          "description": "Family of 4 with qualifying income",
+          "input": {
+            "householdIncome": 5000,
+            "householdSize": 4
+          },
+          "expected": true,
+          "tags": ["eligible", "family"]
+        },
+        {
+          "id": "test-wic-income-ineligible",
+          "description": "Income above 185% FPL",
+          "input": {
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        },
+        {
+          "id": "test-wic-income-boundary",
+          "description": "Income at exact limit",
+          "input": {
+            "householdIncome": 8229,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": ["eligible", "boundary"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["income", "poverty-level", "185-percent"],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "wic-federal-adjunctive-eligibility",
+      "programId": "wic-federal",
+      "name": "WIC Adjunctive Eligibility",
+      "description": "Automatically income-eligible if receiving SNAP, Medicaid, or TANF",
+      "ruleLogic": {
+        "or": [
+          { "var": "receivesSNAP" },
+          { "var": "receivesMedicaid" },
+          { "var": "receivesTANF" }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "If you or your child already receives SNAP (food stamps), Medicaid, or TANF (Temporary Assistance for Needy Families), you automatically meet WIC's income requirement. This is called 'adjunctive eligibility.' You still need to meet the categorical requirements (be pregnant, postpartum, breastfeeding, infant, or child under 5) and nutritional risk criteria.",
+      "requiredFields": ["receivesSNAP", "receivesMedicaid", "receivesTANF"],
+      "requiredDocuments": [
+        {
+          "id": "proof-snap",
+          "name": "Proof of SNAP Benefits",
+          "description": "EBT card or SNAP award letter",
+          "required": false,
+          "alternatives": ["State benefit card", "Award letter from SNAP office"],
+          "where": "State SNAP office"
+        },
+        {
+          "id": "proof-medicaid-wic",
+          "name": "Proof of Medicaid",
+          "description": "Medicaid card or eligibility letter",
+          "required": false,
+          "alternatives": ["State Medicaid card", "Healthcare.gov confirmation"],
+          "where": "State Medicaid office"
+        },
+        {
+          "id": "proof-tanf",
+          "name": "Proof of TANF Benefits",
+          "description": "TANF award letter or benefit card",
+          "required": false,
+          "alternatives": ["State benefit card", "Award letter"],
+          "where": "State TANF office"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Bring your benefit card or award letter to WIC appointment - no additional income documentation needed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "WIC Adjunctive Income Eligibility",
+          "url": "https://www.fns.usda.gov/wic/wic-eligibility-requirements",
+          "legalReference": "7 CFR § 246.7(d)(2)",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 22,
+      "testCases": [
+        {
+          "id": "test-receives-snap-wic",
+          "description": "Receives SNAP - automatically income eligible",
+          "input": {
+            "receivesSNAP": true,
+            "receivesMedicaid": false,
+            "receivesTANF": false
+          },
+          "expected": true,
+          "tags": ["eligible", "snap", "adjunctive"]
+        },
+        {
+          "id": "test-receives-medicaid-wic",
+          "description": "Receives Medicaid - automatically income eligible",
+          "input": {
+            "receivesSNAP": false,
+            "receivesMedicaid": true,
+            "receivesTANF": false
+          },
+          "expected": true,
+          "tags": ["eligible", "medicaid", "adjunctive"]
+        },
+        {
+          "id": "test-receives-tanf",
+          "description": "Receives TANF - automatically income eligible",
+          "input": {
+            "receivesSNAP": false,
+            "receivesMedicaid": false,
+            "receivesTANF": true
+          },
+          "expected": true,
+          "tags": ["eligible", "tanf", "adjunctive"]
+        },
+        {
+          "id": "test-no-benefits",
+          "description": "Does not receive any qualifying benefits",
+          "input": {
+            "receivesSNAP": false,
+            "receivesMedicaid": false,
+            "receivesTANF": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "no-adjunctive"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["adjunctive", "snap", "medicaid", "tanf", "automatic-eligibility"],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "wic-federal-residence",
+      "programId": "wic-federal",
+      "name": "WIC Residence Requirement",
+      "description": "Must reside in the state where applying for WIC",
+      "ruleLogic": {
+        "var": "livesInState"
+      },
+      "ruleType": "eligibility",
+      "explanation": "You must live in the state where you apply for WIC benefits. You do not need proof of residency or a permanent address. Migrant farm workers and homeless individuals can receive WIC. You can only receive WIC from one state at a time.",
+      "requiredFields": ["livesInState"],
+      "requiredDocuments": [
+        {
+          "id": "proof-residence-wic",
+          "name": "Proof of Residence",
+          "description": "Mail, utility bill, or statement confirming you live in the state",
+          "required": false,
+          "alternatives": [
+            "Driver's license",
+            "Homeless shelter statement",
+            "Letter from someone you live with",
+            "Migrant worker documentation",
+            "Verbal statement may be accepted"
+          ],
+          "where": "Varies - often verbal statement is sufficient"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "WIC is very flexible with residency proof - even a verbal statement may be accepted",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "WIC Residency Requirements",
+          "url": "https://www.fns.usda.gov/wic/wic-eligibility-requirements",
+          "legalReference": "7 CFR § 246.7(e)",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-lives-in-state-wic",
+          "description": "Lives in state",
+          "input": {
+            "livesInState": true
+          },
+          "expected": true,
+          "tags": ["eligible", "resident"]
+        },
+        {
+          "id": "test-not-in-state-wic",
+          "description": "Does not live in state",
+          "input": {
+            "livesInState": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "non-resident"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["residence", "homeless", "migrant-workers"],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "wic-federal-nutritional-risk",
+      "programId": "wic-federal",
+      "name": "WIC Nutritional Risk Requirement",
+      "description": "Must be determined to be at nutritional risk by a health professional",
+      "ruleLogic": {
+        "var": "hasNutritionalRisk"
+      },
+      "ruleType": "eligibility",
+      "explanation": "To receive WIC, you must be determined by a health professional (doctor, nurse, or nutritionist) to be at 'nutritional risk.' This means having a medical or dietary condition that could affect your nutrition, such as anemia, underweight, overweight, poor diet, or certain medical conditions. This assessment is done for free at the WIC clinic during your appointment. Most applicants meet this requirement.",
+      "requiredFields": ["hasNutritionalRisk"],
+      "requiredDocuments": [
+        {
+          "id": "medical-records-wic",
+          "name": "Medical Records (if available)",
+          "description": "Any medical records showing nutritional concerns",
+          "required": false,
+          "alternatives": [
+            "Doctor's note",
+            "Hospital records",
+            "Immunization records",
+            "Lab results showing anemia",
+            "Growth charts"
+          ],
+          "where": "Your healthcare provider"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "WIC staff will conduct a free nutrition screening at your appointment - no prior documentation required",
+          "priority": "medium",
+          "estimatedTime": "Completed during WIC appointment"
+        },
+        {
+          "step": "Common nutritional risks include anemia, being underweight or overweight, inadequate diet, or pregnancy complications",
+          "priority": "low"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "WIC Nutritional Risk Criteria",
+          "url": "https://www.fns.usda.gov/wic/wic-eligibility-requirements",
+          "legalReference": "7 CFR § 246.7(e)",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-has-nutritional-risk",
+          "description": "Determined to have nutritional risk",
+          "input": {
+            "hasNutritionalRisk": true
+          },
+          "expected": true,
+          "tags": ["eligible", "nutritional-risk"]
+        },
+        {
+          "id": "test-no-nutritional-risk",
+          "description": "Does not have nutritional risk (rare)",
+          "input": {
+            "hasNutritionalRisk": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "no-risk"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["nutritional-risk", "health-screening", "medical-criteria"],
+      "category": "health-requirement",
+      "jurisdiction": "US-FEDERAL"
+    }
+  ]
+}
+

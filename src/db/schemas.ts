@@ -88,9 +88,9 @@ export const userProfileSchema: RxJsonSchema<UserProfile> = {
     isVeteran: { type: 'boolean' },
     isPregnant: { type: 'boolean' },
     hasChildren: { type: 'boolean' },
-    createdAt: { type: 'number', minimum: 0 },
-    updatedAt: { type: 'number', minimum: 0 },
-    lastAccessedAt: { type: 'number', minimum: 0 },
+    createdAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    updatedAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    lastAccessedAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
   },
   required: ['id', 'createdAt', 'updatedAt'],
   encrypted: [
@@ -190,6 +190,7 @@ export const benefitProgramSchema: RxJsonSchema<BenefitProgram> = {
     description: { type: 'string', maxLength: 2000 },
     category: {
       type: 'string',
+      maxLength: 50,
       enum: ['food', 'healthcare', 'housing', 'financial', 'childcare', 'education', 'employment', 'transportation', 'utilities', 'legal', 'other']
     },
     jurisdiction: { type: 'string', maxLength: 100 },
@@ -204,9 +205,9 @@ export const benefitProgramSchema: RxJsonSchema<BenefitProgram> = {
     active: { type: 'boolean' },
     applicationOpen: { type: 'boolean' },
     source: { type: 'string', maxLength: 500 },
-    sourceDate: { type: 'number', minimum: 0 },
-    lastUpdated: { type: 'number', minimum: 0 },
-    createdAt: { type: 'number', minimum: 0 },
+    sourceDate: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    lastUpdated: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    createdAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
   },
   required: ['id', 'name', 'shortName', 'description', 'category', 'jurisdiction', 'active', 'lastUpdated', 'createdAt'],
   indexes: ['category', 'jurisdiction', 'active', ['category', 'jurisdiction']],
@@ -296,8 +297,8 @@ export const eligibilityRuleSchema: RxJsonSchema<EligibilityRule> = {
     requiredDocuments: { type: 'array', items: { type: 'string', maxLength: 200 } },
     requiredFields: { type: 'array', items: { type: 'string', maxLength: 100 } },
     version: { type: 'string', maxLength: 50 },
-    effectiveDate: { type: 'number', minimum: 0 },
-    expirationDate: { type: 'number', minimum: 0 },
+    effectiveDate: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    expirationDate: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
     source: { type: 'string', maxLength: 500 },
     sourceDocument: { type: 'string', maxLength: 200 },
     legalReference: { type: 'string', maxLength: 200 },
@@ -316,12 +317,12 @@ export const eligibilityRuleSchema: RxJsonSchema<EligibilityRule> = {
         required: ['input', 'expectedOutput', 'description'],
       },
     },
-    createdAt: { type: 'number', minimum: 0 },
-    updatedAt: { type: 'number', minimum: 0 },
+    createdAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    updatedAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
     createdBy: { type: 'string', maxLength: 100 },
   },
   required: ['id', 'programId', 'name', 'ruleLogic', 'version', 'active', 'createdAt', 'updatedAt'],
-  indexes: ['programId', 'active', ['programId', 'active'], 'effectiveDate'],
+  indexes: ['programId', 'active', ['programId', 'active'], 'createdAt'],
 };
 
 export type EligibilityRuleDocument = RxDocument<EligibilityRule>;
@@ -479,14 +480,15 @@ export const eligibilityResultSchema: RxJsonSchema<EligibilityResult> = {
       required: ['frequency', 'currency'],
     },
     ruleVersion: { type: 'string', maxLength: 50 },
-    evaluatedAt: { type: 'number', minimum: 0 },
-    expiresAt: { type: 'number', minimum: 0 },
+    evaluatedAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    expiresAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
     needsReview: { type: 'boolean' },
     incomplete: { type: 'boolean' },
   },
   required: ['id', 'userProfileId', 'programId', 'ruleId', 'eligible', 'confidence', 'evaluatedAt'],
   encrypted: [
-    'userProfileId',
+    // Note: userProfileId and programId are reference IDs, not sensitive data, so not encrypted
+    // This allows efficient querying by these fields
     'eligible',
     'confidence',
     'reason',
@@ -557,15 +559,16 @@ export const appSettingSchema: RxJsonSchema<AppSetting> = {
     sensitive: { type: 'boolean' },
     category: {
       type: 'string',
+      maxLength: 50,
       enum: ['user_preference', 'app_state', 'feature_flag', 'cache', 'metadata', 'other']
     },
     description: { type: 'string', maxLength: 500 },
-    updatedAt: { type: 'number', minimum: 0 },
-    createdAt: { type: 'number', minimum: 0 },
-    expiresAt: { type: 'number', minimum: 0 },
+    updatedAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    createdAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
+    expiresAt: { type: 'number', minimum: 0, maximum: 8640000000000000, multipleOf: 1 },
   },
   required: ['key', 'value', 'type', 'encrypted', 'updatedAt'],
-  indexes: ['category', 'updatedAt', 'expiresAt'],
+  indexes: ['updatedAt'],
 };
 
 export type AppSettingDocument = RxDocument<AppSetting>;

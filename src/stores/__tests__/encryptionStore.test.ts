@@ -385,9 +385,14 @@ describe('EncryptionStore', () => {
         await result1.current.enablePassphraseEncryption('MyStr0ng!P@ssw0rd');
       });
 
+      // Simulate page reload: clear memory state but keep localStorage
+      act(() => {
+        result1.current.lockEncryption(); // Clear key from memory
+      });
+
       unmount();
 
-      // Create new hook instance
+      // Create new hook instance (simulates page reload)
       const { result: result2 } = renderHook(() => useEncryptionStore());
 
       // Mode should be persisted, but key should not be loaded (security)
@@ -407,9 +412,14 @@ describe('EncryptionStore', () => {
 
       expect(result1.current._encryptionKey).not.toBeNull();
 
+      // Simulate page reload: clear memory state but keep localStorage
+      act(() => {
+        result1.current.lockEncryption(); // Clear key from memory
+      });
+
       unmount();
 
-      // Create new hook instance
+      // Create new hook instance (simulates page reload)
       const { result: result2 } = renderHook(() => useEncryptionStore());
 
       // Key should NOT be persisted

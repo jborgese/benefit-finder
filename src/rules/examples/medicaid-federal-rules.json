@@ -1,0 +1,699 @@
+{
+  "metadata": {
+    "id": "medicaid-federal-rules-2024",
+    "name": "Medicaid Federal Eligibility Rules (2024)",
+    "description": "Federal baseline Medicaid eligibility rules for 2024. Note: Medicaid eligibility varies significantly by state. These rules represent federal minimums and expansion state criteria. Check your state's specific rules for accurate eligibility determination.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": ["medicaid-federal"],
+    "tags": ["medicaid", "healthcare", "federal", "2024", "aca"],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-federal-expansion-income",
+      "programId": "medicaid-federal",
+      "name": "Medicaid Expansion Income Limit (Adults)",
+      "description": "In expansion states, adults under 65 qualify if income is at or below 138% FPL",
+      "ruleLogic": {
+        "and": [
+          { "var": "stateHasExpanded" },
+          { "<": [{ "var": "age" }, 65] },
+          {
+            "<=": [
+              { "var": "householdIncome" },
+              {
+                "*": [
+                  { "var": "householdSize" },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Under the Affordable Care Act, states that expanded Medicaid cover adults under age 65 with household income up to 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. Currently, 40 states plus DC have expanded Medicaid.",
+      "requiredFields": ["stateHasExpanded", "age", "householdIncome", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-income",
+          "name": "Proof of Income",
+          "description": "Recent pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": ["W-2 forms", "1099 forms", "Bank statements", "Self-employment records"],
+          "where": "Employer, IRS, bank, or your own records"
+        },
+        {
+          "id": "proof-identity",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": ["Birth certificate", "Tribal ID", "School ID with photo"],
+          "where": "DMV, State Department, or issuing agency"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Check if your state has expanded Medicaid at healthcare.gov or medicaid.gov",
+          "url": "https://www.medicaid.gov/medicaid/program-information/medicaid-and-chip-eligibility-levels/index.html",
+          "priority": "high",
+          "estimatedTime": "5 minutes"
+        },
+        {
+          "step": "Apply through your state Medicaid agency or healthcare.gov marketplace",
+          "url": "https://www.healthcare.gov",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medicaid Eligibility",
+          "url": "https://www.medicaid.gov/medicaid/eligibility/index.html",
+          "legalReference": "42 CFR § 435.119",
+          "date": "2024-10-01",
+          "notes": "ACA expansion: 138% FPL for adults under 65"
+        },
+        {
+          "title": "ACA Medicaid Expansion",
+          "url": "https://www.kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-expansion-eligible-single",
+          "description": "Single adult in expansion state with qualifying income",
+          "input": {
+            "stateHasExpanded": true,
+            "age": 35,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "expansion", "adult"]
+        },
+        {
+          "id": "test-expansion-ineligible-high-income",
+          "description": "Adult in expansion state with high income",
+          "input": {
+            "stateHasExpanded": true,
+            "age": 40,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        },
+        {
+          "id": "test-non-expansion-state",
+          "description": "Adult in non-expansion state",
+          "input": {
+            "stateHasExpanded": false,
+            "age": 35,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "non-expansion"]
+        },
+        {
+          "id": "test-elderly-not-eligible-under-this-rule",
+          "description": "Elderly person (covered under different rules)",
+          "input": {
+            "stateHasExpanded": true,
+            "age": 70,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "elderly", "different-category"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["income", "expansion", "aca", "adults"],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "medicaid-federal-children",
+      "programId": "medicaid-federal",
+      "name": "Medicaid for Children",
+      "description": "Children under 19 in families with income up to 200% FPL (varies by state)",
+      "ruleLogic": {
+        "and": [
+          { "<": [{ "var": "age" }, 19] },
+          {
+            "<=": [
+              { "var": "householdIncome" },
+              {
+                "*": [
+                  { "var": "householdSize" },
+                  2960
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "All states cover children under age 19 in families with incomes up to 200% of the federal poverty level through Medicaid or CHIP (Children's Health Insurance Program). Many states cover children at even higher income levels. For 2024 at 200% FPL: 1 child = $2,960/month, 2 children = $4,007/month, 3 children = $5,054/month. Check your state's CHIP program for specific income limits.",
+      "requiredFields": ["age", "householdIncome", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-age",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": ["School records", "Religious records", "Adoption papers"],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": ["W-2", "1099", "Self-employment records"],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Check your state's CHIP income limits - they may be higher than 200% FPL",
+          "url": "https://www.insurekidsnow.gov",
+          "priority": "high"
+        },
+        {
+          "step": "Children can often enroll year-round, not just during open enrollment",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Children's Health Coverage",
+          "url": "https://www.medicaid.gov/chip/index.html",
+          "legalReference": "42 CFR § 435.118",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "CHIP Eligibility Standards",
+          "url": "https://www.insurekidsnow.gov/chip/index.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "age": 10,
+            "householdIncome": 2500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": ["eligible", "child", "chip"]
+        },
+        {
+          "id": "test-child-high-income",
+          "description": "Child with family income above limit",
+          "input": {
+            "age": 12,
+            "householdIncome": 6000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        },
+        {
+          "id": "test-boundary-19-years",
+          "description": "Person turning 19 (not eligible under children's rules)",
+          "input": {
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "age-limit"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["children", "chip", "pediatric"],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "medicaid-federal-pregnant-women",
+      "programId": "medicaid-federal",
+      "name": "Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 200% FPL (minimum federal requirement)",
+      "ruleLogic": {
+        "and": [
+          { "var": "isPregnant" },
+          {
+            "<=": [
+              { "var": "householdIncome" },
+              {
+                "*": [
+                  { "var": "householdSize" },
+                  2960
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Pregnant women are covered by Medicaid in all states if family income is at or below 200% of the federal poverty level. Many states cover pregnant women at higher income levels. Coverage includes prenatal care, delivery, and postpartum care for up to 60 days after pregnancy ends. For 2024 at 200% FPL: 1 person = $2,960/month, 2 people = $4,007/month.",
+      "requiredFields": ["isPregnant", "householdIncome", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note or positive pregnancy test",
+          "required": true,
+          "alternatives": ["Prenatal clinic verification", "Hospital records"],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": ["W-2", "Unemployment benefits statement"],
+          "where": "Employer or government agency"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply as soon as you know you're pregnant - coverage can start immediately",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Many states offer presumptive eligibility for pregnant women, providing temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medicaid Coverage for Pregnant Women",
+          "url": "https://www.medicaid.gov/medicaid/eligibility/index.html",
+          "legalReference": "42 CFR § 435.116",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-pregnant-eligible",
+          "description": "Pregnant woman with qualifying income",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "pregnant"]
+        },
+        {
+          "id": "test-pregnant-high-income",
+          "description": "Pregnant woman with income above limit",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        },
+        {
+          "id": "test-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "not-pregnant"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["pregnancy", "maternal-health", "prenatal"],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "medicaid-federal-disability",
+      "programId": "medicaid-federal",
+      "name": "Medicaid for People with Disabilities (SSI)",
+      "description": "People receiving SSI (Supplemental Security Income) automatically qualify for Medicaid",
+      "ruleLogic": {
+        "or": [
+          { "var": "receivesSSI" },
+          {
+            "and": [
+              { "var": "hasQualifyingDisability" },
+              {
+                "<=": [
+                  { "var": "householdIncome" },
+                  {
+                    "*": [
+                      { "var": "householdSize" },
+                      1133
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "If you receive Supplemental Security Income (SSI), you automatically qualify for Medicaid in most states. Even if you don't receive SSI, you may qualify for Medicaid if you have a disability and meet income requirements (typically around 74% of FPL for individuals). States may have different rules for people with disabilities under Medicaid Buy-In programs.",
+      "requiredFields": ["receivesSSI", "hasQualifyingDisability", "householdIncome", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-ssi",
+          "name": "Proof of SSI",
+          "description": "SSI award letter or benefit verification",
+          "required": false,
+          "alternatives": ["Social Security benefit statement", "Bank statement showing SSI deposits"],
+          "where": "Social Security Administration"
+        },
+        {
+          "id": "proof-disability",
+          "name": "Proof of Disability",
+          "description": "Social Security disability determination or doctor's certification",
+          "required": false,
+          "alternatives": ["SSDI award letter", "Medical records", "Functional assessment"],
+          "where": "Social Security Administration or healthcare provider"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you receive SSI, contact your state Medicaid office - you should be automatically enrolled",
+          "priority": "high"
+        },
+        {
+          "step": "If you have a disability but don't receive SSI, ask about Medicaid Buy-In programs and Katie Beckett waivers",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medicaid for People with Disabilities",
+          "url": "https://www.medicaid.gov/medicaid/eligibility/index.html",
+          "legalReference": "42 CFR § 435.120, 42 CFR § 435.121",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "SSI and Medicaid",
+          "url": "https://www.ssa.gov/ssi/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-receives-ssi",
+          "description": "Receives SSI - automatically eligible",
+          "input": {
+            "receivesSSI": true,
+            "hasQualifyingDisability": true,
+            "householdIncome": 900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "ssi", "disability"]
+        },
+        {
+          "id": "test-disability-low-income",
+          "description": "Has disability and low income",
+          "input": {
+            "receivesSSI": false,
+            "hasQualifyingDisability": true,
+            "householdIncome": 1000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "disability", "low-income"]
+        },
+        {
+          "id": "test-disability-high-income",
+          "description": "Has disability but income too high",
+          "input": {
+            "receivesSSI": false,
+            "hasQualifyingDisability": true,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["disability", "ssi", "medicare-medicaid"],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "medicaid-federal-citizenship",
+      "programId": "medicaid-federal",
+      "name": "Medicaid Citizenship Requirement",
+      "description": "Must be U.S. citizen, national, or qualified immigrant",
+      "ruleLogic": {
+        "or": [
+          {
+            "in": [
+              { "var": "citizenship" },
+              ["us_citizen", "us_national"]
+            ]
+          },
+          {
+            "and": [
+              {
+                "in": [
+                  { "var": "citizenship" },
+                  ["permanent_resident", "refugee", "asylee", "trafficking_victim", "cuban_haitian"]
+                ]
+              },
+              { ">=": [{ "var": "yearsInUS" }, 5] }
+            ]
+          },
+          {
+            "in": [
+              { "var": "citizenship" },
+              ["refugee", "asylee", "trafficking_victim", "cuban_haitian"]
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "U.S. citizens and nationals qualify for Medicaid. Lawfully present immigrants may qualify, but most must wait 5 years after obtaining qualified status. Exceptions to the 5-year wait include: refugees, asylees, trafficking victims, Cuban/Haitian entrants, certain military members and families. Emergency Medicaid is available to all regardless of immigration status.",
+      "requiredFields": ["citizenship", "yearsInUS"],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship-medicaid",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, green card, or refugee documentation",
+          "required": true,
+          "alternatives": [
+            "U.S. Passport",
+            "Naturalization Certificate",
+            "Green Card (I-551)",
+            "I-94 with refugee/asylee status",
+            "I-766 Employment Authorization Document"
+          ],
+          "where": "Government agency that issued the document"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Emergency Medicaid covers emergency medical conditions regardless of immigration status",
+          "priority": "high"
+        },
+        {
+          "step": "Children and pregnant women may have different immigration requirements - check state rules",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medicaid Eligibility for Non-Citizens",
+          "url": "https://www.medicaid.gov/medicaid/eligibility/index.html",
+          "legalReference": "42 CFR § 435.406",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Immigrant Eligibility for Medicaid",
+          "url": "https://www.healthcare.gov/immigrants/lawfully-present-immigrants/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-us-citizen-medicaid",
+          "description": "U.S. citizen qualifies",
+          "input": {
+            "citizenship": "us_citizen",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": ["eligible", "citizen"]
+        },
+        {
+          "id": "test-refugee",
+          "description": "Refugee qualifies immediately",
+          "input": {
+            "citizenship": "refugee",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": ["eligible", "refugee", "no-wait"]
+        },
+        {
+          "id": "test-lpr-5-years",
+          "description": "Permanent resident after 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 6
+          },
+          "expected": true,
+          "tags": ["eligible", "lpr", "5-year-rule"]
+        },
+        {
+          "id": "test-lpr-under-5-years",
+          "description": "Permanent resident under 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 3
+          },
+          "expected": false,
+          "tags": ["ineligible", "lpr", "waiting-period"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["citizenship", "immigration", "5-year-rule"],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "medicaid-federal-residence-requirement",
+      "programId": "medicaid-federal",
+      "name": "Medicaid State Residence Requirement",
+      "description": "Must be a resident of the state where applying",
+      "ruleLogic": {
+        "var": "livesInState"
+      },
+      "ruleType": "eligibility",
+      "explanation": "You must be a resident of the state where you apply for Medicaid. Residency means you live in the state and intend to stay or return. You don't need a permanent address - homeless individuals can qualify. You cannot receive Medicaid from more than one state at the same time.",
+      "requiredFields": ["livesInState"],
+      "requiredDocuments": [
+        {
+          "id": "proof-residence-medicaid",
+          "name": "Proof of State Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing state address",
+          "required": false,
+          "alternatives": ["Driver's license", "Homeless shelter statement", "Statement from person you live with"],
+          "where": "Varies by document type"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medicaid Residency Requirements",
+          "url": "https://www.medicaid.gov/medicaid/eligibility/index.html",
+          "legalReference": "42 CFR § 435.403",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 16,
+      "testCases": [
+        {
+          "id": "test-lives-in-state-medicaid",
+          "description": "Lives in state",
+          "input": {
+            "livesInState": true
+          },
+          "expected": true,
+          "tags": ["eligible", "resident"]
+        },
+        {
+          "id": "test-not-in-state-medicaid",
+          "description": "Does not live in state",
+          "input": {
+            "livesInState": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "non-resident"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["residence", "state-requirement"],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-FEDERAL"
+    }
+  ]
+}
+

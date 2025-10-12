@@ -47,6 +47,7 @@ export const STORAGE_KEYS = {
   ENCRYPTION_SALT: 'bf_encryption_salt',
   ENCRYPTION_ENABLED: 'bf_encryption_enabled',
   KEY_DERIVATION_HINT: 'bf_kdf_hint',
+  VERIFICATION_VALUE: 'bf_encryption_verification',
 } as const;
 
 // ============================================================================
@@ -104,6 +105,8 @@ export type EncryptionStrength = 'none' | 'weak' | 'medium' | 'strong' | 'very-s
 /**
  * Convert ArrayBuffer to Base64 string
  *
+ * Works in both browser and Node.js environments.
+ *
  * @param buffer ArrayBuffer or ArrayBufferLike to convert
  * @returns Base64-encoded string
  */
@@ -115,24 +118,59 @@ function arrayBufferToBase64(buffer: ArrayBufferLike): string {
     // eslint-disable-next-line security/detect-object-injection
     binary += String.fromCharCode(bytes[i]);
   }
-  return btoa(binary);
+
+  // Use btoa if available (browser), otherwise use Buffer (Node.js)
+  if (typeof btoa !== 'undefined') {
+    return btoa(binary);
+  } else if (typeof Buffer !== 'undefined') {
+    return Buffer.from(binary, 'binary').toString('base64');
+  } else {
+    throw new Error('No base64 encoding method available');
+  }
 }
 
 /**
  * Convert Base64 string to ArrayBuffer
  *
+ * Works in both browser and Node.js environments.
+ *
  * @param base64 Base64-encoded string
  * @returns ArrayBuffer
  */
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binary = atob(base64);
+  const bytes = base64ToUint8Array(base64);
+  // Create a new ArrayBuffer from the Uint8Array to ensure proper type
+  return bytes.buffer.slice(0) as ArrayBuffer;
+}
+
+/**
+ * Convert Base64 string to Uint8Array
+ *
+ * Works in both browser and Node.js environments.
+ * Preferred for Node.js webcrypto compatibility.
+ *
+ * @param base64 Base64-encoded string
+ * @returns Uint8Array
+ */
+function base64ToUint8Array(base64: string): Uint8Array {
+  let binary: string;
+
+  // Use atob if available (browser), otherwise use Buffer (Node.js)
+  if (typeof atob !== 'undefined') {
+    binary = atob(base64);
+  } else if (typeof Buffer !== 'undefined') {
+    binary = Buffer.from(base64, 'base64').toString('binary');
+  } else {
+    throw new Error('No base64 decoding method available');
+  }
+
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
     // Safe: i is a controlled loop counter within array bounds
     // eslint-disable-next-line security/detect-object-injection
     bytes[i] = binary.charCodeAt(i);
   }
-  return bytes.buffer;
+  return bytes;
 }
 
 /**
@@ -322,22 +360,20 @@ export async function decrypt(
   // Validate encrypted data structure
   const validated = EncryptedDataSchema.parse(encryptedData);
 
-  // Convert from Base64
-  const ciphertext = base64ToArrayBuffer(validated.ciphertext);
-  const ivBuffer = base64ToArrayBuffer(validated.iv);
+  // Convert from Base64 to Uint8Array (Node.js webcrypto prefers Uint8Array)
+  const ciphertext = base64ToUint8Array(validated.ciphertext);
+  const iv = base64ToUint8Array(validated.iv);
 
   try {
     // Decrypt using AES-GCM
-    // Ensure iv is a proper Uint8Array for Node.js compatibility
-    const ivArray = new Uint8Array(ivBuffer);
     const decryptedBuffer = await crypto.subtle.decrypt(
       {
         name: ENCRYPTION_CONFIG.ALGORITHM,
-        iv: ivArray,
+        iv: iv as BufferSource,
         tagLength: ENCRYPTION_CONFIG.TAG_LENGTH,
       },
       key,
-      ciphertext
+      ciphertext as BufferSource
     );
 
     // Convert back to string
@@ -393,7 +429,7 @@ export function decryptFromString(
  */
 function getLengthScore(length: number): number {
   let score = 0;
-  if (length >= 8) score += 1;
+  if (length >= 8) score += 2;  // Increased from 1 to reward meeting minimum length
   if (length >= 12) score += 1;
   if (length >= 16) score += 1;
   if (length >= 20) score += 1;
@@ -408,7 +444,7 @@ function getCharacterDiversityScore(passphrase: string): number {
   if (/[a-z]/.test(passphrase)) score += 1; // Lowercase
   if (/[A-Z]/.test(passphrase)) score += 1; // Uppercase
   if (/[0-9]/.test(passphrase)) score += 1; // Numbers
-  if (/[^a-zA-Z0-9]/.test(passphrase)) score += 1; // Special characters
+  if (/[^a-zA-Z0-9]/.test(passphrase)) score += 2; // Special characters (worth more)
   return score;
 }
 
@@ -426,7 +462,7 @@ function getCommonPatternPenalty(passphrase: string): number {
   let penalty = 0;
   for (const pattern of commonPatterns) {
     if (pattern.test(passphrase)) {
-      penalty += 2;
+      penalty += 1;  // Reduced from 2 to be less punishing
     }
   }
   return penalty;
@@ -436,8 +472,8 @@ function getCommonPatternPenalty(passphrase: string): number {
  * Convert score to strength rating
  */
 function scoreToStrength(score: number): EncryptionStrength {
-  if (score >= 8) return 'very-strong';
-  if (score >= 6) return 'strong';
+  if (score >= 9) return 'very-strong';  // Adjusted threshold
+  if (score >= 7) return 'strong';       // Adjusted threshold
   if (score >= 4) return 'medium';
   if (score >= 2) return 'weak';
   return 'none';
@@ -547,6 +583,7 @@ export function clearEncryptionData(): void {
   localStorage.removeItem(STORAGE_KEYS.ENCRYPTION_SALT);
   localStorage.removeItem(STORAGE_KEYS.ENCRYPTION_ENABLED);
   localStorage.removeItem(STORAGE_KEYS.KEY_DERIVATION_HINT);
+  localStorage.removeItem(STORAGE_KEYS.VERIFICATION_VALUE);
 }
 
 /**
@@ -570,6 +607,47 @@ export function getPassphraseHint(): string | null {
 // ============================================================================
 // TESTING UTILITIES
 // ============================================================================
+
+/**
+ * Store verification value for passphrase validation
+ *
+ * @param key CryptoKey to use for encryption
+ */
+export async function storeVerificationValue(key: CryptoKey): Promise<void> {
+  const verificationData = { verified: true, timestamp: Date.now() };
+  try {
+    const encrypted = await encrypt(verificationData, key);
+    const encoded = JSON.stringify(encrypted);
+    localStorage.setItem(STORAGE_KEYS.VERIFICATION_VALUE, encoded);
+  } catch (error) {
+    console.error('Failed to store verification value:', error);
+    throw error;
+  }
+}
+
+/**
+ * Verify passphrase by trying to decrypt stored verification value
+ *
+ * @param key CryptoKey to test
+ * @returns True if this is the correct key (can decrypt verification value)
+ */
+export async function verifyPassphrase(key: CryptoKey): Promise<boolean> {
+  const stored = localStorage.getItem(STORAGE_KEYS.VERIFICATION_VALUE);
+  if (!stored) {
+    // No verification value stored, just test encryption works
+    return testEncryption(key);
+  }
+
+  try {
+    const encrypted = JSON.parse(stored) as EncryptedData;
+    const decrypted = await decrypt(encrypted, key);
+    const parsed = JSON.parse(decrypted);
+    return parsed.verified === true;
+  } catch {
+    // Decryption failed - wrong passphrase
+    return false;
+  }
+}
 
 /**
  * Test encryption/decryption round-trip

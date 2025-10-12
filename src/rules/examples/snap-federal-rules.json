@@ -1,0 +1,713 @@
+{
+  "metadata": {
+    "id": "snap-federal-rules-2024",
+    "name": "SNAP Federal Eligibility Rules (2024)",
+    "description": "Federal baseline SNAP (Supplemental Nutrition Assistance Program) eligibility rules for fiscal year 2024. Based on USDA Food and Nutrition Service guidelines.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": ["snap-federal"],
+    "tags": ["snap", "food-assistance", "federal", "2024", "fns"],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-federal-gross-income",
+      "programId": "snap-federal",
+      "name": "SNAP Gross Income Test",
+      "description": "Household gross income must be at or below 130% of the federal poverty line",
+      "ruleLogic": {
+        "<=": [
+          { "var": "householdIncome" },
+          {
+            "*": [
+              { "var": "householdSize" },
+              1923
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP, your household's gross monthly income must be at or below 130% of the federal poverty level. For 2024, this means: 1 person = $1,923/month, 2 people = $2,600/month, 3 people = $3,278/month, 4 people = $3,955/month. Add $678 per additional person.",
+      "requiredFields": ["householdIncome", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-income",
+          "name": "Proof of Income",
+          "description": "Recent pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": ["W-2 forms", "1099 forms", "Bank statements", "Self-employment records"],
+          "where": "Employer, IRS, bank, or your own records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you pass the gross income test, proceed to net income and asset tests",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Eligibility Requirements",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01",
+          "notes": "Gross income limit is 130% of Federal Poverty Level"
+        },
+        {
+          "title": "Federal Poverty Guidelines 2024",
+          "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+          "date": "2024-01-18",
+          "notes": "FPL for 2024: $15,060 for 1 person, $20,440 for 2 people"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-eligible-single-low",
+          "description": "Single person with low income - should qualify",
+          "input": {
+            "householdIncome": 1200,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "single"]
+        },
+        {
+          "id": "test-eligible-family-low",
+          "description": "Family of 4 with qualifying income",
+          "input": {
+            "householdIncome": 3800,
+            "householdSize": 4
+          },
+          "expected": true,
+          "tags": ["eligible", "family"]
+        },
+        {
+          "id": "test-ineligible-high-income",
+          "description": "Family with high income - should not qualify",
+          "input": {
+            "householdIncome": 6000,
+            "householdSize": 3
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        },
+        {
+          "id": "test-boundary-3-person",
+          "description": "3-person household at exact limit",
+          "input": {
+            "householdIncome": 5769,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": ["boundary", "edge-case"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["income", "poverty-level", "gross-income"],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "snap-federal-net-income",
+      "programId": "snap-federal",
+      "name": "SNAP Net Income Test",
+      "description": "Household net income must be at or below 100% of the federal poverty line",
+      "ruleLogic": {
+        "<=": [
+          {
+            "-": [
+              { "var": "householdIncome" },
+              { "var": "allowedDeductions" }
+            ]
+          },
+          {
+            "*": [
+              { "var": "householdSize" },
+              1480
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "After deducting allowed expenses (like rent, childcare, medical costs for elderly/disabled), your net income must be at or below 100% of the federal poverty level. For 2024: 1 person = $1,480/month, 2 people = $2,000/month, 3 people = $2,520/month, 4 people = $3,040/month.",
+      "requiredFields": ["householdIncome", "allowedDeductions", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-expenses",
+          "name": "Proof of Expenses",
+          "description": "Rent/mortgage statements, utility bills, childcare receipts, medical bills",
+          "required": true,
+          "alternatives": ["Lease agreement", "Childcare provider statement", "Medical receipts"],
+          "where": "Landlord, utility companies, childcare providers, healthcare providers"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Net Income Eligibility Standard",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.10",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 9,
+      "testCases": [
+        {
+          "id": "test-net-income-eligible",
+          "description": "Low net income after deductions",
+          "input": {
+            "householdIncome": 2500,
+            "allowedDeductions": 1200,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "net-income"]
+        },
+        {
+          "id": "test-net-income-ineligible",
+          "description": "High net income after deductions",
+          "input": {
+            "householdIncome": 3000,
+            "allowedDeductions": 500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": ["ineligible", "net-income"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["income", "net-income", "deductions"],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "snap-federal-citizenship",
+      "programId": "snap-federal",
+      "name": "SNAP Citizenship Requirement",
+      "description": "Must be a U.S. citizen, U.S. national, or qualified immigrant",
+      "ruleLogic": {
+        "in": [
+          { "var": "citizenship" },
+          ["us_citizen", "us_national", "permanent_resident", "refugee", "asylee", "cuban_haitian", "amerasian", "trafficking_victim"]
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "SNAP is available to U.S. citizens and certain categories of lawfully residing immigrants. Qualified immigrants include: lawful permanent residents (green card holders) who have lived in the U.S. for 5+ years, refugees, asylees, individuals granted withholding of deportation, Cuban and Haitian entrants, Amerasians, victims of trafficking, and certain other categories.",
+      "requiredFields": ["citizenship"],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, green card, or refugee documentation",
+          "required": true,
+          "alternatives": [
+            "U.S. Passport",
+            "Naturalization Certificate",
+            "Green Card (I-551)",
+            "I-94 Arrival/Departure Record",
+            "I-766 Employment Authorization Document",
+            "Refugee Travel Document"
+          ],
+          "where": "Government agency that issued the document (USCIS, State Department)"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you are a qualified immigrant, you may need to provide additional documentation about your immigration status and date of entry",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Non-Citizen Eligibility",
+          "url": "https://www.fns.usda.gov/snap/eligibility/citizen/non-citizen-policy",
+          "legalReference": "7 CFR § 273.4",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Alien Eligibility for SNAP",
+          "url": "https://www.fns.usda.gov/snap/eligibility/alien-eligibility",
+          "legalReference": "8 USC § 1612",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-us-citizen",
+          "description": "U.S. citizen should qualify",
+          "input": {
+            "citizenship": "us_citizen"
+          },
+          "expected": true,
+          "tags": ["eligible", "citizen"]
+        },
+        {
+          "id": "test-refugee",
+          "description": "Refugee should qualify",
+          "input": {
+            "citizenship": "refugee"
+          },
+          "expected": true,
+          "tags": ["eligible", "qualified-immigrant"]
+        },
+        {
+          "id": "test-permanent-resident",
+          "description": "Permanent resident should qualify",
+          "input": {
+            "citizenship": "permanent_resident"
+          },
+          "expected": true,
+          "tags": ["eligible", "qualified-immigrant"]
+        },
+        {
+          "id": "test-other",
+          "description": "Other status should not qualify",
+          "input": {
+            "citizenship": "temporary_visitor"
+          },
+          "expected": false,
+          "tags": ["ineligible", "non-qualified"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["citizenship", "immigration", "non-citizen"],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "snap-federal-asset-limit",
+      "programId": "snap-federal",
+      "name": "SNAP Asset Limit",
+      "description": "Households must have countable resources below $2,750 ($4,250 if elderly/disabled)",
+      "ruleLogic": {
+        "or": [
+          {
+            "and": [
+              { "<=": [{ "var": "householdAssets" }, 2750] },
+              { "!": { "var": "hasElderlyOrDisabled" } }
+            ]
+          },
+          {
+            "and": [
+              { "<=": [{ "var": "householdAssets" }, 4250] },
+              { "var": "hasElderlyOrDisabled" }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "SNAP has an asset test. Most households can have up to $2,750 in countable resources. If the household includes someone age 60 or older, or someone who is disabled, the limit is $4,250. Countable resources include: bank accounts (checking/savings), cash, stocks, bonds, and certain other assets. NOT counted: your home, retirement accounts (401k, IRA), most vehicles, household goods, and life insurance.",
+      "requiredFields": ["householdAssets", "hasElderlyOrDisabled"],
+      "requiredDocuments": [
+        {
+          "id": "proof-assets",
+          "name": "Proof of Assets",
+          "description": "Bank statements (all accounts), investment account statements",
+          "required": true,
+          "alternatives": ["Bank letter showing balance", "Brokerage statements", "Savings bonds"],
+          "where": "Your bank or financial institution"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather bank statements for all accounts from the last 30 days",
+          "priority": "high",
+          "estimatedTime": "1-2 days"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Resource Limits",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility#Resources",
+          "legalReference": "7 CFR § 273.8",
+          "date": "2024-10-01",
+          "notes": "Asset limits: $2,750 general, $4,250 for elderly/disabled households"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-regular-below-limit",
+          "description": "Regular household below asset limit",
+          "input": {
+            "householdAssets": 2000,
+            "hasElderlyOrDisabled": false
+          },
+          "expected": true,
+          "tags": ["eligible", "regular-household"]
+        },
+        {
+          "id": "test-regular-above-limit",
+          "description": "Regular household above asset limit",
+          "input": {
+            "householdAssets": 3000,
+            "hasElderlyOrDisabled": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "above-limit"]
+        },
+        {
+          "id": "test-elderly-below-higher-limit",
+          "description": "Elderly household below higher limit",
+          "input": {
+            "householdAssets": 4000,
+            "hasElderlyOrDisabled": true
+          },
+          "expected": true,
+          "tags": ["eligible", "elderly-disabled"]
+        },
+        {
+          "id": "test-elderly-above-higher-limit",
+          "description": "Elderly household above higher limit",
+          "input": {
+            "householdAssets": 5000,
+            "hasElderlyOrDisabled": true
+          },
+          "expected": false,
+          "tags": ["ineligible", "above-limit"]
+        },
+        {
+          "id": "test-boundary-regular",
+          "description": "Regular household at exact limit",
+          "input": {
+            "householdAssets": 2750,
+            "hasElderlyOrDisabled": false
+          },
+          "expected": true,
+          "tags": ["boundary", "edge-case"]
+        },
+        {
+          "id": "test-boundary-elderly",
+          "description": "Elderly household at exact limit",
+          "input": {
+            "householdAssets": 4250,
+            "hasElderlyOrDisabled": true
+          },
+          "expected": true,
+          "tags": ["boundary", "edge-case", "elderly"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["assets", "resources", "elderly", "disabled"],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "snap-federal-work-requirement",
+      "programId": "snap-federal",
+      "name": "SNAP Work Requirements (ABAWD)",
+      "description": "Able-bodied adults without dependents (ABAWD) ages 18-52 must work or participate in work programs",
+      "ruleLogic": {
+        "or": [
+          { "!": { "var": "isABAWD" } },
+          { "var": "meetsWorkRequirement" },
+          { "var": "isExemptFromWork" }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "If you are an able-bodied adult without dependents (ABAWD) between ages 18 and 52, you must work at least 80 hours per month, participate in a work program, or qualify for an exemption to receive SNAP for more than 3 months in a 36-month period. Exemptions include: having a disability, being pregnant, caring for a child under 18, being medically certified as unable to work, or living in an area with high unemployment.",
+      "requiredFields": ["isABAWD", "meetsWorkRequirement", "isExemptFromWork"],
+      "requiredDocuments": [
+        {
+          "id": "proof-work",
+          "name": "Proof of Work or Work Program Participation",
+          "description": "Pay stubs, employer letter, work program enrollment verification",
+          "required": false,
+          "alternatives": ["Self-employment records", "Work program attendance records"],
+          "where": "Employer or work program administrator"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you are subject to ABAWD requirements, contact your local SNAP office about available work programs",
+          "priority": "high",
+          "estimatedTime": "Varies by program"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Employment and Training",
+          "url": "https://www.fns.usda.gov/snap/employment-and-training",
+          "legalReference": "7 CFR § 273.7, 7 CFR § 273.24",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "ABAWD Requirements",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 12,
+      "testCases": [
+        {
+          "id": "test-not-abawd",
+          "description": "Not an ABAWD - exempt from work requirements",
+          "input": {
+            "isABAWD": false,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": ["eligible", "not-abawd"]
+        },
+        {
+          "id": "test-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": ["eligible", "abawd", "working"]
+        },
+        {
+          "id": "test-abawd-exempt",
+          "description": "ABAWD with exemption",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true
+          },
+          "expected": true,
+          "tags": ["eligible", "abawd", "exempt"]
+        },
+        {
+          "id": "test-abawd-not-compliant",
+          "description": "ABAWD not meeting requirements",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "abawd", "not-compliant"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["work-requirements", "abawd", "employment"],
+      "category": "work-requirement",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "snap-federal-social-security",
+      "programId": "snap-federal",
+      "name": "SNAP Social Security Number Requirement",
+      "description": "All household members applying for benefits must provide or apply for a Social Security Number",
+      "ruleLogic": {
+        "or": [
+          { "var": "hasSocialSecurityNumber" },
+          { "var": "hasAppliedForSSN" }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "You and everyone in your household applying for SNAP must have a Social Security Number or have applied for one. If you don't have an SSN, you can apply for SNAP benefits while you apply for an SSN. Household members who are not applying for benefits (such as ineligible immigrants) do not need to provide an SSN.",
+      "requiredFields": ["hasSocialSecurityNumber", "hasAppliedForSSN"],
+      "requiredDocuments": [
+        {
+          "id": "social-security-card",
+          "name": "Social Security Card or Proof of SSN",
+          "description": "Social Security card or other document showing SSN",
+          "required": true,
+          "alternatives": ["Medicare card", "Medicaid card", "SSA benefit letter", "W-2 or 1099"],
+          "where": "Social Security Administration"
+        },
+        {
+          "id": "ssn-application-receipt",
+          "name": "Proof of SSN Application",
+          "description": "Receipt showing you have applied for an SSN",
+          "required": false,
+          "alternatives": ["SSA application receipt"],
+          "where": "Social Security Administration office"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you need to apply for an SSN, visit your local Social Security office",
+          "url": "https://www.ssa.gov/number-card",
+          "priority": "high",
+          "estimatedTime": "Same day to apply, 2-4 weeks to receive card"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Application Requirements",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.6",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-has-ssn",
+          "description": "Has Social Security Number",
+          "input": {
+            "hasSocialSecurityNumber": true,
+            "hasAppliedForSSN": false
+          },
+          "expected": true,
+          "tags": ["eligible", "has-ssn"]
+        },
+        {
+          "id": "test-applied-for-ssn",
+          "description": "Applied for SSN but not yet received",
+          "input": {
+            "hasSocialSecurityNumber": false,
+            "hasAppliedForSSN": true
+          },
+          "expected": true,
+          "tags": ["eligible", "pending-ssn"]
+        },
+        {
+          "id": "test-no-ssn-no-application",
+          "description": "No SSN and has not applied",
+          "input": {
+            "hasSocialSecurityNumber": false,
+            "hasAppliedForSSN": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "no-ssn"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["ssn", "identification", "application-requirement"],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-FEDERAL"
+    },
+    {
+      "id": "snap-federal-residence",
+      "programId": "snap-federal",
+      "name": "SNAP Residence Requirement",
+      "description": "Must reside in the state where applying for benefits",
+      "ruleLogic": {
+        "var": "livesInState"
+      },
+      "ruleType": "eligibility",
+      "explanation": "You must live in the state where you are applying for SNAP benefits. You do not need a permanent address - homeless individuals can receive SNAP. You can apply in any state where you currently live, but you cannot receive benefits from multiple states at the same time.",
+      "requiredFields": ["livesInState"],
+      "requiredDocuments": [
+        {
+          "id": "proof-residence",
+          "name": "Proof of Residence",
+          "description": "Utility bill, lease, or mail showing your address",
+          "required": false,
+          "alternatives": ["Letter from landlord", "Homeless shelter statement", "Neighbor's statement"],
+          "where": "Utility company, landlord, or shelter"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Eligibility - Residency",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.3",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 16,
+      "testCases": [
+        {
+          "id": "test-lives-in-state",
+          "description": "Lives in state with address",
+          "input": {
+            "livesInState": true,
+            "isHomeless": false
+          },
+          "expected": true,
+          "tags": ["eligible", "resident"]
+        },
+        {
+          "id": "test-homeless-in-state",
+          "description": "Homeless but in state",
+          "input": {
+            "livesInState": true,
+            "isHomeless": true
+          },
+          "expected": true,
+          "tags": ["eligible", "homeless"]
+        },
+        {
+          "id": "test-not-in-state",
+          "description": "Does not live in state",
+          "input": {
+            "livesInState": false,
+            "isHomeless": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "non-resident"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["residence", "homeless", "address"],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-FEDERAL"
+    }
+  ]
+}
+

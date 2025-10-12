@@ -56,9 +56,9 @@ export const userProfilesCollection: RxCollectionCreator<UserProfile> = {
   },
   statics: {
     /**
-     * Get most recently updated profile
+     * Find most recently updated profile
      */
-    getLatest(this: RxCollection<UserProfile>): Promise<UserProfileDocument | null> {
+    findLatest(this: RxCollection<UserProfile>): Promise<UserProfileDocument | null> {
       return this.findOne({
         sort: [{ updatedAt: 'desc' }],
       }).exec();
@@ -81,9 +81,9 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
   },
   statics: {
     /**
-     * Get all active programs
+     * Find all active programs
      */
-    getActivePrograms(this: RxCollection<BenefitProgram>): Promise<BenefitProgramDocument[]> {
+    findActivePrograms(this: RxCollection<BenefitProgram>): Promise<BenefitProgramDocument[]> {
       return this.find({
         selector: {
           active: true,
@@ -93,9 +93,9 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
     },
 
     /**
-     * Get programs by jurisdiction
+     * Find programs by jurisdiction
      */
-    getByJurisdiction(this: RxCollection<BenefitProgram>, jurisdiction: string): Promise<BenefitProgramDocument[]> {
+    findProgramsByJurisdiction(this: RxCollection<BenefitProgram>, jurisdiction: string): Promise<BenefitProgramDocument[]> {
       return this.find({
         selector: {
           jurisdiction,
@@ -106,9 +106,9 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
     },
 
     /**
-     * Get programs by category
+     * Find programs by category
      */
-    getByCategory(this: RxCollection<BenefitProgram>, category: BenefitProgram['category']): Promise<BenefitProgramDocument[]> {
+    findProgramsByCategory(this: RxCollection<BenefitProgram>, category: BenefitProgram['category']): Promise<BenefitProgramDocument[]> {
       return this.find({
         selector: {
           category: { $eq: category },
@@ -142,21 +142,18 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
   },
   statics: {
     /**
-     * Get active rules for a program
+     * Find active rules for a program
      */
-    getByProgram(this: RxCollection<EligibilityRule>, programId: string): Promise<EligibilityRuleDocument[]> {
+    findRulesByProgram(this: RxCollection<EligibilityRule>, programId: string): Promise<EligibilityRuleDocument[]> {
       const now = Date.now();
 
       return this.find({
         selector: {
           programId,
           active: true,
-          effectiveDate: {
-            $lte: now,
-          },
           $or: [
-            { expirationDate: { $exists: false } },
-            { expirationDate: { $gte: now } },
+            { effectiveDate: { $exists: false } },
+            { effectiveDate: { $lte: now } },
           ],
         },
       }).exec();
@@ -187,9 +184,9 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
   },
   statics: {
     /**
-     * Get results for a user profile
+     * Find results for a user profile
      */
-    getByUserProfile(this: RxCollection<EligibilityResult>, userProfileId: string): Promise<EligibilityResultDocument[]> {
+    findResultsByUserProfile(this: RxCollection<EligibilityResult>, userProfileId: string): Promise<EligibilityResultDocument[]> {
       return this.find({
         selector: {
           userProfileId,
@@ -199,9 +196,9 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
     },
 
     /**
-     * Get non-expired results for a user
+     * Find non-expired results for a user
      */
-    getValidResults(this: RxCollection<EligibilityResult>, userProfileId: string): Promise<EligibilityResultDocument[]> {
+    findValidResultsByUser(this: RxCollection<EligibilityResult>, userProfileId: string): Promise<EligibilityResultDocument[]> {
       const now = Date.now();
 
       return this.find({
@@ -258,9 +255,9 @@ export const appSettingsCollection: RxCollectionCreator<AppSetting> = {
   },
   statics: {
     /**
-     * Get setting value by key
+     * Find setting value by key
      */
-    async get(this: RxCollection<AppSetting>, key: string): Promise<unknown> {
+    async findSettingByKey(this: RxCollection<AppSetting>, key: string): Promise<unknown> {
       const setting = await this.findOne({
         selector: { key },
       }).exec();

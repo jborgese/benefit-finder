@@ -153,6 +153,7 @@ async function checkCache(
   return {
     ...cachedData,
     profileId: cachedData.userProfileId,
+    missingFields: cachedData.missingFields ? Array.from(cachedData.missingFields) : [],
     executionTime: endTime - startTime,
   } as EligibilityEvaluationResult;
 }
@@ -182,7 +183,7 @@ async function getEvaluationEntities(
   }
 
   // Get active rules for program
-  const rules: EligibilityRuleDocument[] = await db.eligibility_rules.getByProgram(programId);
+  const rules: EligibilityRuleDocument[] = await db.eligibility_rules.findRulesByProgram(programId);
   if (rules.length === 0) {
     throw new Error(`No active rules found for program ${programId}`);
   }
@@ -411,7 +412,7 @@ export async function evaluateAllPrograms(
   const db = getDatabase();
 
   // Get all active programs
-  const programs = await db.benefit_programs.getActivePrograms();
+  const programs = await db.benefit_programs.findActivePrograms();
   const programIds = programs.map((p) => p.id);
 
   return evaluateMultiplePrograms(profileId, programIds, options);
@@ -644,6 +645,13 @@ export async function getCachedResults(
     })
     .exec();
 
-  return results.map((r) => r.toJSON() as unknown as EligibilityEvaluationResult);
+  return results.map((r) => {
+    const data = r.toJSON();
+    return {
+      ...data,
+      profileId: data.userProfileId,
+      missingFields: data.missingFields ?? [],
+    } as unknown as EligibilityEvaluationResult;
+  });
 }
 

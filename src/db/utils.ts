@@ -30,13 +30,27 @@ export function generateId(): string {
  * @returns Created profile document
  */
 export function createUserProfile(
-  data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>
+  data: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<RxDocument<UserProfile>> {
   const db = getDatabase();
 
   const profile: UserProfile = {
     id: generateId(),
-    ...data,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    dateOfBirth: data.dateOfBirth,
+    householdSize: data.householdSize,
+    householdIncome: data.householdIncome,
+    state: data.state,
+    zipCode: data.zipCode,
+    county: data.county,
+    citizenship: data.citizenship,
+    employmentStatus: data.employmentStatus,
+    hasDisability: data.hasDisability,
+    isVeteran: data.isVeteran,
+    isPregnant: data.isPregnant,
+    hasChildren: data.hasChildren,
+    lastAccessedAt: data.lastAccessedAt,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };

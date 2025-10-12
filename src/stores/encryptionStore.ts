@@ -18,6 +18,8 @@ import {
   storePassphraseHint,
   getPassphraseHint,
   testEncryption,
+  storeVerificationValue,
+  verifyPassphrase,
   type EncryptionStrength,
   type DerivedKey,
 } from '../utils/encryption';
@@ -135,7 +137,10 @@ export type EncryptionStore = EncryptionState & EncryptionActions;
 // INITIAL STATE
 // ============================================================================
 
-const initialState: EncryptionState = {
+/**
+ * Get initial state dynamically (reads from localStorage)
+ */
+const getInitialState = (): EncryptionState => ({
   mode: isEncryptionEnabled() ? 'auto' : 'disabled',
   isEnabled: isEncryptionEnabled(),
   isKeyLoaded: false,
@@ -143,7 +148,7 @@ const initialState: EncryptionState = {
   passphraseHint: getPassphraseHint(),
   _encryptionKey: null,
   _salt: getStoredSalt(),
-};
+});
 
 // ============================================================================
 // STORE DEFINITION
@@ -161,7 +166,7 @@ const initialState: EncryptionState = {
 export const useEncryptionStore = create<EncryptionStore>()(
   persist(
     (set, get) => ({
-      ...initialState,
+      ...getInitialState(),
 
       // ======================================================================
       // ACTIONS
@@ -188,6 +193,9 @@ export const useEncryptionStore = create<EncryptionStore>()(
             console.error('Encryption test failed');
             return false;
           }
+
+          // Store verification value for future passphrase checks
+          await storeVerificationValue(derived.key);
 
           // Store salt and hint
           storeSalt(derived.salt);
@@ -231,9 +239,9 @@ export const useEncryptionStore = create<EncryptionStore>()(
             salt
           );
 
-          // Test encryption to verify correct passphrase
-          const testResult = await testEncryption(derived.key);
-          if (!testResult) {
+          // Verify this is the correct passphrase by trying to decrypt verification value
+          const isCorrect = await verifyPassphrase(derived.key);
+          if (!isCorrect) {
             return false;
           }
 
@@ -299,18 +307,37 @@ export const useEncryptionStore = create<EncryptionStore>()(
       },
 
       reset: (): void => {
-        set(initialState);
+        // Reset to truly fresh state (don't read from localStorage)
+        set({
+          mode: 'disabled',
+          isEnabled: false,
+          isKeyLoaded: false,
+          passphraseStrength: 'none',
+          passphraseHint: null,
+          _encryptionKey: null,
+          _salt: null,
+        });
       },
     }),
     {
       name: 'bf-encryption-store',
       // Only persist non-sensitive fields
+      // NOTE: Salt is also stored in localStorage separately for additional security layer
       partialize: (state) => ({
         mode: state.mode,
         isEnabled: state.isEnabled,
         passphraseHint: state.passphraseHint,
-        // NEVER persist the encryption key or salt in Zustand storage
+        _salt: state._salt, // Store salt reference (also in localStorage)
+        // NEVER persist the encryption key or isKeyLoaded
       }),
+      // After rehydration, ensure sensitive fields are cleared
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Clear sensitive fields that should never be persisted
+          state.isKeyLoaded = false;
+          state._encryptionKey = null;
+        }
+      },
     }
   )
 );

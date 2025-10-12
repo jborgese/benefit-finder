@@ -1,0 +1,233 @@
+/**
+ * Results Summary Component
+ *
+ * Displays overview of eligibility results across all programs
+ */
+
+import React from 'react';
+import { EligibilityResults, EligibilityStatus } from './types';
+import * as Progress from '@radix-ui/react-progress';
+
+interface ResultsSummaryProps {
+  results: EligibilityResults;
+  onFilterChange?: (status: EligibilityStatus | 'all') => void;
+  activeFilter?: EligibilityStatus | 'all';
+}
+
+export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
+  results,
+  onFilterChange,
+  activeFilter = 'all',
+}) => {
+  const { qualified, likely, maybe, notQualified, totalPrograms, evaluatedAt } = results;
+
+  const statusCounts = {
+    qualified: qualified.length,
+    likely: likely.length,
+    maybe: maybe.length,
+    'not-qualified': notQualified.length,
+  };
+
+  const qualifiedPercentage = totalPrograms > 0
+    ? Math.round((qualified.length / totalPrograms) * 100)
+    : 0;
+
+  // Constants for repeated style classes
+  const GRAY_STYLE = 'bg-gray-100 text-gray-800 border-gray-300';
+  const ACTIVE_FILTER_RING = ' border-current ring-2';
+
+  const getStatusColor = (status: EligibilityStatus | 'all'): string => {
+    switch (status) {
+      case 'qualified':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'likely':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'maybe':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'not-qualified':
+        return GRAY_STYLE;
+      case 'all':
+        return 'bg-purple-100 text-purple-800 border-purple-300';
+      default:
+        return GRAY_STYLE;
+    }
+  };
+
+  const getStatusIcon = (status: EligibilityStatus): string => {
+    switch (status) {
+      case 'qualified':
+        return '✓';
+      case 'likely':
+        return '◐';
+      case 'maybe':
+        return '?';
+      case 'not-qualified':
+        return '✗';
+      default:
+        return '○';
+    }
+  };
+
+  const handleFilterClick = (status: EligibilityStatus | 'all'): void => {
+    if (onFilterChange) {
+      onFilterChange(status);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6 print:shadow-none">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Your Benefit Eligibility Results
+        </h2>
+        <p className="text-gray-600 text-sm">
+          Evaluated on {evaluatedAt.toLocaleDateString()} at {evaluatedAt.toLocaleTimeString()}
+        </p>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">
+            Qualified for {qualified.length} of {totalPrograms} programs
+          </span>
+          <span className="text-sm font-semibold text-green-600">
+            {qualifiedPercentage}%
+          </span>
+        </div>
+        <Progress.Root
+          className="relative overflow-hidden bg-gray-200 rounded-full w-full h-3"
+          value={qualifiedPercentage}
+        >
+          <Progress.Indicator
+            className="bg-green-500 w-full h-full transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${100 - qualifiedPercentage}%)` }}
+          />
+        </Progress.Root>
+      </div>
+
+      {/* Status Filters */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 print:gap-2">
+        {/* All Programs */}
+        <button
+          onClick={() => handleFilterClick('all')}
+          className={`
+            flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
+            ${activeFilter === 'all' ? `${getStatusColor('all')}${ACTIVE_FILTER_RING} ring-purple-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            print:p-2 print:border
+          `}
+          aria-label="Show all programs"
+        >
+          <span className="text-2xl mb-1">📋</span>
+          <span className="text-sm font-medium">All</span>
+          <span className="text-xl font-bold">{totalPrograms}</span>
+        </button>
+
+        {/* Qualified */}
+        <button
+          onClick={() => handleFilterClick('qualified')}
+          className={`
+            flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
+            ${activeFilter === 'qualified' ? `${getStatusColor('qualified')}${ACTIVE_FILTER_RING} ring-green-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            print:p-2 print:border
+          `}
+          aria-label={`Show ${statusCounts.qualified} qualified programs`}
+        >
+          <span className="text-2xl mb-1">{getStatusIcon('qualified')}</span>
+          <span className="text-sm font-medium">Qualified</span>
+          <span className="text-xl font-bold text-green-600">{statusCounts.qualified}</span>
+        </button>
+
+        {/* Likely */}
+        <button
+          onClick={() => handleFilterClick('likely')}
+          className={`
+            flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
+            ${activeFilter === 'likely' ? `${getStatusColor('likely')}${ACTIVE_FILTER_RING} ring-blue-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            print:p-2 print:border
+          `}
+          aria-label={`Show ${statusCounts.likely} likely programs`}
+        >
+          <span className="text-2xl mb-1">{getStatusIcon('likely')}</span>
+          <span className="text-sm font-medium">Likely</span>
+          <span className="text-xl font-bold text-blue-600">{statusCounts.likely}</span>
+        </button>
+
+        {/* Maybe */}
+        <button
+          onClick={() => handleFilterClick('maybe')}
+          className={`
+            flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
+            ${activeFilter === 'maybe' ? `${getStatusColor('maybe')}${ACTIVE_FILTER_RING} ring-yellow-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            print:p-2 print:border
+          `}
+          aria-label={`Show ${statusCounts.maybe} maybe programs`}
+        >
+          <span className="text-2xl mb-1">{getStatusIcon('maybe')}</span>
+          <span className="text-sm font-medium">Maybe</span>
+          <span className="text-xl font-bold text-yellow-600">{statusCounts.maybe}</span>
+        </button>
+
+        {/* Not Qualified */}
+        <button
+          onClick={() => handleFilterClick('not-qualified')}
+          className={`
+            flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
+            ${activeFilter === 'not-qualified' ? `${getStatusColor('not-qualified')}${ACTIVE_FILTER_RING} ring-gray-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            print:p-2 print:border
+          `}
+          aria-label={`Show ${statusCounts['not-qualified']} not qualified programs`}
+        >
+          <span className="text-2xl mb-1">{getStatusIcon('not-qualified')}</span>
+          <span className="text-sm font-medium">Not Qualified</span>
+          <span className="text-xl font-bold text-gray-600">{statusCounts['not-qualified']}</span>
+        </button>
+      </div>
+
+      {/* Quick Tips */}
+      {qualified.length > 0 && (
+        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg print:border print:mt-4">
+          <h3 className="font-semibold text-green-900 mb-2 flex items-center">
+            <span className="mr-2">💡</span>
+            Next Steps
+          </h3>
+          <p className="text-sm text-green-800">
+            You qualify for {qualified.length} program{qualified.length !== 1 ? 's' : ''}!
+            Review each program card below for specific application instructions and required documents.
+          </p>
+        </div>
+      )}
+
+      {qualified.length === 0 && maybe.length > 0 && (
+        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg print:border print:mt-4">
+          <h3 className="font-semibold text-yellow-900 mb-2 flex items-center">
+            <span className="mr-2">ℹ️</span>
+            Additional Information Needed
+          </h3>
+          <p className="text-sm text-yellow-800">
+            You may qualify for some programs, but we need more information to determine eligibility.
+            Review the program details below and contact the program office for assistance.
+          </p>
+        </div>
+      )}
+
+      {qualified.length === 0 && likely.length === 0 && maybe.length === 0 && (
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg print:border print:mt-4">
+          <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+            <span className="mr-2">📞</span>
+            Need Help?
+          </h3>
+          <p className="text-sm text-blue-800">
+            Based on the information provided, you may not qualify for these programs.
+            However, circumstances change and you may become eligible in the future.
+            Contact a local benefits counselor or community organization for personalized assistance.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ResultsSummary;
+

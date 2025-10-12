@@ -14,7 +14,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    
+
     // Include/Exclude patterns
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: [
@@ -23,7 +23,7 @@ export default defineConfig({
       '**/.{idea,git,cache,output,temp}/**',
       '**/tests/e2e/**',
     ],
-    
+
     // Coverage configuration
     coverage: {
       provider: 'v8',
@@ -53,26 +53,27 @@ export default defineConfig({
       all: true,
       clean: true,
     },
-    
+
     // Performance
+    // Use forks instead of threads for better crypto compatibility
     isolate: true,
-    pool: 'threads',
+    pool: 'forks',
     poolOptions: {
-      threads: {
-        singleThread: false,
+      forks: {
+        singleFork: false,
       },
     },
-    
+
     // Timeouts
     testTimeout: 10000,
     hookTimeout: 10000,
-    
+
     // CSS handling
     css: true,
-    
+
     // Reporter configuration
     reporters: ['verbose'],
-    
+
     // Mock configuration
     mockReset: true,
     restoreMocks: true,

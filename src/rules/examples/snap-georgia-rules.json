@@ -1,0 +1,541 @@
+{
+  "metadata": {
+    "id": "snap-georgia-rules-2024",
+    "name": "Georgia SNAP Eligibility Rules (2024)",
+    "description": "Georgia-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. These rules supplement federal SNAP rules and reflect Georgia's implementation of the program.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-GA",
+    "programs": ["snap-georgia"],
+    "tags": ["snap", "food-assistance", "georgia", "2024", "state-specific"],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-ga-broad-based-categorical-eligibility",
+      "programId": "snap-georgia",
+      "name": "Georgia Broad-Based Categorical Eligibility (BBCE)",
+      "description": "Georgia uses broad-based categorical eligibility, which eliminates asset tests and raises income limits for certain households",
+      "ruleLogic": {
+        "and": [
+          {
+            "<=": [
+              { "var": "householdIncome" },
+              {
+                "*": [
+                  { "var": "householdSize" },
+                  2960
+                ]
+              }
+            ]
+          },
+          {
+            "or": [
+              { "var": "receivedTANFBrochure" },
+              { "var": "hasExpenses" }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Georgia expanded SNAP eligibility through Broad-Based Categorical Eligibility (BBCE). If your household receives TANF-funded services (even just an informational brochure) or has certain expenses, you may qualify with: 1) Gross income up to 200% of FPL ($2,960/month for 1 person in 2024), and 2) NO asset limit. This is more generous than federal SNAP rules. Most Georgia SNAP applicants qualify under BBCE.",
+      "requiredFields": ["householdIncome", "householdSize", "receivedTANFBrochure", "hasExpenses"],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-ga",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": ["W-2", "1099", "Bank statements", "Self-employment records"],
+          "where": "Employer or your own records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Gateway.GA.gov or visit your local Division of Family and Children Services (DFCS) office",
+          "url": "https://gateway.ga.gov/",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Georgia SNAP Broad-Based Categorical Eligibility",
+          "url": "https://dfcs.georgia.gov/food-stamps",
+          "date": "2024-10-01",
+          "notes": "Georgia implements BBCE with 200% FPL income limit and no asset test"
+        },
+        {
+          "title": "USDA FNS State BBCE Options",
+          "url": "https://www.fns.usda.gov/snap/broad-based-categorical-eligibility",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ga-bbce-eligible",
+          "description": "Household under 200% FPL with TANF brochure",
+          "input": {
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "receivedTANFBrochure": true,
+            "hasExpenses": false
+          },
+          "expected": true,
+          "tags": ["eligible", "bbce", "georgia"]
+        },
+        {
+          "id": "test-ga-bbce-eligible-expenses",
+          "description": "Household under 200% FPL with expenses",
+          "input": {
+            "householdIncome": 2800,
+            "householdSize": 1,
+            "receivedTANFBrochure": false,
+            "hasExpenses": true
+          },
+          "expected": true,
+          "tags": ["eligible", "bbce", "expenses"]
+        },
+        {
+          "id": "test-ga-bbce-ineligible-income",
+          "description": "Income above 200% FPL",
+          "input": {
+            "householdIncome": 3500,
+            "householdSize": 1,
+            "receivedTANFBrochure": true,
+            "hasExpenses": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        },
+        {
+          "id": "test-ga-bbce-ineligible-no-connection",
+          "description": "Under income limit but no TANF connection or expenses",
+          "input": {
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "receivedTANFBrochure": false,
+            "hasExpenses": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "no-bbce-connection"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["bbce", "categorical-eligibility", "income", "georgia-specific"],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-GA"
+    },
+    {
+      "id": "snap-ga-standard-deduction",
+      "programId": "snap-georgia",
+      "name": "Georgia SNAP Standard Deduction",
+      "description": "Georgia uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          { "<=": [{ "var": "householdSize" }, 3] },
+          193,
+          {
+            "if": [
+              { "==": [{ "var": "householdSize" }, 4] },
+              195,
+              {
+                "if": [
+                  { "==": [{ "var": "householdSize" }, 5] },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "Georgia follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": ["householdSize"],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-ga-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": ["deduction", "small-household"]
+        },
+        {
+          "id": "test-ga-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": ["deduction", "medium-household"]
+        },
+        {
+          "id": "test-ga-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": ["deduction", "large-household"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["deductions", "net-income", "calculation"],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-GA"
+    },
+    {
+      "id": "snap-ga-abawd-exemption-counties",
+      "programId": "snap-georgia",
+      "name": "Georgia ABAWD County Exemptions",
+      "description": "Certain Georgia counties have ABAWD time limit waivers due to high unemployment",
+      "ruleLogic": {
+        "or": [
+          { "!": { "var": "isABAWD" } },
+          { "var": "meetsWorkRequirement" },
+          { "var": "isExemptFromWork" },
+          {
+            "in": [
+              { "var": "county" },
+              ["Clayton", "DeKalb", "Fulton"]
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Georgia implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements, but certain counties may have waivers. As of 2024, some high-unemployment counties in Georgia may be exempt from the 3-month time limit. Check with your local DFCS office for current county waiver status. If you live in an exempt county, you are not subject to the ABAWD time limits even if you don't work.",
+      "requiredFields": ["isABAWD", "meetsWorkRequirement", "isExemptFromWork", "county"],
+      "requiredDocuments": [
+        {
+          "id": "proof-address-county",
+          "name": "Proof of County Residence",
+          "description": "Document showing which Georgia county you live in",
+          "required": false,
+          "alternatives": ["Driver's license", "Utility bill", "Lease agreement"],
+          "where": "DMV or utility company"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Contact your local DFCS office to verify current ABAWD waiver status for your county",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Georgia SNAP ABAWD Information",
+          "url": "https://dfcs.georgia.gov/food-stamps",
+          "date": "2024-10-01",
+          "notes": "County waiver status changes periodically based on unemployment rates"
+        },
+        {
+          "title": "USDA FNS ABAWD Waivers by State",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-ga-abawd-exempt-county",
+          "description": "ABAWD in exempt county (Fulton)",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false,
+            "county": "Fulton"
+          },
+          "expected": true,
+          "tags": ["eligible", "abawd", "county-exempt"]
+        },
+        {
+          "id": "test-ga-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false,
+            "county": "Other"
+          },
+          "expected": true,
+          "tags": ["eligible", "abawd", "working"]
+        },
+        {
+          "id": "test-ga-abawd-not-compliant",
+          "description": "ABAWD in non-exempt county not working",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false,
+            "county": "Other"
+          },
+          "expected": false,
+          "tags": ["ineligible", "abawd", "not-compliant"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["abawd", "work-requirements", "county-waivers", "georgia-specific"],
+      "category": "work-requirement",
+      "jurisdiction": "US-GA"
+    },
+    {
+      "id": "snap-ga-student-eligibility",
+      "programId": "snap-georgia",
+      "name": "Georgia SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          { "!": { "var": "isStudent" } },
+          { "<": [{ "var": "age" }, 18] },
+          { ">": [{ "var": "age" }, 49] },
+          { "var": "worksAtLeast20Hours" },
+          { "var": "hasChildUnder6" },
+          { "var": "hasChildUnder12AndNoChildcare" },
+          { "var": "receivesWorkStudy" },
+          { "var": "inEmploymentTraining" }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Georgia follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, receive TANF, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification",
+          "required": false,
+          "alternatives": ["Class schedule", "Student ID", "Enrollment letter"],
+          "where": "College registrar or student services"
+        },
+        {
+          "id": "proof-student-work",
+          "name": "Proof of Work or Work-Study",
+          "description": "Pay stubs or work-study award letter",
+          "required": false,
+          "alternatives": ["Employer letter", "Work-study documentation"],
+          "where": "Employer or financial aid office"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "legalReference": "7 CFR § 273.5",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 16,
+      "testCases": [
+        {
+          "id": "test-ga-student-not-student",
+          "description": "Not a student - eligible",
+          "input": {
+            "isStudent": false,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": ["eligible", "not-student"]
+        },
+        {
+          "id": "test-ga-student-working",
+          "description": "Student working 20+ hours",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": ["eligible", "student", "working"]
+        },
+        {
+          "id": "test-ga-student-with-child",
+          "description": "Student with child under 6",
+          "input": {
+            "isStudent": true,
+            "age": 25,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": true,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": ["eligible", "student", "parent"]
+        },
+        {
+          "id": "test-ga-student-not-compliant",
+          "description": "Student not meeting exemption criteria",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "student", "not-compliant"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["students", "college", "work-requirements"],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-GA"
+    },
+    {
+      "id": "snap-ga-application-process",
+      "programId": "snap-georgia",
+      "name": "Georgia SNAP Application Process",
+      "description": "Information about applying for SNAP in Georgia",
+      "ruleLogic": {
+        "var": "livesInGeorgia"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for SNAP in Georgia: 1) Apply online at Gateway.GA.gov (fastest), 2) Apply by phone at 1-877-423-4746, 3) Visit a local Division of Family and Children Services (DFCS) office, or 4) Download and mail a paper application. You will have an interview (phone or in-person) within 30 days. Expedited service (within 7 days) is available for households with very low income or urgent need. Bring proof of identity, income, expenses, and household composition to your interview.",
+      "requiredFields": ["livesInGeorgia"],
+      "requiredDocuments": [
+        {
+          "id": "ga-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Georgia SNAP application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Gateway.GA.gov (recommended - fastest processing)",
+          "url": "https://gateway.ga.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Georgia SNAP Hotline: 1-877-423-4746 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DFCS office: https://dfcs.georgia.gov/locations",
+          "url": "https://dfcs.georgia.gov/locations",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Georgia SNAP Application Information",
+          "url": "https://dfcs.georgia.gov/food-stamps",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Georgia Gateway Online Application",
+          "url": "https://gateway.ga.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ga-lives-in-georgia",
+          "description": "Lives in Georgia - can apply",
+          "input": {
+            "livesInGeorgia": true
+          },
+          "expected": true,
+          "tags": ["eligible", "georgia-resident"]
+        },
+        {
+          "id": "test-ga-not-in-georgia",
+          "description": "Does not live in Georgia",
+          "input": {
+            "livesInGeorgia": false
+          },
+          "expected": false,
+          "tags": ["ineligible", "non-resident"]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": ["application", "process", "gateway", "dfcs"],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-GA"
+    }
+  ]
+}
+

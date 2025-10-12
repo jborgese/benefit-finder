@@ -17,6 +17,7 @@ import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration-schema';
 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
+import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
 
 import { collections } from './collections';
 import type {
@@ -32,8 +33,8 @@ import type {
 } from './schemas';
 
 // Add RxDB plugins
-// Note: Encryption is built into RxDB and enabled via the 'password' parameter
-// No separate encryption plugin is needed
+// Note: Encryption is handled by wrappedKeyEncryptionCryptoJsStorage wrapper
+// which is configured when creating the database with a password
 if (import.meta.env.DEV) {
   addRxPlugin(RxDBDevModePlugin);
 }
@@ -45,27 +46,27 @@ addRxPlugin(RxDBMigrationPlugin);
  * Extended collection types with custom statics
  */
 export interface UserProfilesCollection extends RxCollection<UserProfile> {
-  getLatest: () => Promise<UserProfileDocument | null>;
+  findLatest: () => Promise<UserProfileDocument | null>;
 }
 
 export interface BenefitProgramsCollection extends RxCollection<BenefitProgram> {
-  getActivePrograms: () => Promise<BenefitProgramDocument[]>;
-  getByJurisdiction: (jurisdiction: string) => Promise<BenefitProgramDocument[]>;
-  getByCategory: (category: string) => Promise<BenefitProgramDocument[]>;
+  findActivePrograms: () => Promise<BenefitProgramDocument[]>;
+  findProgramsByJurisdiction: (jurisdiction: string) => Promise<BenefitProgramDocument[]>;
+  findProgramsByCategory: (category: string) => Promise<BenefitProgramDocument[]>;
 }
 
 export interface EligibilityRulesCollection extends RxCollection<EligibilityRule> {
-  getByProgram: (programId: string) => Promise<EligibilityRuleDocument[]>;
+  findRulesByProgram: (programId: string) => Promise<EligibilityRuleDocument[]>;
 }
 
 export interface EligibilityResultsCollection extends RxCollection<EligibilityResult> {
-  getByUserProfile: (userProfileId: string) => Promise<EligibilityResultDocument[]>;
-  getValidResults: (userProfileId: string) => Promise<EligibilityResultDocument[]>;
+  findResultsByUserProfile: (userProfileId: string) => Promise<EligibilityResultDocument[]>;
+  findValidResultsByUser: (userProfileId: string) => Promise<EligibilityResultDocument[]>;
   clearExpired: () => Promise<number>;
 }
 
 export interface AppSettingsCollection extends RxCollection<AppSetting> {
-  get: (key: string) => Promise<unknown>;
+  findSettingByKey: (key: string) => Promise<unknown>;
   set: (key: string, value: unknown, encrypted?: boolean) => Promise<void>;
 }
 
@@ -171,11 +172,13 @@ export async function initializeDatabase(
     : getDefaultEncryptionPassword();
 
   try {
-    // Create RxDB database with Dexie storage and AJV validation
+    // Create RxDB database with Dexie storage, encryption, and AJV validation
     const db = await createRxDatabase<BenefitFinderCollections>({
       name: DB_NAME,
       storage: wrappedValidateAjvStorage({
-        storage: getRxStorageDexie(),
+        storage: wrappedKeyEncryptionCryptoJsStorage({
+          storage: getRxStorageDexie(),
+        }),
       }),
       password: encryptionPassword,
       multiInstance: false, // Disable multi-tab support for better performance

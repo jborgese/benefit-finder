@@ -1,0 +1,180 @@
+/**
+ * Print-Friendly Styles for Results Display
+ *
+ * Optimized for printing eligibility results
+ */
+
+@media print {
+  /* Global print settings */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Hide non-essential elements */
+  .print\\:hidden,
+  nav,
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Page breaks */
+  .print\\:break-before {
+    page-break-before: always;
+  }
+
+  .print\\:break-after {
+    page-break-after: always;
+  }
+
+  .print\\:break-inside-avoid {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Results container */
+  .results-container {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Program cards */
+  .program-card {
+    margin-bottom: 1.5rem;
+    page-break-inside: avoid;
+    border: 1px solid #d1d5db;
+    box-shadow: none !important;
+  }
+
+  /* Remove shadows and unnecessary styling */
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl {
+    box-shadow: none !important;
+  }
+
+  /* Simplify borders */
+  .border-2 {
+    border-width: 1px !important;
+  }
+
+  /* Links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #6b7280;
+  }
+
+  a[href^="javascript:"]:after,
+  a[href^="#"]:after {
+    content: "";
+  }
+
+  /* Buttons - show as text */
+  button {
+    border: 1px solid #d1d5db;
+    background: white !important;
+    color: #1f2937 !important;
+  }
+
+  /* Accordions - always expanded */
+  [data-state="closed"] {
+    display: block !important;
+  }
+
+  /* Hide interactive elements */
+  [data-radix-accordion-trigger] svg,
+  .accordion-chevron {
+    display: none !important;
+  }
+
+  /* Checkboxes - show state */
+  [data-state="checked"]:after {
+    content: "✓";
+    color: #059669;
+  }
+
+  /* Progress bars */
+  .progress-bar {
+    border: 1px solid #d1d5db;
+  }
+
+  /* Confidence scores */
+  .confidence-score {
+    border: 1px solid currentColor;
+  }
+
+  /* Document checklist */
+  .document-item {
+    border: 1px solid #e5e7eb;
+    page-break-inside: avoid;
+  }
+
+  /* Next steps */
+  .next-step {
+    border: 1px solid #e5e7eb;
+    page-break-inside: avoid;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 24pt;
+  }
+
+  h2 {
+    font-size: 20pt;
+  }
+
+  h3 {
+    font-size: 16pt;
+  }
+
+  h4 {
+    font-size: 14pt;
+  }
+
+  p, li, td {
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  /* Page header */
+  @page {
+    margin: 0.75in;
+  }
+
+  .print-header {
+    display: block;
+    text-align: center;
+    border-bottom: 2px solid #1f2937;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .print-footer {
+    display: block;
+    text-align: center;
+    border-top: 1px solid #d1d5db;
+    padding-top: 0.5rem;
+    margin-top: 1rem;
+    font-size: 9pt;
+    color: #6b7280;
+  }
+
+  /* Privacy note */
+  .privacy-note {
+    border: 1px solid #d1d5db;
+    padding: 0.5rem;
+    background: #f9fafb;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+}
+
