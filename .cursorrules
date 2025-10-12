@@ -1,0 +1,139 @@
+# BenefitFinder - Cursor AI Rules
+
+## Project Overview
+BenefitFinder is a privacy-preserving, offline-first application for checking government benefits eligibility. All processing happens locally in the browser with no server dependencies.
+
+## Core Principles
+1. **Privacy First**: Never suggest solutions that send data to external servers or APIs
+2. **Offline-First**: All features must work without internet connectivity
+3. **Accessibility**: Follow WCAG 2.1 AA standards for all UI components
+4. **Type Safety**: Strict TypeScript with no `any` types unless absolutely necessary
+5. **Security**: Treat all user data as sensitive; use encryption for local storage
+6. **Plain Language**: User-facing text should be clear and accessible to all reading levels
+
+## Tech Stack Preferences
+
+### Frontend
+- React 18 with hooks (functional components only)
+- TypeScript with strict mode enabled
+- Tailwind CSS for styling (utility-first approach)
+- Radix UI for accessible component primitives (always prefer over custom implementations)
+
+### State & Data
+- Zustand for global state management
+- RxDB for reactive offline database operations
+- Dexie for IndexedDB interactions
+- Zod for runtime schema validation and type inference
+
+### Logic & Visualization
+- json-logic-js for rule evaluation (no custom rule engines)
+- ReactFlow for visual flow diagrams
+- Argdown for argument mapping
+
+### Testing
+- Vitest for unit tests (write tests for all new features)
+- Playwright for E2E tests
+- @axe-core/playwright for accessibility testing (required for UI changes)
+
+## Code Standards
+
+### TypeScript
+- Use strict mode settings from tsconfig.json
+- Prefer explicit return types for functions
+- Use Zod schemas for runtime validation, derive TypeScript types from schemas
+- No `any` types without explicit justification in comments
+- Use discriminated unions for variant data types
+
+### React
+- Functional components only (no class components)
+- Use custom hooks to extract reusable logic
+- Prefer composition over prop drilling (use Zustand for shared state)
+- Keep components focused and single-purpose
+- Use React.memo() sparingly and only when performance issues are measured
+
+### Styling
+- Tailwind utility classes are preferred
+- Use Tailwind config for theme customization (colors, spacing, etc.)
+- Follow mobile-first responsive design principles
+- Ensure minimum touch target size of 44x44px for interactive elements
+
+### Accessibility
+- All interactive elements must be keyboard accessible
+- Use semantic HTML elements
+- Include ARIA labels where semantic HTML is insufficient
+- Ensure color contrast meets WCAG AA standards (4.5:1 for text)
+- Test all UI changes with Playwright accessibility tests
+
+### Security
+- No external API calls or third-party services
+- Use AES-GCM for encrypting sensitive data in local storage
+- Sanitize any user-generated content with isomorphic-dompurify
+- Validate all inputs with Zod schemas
+- Never log sensitive user data
+
+### Data & State
+- Use RxDB for all persistent data storage
+- Encrypt data at rest using built-in RxDB encryption
+- Use Zustand for ephemeral UI state
+- Keep state as close to where it's used as possible
+- Use Immer for immutable state updates when needed
+
+## Prohibited Patterns
+- ❌ No hosted servers or cloud services
+- ❌ No external API calls (except for optional device-to-device sync over local Wi-Fi)
+- ❌ No analytics, tracking, or telemetry
+- ❌ No cookies or session storage for user data
+- ❌ No class components
+- ❌ No inline styles (use Tailwind)
+- ❌ No `any` types without justification
+- ❌ No mutations of state objects (use Immer or immutable patterns)
+- ❌ No accessibility bypasses or hacks
+
+## File Organization
+```
+src/
+├── components/       # Reusable UI components
+├── features/        # Feature-specific modules
+├── hooks/           # Custom React hooks
+├── stores/          # Zustand stores
+├── db/              # RxDB schemas and collections
+├── rules/           # Benefit eligibility rules (JSON)
+├── types/           # TypeScript type definitions
+├── utils/           # Pure utility functions
+└── __tests__/       # Component and unit tests
+```
+
+## Testing Requirements
+- All new features require unit tests
+- UI changes require E2E tests with Playwright
+- Accessibility tests required for interactive components
+- Test coverage should trend upward (no reduction without justification)
+- Use testing-library queries in priority order: role > label > test-id
+
+## Documentation
+- Add JSDoc comments for exported functions and types
+- Include usage examples for complex utilities or hooks
+- Update README.md for significant feature additions
+- Document eligibility rule schemas and examples
+
+## Git Workflow
+- Use conventional commit format: `type(scope): description`
+- Types: feat, fix, docs, style, refactor, test, chore
+- Run `npm run lint` before committing
+- Ensure tests pass before pushing
+
+## When Suggesting Code
+1. Always consider privacy and security implications
+2. Verify TypeScript types are correct and specific
+3. Ensure accessibility requirements are met
+4. Include relevant tests
+5. Follow existing code patterns and file organization
+6. Check that solution works offline
+7. Avoid introducing new dependencies unless necessary
+
+## Device-to-Device Sync
+- Sync features must use local Wi-Fi Direct or peer-to-peer connections only
+- Use CouchDB replication protocol for RxDB sync
+- No intermediary servers or hosted solutions
+- Document sync setup for field deployment scenarios
+
