@@ -27,7 +27,7 @@ interface PerformanceResult {
 /**
  * Test rule evaluation performance
  */
-async function testRuleEvaluation(): Promise<PerformanceResult[]> {
+function testRuleEvaluation(): PerformanceResult[] {
   console.log('\n📊 Testing Rule Evaluation Performance...\n');
 
   const results: PerformanceResult[] = [];
@@ -87,7 +87,7 @@ async function testRuleEvaluation(): Promise<PerformanceResult[]> {
 /**
  * Test large dataset generation and handling
  */
-async function testDataGeneration(): Promise<PerformanceResult[]> {
+function testDataGeneration(): PerformanceResult[] {
   console.log('\n📊 Testing Data Generation Performance...\n');
 
   const results: PerformanceResult[] = [];
@@ -134,7 +134,7 @@ async function testDataGeneration(): Promise<PerformanceResult[]> {
 /**
  * Test JSON parsing and stringifying (for localStorage/export)
  */
-async function testJSONOperations(): Promise<PerformanceResult[]> {
+function testJSONOperations(): PerformanceResult[] {
   console.log('\n📊 Testing JSON Operations Performance...\n');
 
   const results: PerformanceResult[] = [];
@@ -292,13 +292,13 @@ async function main(): Promise<void> {
   const allResults: PerformanceResult[] = [];
 
   // Run tests
-  const ruleResults = await testRuleEvaluation();
+  const ruleResults = testRuleEvaluation();
   allResults.push(...ruleResults);
 
-  const dataResults = await testDataGeneration();
+  const dataResults = testDataGeneration();
   allResults.push(...dataResults);
 
-  const jsonResults = await testJSONOperations();
+  const jsonResults = testJSONOperations();
   allResults.push(...jsonResults);
 
   // Print results

@@ -217,7 +217,7 @@ test.describe('Offline Functionality - IndexedDB', () => {
       // Check databases exist
       const databases = await page.evaluate(async () => {
         if ('databases' in indexedDB) {
-          return await indexedDB.databases();
+          return indexedDB.databases();
         }
         return [];
       });
