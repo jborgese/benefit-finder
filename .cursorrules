@@ -126,21 +126,81 @@ src/
 - Run `npm run lint` before committing
 - Ensure tests pass before pushing
 
-## Command Execution
-- **Before executing any command, explicitly verify the current working directory**
-- **If not already in the project root (`C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder`), navigate there first using `cd`**
-- At the start of each conversation, check and navigate to the project root
-- Exception: Only remain in/navigate to subdirectories when the command explicitly requires it (e.g., testing a specific module)
+## Command Execution (CRITICAL - READ FIRST)
+🚨 **MANDATORY: You MUST verify and navigate to the project root BEFORE executing ANY command** 🚨
+
+### Pre-Command Checklist (REQUIRED FOR EVERY COMMAND)
+1. **ALWAYS start by checking the current working directory with `pwd` or `Get-Location`**
+2. **If the output is NOT exactly `C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder`, you MUST run:**
+   ```powershell
+   cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
+   ```
+3. **Only after step 2, execute your intended command**
+
+### Rules
+- **NEVER run npm, npx, node, vite, vitest, playwright, or any project command from the home directory or any other directory**
+- **The FIRST command of every conversation MUST be verifying/navigating to project root**
+- **Before EVERY command execution, explicitly state in your explanation: "Verifying we're in project root first"**
+- **Exception**: Only remain in/navigate to subdirectories when the command explicitly requires it (e.g., testing a specific module) - but this is RARE
 - The project root contains key files: `package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`
-- **Use PowerShell syntax for all shell commands** (this is a Windows environment with PowerShell as the default shell)
-  - **CRITICAL: Use semicolon (`;`) to chain commands, NEVER use `&&` (bash syntax that doesn't work in PowerShell)**
-    - ❌ WRONG: `cd "C:\path\to\project" && npm run build`
-    - ✅ CORRECT: `cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm run build`
-    - ✅ ALTERNATIVE: Just run `npm run build` (after verifying/navigating to correct directory first)
-  - Use PowerShell cmdlets and operators (e.g., `Get-ChildItem`, `Select-Object`, `-eq`, `-and`)
-  - For cross-platform npm scripts, use npm/npx commands which work consistently across shells
-  - When suggesting file operations, use PowerShell equivalents: `Remove-Item` instead of `rm`, `Copy-Item` instead of `cp`, etc.
-  - PowerShell uses `-and`, `-or`, `-not` for logical operators (not `&&`, `||`, `!`)
+- If these files are not present in your current directory, you are in the WRONG directory
+
+### PowerShell Syntax (Windows Environment)
+- **CRITICAL: Use semicolon (`;`) to chain commands, NEVER use `&&` (bash syntax that doesn't work in PowerShell)**
+
+  ❌ **WRONG** (bash syntax):
+  ```bash
+  cd "C:\path\to\project" && npm run build
+  ```
+
+  ✅ **CORRECT** (PowerShell syntax):
+  ```powershell
+  cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm run build
+  ```
+
+  ✅ **BETTER** (separate commands with explicit verification):
+  ```powershell
+  # First command: Navigate to project root
+  cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
+
+  # Second command (in next tool call): Verify location, then run build
+  pwd; npm run build
+  ```
+
+- Use PowerShell cmdlets and operators (e.g., `Get-ChildItem`, `Select-Object`, `-eq`, `-and`)
+- For cross-platform npm scripts, use npm/npx commands which work consistently across shells
+- When suggesting file operations, use PowerShell equivalents: `Remove-Item` instead of `rm`, `Copy-Item` instead of `cp`, etc.
+- PowerShell uses `-and`, `-or`, `-not` for logical operators (not `&&`, `||`, `!`)
+
+### Examples of Correct Command Sequences
+
+✅ **Starting a new conversation:**
+```powershell
+# First: Check where we are
+pwd
+```
+If output shows `C:\Users\Nipply Nathan\`, then:
+```powershell
+# Navigate to project root
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
+```
+Then in next command:
+```powershell
+# Now run the actual command
+npm install
+```
+
+✅ **Running tests:**
+```powershell
+# Verify location first, then run tests
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm test
+```
+
+❌ **NEVER do this:**
+```powershell
+# Running project commands from home directory - WRONG!
+npm run dev  # This will fail or run the wrong project
+```
 
 ## When Suggesting Code
 1. Always consider privacy and security implications

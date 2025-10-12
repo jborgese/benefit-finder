@@ -22,6 +22,7 @@ export default [
   {
     ignores: [
       'dist/**',
+      'build/**',
       'node_modules/**',
       'coverage/**',
       'playwright-report/**',
@@ -29,6 +30,12 @@ export default [
       '*.config.js',
       '*.config.cjs',
       '*.config.ts',
+      '*.d.ts',
+      '*.log',
+      '.vscode/**',
+      '.idea/**',
+      '.cache/**',
+      '.eslintcache',
     ]
   },
   js.configs.recommended,
