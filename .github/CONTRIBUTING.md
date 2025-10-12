@@ -24,7 +24,7 @@ Before contributing, please understand our core principles:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/benefit-finder.git
+git clone https://github.com/jborgese/benefit-finder.git
 cd benefit-finder
 
 # Install dependencies
@@ -42,7 +42,7 @@ npm run test:e2e
 
 ### 1. Find or Create an Issue
 
-- Check existing [issues](https://github.com/yourusername/benefit-finder/issues)
+- Check existing [issues](https://github.com/jborgese/benefit-finder/issues)
 - Comment on the issue you want to work on
 - Wait for assignment or approval
 
@@ -309,9 +309,8 @@ Contributors will be:
 
 ## 📞 Getting Help
 
-- **Questions**: [GitHub Discussions](https://github.com/yourusername/benefit-finder/discussions)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/benefit-finder/issues)
-- **Security**: security@benefitfinder.example
+- **Questions**: [GitHub Discussions](https://github.com/jborgese/benefit-finder/discussions)
+- **Issues**: [GitHub Issues](https://github.com/jborgese/benefit-finder/issues)
 
 ## 📜 License
 

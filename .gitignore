@@ -35,3 +35,30 @@ coverage/
 # Temporary files
 *.tmp
 .cache/
+
+# Sensitive data
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+config/secrets.json
+.env.production
+.env.staging
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup

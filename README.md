@@ -63,7 +63,7 @@ To empower individuals to access the support they're already entitled to — thr
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/benefit-finder.git
+git clone https://github.com/jborgese/benefit-finder.git
 cd benefit-finder
 
 # Install dependencies
@@ -242,9 +242,8 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ## 📞 Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/benefit-finder/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/benefit-finder/discussions)
-- **Email**: support@benefitfinder.example
+- **Issues**: [GitHub Issues](https://github.com/jborgese/benefit-finder/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jborgese/benefit-finder/discussions)
 
 ---
 
