@@ -230,6 +230,26 @@ export default [
     }
   },
 
+  // Scripts files use node TypeScript config
+  {
+    files: ['scripts/**/*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: './tsconfig.node.json',
+      },
+      globals: {
+        ...globals.node,
+      }
+    },
+    rules: {
+      'no-console': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+    }
+  },
+
   // E2E test files use separate TypeScript config
   {
     files: ['tests/**/*.ts'],

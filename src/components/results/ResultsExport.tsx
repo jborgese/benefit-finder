@@ -29,10 +29,10 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const handlePDFExport = async (): Promise<void> => {
+  const handlePDFExport = (): void => {
     try {
       setIsExporting(true);
-      await exportToPDF(results, {
+      exportToPDF(results, {
         userInfo: {
           name: userInfo?.name,
           evaluationDate: results.evaluatedAt,
@@ -93,9 +93,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
     <div className="flex gap-3 flex-wrap">
       {/* PDF Export Button */}
       <button
-        onClick={() => {
-          void handlePDFExport();
-        }}
+        onClick={handlePDFExport}
         disabled={isExporting}
         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >

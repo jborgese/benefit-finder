@@ -26,7 +26,7 @@ export const PrintView: React.FC<PrintViewProps> = ({ results, userInfo }) => {
           <p className="text-sm text-gray-600">Prepared for: {userInfo.name}</p>
         )}
         <p className="text-sm text-gray-600">
-          Date: {(userInfo?.evaluationDate || results.evaluatedAt).toLocaleDateString()}
+          Date: {(userInfo?.evaluationDate ?? results.evaluatedAt).toLocaleDateString()}
         </p>
       </div>
 

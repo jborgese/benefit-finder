@@ -39,7 +39,7 @@ export const ResultsComparison: React.FC<ResultsComparisonProps> = ({
       .forEach(p => allPrograms.add(p.programName));
   });
 
-  const getProgramStatus = (results: EligibilityResults, programName: string) => {
+  const getProgramStatus = (results: EligibilityResults, programName: string): string => {
     const allPrograms = [
       ...results.qualified,
       ...results.likely,
@@ -48,10 +48,10 @@ export const ResultsComparison: React.FC<ResultsComparisonProps> = ({
     ];
 
     const program = allPrograms.find(p => p.programName === programName);
-    return program?.status || 'not-evaluated';
+    return program?.status ?? 'not-evaluated';
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string): React.ReactElement => {
     const badges: Record<string, { color: string; icon: string; text: string }> = {
       'qualified': { color: 'bg-green-100 text-green-800', icon: '✓', text: 'Qualified' },
       'likely': { color: 'bg-blue-100 text-blue-800', icon: '◐', text: 'Likely' },
@@ -61,7 +61,9 @@ export const ResultsComparison: React.FC<ResultsComparisonProps> = ({
       'not-evaluated': { color: 'bg-gray-50 text-gray-500', icon: '-', text: 'N/A' },
     };
 
-    const badge = badges[status] || badges['not-evaluated'];
+    const defaultBadge = { color: 'bg-gray-50 text-gray-500', icon: '-', text: 'N/A' };
+    // eslint-disable-next-line security/detect-object-injection
+    const badge = (status in badges) ? badges[status] : defaultBadge;
 
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${badge.color}`}>
@@ -162,13 +164,19 @@ export const ResultsComparison: React.FC<ResultsComparisonProps> = ({
                 <span className="font-medium">Qualified programs change:</span>
                 <span>
                   {savedResults[0].results.qualified.length} → {savedResults[savedResults.length - 1].results.qualified.length}
-                  {savedResults[savedResults.length - 1].results.qualified.length > savedResults[0].results.qualified.length ? (
-                    <span className="text-green-600 ml-2">📈 +{savedResults[savedResults.length - 1].results.qualified.length - savedResults[0].results.qualified.length}</span>
-                  ) : savedResults[savedResults.length - 1].results.qualified.length < savedResults[0].results.qualified.length ? (
-                    <span className="text-red-600 ml-2">📉 {savedResults[savedResults.length - 1].results.qualified.length - savedResults[0].results.qualified.length}</span>
-                  ) : (
-                    <span className="text-gray-600 ml-2">→ No change</span>
-                  )}
+                  {(() => {
+                    const firstCount = savedResults[0].results.qualified.length;
+                    const lastCount = savedResults[savedResults.length - 1].results.qualified.length;
+                    const diff = lastCount - firstCount;
+
+                    if (diff > 0) {
+                      return <span className="text-green-600 ml-2">📈 +{diff}</span>;
+                    }
+                    if (diff < 0) {
+                      return <span className="text-red-600 ml-2">📉 {diff}</span>;
+                    }
+                    return <span className="text-gray-600 ml-2">→ No change</span>;
+                  })()}
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-2">

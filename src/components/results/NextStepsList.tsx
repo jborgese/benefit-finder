@@ -23,8 +23,8 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
     priorityOrder[a.priority] - priorityOrder[b.priority]
   );
 
-  const getPriorityBadge = (priority: NextStep['priority']) => {
-    const badges = {
+  const getPriorityBadge = (priority: NextStep['priority']): React.ReactElement => {
+    const badges: Record<NextStep['priority'], { color: string; label: string; icon: string }> = {
       high: {
         color: 'bg-red-100 text-red-800 border-red-300',
         label: 'High Priority',
@@ -42,6 +42,8 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
       },
     };
 
+    // Type-safe access: priority is strictly typed as 'high' | 'medium' | 'low'
+    // eslint-disable-next-line security/detect-object-injection
     const badge = badges[priority];
 
     return (
@@ -54,7 +56,7 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
     );
   };
 
-  const handleCheckboxChange = (index: number, checked: boolean) => {
+  const handleCheckboxChange = (index: number, checked: boolean): void => {
     if (onToggle) {
       onToggle(index, checked);
     }
@@ -93,7 +95,7 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
                     {index + 1}
                   </div>
                   <Checkbox.Root
-                    checked={step.completed || false}
+                    checked={step.completed ?? false}
                     onCheckedChange={(checked) => handleCheckboxChange(originalIndex, checked === true)}
                     className="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 transition-colors print:hidden"
                   >

@@ -28,10 +28,10 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
 }) => {
   const [showExplanation, setShowExplanation] = useState(false);
 
-  const getStatusBadge = () => {
+  const getStatusBadge = (): React.ReactElement => {
     const { status } = result;
 
-    const badgeClasses = {
+    const badgeClasses: Record<typeof status, string> = {
       'qualified': 'bg-green-100 text-green-800 border-green-300',
       'likely': 'bg-blue-100 text-blue-800 border-blue-300',
       'maybe': 'bg-yellow-100 text-yellow-800 border-yellow-300',
@@ -39,7 +39,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
       'not-qualified': 'bg-gray-100 text-gray-800 border-gray-300',
     };
 
-    const badgeText = {
+    const badgeText: Record<typeof status, string> = {
       'qualified': 'You Qualify',
       'likely': 'Likely Qualify',
       'maybe': 'May Qualify',
@@ -47,7 +47,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
       'not-qualified': 'Not Qualified',
     };
 
-    const badgeIcons = {
+    const badgeIcons: Record<typeof status, string> = {
       'qualified': '✓',
       'likely': '◐',
       'maybe': '?',
@@ -55,20 +55,28 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
       'not-qualified': '✗',
     };
 
+    // Safe: status is strictly typed from ProgramEligibilityResult
+    // eslint-disable-next-line security/detect-object-injection
+    const classes = badgeClasses[status];
+    // eslint-disable-next-line security/detect-object-injection
+    const icon = badgeIcons[status];
+    // eslint-disable-next-line security/detect-object-injection
+    const text = badgeText[status];
+
     return (
       <span
         className={`
           inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border-2
-          ${badgeClasses[status]}
+          ${classes}
         `}
       >
-        <span className="mr-1.5">{badgeIcons[status]}</span>
-        {badgeText[status]}
+        <span className="mr-1.5">{icon}</span>
+        {text}
       </span>
     );
   };
 
-  const getJurisdictionLabel = () => {
+  const getJurisdictionLabel = (): string => {
     const jurisdictionMap: Record<string, string> = {
       'US-FEDERAL': '🇺🇸 Federal Program',
       'US-GA': '🍑 Georgia',
@@ -78,7 +86,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
       'US-FL': '🌴 Florida',
     };
 
-    return jurisdictionMap[result.jurisdiction] || result.jurisdiction;
+    return jurisdictionMap[result.jurisdiction] ?? result.jurisdiction;
   };
 
   const shouldShowDocuments = result.status === 'qualified' || result.status === 'likely';
@@ -193,7 +201,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
         )}
 
         {/* Additional Information */}
-        {(result.processingTime || result.applicationDeadline) && (
+        {(result.processingTime ?? result.applicationDeadline) && (
           <Accordion.Item value="info">
             <Accordion.Header>
               <Accordion.Trigger className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors print:bg-transparent print:p-4">

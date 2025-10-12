@@ -25,16 +25,18 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
     qualified: qualified.length,
     likely: likely.length,
     maybe: maybe.length,
-    'not-qualified': notQualified.length,
+    [NOT_QUALIFIED_STATUS]: notQualified.length,
   };
 
   const qualifiedPercentage = totalPrograms > 0
     ? Math.round((qualified.length / totalPrograms) * 100)
     : 0;
 
-  // Constants for repeated style classes
+  // Constants for repeated style classes and status values
   const GRAY_STYLE = 'bg-gray-100 text-gray-800 border-gray-300';
   const ACTIVE_FILTER_RING = ' border-current ring-2';
+  const DEFAULT_BUTTON_STYLE = 'bg-white border-gray-200 hover:border-gray-300';
+  const NOT_QUALIFIED_STATUS = 'not-qualified' as const;
 
   const getStatusColor = (status: EligibilityStatus | 'all'): string => {
     switch (status) {
@@ -44,7 +46,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
         return 'bg-blue-100 text-blue-800 border-blue-300';
       case 'maybe':
         return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'not-qualified':
+      case NOT_QUALIFIED_STATUS:
         return GRAY_STYLE;
       case 'all':
         return 'bg-purple-100 text-purple-800 border-purple-300';
@@ -114,7 +116,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           onClick={() => handleFilterClick('all')}
           className={`
             flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
-            ${activeFilter === 'all' ? `${getStatusColor('all')}${ACTIVE_FILTER_RING} ring-purple-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            ${activeFilter === 'all' ? `${getStatusColor('all')}${ACTIVE_FILTER_RING} ring-purple-200` : DEFAULT_BUTTON_STYLE}
             print:p-2 print:border
           `}
           aria-label="Show all programs"
@@ -129,7 +131,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           onClick={() => handleFilterClick('qualified')}
           className={`
             flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
-            ${activeFilter === 'qualified' ? `${getStatusColor('qualified')}${ACTIVE_FILTER_RING} ring-green-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            ${activeFilter === 'qualified' ? `${getStatusColor('qualified')}${ACTIVE_FILTER_RING} ring-green-200` : DEFAULT_BUTTON_STYLE}
             print:p-2 print:border
           `}
           aria-label={`Show ${statusCounts.qualified} qualified programs`}
@@ -144,7 +146,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           onClick={() => handleFilterClick('likely')}
           className={`
             flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
-            ${activeFilter === 'likely' ? `${getStatusColor('likely')}${ACTIVE_FILTER_RING} ring-blue-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            ${activeFilter === 'likely' ? `${getStatusColor('likely')}${ACTIVE_FILTER_RING} ring-blue-200` : DEFAULT_BUTTON_STYLE}
             print:p-2 print:border
           `}
           aria-label={`Show ${statusCounts.likely} likely programs`}
@@ -159,7 +161,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           onClick={() => handleFilterClick('maybe')}
           className={`
             flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
-            ${activeFilter === 'maybe' ? `${getStatusColor('maybe')}${ACTIVE_FILTER_RING} ring-yellow-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            ${activeFilter === 'maybe' ? `${getStatusColor('maybe')}${ACTIVE_FILTER_RING} ring-yellow-200` : DEFAULT_BUTTON_STYLE}
             print:p-2 print:border
           `}
           aria-label={`Show ${statusCounts.maybe} maybe programs`}
@@ -171,17 +173,23 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
 
         {/* Not Qualified */}
         <button
-          onClick={() => handleFilterClick('not-qualified')}
+          onClick={() => handleFilterClick(NOT_QUALIFIED_STATUS)}
           className={`
             flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all
-            ${activeFilter === 'not-qualified' ? `${getStatusColor('not-qualified')}${ACTIVE_FILTER_RING} ring-gray-200` : 'bg-white border-gray-200 hover:border-gray-300'}
+            ${activeFilter === NOT_QUALIFIED_STATUS ? `${getStatusColor(NOT_QUALIFIED_STATUS)}${ACTIVE_FILTER_RING} ring-gray-200` : DEFAULT_BUTTON_STYLE}
             print:p-2 print:border
           `}
-          aria-label={`Show ${statusCounts['not-qualified']} not qualified programs`}
+          aria-label={`Show ${
+            // eslint-disable-next-line security/detect-object-injection
+            statusCounts[NOT_QUALIFIED_STATUS]
+          } not qualified programs`}
         >
-          <span className="text-2xl mb-1">{getStatusIcon('not-qualified')}</span>
+          <span className="text-2xl mb-1">{getStatusIcon(NOT_QUALIFIED_STATUS)}</span>
           <span className="text-sm font-medium">Not Qualified</span>
-          <span className="text-xl font-bold text-gray-600">{statusCounts['not-qualified']}</span>
+          <span className="text-xl font-bold text-gray-600">{
+            // eslint-disable-next-line security/detect-object-injection
+            statusCounts[NOT_QUALIFIED_STATUS]
+          }</span>
         </button>
       </div>
 

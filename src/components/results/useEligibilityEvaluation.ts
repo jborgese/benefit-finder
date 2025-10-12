@@ -234,13 +234,13 @@ function determineStatus(passedRules: number, totalRules: number): {
 /**
  * Gathers program information from rule package
  */
-function gatherProgramInfo(rulePackage: RulePackage, programId: string): {
+function gatherProgramInfo(rulePackage: RulePackage, _programId: string): {
   programName: string;
   programDescription: string;
   jurisdiction: string;
 } {
   return {
-    programName: rulePackage.metadata.name ?? programId,
+    programName: rulePackage.metadata.name,
     programDescription: rulePackage.metadata.description ?? '',
     jurisdiction: rulePackage.metadata.jurisdiction ?? 'US-FEDERAL',
   };

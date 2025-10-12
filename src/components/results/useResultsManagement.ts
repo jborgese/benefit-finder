@@ -151,19 +151,19 @@ export function useResultsManagement(): UseResultsManagementReturn {
         const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
         const doc = existing.find((d) => d.id === id);
 
-        if (!doc) {
+        if (!doc?.results) {
           setIsLoading(false);
           resolve(null);
           return;
         }
 
         const results: EligibilityResults = {
-          qualified: doc.results!.qualified,
-          likely: doc.results!.likely,
-          maybe: doc.results!.maybe,
-          notQualified: doc.results!.notQualified,
-          totalPrograms: doc.results!.totalPrograms,
-          evaluatedAt: new Date(doc.results!.evaluatedAt),
+          qualified: doc.results.qualified,
+          likely: doc.results.likely,
+          maybe: doc.results.maybe,
+          notQualified: doc.results.notQualified,
+          totalPrograms: doc.results.totalPrograms,
+          evaluatedAt: new Date(doc.results.evaluatedAt),
         };
 
         setIsLoading(false);
@@ -195,15 +195,17 @@ export function useResultsManagement(): UseResultsManagementReturn {
         // Mock: Load from localStorage
         const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
 
-        const results: SavedResult[] = existing.map((doc) => ({
-          id: doc.id!,
-          qualifiedCount: doc.qualifiedCount!,
-          totalPrograms: doc.results!.totalPrograms,
-          evaluatedAt: new Date(doc.evaluatedAt!),
-          state: doc.state,
-          tags: doc.tags,
-          notes: doc.notes,
-        }));
+        const results: SavedResult[] = existing
+          .filter((doc) => doc.id && doc.qualifiedCount !== undefined && doc.results && doc.evaluatedAt)
+          .map((doc) => ({
+            id: doc.id as string,
+            qualifiedCount: doc.qualifiedCount as number,
+            totalPrograms: doc.results?.totalPrograms ?? 0,
+            evaluatedAt: new Date(doc.evaluatedAt as number),
+            state: doc.state,
+            tags: doc.tags,
+            notes: doc.notes,
+          }));
 
         // Sort by date descending
         results.sort((a, b) => b.evaluatedAt.getTime() - a.evaluatedAt.getTime());
@@ -272,21 +274,29 @@ export function useResultsManagement(): UseResultsManagementReturn {
         const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
         const index = existing.findIndex((d) => d.id === id);
 
-        if (index !== -1 && index < existing.length) {
-          const item = existing[index];
-          if (item) {
-            existing[index] = {
-              ...item,
-              ...updates,
-              updatedAt: Date.now(),
-            };
-            localStorage.setItem('eligibility_results', JSON.stringify(existing));
+        if (index !== -1) {
+          // TypeScript knows index is valid here, so we can safely access the item
+          // eslint-disable-next-line security/detect-object-injection
+          const itemToUpdate = existing[index];
+          const updatedItem = {
+            ...itemToUpdate,
+            ...updates,
+            updatedAt: Date.now(),
+          };
 
-            // Update local state
-            setSavedResults(prev => prev.map(r =>
-              r.id === id ? { ...r, ...updates } : r
-            ));
-          }
+          // Create a new array with the updated item
+          const updatedArray = [
+            ...existing.slice(0, index),
+            updatedItem,
+            ...existing.slice(index + 1),
+          ];
+
+          localStorage.setItem('eligibility_results', JSON.stringify(updatedArray));
+
+          // Update local state
+          setSavedResults(prev => prev.map(r =>
+            r.id === id ? { ...r, ...updates } : r
+          ));
         }
 
         setIsLoading(false);

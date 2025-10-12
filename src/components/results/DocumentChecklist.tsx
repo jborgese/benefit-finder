@@ -21,13 +21,13 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
   const requiredDocs = documents.filter(d => d.required);
   const optionalDocs = documents.filter(d => !d.required);
 
-  const handleCheckboxChange = (documentId: string, checked: boolean) => {
+  const handleCheckboxChange = (documentId: string, checked: boolean): void => {
     if (onToggle) {
       onToggle(documentId, checked);
     }
   };
 
-  const renderDocument = (doc: RequiredDocument) => (
+  const renderDocument = (doc: RequiredDocument): React.JSX.Element => (
     <div
       key={doc.id}
       className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors print:break-inside-avoid"
@@ -37,7 +37,7 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
         <div className="flex-shrink-0 mt-1 print:hidden">
           <Checkbox.Root
             id={doc.id}
-            checked={doc.obtained || false}
+            checked={doc.obtained ?? false}
             onCheckedChange={(checked) => handleCheckboxChange(doc.id, checked === true)}
             className="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-colors"
           >
@@ -118,7 +118,7 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
       {/* Summary */}
       <div className="text-sm text-gray-600">
         <p>
-          You'll need to provide the following documents when applying.
+          You&apos;ll need to provide the following documents when applying.
           Check off each item as you gather it.
         </p>
       </div>

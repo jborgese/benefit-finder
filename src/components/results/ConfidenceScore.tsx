@@ -21,7 +21,7 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
   showLabel = true,
   size = 'md',
 }) => {
-  const getColorClass = () => {
+  const getColorClass = (): string => {
     switch (level) {
       case 'high':
         return 'text-green-600 bg-green-100 border-green-300';
@@ -34,7 +34,7 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
     }
   };
 
-  const getSizeClass = () => {
+  const getSizeClass = (): string => {
     switch (size) {
       case 'sm':
         return 'text-xs px-2 py-1';
@@ -46,12 +46,13 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
     }
   };
 
-  const getTooltipText = () => {
-    const explanations = {
+  const getTooltipText = (): string => {
+    const explanations: Record<ConfidenceLevel, string> = {
       high: 'We have high confidence in this determination based on clear eligibility rules and complete information.',
       medium: 'We have moderate confidence in this determination. Some factors may need verification.',
       low: 'We have lower confidence in this determination. Additional information or verification may be needed.',
     };
+    // eslint-disable-next-line security/detect-object-injection
     return explanations[level];
   };
 
