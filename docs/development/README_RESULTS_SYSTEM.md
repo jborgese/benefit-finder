@@ -137,7 +137,7 @@ await exportToPDF(results);
 
 - **Full API**: `src/components/results/README.md`
 - **Management Guide**: `docs/RESULTS_MANAGEMENT.md`
-- **Phase Summary**: `PHASE_1.6_COMPLETE.md`
+- **Phase Summary**: `../milestones/PHASE_1.6_COMPLETE.md`
 
 ---
 

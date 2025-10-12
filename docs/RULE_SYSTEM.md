@@ -366,7 +366,7 @@ if (validation.complexity > 100) {
 
 - [JSON Logic Specification](http://jsonlogic.com/)
 - [json-logic-js Documentation](https://github.com/jwadhams/json-logic-js)
-- [BenefitFinder ROADMAP](../../ROADMAP.md)
+- [BenefitFinder ROADMAP](./ROADMAP.md)
 - [Rule Examples](./examples/README.md)
 
 ---

@@ -272,7 +272,7 @@ npm run test:e2e -- questionnaire-flow.e2e.ts --grep "Form Validation"
 
 ## 📖 Documentation References
 
-- **Implementation Details:** `docs/PHASE_1.4_COMPLETE.md`
+- **Implementation Details:** `docs/milestones/PHASE_1.4_COMPLETE.md`
 - **Questionnaire Guide:** `src/questionnaire/README.md`
 - **Component Guide:** `src/questionnaire/components/README.md`
 - **Accessibility Guide:** `docs/ACCESSIBILITY.md`
