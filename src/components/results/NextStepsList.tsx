@@ -18,13 +18,18 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
   onToggle,
 }) => {
   // Sort by priority: high > medium > low (undefined priorities go last)
-  const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2, undefined: 3 };
+  const getPriorityOrder = (priority: NextStep['priority']): number => {
+    if (!priority) return 3;
+    switch (priority) {
+      case 'high': return 0;
+      case 'medium': return 1;
+      case 'low': return 2;
+      default: return 3;
+    }
+  };
+
   const sortedSteps = [...steps].sort((a, b) => {
-    const aPriority = a.priority ?? 'undefined';
-    const aOrder = priorityOrder[aPriority] ?? 3;
-    const bPriority = b.priority ?? 'undefined';
-    const bOrder = priorityOrder[bPriority] ?? 3;
-    return aOrder - bOrder;
+    return getPriorityOrder(a.priority) - getPriorityOrder(b.priority);
   });
 
   const getPriorityBadge = (priority: NextStep['priority']): React.ReactElement | null => {
@@ -50,13 +55,8 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
       },
     };
 
-    // Type-safe access: priority is strictly typed as 'high' | 'medium' | 'low'
-    // eslint-disable-next-line security/detect-object-injection
+    // Type-safe access: priority is strictly typed as 'high' | 'medium' | 'low' at this point
     const badge = badges[priority];
-
-    if (!badge) {
-      return null;
-    }
 
     return (
       <span
