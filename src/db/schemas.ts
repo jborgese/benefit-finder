@@ -356,6 +356,9 @@ export const EligibilityResultZodSchema = z.object({
     met: z.boolean(),
     value: z.unknown().optional(),
     threshold: z.unknown().optional(),
+    comparison: z.string().optional(),
+    message: z.string().optional(),
+    importance: z.enum(['required', 'preferred', 'optional']).optional(),
   })).optional().describe('Individual criteria results'),
 
   // Missing Information (encrypted)
@@ -365,7 +368,9 @@ export const EligibilityResultZodSchema = z.object({
   nextSteps: z.array(z.object({
     step: z.string().max(500),
     url: z.string().max(500).optional(),
-    priority: z.enum(['high', 'medium', 'low']).optional(),
+    priority: z.enum(['high', 'medium', 'low']),
+    estimatedTime: z.string().max(100).optional(),
+    requiresDocument: z.boolean().optional(),
   })).optional().describe('Recommended next steps'),
 
   // Required Documents (encrypted)
@@ -373,13 +378,20 @@ export const EligibilityResultZodSchema = z.object({
     document: z.string().max(200),
     description: z.string().max(500).optional(),
     where: z.string().max(500).optional(),
+    alternatives: z.array(z.string()).optional(),
+    required: z.boolean(),
+    helpText: z.string().max(500).optional(),
   })).optional().describe('Documents needed for application'),
 
   // Benefit Estimate (encrypted)
   estimatedBenefit: z.object({
     amount: z.number().optional(),
-    frequency: z.enum(['one_time', 'monthly', 'quarterly', 'annual']).optional(),
+    minAmount: z.number().optional(),
+    maxAmount: z.number().optional(),
+    frequency: z.enum(['one_time', 'monthly', 'quarterly', 'annual']),
     description: z.string().max(500).optional(),
+    currency: z.literal('USD'),
+    calculation: z.string().max(500).optional(),
   }).optional().describe('Estimated benefit amount'),
 
   // Evaluation Metadata
@@ -415,6 +427,9 @@ export const eligibilityResultSchema: RxJsonSchema<EligibilityResult> = {
           met: { type: 'boolean' },
           value: {},
           threshold: {},
+          comparison: { type: 'string' },
+          message: { type: 'string' },
+          importance: { type: 'string', enum: ['required', 'preferred', 'optional'] },
         },
         required: ['criterion', 'met'],
       },
@@ -428,8 +443,10 @@ export const eligibilityResultSchema: RxJsonSchema<EligibilityResult> = {
           step: { type: 'string', maxLength: 500 },
           url: { type: 'string', maxLength: 500 },
           priority: { type: 'string', enum: ['high', 'medium', 'low'] },
+          estimatedTime: { type: 'string', maxLength: 100 },
+          requiresDocument: { type: 'boolean' },
         },
-        required: ['step'],
+        required: ['step', 'priority'],
       },
     },
     requiredDocuments: {
@@ -440,17 +457,25 @@ export const eligibilityResultSchema: RxJsonSchema<EligibilityResult> = {
           document: { type: 'string', maxLength: 200 },
           description: { type: 'string', maxLength: 500 },
           where: { type: 'string', maxLength: 500 },
+          alternatives: { type: 'array', items: { type: 'string' } },
+          required: { type: 'boolean' },
+          helpText: { type: 'string', maxLength: 500 },
         },
-        required: ['document'],
+        required: ['document', 'required'],
       },
     },
     estimatedBenefit: {
       type: 'object',
       properties: {
         amount: { type: 'number' },
+        minAmount: { type: 'number' },
+        maxAmount: { type: 'number' },
         frequency: { type: 'string', enum: ['one_time', 'monthly', 'quarterly', 'annual'] },
         description: { type: 'string', maxLength: 500 },
+        currency: { type: 'string', enum: ['USD'] },
+        calculation: { type: 'string', maxLength: 500 },
       },
+      required: ['frequency', 'currency'],
     },
     ruleVersion: { type: 'string', maxLength: 50 },
     evaluatedAt: { type: 'number', minimum: 0 },

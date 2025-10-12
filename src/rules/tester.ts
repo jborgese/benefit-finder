@@ -231,7 +231,7 @@ export async function runTestSuites(
  * ```
  */
 export function generateBoundaryTests(
-  rule: JsonLogicRule,
+  _rule: JsonLogicRule,
   variables: Record<string, { min: number; max: number; boundary?: number }>
 ): RuleTestCase[] {
   const testCases: RuleTestCase[] = [];

@@ -137,12 +137,12 @@ export interface QuestionFlow {
   sections?: QuestionSection[];
 
   // Configuration
-  allowSaveAndResume: boolean;
+  allowSaveAndResume?: boolean;
   estimatedTime?: number; // minutes
 
   // Metadata
   createdAt: number;
-  updatedAt: number;
+  updatedAt?: number;
 }
 
 /**
@@ -167,7 +167,7 @@ export interface QuestionSection {
  */
 export interface QuestionAnswer {
   questionId: string;
-  questionKey: string;
+  questionKey?: string;
   value: any;
   timestamp: number;
   source?: 'user' | 'prefilled' | 'calculated';

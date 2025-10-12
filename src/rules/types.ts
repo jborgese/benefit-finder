@@ -337,6 +337,8 @@ export interface RuleExplanation {
   operators: string[];
   /** Complexity level */
   complexity: 'simple' | 'moderate' | 'complex' | 'very-complex';
+  /** What criteria were checked */
+  criteriaChecked?: string[];
 }
 
 /**

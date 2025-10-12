@@ -9,7 +9,6 @@ import {
   batchEvaluateRules,
   registerBenefitOperators,
   unregisterBenefitOperators,
-  BENEFIT_OPERATORS,
 } from '../evaluator';
 import type { JsonLogicRule, JsonLogicData } from '../types';
 

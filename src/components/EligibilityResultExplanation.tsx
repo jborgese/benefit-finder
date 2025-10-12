@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
-import { explainResult, type ResultExplanation } from '../rules/explanation';
+import { explainResult } from '../rules/explanation';
 import type { EligibilityEvaluationResult } from '../rules/eligibility';
 import type { JsonLogicRule, JsonLogicData } from '../rules/types';
 

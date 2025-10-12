@@ -8,8 +8,6 @@
 import { nanoid } from 'nanoid';
 import { getDatabase } from '../db/database';
 import { evaluateRule, registerBenefitOperators } from './evaluator';
-import { validateRule } from './validator';
-import type { UserProfile } from '../db/schemas';
 import type { EligibilityResult } from '../db/schemas';
 import type { JsonLogicData, RuleEvaluationOptions } from './types';
 
@@ -214,7 +212,7 @@ export async function evaluateEligibility(
 
     // Evaluate rule
     const evalResult = await evaluateRule(
-      rule.ruleLogic,
+      rule.ruleLogic as any,
       data,
       opts.evaluationOptions
     );
@@ -231,10 +229,11 @@ export async function evaluateEligibility(
       confidence: calculateConfidence(evalResult, incomplete),
       reason: generateReason(evalResult, rule, incomplete),
       missingFields: incomplete ? missingFields : undefined,
-      requiredDocuments: rule.requiredDocuments?.map((doc) => ({
+      requiredDocuments: rule.requiredDocuments?.map((doc: string) => ({
         document: doc,
         description: undefined,
         where: undefined,
+        required: true,
       })),
       evaluatedAt: Date.now(),
       executionTime,
@@ -428,7 +427,7 @@ function generateReason(
 function generateCriteriaBreakdown(
   rule: any,
   data: JsonLogicData,
-  evalResult: any
+  _evalResult: any
 ): Array<{ criterion: string; met: boolean; value?: unknown; threshold?: unknown; description?: string }> {
   // This is a simplified implementation
   // In production, you'd want more sophisticated logic analysis
@@ -498,9 +497,19 @@ async function cacheResult(
     reason: result.reason,
     criteriaResults: result.criteriaResults,
     missingFields: result.missingFields,
-    nextSteps: result.nextSteps,
-    requiredDocuments: result.requiredDocuments,
-    estimatedBenefit: result.estimatedBenefit,
+    nextSteps: result.nextSteps?.map(step => ({
+      ...step,
+      priority: step.priority || 'medium',
+    })),
+    requiredDocuments: result.requiredDocuments?.map(doc => ({
+      ...doc,
+      required: doc.required ?? true,
+    })),
+    estimatedBenefit: result.estimatedBenefit ? {
+      ...result.estimatedBenefit,
+      frequency: result.estimatedBenefit.frequency || 'monthly',
+      currency: 'USD' as const,
+    } : undefined,
     ruleVersion: result.ruleVersion,
     evaluatedAt: result.evaluatedAt,
     expiresAt: Date.now() + expiresIn,

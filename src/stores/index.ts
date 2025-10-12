@@ -5,7 +5,7 @@
  * Each slice handles a specific domain of the application state.
  */
 
-export { useStore } from './useStore';
+export { useCommonState } from './useStore';
 export { useAppSettingsStore } from './appSettingsStore';
 export { useQuestionnaireStore } from './questionnaireStore';
 export { useUIStore } from './uiStore';

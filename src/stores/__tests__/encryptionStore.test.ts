@@ -9,8 +9,6 @@ import { renderHook, act } from '@testing-library/react';
 import { useEncryptionStore } from '../encryptionStore';
 import {
   clearEncryptionData,
-  generateSalt,
-  storeSalt,
 } from '../../utils/encryption';
 
 describe('EncryptionStore', () => {

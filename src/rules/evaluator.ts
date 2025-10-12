@@ -208,7 +208,7 @@ async function evaluateWithTimeout<T>(
     }, timeout);
 
     try {
-      const result = jsonLogic.apply(rule, data) as T;
+      const result = jsonLogic.apply(rule as any, data) as T;
       clearTimeout(timeoutId);
       resolve(result);
     } catch (error) {
@@ -231,7 +231,7 @@ export function evaluateRuleSync<T = boolean>(
 ): RuleEvaluationResult<T> {
   try {
     const startTime = performance.now();
-    const result = jsonLogic.apply(rule, data) as T;
+    const result = jsonLogic.apply(rule as any, data) as T;
     const endTime = performance.now();
 
     return {
@@ -453,7 +453,7 @@ export const BENEFIT_OPERATORS = {
  * Register benefit-specific custom operators
  */
 export function registerBenefitOperators(): void {
-  registerCustomOperators(BENEFIT_OPERATORS);
+  registerCustomOperators(BENEFIT_OPERATORS as Record<string, (...args: unknown[]) => unknown>);
 }
 
 /**

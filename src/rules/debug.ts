@@ -329,7 +329,7 @@ export function inspectRule(
         operatorUsage.set(key, (operatorUsage.get(key) || 0) + 1);
       }
 
-      const value = node[key];
+      const value = (node as any)[key];
       if (value !== undefined) {
         countUsage(value as JsonLogicRule);
       }

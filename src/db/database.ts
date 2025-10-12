@@ -38,14 +38,42 @@ addRxPlugin(RxDBUpdatePlugin);
 addRxPlugin(RxDBMigrationPlugin);
 
 /**
+ * Extended collection types with custom statics
+ */
+export interface UserProfilesCollection extends RxCollection<UserProfile> {
+  getLatest: () => Promise<UserProfile | null>;
+}
+
+export interface BenefitProgramsCollection extends RxCollection<BenefitProgram> {
+  getActivePrograms: () => Promise<BenefitProgram[]>;
+  getByJurisdiction: (jurisdiction: string) => Promise<BenefitProgram[]>;
+  getByCategory: (category: string) => Promise<BenefitProgram[]>;
+}
+
+export interface EligibilityRulesCollection extends RxCollection<EligibilityRule> {
+  getByProgram: (programId: string) => Promise<EligibilityRule[]>;
+}
+
+export interface EligibilityResultsCollection extends RxCollection<EligibilityResult> {
+  getByUserProfile: (userProfileId: string) => Promise<EligibilityResult[]>;
+  getValidResults: (userProfileId: string) => Promise<EligibilityResult[]>;
+  clearExpired: () => Promise<number>;
+}
+
+export interface AppSettingsCollection extends RxCollection<AppSetting> {
+  get: (key: string) => Promise<unknown>;
+  set: (key: string, value: unknown, encrypted?: boolean) => Promise<void>;
+}
+
+/**
  * Database Collections Type Definition
  */
 export interface BenefitFinderCollections {
-  user_profiles: RxCollection<UserProfile>;
-  benefit_programs: RxCollection<BenefitProgram>;
-  eligibility_rules: RxCollection<EligibilityRule>;
-  eligibility_results: RxCollection<EligibilityResult>;
-  app_settings: RxCollection<AppSetting>;
+  user_profiles: UserProfilesCollection;
+  benefit_programs: BenefitProgramsCollection;
+  eligibility_rules: EligibilityRulesCollection;
+  eligibility_results: EligibilityResultsCollection;
+  app_settings: AppSettingsCollection;
 }
 
 /**
@@ -204,7 +232,7 @@ export async function destroyDatabase(
   }
 
   try {
-    await dbInstance.destroy();
+    await dbInstance.remove();
     dbInstance = null;
 
     // Optionally clear encryption key
@@ -239,20 +267,17 @@ export function isDatabaseInitialized(): boolean {
 export async function exportDatabase(): Promise<Record<string, unknown>> {
   const db = getDatabase();
 
-  const exportData: Record<string, unknown> = {
+  const exportData = {
     version: DB_VERSION,
     timestamp: Date.now(),
-    collections: {},
+    collections: {} as Record<string, unknown>,
   };
 
   // Export each collection
   for (const collectionName of Object.keys(collections)) {
     const collection = db[collectionName as keyof BenefitFinderCollections];
     const docs = await collection.find().exec();
-    exportData.collections = {
-      ...exportData.collections,
-      [collectionName]: docs.map((doc) => doc.toJSON()),
-    };
+    exportData.collections[collectionName] = docs.map((doc) => doc.toJSON());
   }
 
   return exportData;
@@ -287,7 +312,7 @@ export async function importDatabase(
     }
 
     // Bulk insert documents
-    await collection.bulkInsert(docs);
+    await collection.bulkInsert(docs as any[]);
   }
 
   console.log('Database import completed successfully');

@@ -59,7 +59,7 @@ import { test, expect } from './fixtures/test-fixtures';
 test.describe('Feature Name', () => {
   test('should do something', async ({ page }) => {
     await page.goto('/');
-    
+
     await expect(page.locator('h1')).toHaveText('Welcome');
   });
 });
@@ -73,14 +73,14 @@ import { test, expect } from './fixtures/test-fixtures';
 test('with clean storage', async ({ cleanPage }) => {
   // Page starts with cleared localStorage/sessionStorage
   await cleanPage.goto('/');
-  
+
   // Your test code
 });
 
 test('with mock data', async ({ pageWithData }) => {
   // Page starts with pre-populated data
   await pageWithData.goto('/');
-  
+
   // Your test code
 });
 ```
@@ -98,12 +98,12 @@ import {
 test('form submission', async ({ page }) => {
   await page.goto('/form');
   await waitForPageReady(page);
-  
+
   await fillFormField(page, 'Name', 'John Doe');
   await fillFormField(page, 'Email', 'john@example.com');
-  
+
   await page.click('button[type="submit"]');
-  
+
   await expect(page.locator('.success')).toBeVisible();
 });
 ```
@@ -150,10 +150,10 @@ export const test = base.extend<TestFixtures>({
   myCustomFixture: async ({ page }, use) => {
     // Setup
     await page.goto('/');
-    
+
     // Provide fixture
     await use(page);
-    
+
     // Teardown (if needed)
   },
 });
@@ -183,13 +183,13 @@ import {
 
 test('accessibility compliance', async ({ page }) => {
   await page.goto('/');
-  
+
   // Check for any violations
   await expectNoA11yViolations(page);
-  
+
   // Check keyboard navigation
   await checkKeyboardNavigation(page);
-  
+
   // Check color contrast
   await checkColorContrast(page);
 });
@@ -283,14 +283,14 @@ test('test B', async ({ page }) => {
 test('works on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto('/');
-  
+
   // Test mobile-specific behavior
 });
 
 // Or use device presets
 test('works on iPhone', async ({ page }) => {
-  await page.goto('/', { 
-    viewport: devices['iPhone 14'].viewport 
+  await page.goto('/', {
+    viewport: devices['iPhone 14'].viewport
   });
 });
 ```
@@ -316,10 +316,10 @@ await Promise.all([
 ```typescript
 test('shows error on invalid input', async ({ page }) => {
   await page.goto('/form');
-  
+
   // Submit without filling required fields
   await page.click('button[type="submit"]');
-  
+
   // Check error message
   await expect(page.getByText('This field is required')).toBeVisible();
 });
@@ -365,7 +365,7 @@ npx playwright show-trace test-results/trace.zip
 ```typescript
 test('debug test', async ({ page }) => {
   page.on('console', msg => console.log('PAGE LOG:', msg.text()));
-  
+
   await page.goto('/');
 });
 ```
@@ -375,9 +375,9 @@ test('debug test', async ({ page }) => {
 ```typescript
 test('pause test', async ({ page }) => {
   await page.goto('/');
-  
+
   await page.pause(); // Opens Playwright Inspector
-  
+
   // Continue with test
 });
 ```
@@ -395,18 +395,38 @@ test('pause test', async ({ page }) => {
 
 ```
 tests/e2e/
-├── app.e2e.ts              # Core app tests
-├── questionnaire.e2e.ts    # Questionnaire tests
-├── results.e2e.ts          # Results display tests
-├── accessibility.a11y.ts   # A11y tests
+├── app.e2e.ts                    # Core app tests
+├── questionnaire-flow.e2e.ts     # Questionnaire flow tests ✅
+├── accessibility.a11y.ts         # A11y compliance tests ✅
 ├── fixtures/
-│   └── test-fixtures.ts    # Custom fixtures
+│   └── test-fixtures.ts          # Custom fixtures
 ├── utils/
-│   ├── helpers.ts          # Helper functions
-│   └── accessibility.ts    # A11y utilities
+│   ├── helpers.ts                # Helper functions
+│   └── accessibility.ts          # A11y utilities
 └── setup/
-    └── global-setup.ts     # Global setup
+    └── global-setup.ts           # Global setup
 ```
+
+### Test Files Overview
+
+#### `app.e2e.ts`
+Core application tests including navigation, offline functionality, and error handling.
+
+#### `questionnaire-flow.e2e.ts` ✨ NEW
+Comprehensive questionnaire flow tests covering:
+- **Navigation**: Forward/backward navigation, progress tracking
+- **Form Inputs**: All input types (text, number, select, radio, checkbox, date)
+- **Validation**: Required fields, email format, number constraints
+- **Conditional Logic**: Show/hide questions, branching logic
+- **Save & Resume**: Data persistence, auto-save functionality
+- **Keyboard Navigation**: Tab, Enter, Space, Arrow keys
+- **Accessibility**: ARIA labels, live regions, focus management
+- **Complete Workflows**: End-to-end questionnaire completion
+
+**60+ test cases** covering all questionnaire functionality.
+
+#### `accessibility.a11y.ts`
+WCAG 2.1 AA compliance tests using axe-core, including keyboard navigation, color contrast, semantic HTML, and screen reader support.
 
 ## CI/CD Integration
 
@@ -425,16 +445,16 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Install Playwright
         run: npx playwright install --with-deps
-      
+
       - name: Run E2E tests
         run: npm run test:e2e
-      
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3

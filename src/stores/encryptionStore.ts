@@ -9,11 +9,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
   deriveKeyFromPassphrase,
-  generateSalt,
   isEncryptionEnabled,
   setEncryptionEnabled,
   getStoredSalt,
-  storeSalt,
   clearEncryptionData,
   evaluatePassphraseStrength,
   storePassphraseHint,

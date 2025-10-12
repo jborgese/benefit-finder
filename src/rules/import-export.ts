@@ -9,8 +9,6 @@ import { getDatabase } from '../db/database';
 import { validateRule } from './validator';
 import { runTestSuite, createTestSuite } from './tester';
 import {
-  RuleDefinitionSchema,
-  RulePackageSchema,
   validateRuleDefinition,
   validateRulePackage,
   calculateChecksum,

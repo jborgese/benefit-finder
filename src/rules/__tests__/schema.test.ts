@@ -4,8 +4,6 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  RuleDefinitionSchema,
-  RulePackageSchema,
   validateRuleDefinition,
   validateRulePackage,
   parseVersion,

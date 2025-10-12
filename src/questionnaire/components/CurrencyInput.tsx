@@ -1,0 +1,201 @@
+/**
+ * Currency Input Component
+ *
+ * Accessible currency input with formatting and validation
+ * for income, benefit amounts, expenses, etc.
+ */
+
+import React, { useState, useId } from 'react';
+import type { CurrencyInputProps } from './types';
+
+export const CurrencyInput: React.FC<CurrencyInputProps> = ({
+  question,
+  value,
+  onChange,
+  error,
+  disabled = false,
+  className = '',
+  autoFocus = false,
+  currency = 'USD',
+  min: _min = 0,
+  max: _max,
+  allowNegative = false,
+}) => {
+  const id = useId();
+  const errorId = `${id}-error`;
+  const descId = `${id}-desc`;
+  const [isFocused, setIsFocused] = useState(false);
+  const [isTouched, setIsTouched] = useState(false);
+  const [displayValue, setDisplayValue] = useState(
+    value !== undefined ? formatCurrency(value, false) : ''
+  );
+
+  const hasError = Boolean(error);
+  const showError = hasError && isTouched;
+  const errors = Array.isArray(error) ? error : error ? [error] : [];
+
+  const currencySymbol = getCurrencySymbol(currency);
+
+  function formatCurrency(amount: number, withSymbol: boolean = true): string {
+    const formatted = Math.abs(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return withSymbol ? `${currencySymbol}${formatted}` : formatted;
+  }
+
+  function getCurrencySymbol(code: string): string {
+    const symbols: Record<string, string> = {
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+      CAD: 'C$',
+      AUD: 'A$',
+      JPY: '¥',
+      CNY: '¥',
+      INR: '₹',
+    };
+    return symbols[code] || '$';
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let inputVal = e.target.value;
+
+    // Remove all non-numeric characters except decimal point and minus
+    inputVal = inputVal.replace(/[^0-9.-]/g, '');
+
+    // Handle negative sign
+    if (!allowNegative) {
+      inputVal = inputVal.replace(/-/g, '');
+    } else {
+      // Keep only first minus sign at the beginning
+      const hasNegative = inputVal.startsWith('-');
+      inputVal = inputVal.replace(/-/g, '');
+      if (hasNegative) {
+        inputVal = '-' + inputVal;
+      }
+    }
+
+    // Allow only one decimal point
+    const parts = inputVal.split('.');
+    if (parts.length > 2) {
+      inputVal = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    // Limit to 2 decimal places
+    if (parts.length === 2 && parts[1].length > 2) {
+      inputVal = parts[0] + '.' + parts[1].slice(0, 2);
+    }
+
+    setDisplayValue(inputVal);
+
+    const numValue = parseFloat(inputVal);
+    if (!isNaN(numValue)) {
+      onChange(numValue);
+    } else if (inputVal === '' || inputVal === '-') {
+      onChange(undefined as any);
+    }
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    setIsTouched(true);
+
+    // Format with commas on blur
+    if (value !== undefined) {
+      setDisplayValue(formatCurrency(value, false));
+    }
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    // Remove formatting on focus for easier editing
+    if (value !== undefined) {
+      setDisplayValue(value.toString());
+    }
+    // Select all text on focus
+    e.target.select();
+  };
+
+  return (
+    <div className={`question-currency-input ${className}`}>
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-gray-700 mb-1"
+      >
+        {question.text}
+        {question.required && (
+          <span className="text-red-500 ml-1" aria-label="required">
+            *
+          </span>
+        )}
+      </label>
+
+      {question.description && (
+        <p
+          id={descId}
+          className="text-sm text-gray-600 mb-2"
+        >
+          {question.description}
+        </p>
+      )}
+
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+          {currencySymbol}
+        </div>
+
+        <input
+          id={id}
+          type="text"
+          inputMode="decimal"
+          value={displayValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          disabled={disabled}
+          placeholder={question.placeholder || '0.00'}
+          autoFocus={autoFocus}
+          required={question.required}
+          aria-invalid={showError}
+          aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
+          aria-label={question.ariaLabel || question.text}
+          className={`
+            w-full pl-8 pr-3 py-2 border rounded-md shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+            disabled:bg-gray-100 disabled:cursor-not-allowed
+            ${showError ? 'border-red-500' : 'border-gray-300'}
+            ${isFocused ? 'ring-2 ring-blue-500' : ''}
+          `}
+        />
+      </div>
+
+      {question.helpText && !showError && (
+        <p className="mt-1 text-xs text-gray-500">
+          {question.helpText}
+        </p>
+      )}
+
+      {!showError && value !== undefined && value >= 1000 && (
+        <p className="mt-1 text-xs text-gray-600">
+          {formatCurrency(value)} {currency}
+        </p>
+      )}
+
+      {showError && (
+        <div
+          id={errorId}
+          role="alert"
+          aria-live="polite"
+          className="mt-1"
+        >
+          {errors.map((err, idx) => (
+            <p key={idx} className="text-sm text-red-600">
+              {err}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+CurrencyInput.displayName = 'CurrencyInput';
+

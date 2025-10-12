@@ -83,7 +83,7 @@ const OPERATOR_DESCRIPTIONS: Record<string, (operands: unknown[]) => string> = {
   '%': ([left, right]) => `${formatValue(left)} modulo ${formatValue(right)}`,
   'between': ([value, min, max]) => `${formatValue(value)} is between ${formatValue(min)} and ${formatValue(max)}`,
   'age_from_dob': ([dob]) => `age calculated from date of birth ${formatValue(dob)}`,
-  'matches_any': ([value, array]) => `${formatValue(value)} matches one of the allowed values`,
+  'matches_any': ([value, _array]) => `${formatValue(value)} matches one of the allowed values`,
 };
 
 // ============================================================================
@@ -110,7 +110,7 @@ const OPERATOR_DESCRIPTIONS: Record<string, (operands: unknown[]) => string> = {
 export function explainResult(
   result: EligibilityEvaluationResult,
   rule: JsonLogicRule,
-  data: JsonLogicData,
+  _data: JsonLogicData,
   options: ExplanationOptions = {}
 ): ResultExplanation {
   const opts = {

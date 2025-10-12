@@ -115,6 +115,10 @@ src/
 - Include usage examples for complex utilities or hooks
 - Update README.md for significant feature additions
 - Document eligibility rule schemas and examples
+- **All standalone documentation markdown files must be placed in `./docs/` or relevant subdirectories within `./docs/`**
+  - Examples: `./docs/ENCRYPTION.md`, `./docs/SECURITY.md`, `./docs/RULE_SCHEMA.md`
+  - Organize by topic: use subdirectories for feature-specific documentation if needed
+  - Never create documentation files in the project root (except README.md)
 
 ## Git Workflow
 - Use conventional commit format: `type(scope): description`
@@ -123,10 +127,20 @@ src/
 - Ensure tests pass before pushing
 
 ## Command Execution
-- **Always verify you are in the project root** (`C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder`) before executing commands
-- Exception: Only navigate to subdirectories when the command explicitly requires it (e.g., testing a specific module)
-- If not in the project root, use `cd` to navigate back before running build, test, lint, or dependency management commands
+- **Before executing any command, explicitly verify the current working directory**
+- **If not already in the project root (`C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder`), navigate there first using `cd`**
+- At the start of each conversation, check and navigate to the project root
+- Exception: Only remain in/navigate to subdirectories when the command explicitly requires it (e.g., testing a specific module)
 - The project root contains key files: `package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`
+- **Use PowerShell syntax for all shell commands** (this is a Windows environment with PowerShell as the default shell)
+  - **CRITICAL: Use semicolon (`;`) to chain commands, NEVER use `&&` (bash syntax that doesn't work in PowerShell)**
+    - ❌ WRONG: `cd "C:\path\to\project" && npm run build`
+    - ✅ CORRECT: `cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm run build`
+    - ✅ ALTERNATIVE: Just run `npm run build` (after verifying/navigating to correct directory first)
+  - Use PowerShell cmdlets and operators (e.g., `Get-ChildItem`, `Select-Object`, `-eq`, `-and`)
+  - For cross-platform npm scripts, use npm/npx commands which work consistently across shells
+  - When suggesting file operations, use PowerShell equivalents: `Remove-Item` instead of `rm`, `Copy-Item` instead of `cp`, etc.
+  - PowerShell uses `-and`, `-or`, `-not` for logical operators (not `&&`, `||`, `!`)
 
 ## When Suggesting Code
 1. Always consider privacy and security implications
