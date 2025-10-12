@@ -1,0 +1,22 @@
+echo "🔍 Running pre-push checks..."
+
+echo "📝 Linting..."
+npm run lint || exit 1
+
+echo "✅ Type checking..."
+npx tsc --noEmit || exit 1
+
+echo "🔧 Validating rules..."
+npm run validate-rules || exit 1
+
+echo "🧪 Running unit tests..."
+npm run test:run || exit 1
+
+echo "🎭 Running E2E tests..."
+npm run test:e2e || exit 1
+
+echo "♿ Running accessibility tests..."
+npm run test:a11y || exit 1
+
+echo "✨ All checks passed! Pushing..."
+
