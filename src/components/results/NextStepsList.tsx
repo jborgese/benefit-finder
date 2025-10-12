@@ -37,33 +37,38 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
       return null;
     }
 
-    const badges: Record<string, { color: string; label: string; icon: string }> = {
-      high: {
-        color: 'bg-red-100 text-red-800 border-red-300',
-        label: 'High Priority',
-        icon: '🔴',
-      },
-      medium: {
-        color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-        label: 'Medium Priority',
-        icon: '🟡',
-      },
-      low: {
-        color: 'bg-gray-100 text-gray-800 border-gray-300',
-        label: 'Low Priority',
-        icon: '⚪',
-      },
-    };
+    // Type-safe switch statement to avoid object injection warnings
+    let color: string;
+    let label: string;
+    let icon: string;
 
-    // Type-safe access: priority is strictly typed as 'high' | 'medium' | 'low' at this point
-    const badge = badges[priority];
+    switch (priority) {
+      case 'high':
+        color = 'bg-red-100 text-red-800 border-red-300';
+        label = 'High Priority';
+        icon = '🔴';
+        break;
+      case 'medium':
+        color = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        label = 'Medium Priority';
+        icon = '🟡';
+        break;
+      case 'low':
+        color = 'bg-gray-100 text-gray-800 border-gray-300';
+        label = 'Low Priority';
+        icon = '⚪';
+        break;
+      default:
+        // TypeScript exhaustiveness check - should never reach here
+        return null;
+    }
 
     return (
       <span
-        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${badge.color}`}
+        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${color}`}
       >
-        <span className="mr-1">{badge.icon}</span>
-        {badge.label}
+        <span className="mr-1">{icon}</span>
+        {label}
       </span>
     );
   };
