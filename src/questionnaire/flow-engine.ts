@@ -431,7 +431,7 @@ export class FlowEngine {
 
     while (queue.length > 0) {
       const nodeId = queue.shift();
-      
+
       // Skip if queue was empty (shouldn't happen due to while condition)
       if (!nodeId) {
         continue;
@@ -558,6 +558,7 @@ export function addNodeToFlow(
   node: FlowNode
 ): QuestionFlow {
   flow.nodes.set(node.id, node);
+  // eslint-disable-next-line no-param-reassign
   flow.updatedAt = Date.now();
   return flow;
 }
@@ -580,6 +581,7 @@ export function linkNodes(
 
   fromNode.nextId = toId;
   toNode.previousId = fromId;
+  // eslint-disable-next-line no-param-reassign
   flow.updatedAt = Date.now();
 
   return flow;
@@ -604,6 +606,7 @@ export function addBranch(
   node.branches ??= [];
 
   node.branches.push(branch);
+  // eslint-disable-next-line no-param-reassign
   flow.updatedAt = Date.now();
 
   return flow;

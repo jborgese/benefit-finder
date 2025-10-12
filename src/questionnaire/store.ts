@@ -683,7 +683,7 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
           // Convert persisted array back to Map
           state.answers = new Map(state.answers as Array<[string, QuestionAnswer]>);
         }
-        if (state && !state.questionStates) {
+        if (state) {
           state.questionStates = new Map();
         }
       },

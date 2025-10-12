@@ -184,7 +184,7 @@ describe('QuestionFlowStore', () => {
       // Answer another question
       store.answerQuestion('q1', 'f1', 'changed answer');
 
-      let state = useQuestionFlowStore.getState();
+      const state = useQuestionFlowStore.getState();
       expect(state.answers.get('q1')?.value).toBe('changed answer');
 
       // Note: Restoring from checkpoint would require more complex setup

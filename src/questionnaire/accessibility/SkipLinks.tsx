@@ -12,7 +12,7 @@ export interface SkipLinkProps {
 }
 
 export const SkipLink: React.FC<SkipLinkProps> = ({ targetId, label }) => {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>): void => {
     e.preventDefault();
 
     const target = document.getElementById(targetId);
@@ -46,7 +46,7 @@ export const SkipLinks: React.FC<{
     { targetId: 'navigation', label: 'Skip to navigation' },
   ];
 
-  const skipLinks = links || defaultLinks;
+  const skipLinks = links ?? defaultLinks;
 
   return (
     <div className={`skip-links ${className}`}>

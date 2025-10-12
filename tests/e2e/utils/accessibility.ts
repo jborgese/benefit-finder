@@ -31,7 +31,7 @@ export interface A11yScanOptions {
  * @param options Scan options
  * @returns Accessibility violations
  */
-export async function runA11yScan(
+export function runA11yScan(
   page: Page,
   options: A11yScanOptions = {}
 ): Promise<Awaited<ReturnType<AxeBuilder['analyze']>>> {
@@ -171,9 +171,8 @@ export async function checkHeadingHierarchy(page: Page): Promise<void> {
 
   // Check that heading levels don't skip (e.g., h1 -> h3)
   for (let i = 1; i < levels.length; i++) {
-    // eslint-disable-next-line security/detect-object-injection
     const prevLevel = levels[i - 1];
-    // eslint-disable-next-line security/detect-object-injection
+    // eslint-disable-next-line security/detect-object-injection -- i is a controlled loop counter within array bounds
     const currLevel = levels[i];
     const diff = currLevel - prevLevel;
     expect(

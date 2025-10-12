@@ -47,10 +47,14 @@ export {
   StatusAnnouncer,
   VisuallyHidden,
   SRDescription,
+} from './announcements';
+
+// Announcement Hooks
+export {
   useNavigationAnnouncements,
   useValidationAnnouncements,
   useProgressAnnouncements,
-} from './announcements';
+} from './announcementHooks';
 
 // Skip Links & Landmarks
 export {

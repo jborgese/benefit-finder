@@ -192,7 +192,9 @@ export async function initializeDatabase(
     // Store instance
     dbInstance = db;
 
-    console.log('RxDB initialized successfully with encryption');
+    if (import.meta.env.DEV) {
+      console.warn('RxDB initialized successfully with encryption');
+    }
 
     return db;
   } catch (error) {
@@ -240,7 +242,9 @@ export async function destroyDatabase(
       localStorage.removeItem('bf_encryption_key');
     }
 
-    console.log('Database destroyed successfully');
+    if (import.meta.env.DEV) {
+      console.warn('Database destroyed successfully');
+    }
   } catch (error) {
     console.error('Failed to destroy database:', error);
     throw new Error(`Database destruction failed: ${error}`);
@@ -274,10 +278,12 @@ export async function exportDatabase(): Promise<Record<string, unknown>> {
   };
 
   // Export each collection
-  for (const collectionName of Object.keys(collections)) {
-    const collection = db[collectionName as keyof BenefitFinderCollections];
+  const collectionEntries = Object.keys(collections) as Array<keyof BenefitFinderCollections>;
+  for (const collectionName of collectionEntries) {
+    const collection = db[collectionName];
     const docs = await collection.find().exec();
-    exportData.collections[collectionName] = docs.map((doc) => doc.toJSON());
+    const collectionKey = collectionName as string;
+    exportData.collections[collectionKey] = docs.map((doc) => doc.toJSON());
   }
 
   return exportData;
@@ -304,17 +310,21 @@ export async function importDatabase(
 
   // Import each collection
   for (const [collectionName, docs] of Object.entries(collections)) {
-    const collection = db[collectionName as keyof BenefitFinderCollections];
-
-    if (!collection) {
+    // Check if collection exists in database
+    if (!(collectionName in db)) {
       console.warn(`Collection ${collectionName} not found, skipping...`);
       continue;
     }
 
+    const collection = db[collectionName as keyof BenefitFinderCollections];
+
     // Bulk insert documents
-    await collection.bulkInsert(docs as any[]);
+    // Note: RxDB's bulkInsert accepts documents as plain objects
+    await collection.bulkInsert(docs as Record<string, unknown>[]);
   }
 
-  console.log('Database import completed successfully');
+  if (import.meta.env.DEV) {
+    console.warn('Database import completed successfully');
+  }
 }
 

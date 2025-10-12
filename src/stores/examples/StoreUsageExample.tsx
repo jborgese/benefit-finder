@@ -300,9 +300,9 @@ export function QuestionComponent(): React.JSX.Element {
   }));
 
   // Safe: currentQuestionId is validated before use
-  // eslint-disable-next-line security/detect-object-injection
   const currentAnswer = currentQuestionId
-    ? (answers[currentQuestionId]?.value ?? null)
+    ? // eslint-disable-next-line security/detect-object-injection -- currentQuestionId comes from controlled questionnaire flow
+      (answers[currentQuestionId].value ?? null)
     : null;
 
   const handleSubmit = (): void => {

@@ -4,12 +4,17 @@
  * Helper functions and hooks for ARIA attributes
  */
 
-import { useId } from 'react';
+import { useId, type MouseEvent } from 'react';
 
 /**
  * Generate unique IDs for ARIA relationships
  */
-export function useAriaIds(prefix = 'aria') {
+export function useAriaIds(prefix = 'aria'): {
+  labelId: string;
+  descriptionId: string;
+  errorId: string;
+  helpId: string;
+} {
   const baseId = useId();
 
   return {
@@ -23,7 +28,7 @@ export function useAriaIds(prefix = 'aria') {
 /**
  * Build aria-describedby string from multiple IDs
  */
-export function buildAriaDescribedBy(...ids: (string | undefined | false)[]) {
+export function buildAriaDescribedBy(...ids: (string | undefined | false)[]): string | undefined {
   return ids.filter(Boolean).join(' ') || undefined;
 }
 
@@ -31,7 +36,7 @@ export function buildAriaDescribedBy(...ids: (string | undefined | false)[]) {
  * ARIA live region announcer
  */
 export class AriaAnnouncer {
-  private static instance: AriaAnnouncer;
+  private static instance: AriaAnnouncer | undefined;
   private politeRegion: HTMLDivElement | null = null;
   private assertiveRegion: HTMLDivElement | null = null;
 
@@ -46,7 +51,7 @@ export class AriaAnnouncer {
     return AriaAnnouncer.instance;
   }
 
-  private createRegions() {
+  private createRegions(): void {
     // Create polite region
     this.politeRegion = document.createElement('div');
     this.politeRegion.setAttribute('role', 'status');
@@ -64,7 +69,7 @@ export class AriaAnnouncer {
     document.body.appendChild(this.assertiveRegion);
   }
 
-  announce(message: string, priority: 'polite' | 'assertive' = 'polite', clearAfter = 1000) {
+  announce(message: string, priority: 'polite' | 'assertive' = 'polite', clearAfter = 1000): void {
     const region = priority === 'assertive' ? this.assertiveRegion : this.politeRegion;
 
     if (!region) return;
@@ -85,7 +90,7 @@ export class AriaAnnouncer {
     }, 100);
   }
 
-  clear() {
+  clear(): void {
     if (this.politeRegion) this.politeRegion.textContent = '';
     if (this.assertiveRegion) this.assertiveRegion.textContent = '';
   }
@@ -94,7 +99,10 @@ export class AriaAnnouncer {
 /**
  * Hook for screen reader announcements
  */
-export function useAnnouncer() {
+export function useAnnouncer(): {
+  announce: (message: string, priority?: 'polite' | 'assertive') => void;
+  clear: () => void;
+} {
   const announcer = AriaAnnouncer.getInstance();
 
   return {
@@ -142,7 +150,12 @@ export function getFieldAriaProps(options: {
   helpId?: string;
   hasError?: boolean;
   isRequired?: boolean;
-}) {
+}): {
+  'aria-labelledby': string | undefined;
+  'aria-describedby': string | undefined;
+  'aria-invalid': true | undefined;
+  'aria-required': true | undefined;
+} {
   const { labelId, descriptionId, errorId, helpId, hasError, isRequired } = options;
 
   const describedByIds = [];
@@ -166,7 +179,9 @@ export function getNavigationAriaProps(options: {
   isLastQuestion?: boolean;
   currentQuestion?: number;
   totalQuestions?: number;
-}) {
+}): {
+  'aria-label': string;
+} {
   const { direction, isLastQuestion, currentQuestion, totalQuestions } = options;
 
   if (direction === 'next') {
@@ -185,7 +200,13 @@ export function getNavigationAriaProps(options: {
 /**
  * ARIA props for progress indicator
  */
-export function getProgressAriaProps(current: number, total: number, percent: number) {
+export function getProgressAriaProps(current: number, total: number, percent: number): {
+  role: 'progressbar';
+  'aria-valuemin': number;
+  'aria-valuemax': number;
+  'aria-valuenow': number;
+  'aria-valuetext': string;
+} {
   return {
     role: 'progressbar',
     'aria-valuemin': 0,
@@ -210,11 +231,16 @@ export const landmarkRoles = {
 /**
  * Create skip link
  */
-export function createSkipLink(targetId: string, label: string) {
+export function createSkipLink(targetId: string, label: string): {
+  href: string;
+  className: string;
+  onClick: (e: MouseEvent) => void;
+  children: string;
+} {
   return {
     href: `#${targetId}`,
     className: 'skip-link',
-    onClick: (e: React.MouseEvent) => {
+    onClick: (e: MouseEvent) => {
       e.preventDefault();
       const target = document.getElementById(targetId);
       if (target) {

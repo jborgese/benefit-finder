@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useCallback } from 'react';
+import type React from 'react';
 
 /**
  * Key codes for common keyboard actions
@@ -40,7 +41,7 @@ export interface KeyboardShortcut {
 /**
  * Hook for keyboard shortcuts
  */
-export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = true) {
+export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = true): void {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!enabled) return;
@@ -82,7 +83,7 @@ export function useQuestionnaireKeyboard(handlers: {
   onSave?: () => void;
   onHelp?: () => void;
   onSkip?: () => void;
-}) {
+}): KeyboardShortcut[] {
   const shortcuts: KeyboardShortcut[] = [
     {
       key: Keys.ARROW_RIGHT,
@@ -134,7 +135,7 @@ export function useArrowNavigation(
     horizontal?: boolean;
     enabled?: boolean;
   }
-) {
+): void {
   const { currentIndex, onIndexChange, loop = true, horizontal = false, enabled = true } = options;
 
   const handleKeyDown = useCallback(
@@ -188,13 +189,13 @@ export function useArrowNavigation(
 export function useFocusTrap(
   containerRef: React.RefObject<HTMLElement>,
   enabled = true
-) {
+): void {
   useEffect(() => {
     if (!enabled || !containerRef.current) return;
 
     const container = containerRef.current;
 
-    const getFocusableElements = () => {
+    const getFocusableElements = (): HTMLElement[] => {
       const selectors = [
         'a[href]',
         'button:not([disabled])',
@@ -209,7 +210,7 @@ export function useFocusTrap(
       );
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key !== Keys.TAB) return;
 
       const focusableElements = getFocusableElements();
@@ -224,12 +225,10 @@ export function useFocusTrap(
           event.preventDefault();
           lastElement.focus();
         }
-      } else {
+      } else if (document.activeElement === lastElement) {
         // Tab
-        if (document.activeElement === lastElement) {
-          event.preventDefault();
-          firstElement.focus();
-        }
+        event.preventDefault();
+        firstElement.focus();
       }
     };
 
@@ -244,8 +243,8 @@ export function useFocusTrap(
 /**
  * Roving tabindex for keyboard navigation in lists
  */
-export function useRovingTabIndex(_items: number, activeIndex: number) {
-  const getTabIndex = (index: number) => {
+export function useRovingTabIndex(_items: number, activeIndex: number): { getTabIndex: (index: number) => number } {
+  const getTabIndex = (index: number): number => {
     return index === activeIndex ? 0 : -1;
   };
 

@@ -32,12 +32,27 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors = Array.isArray(error) ? error : error ? [error] : [];
+  // Convert error to array format
+  const errors: string[] = Array.isArray(error)
+    ? error
+    : error
+    ? [error]
+    : [];
 
   const currencySymbol = getCurrencySymbol(currency);
 
   function formatCurrency(amount: number, withSymbol: boolean = true): string {
-    const formatted = Math.abs(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // Format with 2 decimal places
+    const absAmount = Math.abs(amount);
+    const [integerPart, decimalPart] = absAmount.toFixed(2).split('.');
+
+    // Add commas to integer part (safer than complex regex)
+    const formattedInteger = integerPart.split('').reverse().reduce((acc, digit, index) => {
+      const separator = index > 0 && index % 3 === 0 ? ',' : '';
+      return separator + digit + acc;
+    }, '');
+
+    const formatted = `${formattedInteger}.${decimalPart}`;
     return withSymbol ? `${currencySymbol}${formatted}` : formatted;
   }
 
@@ -52,10 +67,11 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       CNY: '¥',
       INR: '₹',
     };
-    return symbols[code] || '$';
+    // Type-safe access with hasOwnProperty check
+    return Object.prototype.hasOwnProperty.call(symbols, code) ? symbols[code] : '$';
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     let inputVal = e.target.value;
 
     // Remove all non-numeric characters except decimal point and minus
@@ -69,19 +85,19 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       const hasNegative = inputVal.startsWith('-');
       inputVal = inputVal.replace(/-/g, '');
       if (hasNegative) {
-        inputVal = '-' + inputVal;
+        inputVal = `-${inputVal}`;
       }
     }
 
     // Allow only one decimal point
     const parts = inputVal.split('.');
     if (parts.length > 2) {
-      inputVal = parts[0] + '.' + parts.slice(1).join('');
+      inputVal = `${parts[0]}.${parts.slice(1).join('')}`;
     }
 
     // Limit to 2 decimal places
     if (parts.length === 2 && parts[1].length > 2) {
-      inputVal = parts[0] + '.' + parts[1].slice(0, 2);
+      inputVal = `${parts[0]}.${parts[1].slice(0, 2)}`;
     }
 
     setDisplayValue(inputVal);
@@ -90,11 +106,12 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     if (!isNaN(numValue)) {
       onChange(numValue);
     } else if (inputVal === '' || inputVal === '-') {
-      onChange(undefined as any);
+      // When input is cleared, pass undefined (type assertion needed due to strict typing)
+      onChange(undefined as number);
     }
   };
 
-  const handleBlur = () => {
+  const handleBlur = (): void => {
     setIsFocused(false);
     setIsTouched(true);
 
@@ -104,7 +121,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     }
   };
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>): void => {
     setIsFocused(true);
     // Remove formatting on focus for easier editing
     if (value !== undefined) {
@@ -151,12 +168,12 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           disabled={disabled}
-          placeholder={question.placeholder || '0.00'}
+          placeholder={question.placeholder ?? '0.00'}
           autoFocus={autoFocus}
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel || question.text}
+          aria-label={question.ariaLabel ?? question.text}
           className={`
             w-full pl-8 pr-3 py-2 border rounded-md shadow-sm
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500

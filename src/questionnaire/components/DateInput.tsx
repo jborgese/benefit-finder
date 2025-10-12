@@ -29,18 +29,19 @@ export const DateInput: React.FC<DateInputProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors = Array.isArray(error) ? error : error ? [error] : [];
+  // Convert error to array format, avoiding nested ternaries
+  const errors = Array.isArray(error) ? error : (error ? [error] : []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     onChange(e.target.value);
   };
 
-  const handleBlur = () => {
+  const handleBlur = (): void => {
     setIsFocused(false);
     setIsTouched(true);
   };
 
-  const handleFocus = () => {
+  const handleFocus = (): void => {
     setIsFocused(true);
   };
 
@@ -50,12 +51,15 @@ export const DateInput: React.FC<DateInputProps> = ({
     try {
       const date = new Date(isoDate);
 
-      const options: Intl.DateTimeFormatOptions =
-        format === 'short'
-          ? { month: 'numeric', day: 'numeric', year: '2-digit' }
-          : format === 'long'
-          ? { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
-          : { year: 'numeric', month: 'long', day: 'numeric' };
+      // Determine format options without nested ternaries
+      let options: Intl.DateTimeFormatOptions;
+      if (format === 'short') {
+        options = { month: 'numeric', day: 'numeric', year: '2-digit' };
+      } else if (format === 'long') {
+        options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      } else {
+        options = { year: 'numeric', month: 'long', day: 'numeric' };
+      }
 
       return new Intl.DateTimeFormat('en-US', options).format(date);
     } catch {
@@ -113,7 +117,7 @@ export const DateInput: React.FC<DateInputProps> = ({
         <input
           id={id}
           type="date"
-          value={value || ''}
+          value={value ?? ''}
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
@@ -124,7 +128,7 @@ export const DateInput: React.FC<DateInputProps> = ({
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel || question.text}
+          aria-label={question.ariaLabel ?? question.text}
           className={`
             w-full px-3 py-2 border rounded-md shadow-sm
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500

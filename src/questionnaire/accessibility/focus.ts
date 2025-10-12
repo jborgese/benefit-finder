@@ -9,7 +9,7 @@ import { useEffect, useRef, useCallback } from 'react';
 /**
  * Hook to auto-focus an element on mount
  */
-export function useAutoFocus<T extends HTMLElement>(enabled = true) {
+export function useAutoFocus<T extends HTMLElement>(enabled = true): React.RefObject<T> {
   const ref = useRef<T>(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function useAutoFocus<T extends HTMLElement>(enabled = true) {
 /**
  * Hook to restore focus when unmounting
  */
-export function useRestoreFocus<T extends HTMLElement>() {
+export function useRestoreFocus<T extends HTMLElement>(): React.RefObject<T> {
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const currentRef = useRef<T>(null);
 
@@ -56,27 +56,27 @@ export function useRestoreFocus<T extends HTMLElement>() {
 /**
  * Focus visible management (keyboard vs mouse)
  */
-export function useFocusVisible() {
+export function useFocusVisible(): boolean {
   const [focusVisible, setFocusVisible] = React.useState(false);
 
   useEffect(() => {
     let hadKeyboardEvent = false;
 
-    const handleKeyDown = () => {
+    const handleKeyDown = (): void => {
       hadKeyboardEvent = true;
     };
 
-    const handleMouseDown = () => {
+    const handleMouseDown = (): void => {
       hadKeyboardEvent = false;
     };
 
-    const handleFocus = () => {
+    const handleFocus = (): void => {
       if (hadKeyboardEvent) {
         setFocusVisible(true);
       }
     };
 
-    const handleBlur = () => {
+    const handleBlur = (): void => {
       setFocusVisible(false);
     };
 
@@ -99,7 +99,7 @@ export function useFocusVisible() {
 /**
  * Focus management for modal/dialog
  */
-export function useModalFocus<T extends HTMLElement>() {
+export function useModalFocus<T extends HTMLElement>(): React.RefObject<T> {
   const modalRef = useRef<T>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -132,7 +132,7 @@ export function useModalFocus<T extends HTMLElement>() {
 /**
  * Focus first error field
  */
-export function useFocusError(errors: Record<string, any>) {
+export function useFocusError(errors: Record<string, unknown>): void {
   useEffect(() => {
     const errorKeys = Object.keys(errors);
     if (errorKeys.length === 0) return;
@@ -152,7 +152,7 @@ export function useFocusError(errors: Record<string, any>) {
 /**
  * Scroll element into view and focus
  */
-export function scrollIntoViewAndFocus(element: HTMLElement | null, options?: ScrollIntoViewOptions) {
+export function scrollIntoViewAndFocus(element: HTMLElement | null, options?: ScrollIntoViewOptions): void {
   if (!element) return;
 
   element.scrollIntoView({
@@ -200,7 +200,7 @@ export function getNextFocusable(current: HTMLElement, reverse = false): HTMLEle
 export class FocusManager {
   private history: HTMLElement[] = [];
 
-  push(element: HTMLElement) {
+  push(element: HTMLElement): void {
     this.history.push(element);
   }
 
@@ -208,14 +208,14 @@ export class FocusManager {
     return this.history.pop();
   }
 
-  restore() {
+  restore(): void {
     const element = this.pop();
     if (element) {
       element.focus();
     }
   }
 
-  clear() {
+  clear(): void {
     this.history = [];
   }
 }
@@ -223,7 +223,12 @@ export class FocusManager {
 /**
  * Hook for focus history management
  */
-export function useFocusHistory() {
+export function useFocusHistory(): {
+  pushFocus: (element: HTMLElement) => void;
+  popFocus: () => HTMLElement | undefined;
+  restoreFocus: () => void;
+  clearFocus: () => void;
+} {
   const managerRef = useRef(new FocusManager());
 
   const pushFocus = useCallback((element: HTMLElement) => {

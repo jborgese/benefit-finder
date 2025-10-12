@@ -66,13 +66,8 @@ export const EligibilityResultExplanation: React.FC<
   });
 
   // Get status color
-  const statusColor = result.eligible
-    ? 'text-green-700 bg-green-50 border-green-200'
-    : result.incomplete
-    ? 'text-yellow-700 bg-yellow-50 border-yellow-200'
-    : 'text-red-700 bg-red-50 border-red-200';
-
-  const statusIcon = result.eligible ? '✓' : result.incomplete ? '⚠' : '✗';
+  const statusColor = getStatusColor(result.eligible, result.incomplete);
+  const statusIcon = getStatusIcon(result.eligible, result.incomplete);
 
   return (
     <div
@@ -91,11 +86,7 @@ export const EligibilityResultExplanation: React.FC<
         </span>
         <div className="flex-1">
           <h3 className="text-lg font-semibold mb-1">
-            {result.eligible
-              ? 'You May Be Eligible'
-              : result.incomplete
-              ? 'More Information Needed'
-              : 'Not Eligible at This Time'}
+            {getStatusHeading(result.eligible, result.incomplete)}
           </h3>
           <p className="text-sm opacity-90">{explanation.summary}</p>
         </div>
@@ -260,13 +251,9 @@ export const EligibilityResultSummary: React.FC<{
   result: EligibilityEvaluationResult;
   className?: string;
 }> = ({ result, className = '' }) => {
-  const statusColor = result.eligible
-    ? 'text-green-700 bg-green-50 border-green-200'
-    : result.incomplete
-    ? 'text-yellow-700 bg-yellow-50 border-yellow-200'
-    : 'text-red-700 bg-red-50 border-red-200';
-
-  const statusIcon = result.eligible ? '✓' : result.incomplete ? '⚠' : '✗';
+  const statusColor = getStatusColor(result.eligible, result.incomplete);
+  const statusIcon = getStatusIcon(result.eligible, result.incomplete);
+  const statusLabel = getStatusLabel(result.eligible, result.incomplete);
 
   return (
     <div
@@ -282,13 +269,7 @@ export const EligibilityResultSummary: React.FC<{
         {statusIcon}
       </span>
       <div>
-        <p className="font-medium text-sm">
-          {result.eligible
-            ? 'Eligible'
-            : result.incomplete
-            ? 'Incomplete'
-            : 'Not Eligible'}
-        </p>
+        <p className="font-medium text-sm">{statusLabel}</p>
         <p className="text-xs opacity-75">{result.confidence}% confident</p>
       </div>
     </div>
@@ -298,6 +279,58 @@ export const EligibilityResultSummary: React.FC<{
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
+
+/**
+ * Get status color classes based on eligibility state
+ */
+function getStatusColor(eligible: boolean, incomplete: boolean): string {
+  if (eligible) {
+    return 'text-green-700 bg-green-50 border-green-200';
+  }
+  if (incomplete) {
+    return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+  }
+  return 'text-red-700 bg-red-50 border-red-200';
+}
+
+/**
+ * Get status icon based on eligibility state
+ */
+function getStatusIcon(eligible: boolean, incomplete: boolean): string {
+  if (eligible) {
+    return '✓';
+  }
+  if (incomplete) {
+    return '⚠';
+  }
+  return '✗';
+}
+
+/**
+ * Get status heading based on eligibility state
+ */
+function getStatusHeading(eligible: boolean, incomplete: boolean): string {
+  if (eligible) {
+    return 'You May Be Eligible';
+  }
+  if (incomplete) {
+    return 'More Information Needed';
+  }
+  return 'Not Eligible at This Time';
+}
+
+/**
+ * Get status label based on eligibility state
+ */
+function getStatusLabel(eligible: boolean, incomplete: boolean): string {
+  if (eligible) {
+    return 'Eligible';
+  }
+  if (incomplete) {
+    return 'Incomplete';
+  }
+  return 'Not Eligible';
+}
 
 /**
  * Format field name to human-readable

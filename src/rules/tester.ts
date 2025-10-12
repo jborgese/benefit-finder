@@ -300,9 +300,8 @@ export function generateCombinationTests(
 
   for (const combination of combinations) {
     const input: Record<string, unknown> = {};
-    // eslint-disable-next-line security/detect-object-injection -- varName comes from Object.keys(), safe to use as property accessor
     varNames.forEach((varName, i) => {
-      // eslint-disable-next-line security/detect-object-injection -- i is a controlled loop index
+      // eslint-disable-next-line security/detect-object-injection -- varName comes from Object.keys() and i is a controlled loop index, safe to use as property accessor
       input[varName] = combination[i];
     });
 

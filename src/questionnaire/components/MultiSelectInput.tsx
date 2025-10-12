@@ -27,9 +27,10 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors = Array.isArray(error) ? error : error ? [error] : [];
+  // Convert error to array format, avoiding nested ternaries
+  const errors = Array.isArray(error) ? error : (error ? [error] : []);
 
-  const handleToggle = (optionValue: string | number) => {
+  const handleToggle = (optionValue: string | number): void => {
     const newValue = value.includes(optionValue)
       ? value.filter((v) => v !== optionValue)
       : [...value, optionValue];
@@ -43,11 +44,54 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
     setIsTouched(true);
   };
 
-  const isOptionSelected = (optionValue: string | number) => {
+  const isOptionSelected = (optionValue: string | number): boolean => {
     return value.includes(optionValue);
   };
 
   const canSelectMore = !maxSelections || value.length < maxSelections;
+
+  // Helper to generate selection constraint message
+  const getSelectionMessage = (): string => {
+    if (minSelections && maxSelections) {
+      return `Select ${minSelections} to ${maxSelections} options`;
+    }
+    if (minSelections) {
+      return `Select at least ${minSelections}`;
+    }
+    if (maxSelections) {
+      return `Select up to ${maxSelections}`;
+    }
+    return '';
+  };
+
+  // Render selection constraints helper text
+  const renderConstraintsText = (): JSX.Element | null => {
+    if (!(minSelections ?? maxSelections)) return null;
+    return (
+      <p className="text-xs text-gray-500 mt-1 mb-3">
+        {getSelectionMessage()}
+      </p>
+    );
+  };
+
+  // Render error messages
+  const renderErrors = (): JSX.Element | null => {
+    if (!showError) return null;
+    return (
+      <div
+        id={errorId}
+        role="alert"
+        aria-live="polite"
+        className="mt-2"
+      >
+        {errors.map((err, idx) => (
+          <p key={idx} className="text-sm text-red-600">
+            {err}
+          </p>
+        ))}
+      </div>
+    );
+  };
 
   if (variant === 'pills') {
     return (
@@ -71,15 +115,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
             </p>
           )}
 
-          {(minSelections || maxSelections) && (
-            <p className="text-xs text-gray-500 mt-1">
-              {minSelections && maxSelections
-                ? `Select ${minSelections} to ${maxSelections} options`
-                : minSelections
-                ? `Select at least ${minSelections}`
-                : `Select up to ${maxSelections}`}
-            </p>
-          )}
+          {renderConstraintsText()}
         </div>
 
         <div
@@ -89,7 +125,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         >
           {options.map((option) => {
             const isSelected = isOptionSelected(option.value);
-            const isDisabled = disabled || option.disabled || (!isSelected && !canSelectMore);
+            const isDisabled = disabled || (option.disabled ?? false) || (!isSelected && !canSelectMore);
 
             return (
               <button
@@ -138,20 +174,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
           </p>
         )}
 
-        {showError && (
-          <div
-            id={errorId}
-            role="alert"
-            aria-live="polite"
-            className="mt-2"
-          >
-            {errors.map((err, idx) => (
-              <p key={idx} className="text-sm text-red-600">
-                {err}
-              </p>
-            ))}
-          </div>
-        )}
+        {renderErrors()}
       </div>
     );
   }
@@ -178,21 +201,13 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
           </p>
         )}
 
-        {(minSelections || maxSelections) && (
-          <p className="text-xs text-gray-500 mb-3">
-            {minSelections && maxSelections
-              ? `Select ${minSelections} to ${maxSelections} options`
-              : minSelections
-              ? `Select at least ${minSelections}`
-              : `Select up to ${maxSelections}`}
-          </p>
-        )}
+        {renderConstraintsText()}
 
         <div className="space-y-2">
           {options.map((option) => {
             const optionId = `${id}-${option.value}`;
             const isSelected = isOptionSelected(option.value);
-            const isDisabled = disabled || option.disabled || (!isSelected && !canSelectMore);
+            const isDisabled = disabled || (option.disabled ?? false) || (!isSelected && !canSelectMore);
 
             return (
               <label
@@ -245,20 +260,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         </p>
       )}
 
-      {showError && (
-        <div
-          id={errorId}
-          role="alert"
-          aria-live="polite"
-          className="mt-2"
-        >
-          {errors.map((err, idx) => (
-            <p key={idx} className="text-sm text-red-600">
-              {err}
-            </p>
-          ))}
-        </div>
-      )}
+      {renderErrors()}
     </div>
   );
 };

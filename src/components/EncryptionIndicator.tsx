@@ -55,7 +55,7 @@ function getEncryptionIcon(
     return '🔓'; // Unlocked - no encryption
   }
 
-  if (isEnabled && !isKeyLoaded) {
+  if (!isKeyLoaded) {
     return '🔒'; // Locked - needs passphrase
   }
 
@@ -78,7 +78,7 @@ function getColorClass(
     return 'text-gray-500'; // No encryption - gray
   }
 
-  if (isEnabled && !isKeyLoaded) {
+  if (!isKeyLoaded) {
     return 'text-yellow-600'; // Locked - needs unlock - yellow
   }
 
@@ -110,7 +110,7 @@ function getStatusText(
     return 'Encryption Disabled';
   }
 
-  if (isEnabled && !isKeyLoaded) {
+  if (!isKeyLoaded) {
     return 'Locked - Enter Passphrase';
   }
 
@@ -134,7 +134,7 @@ function getTooltipContent(
     return 'Your data is not encrypted. Enable encryption in settings for better privacy.';
   }
 
-  if (isEnabled && !isKeyLoaded) {
+  if (!isKeyLoaded) {
     return 'Encryption is enabled but locked. Enter your passphrase to access encrypted data.';
   }
 
@@ -340,7 +340,7 @@ export const EncryptionBadge: React.FC<{ className?: string }> = ({
     <EncryptionIndicator
       size="sm"
       showLabel={false}
-      showTooltip={true}
+      showTooltip
       className={className}
     />
   );
@@ -360,8 +360,8 @@ export const EncryptionBanner: React.FC<{ className?: string }> = ({
   return (
     <EncryptionIndicator
       size="lg"
-      showLabel={true}
-      showTooltip={true}
+      showLabel
+      showTooltip
       className={className}
     />
   );

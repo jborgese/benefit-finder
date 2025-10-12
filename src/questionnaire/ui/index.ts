@@ -14,8 +14,11 @@ export {
   SaveProgressButton,
   ResumeDialog,
   ExitConfirmDialog,
-  useExitConfirmation,
 } from './SaveResume';
+export type { SaveResumeProps } from './SaveResume';
+
+// Hooks
+export { useExitConfirmation } from './hooks';
 
 // Auto-save
 export {
@@ -29,7 +32,6 @@ export {
 // Types
 export type { QuestionProps } from './Question';
 export type { NavigationControlsProps } from './NavigationControls';
-export type { SaveResumeProps } from './SaveResume';
 export type { AutoSaveOptions } from './AutoSave';
 export type { QuestionFlowUIProps } from './QuestionFlowUI';
 

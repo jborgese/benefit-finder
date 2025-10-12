@@ -126,17 +126,14 @@ test.describe('Accessibility', () => {
       const headings = await page.locator('h1, h2, h3, h4, h5, h6').evaluateAll(
         (elements) => elements.map((el) => {
           // Safe: tagName[1] is always a digit for h1-h6 elements
-          // eslint-disable-next-line security/detect-object-injection
           return parseInt(el.tagName[1], 10);
         })
       );
 
       // Check headings don't skip levels
       for (let i = 1; i < headings.length; i++) {
-        // Safe: i is a controlled loop counter within array bounds
-        // eslint-disable-next-line security/detect-object-injection
+        // eslint-disable-next-line security/detect-object-injection -- i is a controlled loop counter within array bounds
         const current = headings[i];
-        // eslint-disable-next-line security/detect-object-injection
         const previous = headings[i - 1];
         const diff = current - previous;
         expect(

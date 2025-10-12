@@ -29,18 +29,18 @@ export const TextInput: React.FC<TextInputProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors = Array.isArray(error) ? error : error ? [error] : [];
+  const errors = Array.isArray(error) ? error : (error ? [error] : []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     onChange(e.target.value);
   };
 
-  const handleBlur = () => {
+  const handleBlur = (): void => {
     setIsFocused(false);
     setIsTouched(true);
   };
 
-  const handleFocus = () => {
+  const handleFocus = (): void => {
     setIsFocused(true);
   };
 
@@ -88,7 +88,7 @@ export const TextInput: React.FC<TextInputProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           disabled={disabled}
-          maxLength={maxLength || question.maxLength}
+          maxLength={maxLength ?? question.maxLength}
           pattern={pattern}
           placeholder={question.placeholder}
           autoComplete={autoComplete}
@@ -96,7 +96,7 @@ export const TextInput: React.FC<TextInputProps> = ({
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel || question.text}
+          aria-label={question.ariaLabel ?? question.text}
           className={`
             w-full px-3 py-2 border rounded-md shadow-sm
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500

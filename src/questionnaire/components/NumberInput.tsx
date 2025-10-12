@@ -27,22 +27,22 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   const descId = `${id}-desc`;
   const [isFocused, setIsFocused] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
-  const [inputValue, setInputValue] = useState(value?.toString() || '');
+  const [inputValue, setInputValue] = useState(value?.toString() ?? '');
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors = Array.isArray(error) ? error : error ? [error] : [];
+  const errors = Array.isArray(error) ? error : (error ? [error] : []);
 
-  const minValue = min ?? question.min ?? undefined;
-  const maxValue = max ?? question.max ?? undefined;
+  const minValue = min ?? question.min;
+  const maxValue = max ?? question.max;
   const stepValue = step ?? question.step ?? 1;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const rawValue = e.target.value;
     setInputValue(rawValue);
 
     if (rawValue === '' || rawValue === '-') {
-      onChange(undefined as any);
+      onChange(undefined);
       return;
     }
 
@@ -52,7 +52,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     }
   };
 
-  const handleBlur = () => {
+  const handleBlur = (): void => {
     setIsFocused(false);
     setIsTouched(true);
 
@@ -62,11 +62,11 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     }
   };
 
-  const handleFocus = () => {
+  const handleFocus = (): void => {
     setIsFocused(true);
   };
 
-  const handleIncrement = () => {
+  const handleIncrement = (): void => {
     const currentValue = value ?? minValue ?? 0;
     const newValue = currentValue + stepValue;
 
@@ -76,7 +76,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     }
   };
 
-  const handleDecrement = () => {
+  const handleDecrement = (): void => {
     const currentValue = value ?? minValue ?? 0;
     const newValue = currentValue - stepValue;
 
@@ -129,7 +129,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel || question.text}
+          aria-label={question.ariaLabel ?? question.text}
           className={`
             flex-1 px-3 py-2 border rounded-md shadow-sm
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500

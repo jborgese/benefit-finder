@@ -5,6 +5,7 @@
  * Use these to validate data before inserting into RxDB.
  */
 
+import { z } from 'zod';
 import {
   UserProfileZodSchema,
   BenefitProgramZodSchema,
@@ -35,7 +36,7 @@ export function validateUserProfile(data: unknown): UserProfile {
  * @param data Data to validate
  * @returns Validation result with success/error
  */
-export function validateUserProfileSafe(data: unknown) {
+export function validateUserProfileSafe(data: unknown): ReturnType<typeof UserProfileZodSchema.safeParse> {
   return UserProfileZodSchema.safeParse(data);
 }
 
@@ -56,7 +57,7 @@ export function validateBenefitProgram(data: unknown): BenefitProgram {
  * @param data Data to validate
  * @returns Validation result with success/error
  */
-export function validateBenefitProgramSafe(data: unknown) {
+export function validateBenefitProgramSafe(data: unknown): ReturnType<typeof BenefitProgramZodSchema.safeParse> {
   return BenefitProgramZodSchema.safeParse(data);
 }
 
@@ -77,7 +78,7 @@ export function validateEligibilityRule(data: unknown): EligibilityRule {
  * @param data Data to validate
  * @returns Validation result with success/error
  */
-export function validateEligibilityRuleSafe(data: unknown) {
+export function validateEligibilityRuleSafe(data: unknown): ReturnType<typeof EligibilityRuleZodSchema.safeParse> {
   return EligibilityRuleZodSchema.safeParse(data);
 }
 
@@ -98,7 +99,7 @@ export function validateEligibilityResult(data: unknown): EligibilityResult {
  * @param data Data to validate
  * @returns Validation result with success/error
  */
-export function validateEligibilityResultSafe(data: unknown) {
+export function validateEligibilityResultSafe(data: unknown): ReturnType<typeof EligibilityResultZodSchema.safeParse> {
   return EligibilityResultZodSchema.safeParse(data);
 }
 
@@ -119,7 +120,7 @@ export function validateAppSetting(data: unknown): AppSetting {
  * @param data Data to validate
  * @returns Validation result with success/error
  */
-export function validateAppSettingSafe(data: unknown) {
+export function validateAppSettingSafe(data: unknown): ReturnType<typeof AppSettingZodSchema.safeParse> {
   return AppSettingZodSchema.safeParse(data);
 }
 
@@ -129,11 +130,11 @@ export function validateAppSettingSafe(data: unknown) {
  * @param error Zod error object
  * @returns Formatted error message
  */
-export function formatZodError(error: any): string {
+export function formatZodError(error: z.ZodError): string {
   if (!error.errors) return String(error);
 
   return error.errors
-    .map((err: any) => {
+    .map((err) => {
       const path = err.path.join('.');
       return `${path}: ${err.message}`;
     })
