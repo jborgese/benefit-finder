@@ -171,32 +171,31 @@ function App(): React.ReactElement {
 
   const { saveResults } = useResultsManagement();
 
-  const handleStartQuestionnaire = () => {
+  const handleStartQuestionnaire = (): void => {
     setAppState('questionnaire');
   };
 
-  const handleCompleteQuestionnaire = (answers: Record<string, unknown>) => {
-    console.log('Questionnaire completed with answers:', answers);
+  const handleCompleteQuestionnaire = (_answers: Record<string, unknown>): void => {
     // Generate sample results based on answers
     const results = {
       ...sampleResults,
       evaluatedAt: new Date()
     };
 
-    saveResults({ results });
+    void saveResults({ results });
     setHasResults(true);
     setAppState('results');
   };
 
-  const handleViewResults = () => {
+  const handleViewResults = (): void => {
     setAppState('results');
   };
 
-  const handleBackToHome = () => {
+  const handleBackToHome = (): void => {
     setAppState('home');
   };
 
-  const handleNewAssessment = () => {
+  const handleNewAssessment = (): void => {
     setHasResults(false);
     setAppState('questionnaire');
   };

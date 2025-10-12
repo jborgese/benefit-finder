@@ -41,7 +41,7 @@ async function testRuleEvaluation(): Promise<PerformanceResult[]> {
   };
 
   const simpleData = { income: 1500 };
-  const simpleTimes = await measurePerformance('Simple Rule (income check)', 1000, () => {
+  const simpleTimes = measurePerformance('Simple Rule (income check)', 1000, () => {
     jsonLogic.apply(simpleRule, simpleData);
   });
   results.push(simpleTimes);
@@ -64,13 +64,13 @@ async function testRuleEvaluation(): Promise<PerformanceResult[]> {
     livesInState: true,
   };
 
-  const complexTimes = await measurePerformance('Complex Rule (SNAP eligibility)', 1000, () => {
+  const complexTimes = measurePerformance('Complex Rule (SNAP eligibility)', 1000, () => {
     jsonLogic.apply(complexRule, complexData);
   });
   results.push(complexTimes);
 
   // Multiple rules (typical evaluation)
-  const multipleRulesTimes = await measurePerformance('7 Rules (SNAP package)', 100, () => {
+  const multipleRulesTimes = measurePerformance('7 Rules (SNAP package)', 100, () => {
     for (let i = 0; i < 7; i++) {
       jsonLogic.apply(complexRule, complexData);
     }
@@ -93,7 +93,7 @@ async function testDataGeneration(): Promise<PerformanceResult[]> {
   const results: PerformanceResult[] = [];
 
   // Generate small dataset
-  const smallDatasetTimes = await measurePerformance('Generate 100 results', 10, () => {
+  const smallDatasetTimes = measurePerformance('Generate 100 results', 10, () => {
     const results = [];
     for (let i = 0; i < 100; i++) {
       results.push({
@@ -109,7 +109,7 @@ async function testDataGeneration(): Promise<PerformanceResult[]> {
   results.push(smallDatasetTimes);
 
   // Generate medium dataset
-  const mediumDatasetTimes = await measurePerformance('Generate 1,000 results', 10, () => {
+  const mediumDatasetTimes = measurePerformance('Generate 1,000 results', 10, () => {
     const results = [];
     for (let i = 0; i < 1000; i++) {
       results.push({
@@ -166,14 +166,14 @@ async function testJSONOperations(): Promise<PerformanceResult[]> {
   };
 
   // Test stringify
-  const stringifyTimes = await measurePerformance('JSON.stringify (results)', 1000, () => {
+  const stringifyTimes = measurePerformance('JSON.stringify (results)', 1000, () => {
     JSON.stringify(testData);
   });
   results.push(stringifyTimes);
 
   // Test parse
   const jsonString = JSON.stringify(testData);
-  const parseTimes = await measurePerformance('JSON.parse (results)', 1000, () => {
+  const parseTimes = measurePerformance('JSON.parse (results)', 1000, () => {
     JSON.parse(jsonString);
   });
   results.push(parseTimes);
@@ -188,11 +188,11 @@ async function testJSONOperations(): Promise<PerformanceResult[]> {
 /**
  * Measure performance of a function over multiple iterations
  */
-async function measurePerformance(
+function measurePerformance(
   name: string,
   iterations: number,
-  fn: () => any
-): Promise<PerformanceResult> {
+  fn: () => void
+): PerformanceResult {
   const times: number[] = [];
 
   // Warmup
@@ -284,7 +284,7 @@ function checkPerformanceTargets(results: PerformanceResult[]): boolean {
 // MAIN EXECUTION
 // ============================================================================
 
-async function main() {
+async function main(): Promise<void> {
   console.log('╔═══════════════════════════════════════════════════╗');
   console.log('║         BenefitFinder Performance Tests          ║');
   console.log('╚═══════════════════════════════════════════════════╝');

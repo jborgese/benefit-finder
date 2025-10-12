@@ -44,10 +44,10 @@ test.describe('Results Accessibility', () => {
       const checkbox = checkboxes.nth(i);
 
       // Each checkbox should have accessible name
-      const accessibleName = await checkbox.getAttribute('aria-label') ||
+      const accessibleName = await checkbox.getAttribute('aria-label') ??
                              await checkbox.evaluate(el => {
                                const label = document.querySelector(`label[for="${el.id}"]`);
-                               return label?.textContent || null;
+                               return label?.textContent ?? null;
                              });
 
       expect(accessibleName).toBeTruthy();
@@ -123,7 +123,7 @@ test.describe('Results Accessibility', () => {
       const ariaLabel = await button.getAttribute('aria-label');
 
       // Button should have text or aria-label
-      expect(text || ariaLabel).toBeTruthy();
+      expect(text ?? ariaLabel).toBeTruthy();
     }
   });
 });
@@ -153,9 +153,9 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
     await page.locator('button').first().focus();
 
     // Press Enter
-    let actionOccurred = false;
-    page.on('dialog', () => { actionOccurred = true; });
-    page.on('framenavigated', () => { actionOccurred = true; });
+    let _actionOccurred = false;
+    page.on('dialog', () => { _actionOccurred = true; });
+    page.on('framenavigated', () => { _actionOccurred = true; });
 
     await page.keyboard.press('Enter');
     await page.waitForTimeout(500);
@@ -201,7 +201,7 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
       const focusedInDialog = await page.evaluate(() => {
         const dialog = document.querySelector('[role="dialog"]');
         const focused = document.activeElement;
-        return dialog?.contains(focused) || false;
+        return dialog?.contains(focused) ?? false;
       });
 
       expect(focusedInDialog).toBeTruthy();
@@ -222,8 +222,7 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
     // Check for focus ring or outline
     const hasFocusIndicator = await button.evaluate(el => {
       const styles = window.getComputedStyle(el);
-      const outline = styles.outline;
-      const boxShadow = styles.boxShadow;
+      const { outline, boxShadow } = styles;
 
       // Should have either outline or box-shadow (Tailwind ring)
       return outline !== 'none' || boxShadow !== 'none';

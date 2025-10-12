@@ -136,7 +136,7 @@ test.describe('Performance - Rendering', () => {
         let jankCount = 0;
         let lastTime = performance.now();
 
-        const measureFrame = () => {
+        const measureFrame = (): void => {
           const currentTime = performance.now();
           const frameDuration = currentTime - lastTime;
 
@@ -311,7 +311,7 @@ test.describe('Performance - Bundle Size', () => {
         .filter((r: any) => r.initiatorType === 'script')
         .map((r: any) => ({
           name: r.name,
-          size: r.transferSize || r.encodedBodySize,
+          size: r.transferSize ?? r.encodedBodySize,
         }));
     });
 

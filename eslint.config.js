@@ -29,7 +29,6 @@ export default [
       'test-results/**',
       '*.config.js',
       '*.config.cjs',
-      '*.config.ts',
       '*.d.ts',
       '*.log',
       '.vscode/**',
@@ -227,6 +226,27 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'off',
       'no-console': 'off',
       'sonarjs/no-duplicate-string': 'off',
+    }
+  },
+
+  // Config files use node TypeScript config
+  {
+    files: ['*.config.ts', 'vite.config.*.ts', 'playwright.config.*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: './tsconfig.node.json',
+      },
+      globals: {
+        ...globals.node,
+      }
+    },
+    rules: {
+      'no-console': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     }
   },
 

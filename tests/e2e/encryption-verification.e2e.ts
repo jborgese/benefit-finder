@@ -8,6 +8,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import fs from 'fs';
 
 test.describe('Encryption Verification', () => {
   test('should encrypt sensitive data when saving', async ({ page }) => {
@@ -71,7 +72,7 @@ test.describe('Encryption Verification', () => {
         // Read file contents
         const downloadPath = await download.path();
         if (downloadPath) {
-          const fs = require('fs');
+          // eslint-disable-next-line security/detect-non-literal-fs-filename -- Safe: downloadPath from Playwright's controlled download API
           const fileContents = fs.readFileSync(downloadPath, 'utf-8');
 
           // File should be encrypted (not plaintext JSON)
@@ -216,7 +217,7 @@ test.describe('Encryption - Security Checks', () => {
         if (download) {
           const downloadPath = await download.path();
           if (downloadPath) {
-            const fs = require('fs');
+            // eslint-disable-next-line security/detect-non-literal-fs-filename -- Safe: downloadPath from Playwright's controlled download API
             const fileContents = fs.readFileSync(downloadPath, 'utf-8');
             encryptedOutputs.push(fileContents);
           }

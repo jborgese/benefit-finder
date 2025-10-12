@@ -5,7 +5,6 @@
  */
 
 import { test, expect } from '@playwright/test';
-import * as path from 'path';
 import * as fs from 'fs';
 
 test.describe('Results Export', () => {
@@ -75,7 +74,7 @@ test.describe('Results Export', () => {
     }
   });
 
-  test('should download encrypted file', async ({ page, context }) => {
+  test('should download encrypted file', async ({ page }) => {
     const exportButton = page.locator('button:has-text("Export Encrypted")');
 
     if (await exportButton.isVisible()) {
@@ -100,6 +99,7 @@ test.describe('Results Export', () => {
       // Verify file is not empty
       const downloadPath = await download.path();
       if (downloadPath) {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         const stats = fs.statSync(downloadPath);
         expect(stats.size).toBeGreaterThan(100); // Should have content
       }

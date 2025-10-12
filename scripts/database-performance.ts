@@ -18,6 +18,15 @@ interface PerformanceMetric {
   unit: string;
 }
 
+interface PerformanceResult {
+  name: string;
+  avgTime: number;
+  minTime: number;
+  maxTime: number;
+  iterations: number;
+  unit: string;
+}
+
 // ============================================================================
 // MOCK DATABASE OPERATIONS
 // ============================================================================
@@ -25,7 +34,7 @@ interface PerformanceMetric {
 /**
  * Simulate database insert performance
  */
-async function testInsertPerformance(): Promise<PerformanceMetric[]> {
+function testInsertPerformance(): PerformanceMetric[] {
   console.log('\n📊 Testing Database Insert Performance...\n');
 
   const results: PerformanceMetric[] = [];
@@ -77,7 +86,7 @@ async function testInsertPerformance(): Promise<PerformanceMetric[]> {
 /**
  * Test database query performance
  */
-async function testQueryPerformance(): Promise<PerformanceMetric[]> {
+function testQueryPerformance(): PerformanceMetric[] {
   console.log('\n📊 Testing Database Query Performance...\n');
 
   const results: PerformanceMetric[] = [];
@@ -99,7 +108,7 @@ async function testQueryPerformance(): Promise<PerformanceMetric[]> {
     // Test: Find by ID
     const findStart = performance.now();
     const testId = records[Math.floor(records.length / 2)].id;
-    const found = records.find(r => r.id === testId);
+    const _found = records.find(r => r.id === testId);
     const findEnd = performance.now();
 
     results.push({
@@ -112,7 +121,7 @@ async function testQueryPerformance(): Promise<PerformanceMetric[]> {
 
     // Test: Filter by state
     const filterStart = performance.now();
-    const filtered = records.filter(r => r.state === 'GA');
+    const _filtered = records.filter(r => r.state === 'GA');
     const filterEnd = performance.now();
 
     results.push({
@@ -125,7 +134,7 @@ async function testQueryPerformance(): Promise<PerformanceMetric[]> {
 
     // Test: Sort by date
     const sortStart = performance.now();
-    const sorted = [...records].sort((a, b) => b.evaluatedAt - a.evaluatedAt);
+    const _sorted = [...records].sort((a, b) => b.evaluatedAt - a.evaluatedAt);
     const sortEnd = performance.now();
 
     results.push({
@@ -146,7 +155,7 @@ async function testQueryPerformance(): Promise<PerformanceMetric[]> {
 /**
  * Test large data serialization
  */
-async function testSerializationPerformance(): Promise<PerformanceMetric[]> {
+function testSerializationPerformance(): PerformanceMetric[] {
   console.log('\n📊 Testing Serialization Performance...\n');
 
   const results: PerformanceMetric[] = [];
@@ -237,11 +246,11 @@ async function testSerializationPerformance(): Promise<PerformanceMetric[]> {
 /**
  * Generic performance measurement function
  */
-async function measurePerformance(
+function _measurePerformance(
   name: string,
   iterations: number,
-  fn: () => any
-): Promise<PerformanceResult> {
+  fn: () => void
+): PerformanceResult {
   const times: number[] = [];
 
   // Warmup (10% of iterations)
@@ -334,18 +343,18 @@ function checkTargets(allMetrics: PerformanceMetric[]): boolean {
 // MAIN
 // ============================================================================
 
-async function runAllTests() {
+function runAllTests(): void {
   console.log('\n🚀 Starting Performance Tests...\n');
 
   const allMetrics: PerformanceMetric[] = [];
 
   // Run all test suites
-  const ruleResults = await testRuleEvaluation();
-  const dataResults = await testDataGeneration();
-  const jsonResults = await testSerializationPerformance();
+  const insertResults = testInsertPerformance();
+  const queryResults = testQueryPerformance();
+  const jsonResults = testSerializationPerformance();
 
-  allMetrics.push(...ruleResults);
-  allMetrics.push(...dataResults);
+  allMetrics.push(...insertResults);
+  allMetrics.push(...queryResults);
   allMetrics.push(...jsonResults);
 
   // Print consolidated results

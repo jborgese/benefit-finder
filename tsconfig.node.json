@@ -7,6 +7,14 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "scripts/**/*.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite.config.performance.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "playwright.config.lowend.ts",
+    "tailwind.config.ts",
+    "scripts/**/*.ts"
+  ]
 }
 
