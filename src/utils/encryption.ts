@@ -104,10 +104,10 @@ export type EncryptionStrength = 'none' | 'weak' | 'medium' | 'strong' | 'very-s
 /**
  * Convert ArrayBuffer to Base64 string
  *
- * @param buffer ArrayBuffer to convert
+ * @param buffer ArrayBuffer or ArrayBufferLike to convert
  * @returns Base64-encoded string
  */
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
+function arrayBufferToBase64(buffer: ArrayBufferLike): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.length; i++) {
@@ -282,10 +282,11 @@ export async function encrypt(
   const iv = generateRandomBytes(ENCRYPTION_CONFIG.IV_LENGTH);
 
   // Encrypt using AES-GCM
+  // Cast to BufferSource to satisfy TypeScript's strict type checking
   const encryptedBuffer = await crypto.subtle.encrypt(
     {
       name: ENCRYPTION_CONFIG.ALGORITHM,
-      iv,
+      iv: iv as BufferSource,
       tagLength: ENCRYPTION_CONFIG.TAG_LENGTH,
     },
     key,

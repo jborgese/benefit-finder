@@ -32,12 +32,15 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  // Convert error to array format
-  const errors: string[] = Array.isArray(error)
-    ? error
-    : error
-    ? [error]
-    : [];
+  // Convert error to array format without nested ternaries
+  let errors: string[];
+  if (Array.isArray(error)) {
+    errors = error;
+  } else if (error) {
+    errors = [error];
+  } else {
+    errors = [];
+  }
 
   const currencySymbol = getCurrencySymbol(currency);
 
@@ -67,8 +70,12 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       CNY: '¥',
       INR: '₹',
     };
-    // Type-safe access with hasOwnProperty check
-    return Object.prototype.hasOwnProperty.call(symbols, code) ? symbols[code] : '$';
+    // Type-safe access using hasOwnProperty to prevent object injection
+    if (Object.prototype.hasOwnProperty.call(symbols, code)) {
+      // eslint-disable-next-line security/detect-object-injection -- Safe: property existence validated above
+      return symbols[code];
+    }
+    return '$';
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {

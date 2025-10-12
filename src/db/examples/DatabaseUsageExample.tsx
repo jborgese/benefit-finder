@@ -4,7 +4,7 @@
  * Demonstrates how to use RxDB in React components.
  */
 
-import { useState, useEffect, type FormEvent, type ReactNode } from 'react';
+import { useState, useEffect, type FormEvent, type ReactNode, type ReactElement } from 'react';
 import {
   useUserProfiles,
   useUserProfile,
@@ -21,7 +21,7 @@ import {
  * Example 1: Display User Profiles
  * Shows reactive query that auto-updates
  */
-export function UserProfilesList() {
+export function UserProfilesList(): ReactElement {
   const { result: profiles, isFetching } = useUserProfiles();
 
   if (isFetching) {
@@ -54,7 +54,7 @@ export function UserProfilesList() {
  * Example 2: Create User Profile Form
  * Demonstrates creating documents
  */
-export function CreateProfileForm() {
+export function CreateProfileForm(): ReactElement {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -218,7 +218,7 @@ export function CreateProfileForm() {
  * Example 3: Edit Profile
  * Demonstrates updating documents
  */
-export function EditProfileButton({ profileId }: { profileId: string }) {
+export function EditProfileButton({ profileId }: { profileId: string }): ReactElement {
   const { result: profile, isFetching } = useUserProfile(profileId);
   const [editing, setEditing] = useState(false);
   const [income, setIncome] = useState<number>(0);
@@ -301,7 +301,7 @@ export function EditProfileButton({ profileId }: { profileId: string }) {
  * Example 4: Delete Profile with Confirmation
  * Demonstrates deleting documents
  */
-export function DeleteProfileButton({ profileId }: { profileId: string }) {
+export function DeleteProfileButton({ profileId }: { profileId: string }): ReactElement {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -380,7 +380,7 @@ export function DeleteProfileButton({ profileId }: { profileId: string }) {
  * Example 5: Benefit Programs List
  * Demonstrates querying with filters
  */
-export function BenefitProgramsList({ jurisdiction }: { jurisdiction?: string }) {
+export function BenefitProgramsList({ jurisdiction }: { jurisdiction?: string }): ReactElement {
   const { result: programs, isFetching } = useBenefitPrograms(jurisdiction);
 
   if (isFetching) {
@@ -431,7 +431,7 @@ export function BenefitProgramsList({ jurisdiction }: { jurisdiction?: string })
  * Example 6: Eligibility Results Display
  * Demonstrates complex queries and encrypted data
  */
-export function EligibilityResultsList({ userProfileId }: { userProfileId: string }) {
+export function EligibilityResultsList({ userProfileId }: { userProfileId: string }): ReactElement {
   const { result: results, isFetching } = useEligibilityResults(userProfileId);
   const { result: programs } = useBenefitPrograms();
 
@@ -514,7 +514,7 @@ export function EligibilityResultsList({ userProfileId }: { userProfileId: strin
  * Example 7: Initialize Database in App
  * Shows how to set up database when app starts
  */
-export function DatabaseInitializer({ children }: { children: ReactNode }) {
+export function DatabaseInitializer({ children }: { children: ReactNode }): ReactElement {
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

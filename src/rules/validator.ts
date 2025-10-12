@@ -69,11 +69,12 @@ export const DEFAULT_VALIDATION_OPTIONS: Required<RuleValidationOptions> = {
 
 /**
  * Zod schema for JSON Logic rule validation
- * Using z.any() in array and explicit type assertion for recursive type.
- * Justification: Zod's z.lazy() doesn't properly type recursive schemas,
- * so we use explicit type assertion to maintain type safety at usage sites.
+ * Using z.any() in array for recursive type.
+ * Justification: Zod's z.lazy() requires z.any() for recursive array elements
+ * to avoid circular type reference issues. The schema validates the structure
+ * at runtime while TypeScript type inference handles compile-time type checking.
  */
-export const JsonLogicRuleSchema: z.ZodType<JsonLogicRule> = z.lazy(() =>
+export const JsonLogicRuleSchema = z.lazy(() =>
   z.union([
     z.string(),
     z.number(),
@@ -82,7 +83,7 @@ export const JsonLogicRuleSchema: z.ZodType<JsonLogicRule> = z.lazy(() =>
     z.array(z.any()),
     z.record(z.unknown()),
   ])
-) as z.ZodType<JsonLogicRule>;
+);
 
 // ============================================================================
 // VALIDATION FUNCTIONS
@@ -114,7 +115,7 @@ function validateRuleStructure(
     return null;
   }
 
-  return structureResult.data;
+  return structureResult.data as JsonLogicRule;
 }
 
 /**

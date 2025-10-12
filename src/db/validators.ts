@@ -131,8 +131,7 @@ export function validateAppSettingSafe(data: unknown): ReturnType<typeof AppSett
  * @returns Formatted error message
  */
 export function formatZodError(error: z.ZodError): string {
-  if (!error.errors) return String(error);
-
+  // ZodError.errors is always present, so we can use it directly
   return error.errors
     .map((err) => {
       const path = err.path.join('.');

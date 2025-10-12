@@ -5,6 +5,7 @@
  */
 
 import { nanoid } from 'nanoid';
+import type { RxDocument } from 'rxdb';
 import { getDatabase } from './database';
 import type {
   UserProfile,
@@ -30,7 +31,7 @@ export function generateId(): string {
  */
 export function createUserProfile(
   data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>
-): Promise<ReturnType<typeof getDatabase>['user_profiles']['insert']> {
+): Promise<RxDocument<UserProfile>> {
   const db = getDatabase();
 
   const profile: UserProfile = {
@@ -53,7 +54,7 @@ export function createUserProfile(
 export async function updateUserProfile(
   profileId: string,
   data: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>
-): Promise<ReturnType<typeof getDatabase>['user_profiles']['findOne']> {
+): Promise<RxDocument<UserProfile>> {
   const db = getDatabase();
 
   const profile = await db.user_profiles.findOne({
@@ -108,7 +109,7 @@ export async function deleteUserProfile(profileId: string): Promise<void> {
  */
 export function createBenefitProgram(
   data: Omit<BenefitProgram, 'id' | 'lastUpdated' | 'createdAt'>
-): Promise<ReturnType<typeof getDatabase>['benefit_programs']['insert']> {
+): Promise<RxDocument<BenefitProgram>> {
   const db = getDatabase();
 
   const program: BenefitProgram = {
@@ -129,7 +130,7 @@ export function createBenefitProgram(
  */
 export function createEligibilityRule(
   data: Omit<EligibilityRule, 'id' | 'createdAt' | 'updatedAt'>
-): Promise<ReturnType<typeof getDatabase>['eligibility_rules']['insert']> {
+): Promise<RxDocument<EligibilityRule>> {
   const db = getDatabase();
 
   const rule: EligibilityRule = {
@@ -152,7 +153,7 @@ export function createEligibilityRule(
 export function saveEligibilityResult(
   data: Omit<EligibilityResult, 'id' | 'evaluatedAt' | 'expiresAt'>,
   expirationDays = 30
-): Promise<ReturnType<typeof getDatabase>['eligibility_results']['insert']> {
+): Promise<RxDocument<EligibilityResult>> {
   const db = getDatabase();
 
   const now = Date.now();

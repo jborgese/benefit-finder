@@ -29,7 +29,13 @@ export const TextInput: React.FC<TextInputProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors = Array.isArray(error) ? error : (error ? [error] : []);
+
+  // Convert error to array format
+  const errors: string[] = (() => {
+    if (Array.isArray(error)) return error;
+    if (error) return [error];
+    return [];
+  })();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     onChange(e.target.value);

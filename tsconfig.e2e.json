@@ -3,7 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,
-    "noEmit": true,
+    "noEmit": false,
     "types": [
       "node",
       "@playwright/test"

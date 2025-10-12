@@ -27,8 +27,13 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  // Convert error to array format, avoiding nested ternaries
-  const errors = Array.isArray(error) ? error : (error ? [error] : []);
+
+  // Convert error to array format (avoiding nested ternaries)
+  const errors = (() => {
+    if (Array.isArray(error)) return error;
+    if (error) return [error];
+    return [];
+  })();
 
   const handleToggle = (optionValue: string | number): void => {
     const newValue = value.includes(optionValue)
@@ -65,7 +70,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   };
 
   // Render selection constraints helper text
-  const renderConstraintsText = (): JSX.Element | null => {
+  const renderConstraintsText = (): React.ReactElement | null => {
     if (!(minSelections ?? maxSelections)) return null;
     return (
       <p className="text-xs text-gray-500 mt-1 mb-3">
@@ -75,7 +80,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   };
 
   // Render error messages
-  const renderErrors = (): JSX.Element | null => {
+  const renderErrors = (): React.ReactElement | null => {
     if (!showError) return null;
     return (
       <div

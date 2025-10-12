@@ -59,7 +59,14 @@ export async function getLatestRuleVersion(
     }
   }
 
-  return { rule: latestRule, version: latestVersion };
+  // Convert RxDocument to RuleDefinition
+  const ruleData = latestRule.toJSON();
+  const ruleDefinition = {
+    ...ruleData,
+    version: latestVersion,
+  } as RuleDefinition;
+
+  return { rule: ruleDefinition, version: latestVersion };
 }
 
 /**
@@ -83,10 +90,18 @@ export async function getAllRuleVersions(
     })
     .exec();
 
-  const versions = rules.map((rule) => ({
-    rule,
-    version: parseVersion(rule.version || '0.1.0'),
-  }));
+  const versions = rules.map((rule) => {
+    const version = parseVersion(rule.version || '0.1.0');
+    const ruleData = rule.toJSON();
+    const ruleDefinition = {
+      ...ruleData,
+      version,
+    } as RuleDefinition;
+    return {
+      rule: ruleDefinition,
+      version,
+    };
+  });
 
   // Sort by version (newest first)
   versions.sort((a, b) => compareVersions(b.version, a.version));
@@ -427,15 +442,33 @@ export async function archiveOldVersions(
   ruleId: string,
   keepVersions = 5
 ): Promise<number> {
-  const versions = await getAllRuleVersions(ruleId);
+  const db = getDatabase();
 
-  if (versions.length <= keepVersions) {
+  // Find all rules with this ID
+  const rules = await db.eligibility_rules
+    .find({
+      selector: {
+        id: {
+          $regex: `^${ruleId}`,
+        },
+      },
+    })
+    .exec();
+
+  if (rules.length <= keepVersions) {
     return 0; // Nothing to archive
   }
 
-  const toArchive = versions.slice(keepVersions);
+  // Sort by version (newest first)
+  const sortedRules = rules.sort((a, b) => {
+    const versionA = parseVersion(a.version || '0.1.0');
+    const versionB = parseVersion(b.version || '0.1.0');
+    return compareVersions(versionB, versionA);
+  });
 
-  for (const { rule } of toArchive) {
+  const toArchive = sortedRules.slice(keepVersions);
+
+  for (const rule of toArchive) {
     await rule.update({
       $set: {
         active: false,
@@ -460,15 +493,33 @@ export async function deleteOldVersions(
   ruleId: string,
   keepVersions = 3
 ): Promise<number> {
-  const versions = await getAllRuleVersions(ruleId);
+  const db = getDatabase();
 
-  if (versions.length <= keepVersions) {
+  // Find all rules with this ID
+  const rules = await db.eligibility_rules
+    .find({
+      selector: {
+        id: {
+          $regex: `^${ruleId}`,
+        },
+      },
+    })
+    .exec();
+
+  if (rules.length <= keepVersions) {
     return 0; // Nothing to delete
   }
 
-  const toDelete = versions.slice(keepVersions);
+  // Sort by version (newest first)
+  const sortedRules = rules.sort((a, b) => {
+    const versionA = parseVersion(a.version || '0.1.0');
+    const versionB = parseVersion(b.version || '0.1.0');
+    return compareVersions(versionB, versionA);
+  });
 
-  for (const { rule } of toDelete) {
+  const toDelete = sortedRules.slice(keepVersions);
+
+  for (const rule of toDelete) {
     await rule.remove();
   }
 

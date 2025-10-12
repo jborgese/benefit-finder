@@ -18,7 +18,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   autoFocus = false,
   min,
   max,
-  step = 1,
+  step,
   decimals = 0,
   showSteppers = true,
 }) => {
@@ -31,10 +31,17 @@ export const NumberInput: React.FC<NumberInputProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors = Array.isArray(error) ? error : (error ? [error] : []);
+
+  // Convert error to array format
+  const errors: string[] = (() => {
+    if (Array.isArray(error)) return error;
+    if (error) return [error];
+    return [];
+  })();
 
   const minValue = min ?? question.min;
   const maxValue = max ?? question.max;
+  // Default step to 1 if neither prop nor question defines it
   const stepValue = step ?? question.step ?? 1;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {

@@ -45,9 +45,7 @@ export class AriaAnnouncer {
   }
 
   static getInstance(): AriaAnnouncer {
-    if (!AriaAnnouncer.instance) {
-      AriaAnnouncer.instance = new AriaAnnouncer();
-    }
+    AriaAnnouncer.instance ??= new AriaAnnouncer();
     return AriaAnnouncer.instance;
   }
 

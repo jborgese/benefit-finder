@@ -58,7 +58,7 @@ beforeAll(() => {
   };
 
   if (typeof globalWithCrypto.crypto === 'undefined') {
-    globalWithCrypto.crypto = {} as Crypto;
+    globalWithCrypto.crypto = {} as typeof globalWithCrypto.crypto;
   }
   if (typeof globalWithCrypto.crypto.getRandomValues === 'undefined') {
     globalWithCrypto.crypto.getRandomValues = <T extends ArrayBufferView | null>(array: T): T => {

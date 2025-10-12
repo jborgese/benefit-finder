@@ -29,8 +29,15 @@ export const DateInput: React.FC<DateInputProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  // Convert error to array format, avoiding nested ternaries
-  const errors = Array.isArray(error) ? error : (error ? [error] : []);
+  // Convert error to array format without nested ternaries
+  let errors: string[];
+  if (Array.isArray(error)) {
+    errors = error;
+  } else if (error) {
+    errors = [error];
+  } else {
+    errors = [];
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     onChange(e.target.value);

@@ -20,7 +20,7 @@ function Button({
   onClick?: () => void;
   disabled?: boolean;
   variant?: 'primary' | 'secondary';
-}): JSX.Element {
+}): React.ReactElement {
   const baseClasses = 'px-6 py-3 rounded-lg min-h-touch font-medium transition-colors';
   const variantClasses = variant === 'primary'
     ? 'bg-primary-600 text-white hover:bg-primary-700'
