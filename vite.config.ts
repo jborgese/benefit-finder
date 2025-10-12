@@ -22,27 +22,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        // Manual chunks will be configured when features are integrated into the app
+        // For now, let Vite handle automatic code splitting
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react/jsx-runtime'],
-          'reactflow-vendor': ['reactflow'],
-          'argdown-vendor': ['@argdown/core'],
-          'state-vendor': ['zustand', 'immer'],
-          'utils-vendor': ['nanoid', 'zod', 'dexie', 'rxdb'],
-          'export-vendor': ['html-to-image', 'dom-to-svg'],
-          'radix-vendor': [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-select',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-switch',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-tooltip',
-          ],
-          'backend-vendor': ['isomorphic-dompurify'],
         }
       }
     },
