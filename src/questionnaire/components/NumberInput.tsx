@@ -49,7 +49,8 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     setInputValue(rawValue);
 
     if (rawValue === '' || rawValue === '-') {
-      onChange(undefined);
+      // Type assertion needed: component allows clearing optional number fields
+      onChange(undefined as unknown as number);
       return;
     }
 

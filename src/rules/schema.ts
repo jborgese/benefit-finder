@@ -7,7 +7,6 @@
 
 import { z } from 'zod';
 import { JsonLogicRuleSchema } from './validator';
-import type { JsonLogicRule } from './types';
 
 // ============================================================================
 // METADATA SCHEMAS
@@ -419,7 +418,7 @@ export function createRuleTemplate(
     id: `${programId}-${Date.now()}`,
     programId,
     name,
-    ruleLogic: { var: 'placeholder' } as JsonLogicRule,
+    ruleLogic: { var: 'placeholder' } as Record<string, unknown>,
     version: { major: 0, minor: 1, patch: 0, label: 'draft' },
     active: false,
     draft: true,

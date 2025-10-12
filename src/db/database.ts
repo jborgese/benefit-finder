@@ -25,6 +25,10 @@ import type {
   EligibilityRule,
   EligibilityResult,
   AppSetting,
+  UserProfileDocument,
+  BenefitProgramDocument,
+  EligibilityRuleDocument,
+  EligibilityResultDocument,
 } from './schemas';
 
 // Add RxDB plugins
@@ -41,22 +45,22 @@ addRxPlugin(RxDBMigrationPlugin);
  * Extended collection types with custom statics
  */
 export interface UserProfilesCollection extends RxCollection<UserProfile> {
-  getLatest: () => Promise<UserProfile | null>;
+  getLatest: () => Promise<UserProfileDocument | null>;
 }
 
 export interface BenefitProgramsCollection extends RxCollection<BenefitProgram> {
-  getActivePrograms: () => Promise<BenefitProgram[]>;
-  getByJurisdiction: (jurisdiction: string) => Promise<BenefitProgram[]>;
-  getByCategory: (category: string) => Promise<BenefitProgram[]>;
+  getActivePrograms: () => Promise<BenefitProgramDocument[]>;
+  getByJurisdiction: (jurisdiction: string) => Promise<BenefitProgramDocument[]>;
+  getByCategory: (category: string) => Promise<BenefitProgramDocument[]>;
 }
 
 export interface EligibilityRulesCollection extends RxCollection<EligibilityRule> {
-  getByProgram: (programId: string) => Promise<EligibilityRule[]>;
+  getByProgram: (programId: string) => Promise<EligibilityRuleDocument[]>;
 }
 
 export interface EligibilityResultsCollection extends RxCollection<EligibilityResult> {
-  getByUserProfile: (userProfileId: string) => Promise<EligibilityResult[]>;
-  getValidResults: (userProfileId: string) => Promise<EligibilityResult[]>;
+  getByUserProfile: (userProfileId: string) => Promise<EligibilityResultDocument[]>;
+  getValidResults: (userProfileId: string) => Promise<EligibilityResultDocument[]>;
   clearExpired: () => Promise<number>;
 }
 
@@ -324,7 +328,8 @@ export async function importDatabase(
 
     // Bulk insert documents
     // Note: RxDB's bulkInsert accepts documents as plain objects
-    await collection.bulkInsert(docs as Record<string, unknown>[]);
+    // Type assertion needed as we're importing generic data that matches collection schema
+    await collection.bulkInsert(docs as never);
   }
 
   if (import.meta.env.DEV) {

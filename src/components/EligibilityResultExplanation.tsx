@@ -66,8 +66,8 @@ export const EligibilityResultExplanation: React.FC<
   });
 
   // Get status color
-  const statusColor = getStatusColor(result.eligible, result.incomplete);
-  const statusIcon = getStatusIcon(result.eligible, result.incomplete);
+  const statusColor = getStatusColor(result.eligible, result.incomplete ?? false);
+  const statusIcon = getStatusIcon(result.eligible, result.incomplete ?? false);
 
   return (
     <div
@@ -86,7 +86,7 @@ export const EligibilityResultExplanation: React.FC<
         </span>
         <div className="flex-1">
           <h3 className="text-lg font-semibold mb-1">
-            {getStatusHeading(result.eligible, result.incomplete)}
+            {getStatusHeading(result.eligible, result.incomplete ?? false)}
           </h3>
           <p className="text-sm opacity-90">{explanation.summary}</p>
         </div>
@@ -251,9 +251,9 @@ export const EligibilityResultSummary: React.FC<{
   result: EligibilityEvaluationResult;
   className?: string;
 }> = ({ result, className = '' }) => {
-  const statusColor = getStatusColor(result.eligible, result.incomplete);
-  const statusIcon = getStatusIcon(result.eligible, result.incomplete);
-  const statusLabel = getStatusLabel(result.eligible, result.incomplete);
+  const statusColor = getStatusColor(result.eligible, result.incomplete ?? false);
+  const statusIcon = getStatusIcon(result.eligible, result.incomplete ?? false);
+  const statusLabel = getStatusLabel(result.eligible, result.incomplete ?? false);
 
   return (
     <div

@@ -113,8 +113,9 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     if (!isNaN(numValue)) {
       onChange(numValue);
     } else if (inputVal === '' || inputVal === '-') {
-      // When input is cleared, pass undefined (type assertion needed due to strict typing)
-      onChange(undefined as number);
+      // When input is cleared, pass undefined
+      // Type assertion needed: component allows clearing optional number fields
+      onChange(undefined as unknown as number);
     }
   };
 

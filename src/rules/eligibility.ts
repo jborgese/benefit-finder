@@ -126,6 +126,133 @@ function ensureOperatorsRegistered(): void {
 // ============================================================================
 
 /**
+ * Check cache and return valid cached result if available
+ */
+async function checkCache(
+  profileId: string,
+  programId: string,
+  startTime: number,
+  forceReEvaluation: boolean
+): Promise<EligibilityEvaluationResult | null> {
+  if (forceReEvaluation) {
+    return null;
+  }
+
+  const cached = await getCachedResult(profileId, programId);
+  if (!cached) {
+    return null;
+  }
+
+  const isExpired = cached.expiresAt ? Date.now() > cached.expiresAt : false;
+  if (isExpired) {
+    return null;
+  }
+
+  const endTime = performance.now();
+  const cachedData = cached.toJSON();
+  return {
+    ...cachedData,
+    profileId: cachedData.userProfileId,
+    executionTime: endTime - startTime,
+  } as EligibilityEvaluationResult;
+}
+
+/**
+ * Retrieve and validate required entities from database
+ */
+async function getEvaluationEntities(
+  profileId: string,
+  programId: string
+): Promise<{
+  profile: UserProfileDocument;
+  rule: EligibilityRuleDocument;
+}> {
+  const db = getDatabase();
+
+  // Get user profile
+  const profile = await db.user_profiles.findOne(profileId).exec();
+  if (!profile) {
+    throw new Error(`Profile ${profileId} not found`);
+  }
+
+  // Get program
+  const program = await db.benefit_programs.findOne(programId).exec();
+  if (!program) {
+    throw new Error(`Program ${programId} not found`);
+  }
+
+  // Get active rules for program
+  const rules: EligibilityRuleDocument[] = await db.eligibility_rules.getByProgram(programId);
+  if (rules.length === 0) {
+    throw new Error(`No active rules found for program ${programId}`);
+  }
+
+  // Use the highest priority rule
+  const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  const rule: EligibilityRuleDocument = sortedRules[0];
+
+  return { profile, rule };
+}
+
+/**
+ * Build eligibility evaluation result from rule evaluation
+ */
+function buildEvaluationResult(
+  profileId: string,
+  programId: string,
+  rule: EligibilityRuleDocument,
+  evalResult: RuleEvaluationResult,
+  missingFields: string[],
+  executionTime: number
+): EligibilityEvaluationResult {
+  const incomplete = missingFields.length > 0;
+
+  return {
+    profileId,
+    programId,
+    ruleId: rule.id,
+    eligible: evalResult.success ? Boolean(evalResult.result) : false,
+    confidence: calculateConfidence(evalResult, incomplete),
+    reason: generateReason(evalResult, rule, incomplete),
+    missingFields: incomplete ? missingFields : undefined,
+    requiredDocuments: rule.requiredDocuments?.map((doc: string) => ({
+      document: doc,
+      description: undefined,
+      where: undefined,
+      required: true,
+    })),
+    evaluatedAt: Date.now(),
+    executionTime,
+    ruleVersion: rule.version,
+    needsReview: !evalResult.success || incomplete,
+    incomplete,
+  };
+}
+
+/**
+ * Create error result
+ */
+function buildErrorResult(
+  profileId: string,
+  programId: string,
+  error: unknown,
+  executionTime: number
+): EligibilityEvaluationResult {
+  return {
+    profileId,
+    programId,
+    ruleId: 'error',
+    eligible: false,
+    confidence: 0,
+    reason: error instanceof Error ? error.message : 'Unknown error occurred',
+    evaluatedAt: Date.now(),
+    executionTime,
+    needsReview: true,
+    incomplete: true,
+  };
+}
+
+/**
  * Evaluate eligibility for a single program
  *
  * High-level function that handles:
@@ -157,7 +284,6 @@ export async function evaluateEligibility(
   ensureOperatorsRegistered();
 
   const startTime = performance.now();
-  const db = getDatabase();
 
   // Default options
   const opts = {
@@ -169,46 +295,18 @@ export async function evaluateEligibility(
   };
 
   try {
-    // Check cache first (unless forced re-evaluation)
-    if (!opts.forceReEvaluation) {
-      const cached = await getCachedResult(profileId, programId);
-      if (cached && !cached.isExpired()) {
-        const endTime = performance.now();
-        return {
-          ...cached.toJSON(),
-          executionTime: endTime - startTime,
-        } as EligibilityEvaluationResult;
-      }
+    // Check cache first
+    const cachedResult = await checkCache(profileId, programId, startTime, opts.forceReEvaluation);
+    if (cachedResult) {
+      return cachedResult;
     }
 
-    // Get user profile
-    const profile = await db.user_profiles.findOne(profileId).exec();
-    if (!profile) {
-      throw new Error(`Profile ${profileId} not found`);
-    }
+    // Get required entities
+    const { profile, rule } = await getEvaluationEntities(profileId, programId);
 
-    // Get program
-    const program = await db.benefit_programs.findOne(programId).exec();
-    if (!program) {
-      throw new Error(`Program ${programId} not found`);
-    }
-
-    // Get active rules for program
-    const rules = await db.eligibility_rules.getByProgram(programId);
-    if (rules.length === 0) {
-      throw new Error(`No active rules found for program ${programId}`);
-    }
-
-    // Use the highest priority rule
-    const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-    const rule = sortedRules[0];
-
-    // Prepare data context
+    // Prepare data and check for missing fields
     const data = prepareDataContext(profile);
-
-    // Check for missing required fields
     const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
-    const incomplete = missingFields.length > 0;
 
     // Evaluate rule
     const evalResult = await evaluateRule(
@@ -217,30 +315,17 @@ export async function evaluateEligibility(
       opts.evaluationOptions
     );
 
-    const endTime = performance.now();
-    const executionTime = endTime - startTime;
+    const executionTime = performance.now() - startTime;
 
     // Build result
-    const result: EligibilityEvaluationResult = {
+    const result = buildEvaluationResult(
       profileId,
       programId,
-      ruleId: rule.id,
-      eligible: evalResult.success ? Boolean(evalResult.result) : false,
-      confidence: calculateConfidence(evalResult, incomplete),
-      reason: generateReason(evalResult, rule, incomplete),
-      missingFields: incomplete ? missingFields : undefined,
-      requiredDocuments: rule.requiredDocuments?.map((doc: string) => ({
-        document: doc,
-        description: undefined,
-        where: undefined,
-        required: true,
-      })),
-      evaluatedAt: Date.now(),
-      executionTime,
-      ruleVersion: rule.version,
-      needsReview: !evalResult.success || incomplete,
-      incomplete,
-    };
+      rule,
+      evalResult,
+      missingFields,
+      executionTime
+    );
 
     // Add detailed breakdown if requested
     if (opts.includeBreakdown) {
@@ -255,22 +340,8 @@ export async function evaluateEligibility(
     return result;
 
   } catch (error) {
-    const endTime = performance.now();
-    const executionTime = endTime - startTime;
-
-    // Return error result
-    return {
-      profileId,
-      programId,
-      ruleId: 'error',
-      eligible: false,
-      confidence: 0,
-      reason: error instanceof Error ? error.message : 'Unknown error occurred',
-      evaluatedAt: Date.now(),
-      executionTime,
-      needsReview: true,
-      incomplete: true,
-    };
+    const executionTime = performance.now() - startTime;
+    return buildErrorResult(profileId, programId, error, executionTime);
   }
 }
 
@@ -404,7 +475,7 @@ function calculateConfidence(
  */
 function generateReason(
   evalResult: RuleEvaluationResult,
-  rule: EligibilityRuleDocument,
+  rule: EligibilityRuleDocument | { explanation?: string },
   incomplete: boolean
 ): string {
   if (!evalResult.success) {
@@ -426,7 +497,7 @@ function generateReason(
  * Generate detailed criteria breakdown
  */
 function generateCriteriaBreakdown(
-  rule: EligibilityRuleDocument,
+  rule: EligibilityRuleDocument | { requiredFields?: string[] },
   data: JsonLogicData,
   _evalResult: RuleEvaluationResult
 ): Array<{ criterion: string; met: boolean; value?: unknown; threshold?: unknown; description?: string }> {

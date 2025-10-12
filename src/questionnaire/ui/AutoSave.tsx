@@ -61,7 +61,12 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
     if (!enabled || !store.started) return;
 
     try {
-      const data = {
+      // Ensure all required fields are non-null before saving
+      if (!store.sessionId || !store.flowId || !store.currentNodeId || store.startedAt === null) {
+        return;
+      }
+
+      const data: SavedProgressData = {
         sessionId: store.sessionId,
         flowId: store.flowId,
         currentNodeId: store.currentNodeId,

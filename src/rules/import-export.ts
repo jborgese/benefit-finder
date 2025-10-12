@@ -22,6 +22,7 @@ import {
   type RuleSchemaValidationResult,
 } from './schema';
 import type { EligibilityRule } from '../db/schemas';
+import type { JsonLogicRule } from './types';
 
 // ============================================================================
 // ERROR CODES
@@ -510,7 +511,7 @@ async function runRuleTests(rule: RuleDefinition): Promise<{
 
   const suite = createTestSuite()
     .name(`Tests for ${rule.name}`)
-    .rule(rule.ruleLogic)
+    .rule(rule.ruleLogic as JsonLogicRule)
     .tests(rule.testCases.map((tc) => ({
       description: tc.description,
       input: tc.input,

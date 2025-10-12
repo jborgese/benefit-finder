@@ -158,7 +158,7 @@ export const optionalSchema = <T extends z.ZodTypeAny>(schema: T): z.ZodOptional
  */
 type ValidationDefinition = {
   type: string;
-  value?: string | number | boolean;
+  value?: string | number | boolean | RegExp;
   message: string;
 };
 
@@ -178,10 +178,14 @@ function applyValidation(schema: z.ZodTypeAny, validation: ValidationDefinition)
     return schema.max(validation.value, validation.message);
   }
 
-  if (validation.type === 'pattern' && typeof validation.value === 'string') {
-    // Validate pattern is safe before using
-    // eslint-disable-next-line security/detect-non-literal-regexp
-    return schema.regex(new RegExp(validation.value), validation.message);
+  if (validation.type === 'pattern') {
+    if (validation.value instanceof RegExp) {
+      return schema.regex(validation.value, validation.message);
+    } else if (typeof validation.value === 'string') {
+      // Validate pattern is safe before using
+      // eslint-disable-next-line security/detect-non-literal-regexp
+      return schema.regex(new RegExp(validation.value), validation.message);
+    }
   }
 
   return schema;

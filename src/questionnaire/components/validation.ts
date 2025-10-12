@@ -144,6 +144,14 @@ function applyValidation(
       return validateMax(value, validation.value as number, validation.message);
 
     case 'pattern':
+      // Ensure validation.value is defined and is a valid pattern type
+      if (validation.value === undefined) {
+        return 'Pattern validation requires a pattern value';
+      }
+      // Pattern validation requires string or RegExp, not number
+      if (typeof validation.value === 'number') {
+        return 'Pattern validation requires a string or RegExp pattern';
+      }
       return validatePattern(value, validation.value, validation.message);
 
     case 'custom':

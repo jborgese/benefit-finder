@@ -14,7 +14,8 @@ import { useQuestionFlowStore } from '../store';
 import { Question } from './Question';
 import { NavigationControls, QuestionBreadcrumb } from './NavigationControls';
 import { useAutoSave } from './AutoSave';
-import { ResumeDialog, SaveProgressButton, useExitConfirmation } from './SaveResume';
+import { ResumeDialog, SaveProgressButton } from './SaveResume';
+import { useExitConfirmation } from './hooks';
 import type { QuestionFlow } from '../types';
 
 export interface QuestionFlowUIProps {

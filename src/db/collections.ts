@@ -16,6 +16,11 @@ import {
   type EligibilityRule,
   type EligibilityResult,
   type AppSetting,
+  type UserProfileDocument,
+  type BenefitProgramDocument,
+  type EligibilityRuleDocument,
+  type EligibilityResultDocument,
+  type AppSettingDocument,
 } from './schemas';
 
 /**
@@ -53,7 +58,7 @@ export const userProfilesCollection: RxCollectionCreator<UserProfile> = {
     /**
      * Get most recently updated profile
      */
-    getLatest(this: RxCollection<UserProfile>) {
+    getLatest(this: RxCollection<UserProfile>): Promise<UserProfileDocument | null> {
       return this.findOne({
         sort: [{ updatedAt: 'desc' }],
       }).exec();
@@ -78,7 +83,7 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
     /**
      * Get all active programs
      */
-    getActivePrograms(this: RxCollection<BenefitProgram>) {
+    getActivePrograms(this: RxCollection<BenefitProgram>): Promise<BenefitProgramDocument[]> {
       return this.find({
         selector: {
           active: true,
@@ -90,7 +95,7 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
     /**
      * Get programs by jurisdiction
      */
-    getByJurisdiction(this: RxCollection<BenefitProgram>, jurisdiction: string) {
+    getByJurisdiction(this: RxCollection<BenefitProgram>, jurisdiction: string): Promise<BenefitProgramDocument[]> {
       return this.find({
         selector: {
           jurisdiction,
@@ -103,10 +108,10 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
     /**
      * Get programs by category
      */
-    getByCategory(this: RxCollection<BenefitProgram>, category: string) {
+    getByCategory(this: RxCollection<BenefitProgram>, category: BenefitProgram['category']): Promise<BenefitProgramDocument[]> {
       return this.find({
         selector: {
-          category,
+          category: { $eq: category },
           active: true,
         },
         sort: [{ name: 'asc' }],
@@ -139,7 +144,7 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
     /**
      * Get active rules for a program
      */
-    getByProgram(this: RxCollection<EligibilityRule>, programId: string) {
+    getByProgram(this: RxCollection<EligibilityRule>, programId: string): Promise<EligibilityRuleDocument[]> {
       const now = Date.now();
 
       return this.find({
@@ -184,7 +189,7 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
     /**
      * Get results for a user profile
      */
-    getByUserProfile(this: RxCollection<EligibilityResult>, userProfileId: string) {
+    getByUserProfile(this: RxCollection<EligibilityResult>, userProfileId: string): Promise<EligibilityResultDocument[]> {
       return this.find({
         selector: {
           userProfileId,
@@ -196,7 +201,7 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
     /**
      * Get non-expired results for a user
      */
-    getValidResults(this: RxCollection<EligibilityResult>, userProfileId: string) {
+    getValidResults(this: RxCollection<EligibilityResult>, userProfileId: string): Promise<EligibilityResultDocument[]> {
       const now = Date.now();
 
       return this.find({
@@ -214,7 +219,7 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
     /**
      * Clear expired results
      */
-    async clearExpired(this: RxCollection<EligibilityResult>) {
+    async clearExpired(this: RxCollection<EligibilityResult>): Promise<number> {
       const now = Date.now();
 
       const expiredDocs = await this.find({
@@ -262,13 +267,14 @@ export const appSettingsCollection: RxCollectionCreator<AppSetting> = {
 
       if (!setting) return null;
 
-      return setting.getValue();
+      // Type assertion needed because RxDB doesn't automatically include method types
+      return (setting as AppSettingDocument & { getValue: () => unknown }).getValue();
     },
 
     /**
      * Set setting value
      */
-    async set(this: RxCollection<AppSetting>, key: string, value: unknown, encrypted = false) {
+    async set(this: RxCollection<AppSetting>, key: string, value: unknown, encrypted = false): Promise<void> {
       const serialized = typeof value === 'string' ? value : JSON.stringify(value);
 
       let type: 'string' | 'number' | 'boolean' | 'object' | 'array' = 'string';

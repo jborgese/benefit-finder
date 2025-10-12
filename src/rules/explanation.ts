@@ -312,9 +312,12 @@ function generateExplanationTree(
  * Generate constant value node
  */
 function generateConstantNode(rule: JsonLogicRule, level: number): RuleExplanationNode[] {
+  // Type assertion: this function is only called when rule is a primitive
+  const primitiveValue = rule as string | number | boolean | null;
+
   return [{
     type: 'constant',
-    value: rule,
+    value: primitiveValue,
     description: `Constant value: ${formatValue(rule)}`,
     level,
   }];
@@ -337,6 +340,11 @@ function generateArrayNode(rule: JsonLogicRule[], level: number): RuleExplanatio
  */
 function generateOperatorNodes(rule: JsonLogicRule, level: number): RuleExplanationNode[] {
   const nodes: RuleExplanationNode[] = [];
+
+  // Handle null or non-object rules
+  if (rule === null || typeof rule !== 'object') {
+    return nodes;
+  }
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
