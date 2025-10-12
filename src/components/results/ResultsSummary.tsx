@@ -21,6 +21,12 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
 }) => {
   const { qualified, likely, maybe, notQualified, totalPrograms, evaluatedAt } = results;
 
+  // Constants for repeated style classes and status values
+  const GRAY_STYLE = 'bg-gray-100 text-gray-800 border-gray-300';
+  const ACTIVE_FILTER_RING = ' border-current ring-2';
+  const DEFAULT_BUTTON_STYLE = 'bg-white border-gray-200 hover:border-gray-300';
+  const NOT_QUALIFIED_STATUS = 'not-qualified' as const;
+
   const statusCounts = {
     qualified: qualified.length,
     likely: likely.length,
@@ -31,12 +37,6 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
   const qualifiedPercentage = totalPrograms > 0
     ? Math.round((qualified.length / totalPrograms) * 100)
     : 0;
-
-  // Constants for repeated style classes and status values
-  const GRAY_STYLE = 'bg-gray-100 text-gray-800 border-gray-300';
-  const ACTIVE_FILTER_RING = ' border-current ring-2';
-  const DEFAULT_BUTTON_STYLE = 'bg-white border-gray-200 hover:border-gray-300';
-  const NOT_QUALIFIED_STATUS = 'not-qualified' as const;
 
   const getStatusColor = (status: EligibilityStatus | 'all'): string => {
     switch (status) {

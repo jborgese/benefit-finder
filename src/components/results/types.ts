@@ -31,7 +31,7 @@ export interface RequiredDocument {
 export interface NextStep {
   step: string;
   url?: string;
-  priority: 'high' | 'medium' | 'low';
+  priority?: 'high' | 'medium' | 'low';
   estimatedTime?: string;
   completed?: boolean; // User can mark as completed
 }

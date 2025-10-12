@@ -17,14 +17,22 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
   steps,
   onToggle,
 }) => {
-  // Sort by priority: high > medium > low
-  const priorityOrder = { high: 0, medium: 1, low: 2 };
-  const sortedSteps = [...steps].sort((a, b) =>
-    priorityOrder[a.priority] - priorityOrder[b.priority]
-  );
+  // Sort by priority: high > medium > low (undefined priorities go last)
+  const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2, undefined: 3 };
+  const sortedSteps = [...steps].sort((a, b) => {
+    const aPriority = a.priority ?? 'undefined';
+    const aOrder = priorityOrder[aPriority] ?? 3;
+    const bPriority = b.priority ?? 'undefined';
+    const bOrder = priorityOrder[bPriority] ?? 3;
+    return aOrder - bOrder;
+  });
 
-  const getPriorityBadge = (priority: NextStep['priority']): React.ReactElement => {
-    const badges: Record<NextStep['priority'], { color: string; label: string; icon: string }> = {
+  const getPriorityBadge = (priority: NextStep['priority']): React.ReactElement | null => {
+    if (!priority) {
+      return null;
+    }
+
+    const badges: Record<string, { color: string; label: string; icon: string }> = {
       high: {
         color: 'bg-red-100 text-red-800 border-red-300',
         label: 'High Priority',
@@ -45,6 +53,10 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
     // Type-safe access: priority is strictly typed as 'high' | 'medium' | 'low'
     // eslint-disable-next-line security/detect-object-injection
     const badge = badges[priority];
+
+    if (!badge) {
+      return null;
+    }
 
     return (
       <span
