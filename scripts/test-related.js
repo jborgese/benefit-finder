@@ -18,7 +18,7 @@ function getChangedFiles() {
     // Get files changed in the last commit
     const output = execSync('git diff --name-only HEAD~1 HEAD', { encoding: 'utf8' });
     return output.trim().split('\n').filter(Boolean);
-  } catch (error) {
+  } catch {
     console.warn('⚠️  Could not determine changed files, running all tests');
     return [];
   }
@@ -28,7 +28,7 @@ function getChangedFiles() {
 function findRelatedTests(changedFiles) {
   const unitTests = new Set();
   const e2eTests = new Set();
-  const needsRuleValidation = false;
+  let needsRuleValidation = false;
 
   for (const file of changedFiles) {
     // Skip test files themselves
@@ -96,7 +96,7 @@ async function runTests(testPlan) {
     try {
       execSync(`npm run test:run -- ${testPlan.unitTests.join(' ')}`, { stdio: 'inherit' });
       console.log('✅ Unit tests passed\n');
-    } catch (error) {
+    } catch {
       console.error('❌ Unit tests failed\n');
       results.unit = false;
     }
@@ -112,7 +112,7 @@ async function runTests(testPlan) {
       try {
         execSync(`npm run test:e2e -- ${existingE2ETests.join(' ')}`, { stdio: 'inherit' });
         console.log('✅ E2E tests passed\n');
-      } catch (error) {
+      } catch {
         console.error('❌ E2E tests failed\n');
         results.e2e = false;
       }
@@ -129,7 +129,7 @@ async function runTests(testPlan) {
     try {
       execSync('npm run validate-rules', { stdio: 'inherit' });
       console.log('✅ Rule validation passed\n');
-    } catch (error) {
+    } catch {
       console.error('❌ Rule validation failed\n');
       results.rules = false;
     }

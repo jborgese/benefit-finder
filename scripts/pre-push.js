@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
 
 console.log('🔍 Running pre-push checks...');
 
@@ -10,7 +9,7 @@ function getChangedFiles() {
   try {
     const output = execSync('git diff --name-only HEAD~1 HEAD', { encoding: 'utf8' });
     return output.trim().split('\n').filter(Boolean);
-  } catch (error) {
+  } catch {
     // If we can't get changed files, return empty array
     return [];
   }
@@ -18,19 +17,19 @@ function getChangedFiles() {
 
 // Determine which tests to run based on changed files
 function determineTestScope(changedFiles) {
-  const hasSourceChanges = changedFiles.some(file => 
+  const hasSourceChanges = changedFiles.some(file =>
     file.startsWith('src/') && !file.includes('.test.') && !file.includes('.spec.')
   );
-  
-  const hasTestChanges = changedFiles.some(file => 
+
+  const hasTestChanges = changedFiles.some(file =>
     file.includes('.test.') || file.includes('.spec.') || file.includes('.e2e.')
   );
-  
-  const hasConfigChanges = changedFiles.some(file => 
+
+  const hasConfigChanges = changedFiles.some(file =>
     file.includes('package.json') || file.includes('vite.config') || file.includes('playwright.config')
   );
-  
-  const hasRuleChanges = changedFiles.some(file => 
+
+  const hasRuleChanges = changedFiles.some(file =>
     file.includes('src/rules/') && file.endsWith('.json')
   );
 
@@ -86,17 +85,17 @@ function runSmartTests(scope) {
 try {
   const changedFiles = getChangedFiles();
   console.log(`📋 Changed files: ${changedFiles.length > 0 ? changedFiles.join(', ') : 'None detected'}`);
-  
+
   const scope = determineTestScope(changedFiles);
   const commands = runSmartTests(scope);
-  
+
   console.log(`🎯 Test scope: Unit=${scope.runUnitTests}, E2E=${scope.runE2ETests}, A11y=${scope.runA11yTests}, Rules=${scope.runRuleValidation}`);
 
   for (const { name, cmd } of commands) {
     console.log(name);
     execSync(cmd, { stdio: 'inherit' });
   }
-  
+
   console.log('✨ All checks passed! Pushing...');
 } catch (error) {
   console.error('❌ Pre-push checks failed:', error.message);
