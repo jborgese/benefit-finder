@@ -8,8 +8,58 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Results Display', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to results page (adjust URL based on your routing)
-    await page.goto('/results');
+    // Navigate to home and complete questionnaire to get to results
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Click start assessment button
+    const startButton = page.locator('button', { hasText: /Start Assessment/i });
+    if (await startButton.isVisible()) {
+      await startButton.click();
+      await page.waitForTimeout(500);
+
+      // Fill out questionnaire quickly to get to results
+      // Fill household size
+      const householdInput = page.locator('input[name="householdSize"], input[type="number"]').first();
+      if (await householdInput.isVisible()) {
+        await householdInput.fill('2');
+        await page.waitForTimeout(200);
+
+        // Click next
+        const nextButton = page.locator('button', { hasText: /next/i }).first();
+        if (await nextButton.isVisible()) {
+          await nextButton.click();
+          await page.waitForTimeout(500);
+
+          // Fill income
+          const incomeInput = page.locator('input[name="monthlyIncome"], input[type="number"]').first();
+          if (await incomeInput.isVisible()) {
+            await incomeInput.fill('1500');
+            await page.waitForTimeout(200);
+
+            // Click next
+            if (await nextButton.isVisible()) {
+              await nextButton.click();
+              await page.waitForTimeout(500);
+
+              // Fill age
+              const ageInput = page.locator('input[name="age"], input[type="number"]').first();
+              if (await ageInput.isVisible()) {
+                await ageInput.fill('30');
+                await page.waitForTimeout(200);
+
+                // Submit
+                const submitButton = page.locator('button', { hasText: /submit|finish/i }).first();
+                if (await submitButton.isVisible()) {
+                  await submitButton.click();
+                  await page.waitForTimeout(1000);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   });
 
   test('should display results summary with statistics', async ({ page }) => {

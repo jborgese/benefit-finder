@@ -13,19 +13,28 @@ import { test, expect } from './fixtures/test-fixtures';
 import { waitForPageReady } from './utils/helpers';
 
 test.describe('Questionnaire Flow', () => {
+  // Helper to start questionnaire for all tests
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await waitForPageReady(page);
+
+    // Click start assessment to begin questionnaire
+    const startButton = page.locator('button', { hasText: /Start Assessment/i });
+    if (await startButton.isVisible()) {
+      await startButton.click();
+      await page.waitForTimeout(500);
+    }
+  });
+
   test.describe('Basic Question Navigation', () => {
     test('should display first question on flow start', async ({ page }) => {
-      await page.goto('/');
-      await waitForPageReady(page);
-
-      // Wait for questionnaire to be ready
+      // Wait for questionnaire to be ready (started by beforeEach)
       const question = page.locator('[role="group"][aria-label*="Question"]').first();
       await expect(question).toBeVisible({ timeout: 10000 });
     });
 
     test('should navigate forward through questions', async ({ page }) => {
-      await page.goto('/');
-      await waitForPageReady(page);
+      // Questionnaire already started by beforeEach
 
       // Find and click "Next" button
       const nextButton = page.locator('button', { hasText: /next/i });
@@ -44,8 +53,7 @@ test.describe('Questionnaire Flow', () => {
     });
 
     test('should navigate backward through questions', async ({ page }) => {
-      await page.goto('/');
-      await waitForPageReady(page);
+      // Questionnaire already started by beforeEach
 
       // Navigate forward first
       const nextButton = page.locator('button', { hasText: /next/i }).first();
@@ -66,8 +74,7 @@ test.describe('Questionnaire Flow', () => {
     });
 
     test('should show progress indicator', async ({ page }) => {
-      await page.goto('/');
-      await waitForPageReady(page);
+      // Questionnaire already started by beforeEach
 
       // Look for progress indicators
       const progressBar = page.locator('[role="progressbar"]');

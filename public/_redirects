@@ -1,0 +1,9 @@
+# Cloudflare Pages configuration for React Router
+# Handle client-side routing - all routes should serve index.html
+/*    /index.html   200
+
+# Optional: Add security headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

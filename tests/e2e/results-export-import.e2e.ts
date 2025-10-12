@@ -6,10 +6,60 @@
 
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
+import type { Page } from '@playwright/test';
+
+// Helper to navigate to results through the app flow
+async function navigateToResults(page: Page): Promise<void> {
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+
+  // Click start assessment button
+  const startButton = page.locator('button', { hasText: /Start Assessment/i });
+  if (await startButton.isVisible()) {
+    await startButton.click();
+    await page.waitForTimeout(500);
+
+    // Fill out questionnaire quickly to get to results
+    const householdInput = page.locator('input[name="householdSize"], input[type="number"]').first();
+    if (await householdInput.isVisible()) {
+      await householdInput.fill('2');
+      await page.waitForTimeout(200);
+
+      const nextButton = page.locator('button', { hasText: /next/i }).first();
+      if (await nextButton.isVisible()) {
+        await nextButton.click();
+        await page.waitForTimeout(500);
+
+        const incomeInput = page.locator('input[name="monthlyIncome"], input[type="number"]').first();
+        if (await incomeInput.isVisible()) {
+          await incomeInput.fill('1500');
+          await page.waitForTimeout(200);
+
+          if (await nextButton.isVisible()) {
+            await nextButton.click();
+            await page.waitForTimeout(500);
+
+            const ageInput = page.locator('input[name="age"], input[type="number"]').first();
+            if (await ageInput.isVisible()) {
+              await ageInput.fill('30');
+              await page.waitForTimeout(200);
+
+              const submitButton = page.locator('button', { hasText: /submit|finish/i }).first();
+              if (await submitButton.isVisible()) {
+                await submitButton.click();
+                await page.waitForTimeout(1000);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 test.describe('Results Export', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/results');
+    await navigateToResults(page);
   });
 
   test('should open encrypted export dialog', async ({ page }) => {
@@ -109,7 +159,7 @@ test.describe('Results Export', () => {
 
 test.describe('Results Import', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/results');
+    await navigateToResults(page);
   });
 
   test('should open import dialog', async ({ page }) => {
@@ -172,7 +222,7 @@ test.describe('Results Import', () => {
 
 test.describe('Export/Import Round-Trip', () => {
   test('should export and re-import results successfully', async ({ page }) => {
-    await page.goto('/results');
+    await navigateToResults(page);
 
     // Note: Full round-trip test would require:
     // 1. Export encrypted file
@@ -195,14 +245,14 @@ test.describe('Export/Import Round-Trip', () => {
 
 test.describe('PDF Export', () => {
   test('should show print button', async ({ page }) => {
-    await page.goto('/results');
+    await navigateToResults(page);
 
     const printButton = page.locator('button:has-text("Print"), button:has-text("PDF")').first();
     await expect(printButton).toBeVisible();
   });
 
   test('should trigger print when clicked', async ({ page }) => {
-    await page.goto('/results');
+    await navigateToResults(page);
 
     const printButton = page.locator('button:has-text("Print"), button:has-text("PDF")').first();
 
