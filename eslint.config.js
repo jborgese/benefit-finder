@@ -270,6 +270,22 @@ export default [
     }
   },
 
+  // JavaScript scripts use basic JS parser
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+      }
+    },
+    rules: {
+      'no-console': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+    }
+  },
+
   // E2E test files use separate TypeScript config
   {
     files: ['tests/**/*.ts'],
