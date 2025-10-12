@@ -78,7 +78,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
 
   // Initialize flow
   useEffect(() => {
-    if (!store.started) {
+    if (!store.started || !store.flow || store.flow.id !== flow.id) {
       store.startFlow(flow);
     }
   }, [flow, store]);

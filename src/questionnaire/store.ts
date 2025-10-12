@@ -683,8 +683,16 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
           // Convert persisted array back to Map
           state.answers = new Map(state.answers as Array<[string, QuestionAnswer]>);
         }
+        // Reset flow state on rehydration to ensure proper initialization
         if (state) {
+          state.flow = null;
           state.questionStates = new Map();
+          state.currentNodeId = null;
+          state.started = false;
+          state.completed = false;
+          state._navigationManager = null;
+          state._checkpointManager = null;
+          state._timeTracker = null;
         }
       },
     }
