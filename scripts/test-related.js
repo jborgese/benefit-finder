@@ -2,7 +2,7 @@
 
 /**
  * Smart Test Runner - Runs tests related to changed files
- * 
+ *
  * This script analyzes git changes and runs only the relevant tests:
  * - Unit tests for changed source files
  * - E2E tests for changed components/pages
@@ -43,13 +43,13 @@ function findRelatedTests(changedFiles) {
       if (existsSync(testFile)) {
         unitTests.add(testFile);
       }
-      
+
       // Also check for spec files
       const specFile = file.replace(/\.(ts|tsx)$/, '.spec.$1');
       if (existsSync(specFile)) {
         unitTests.add(specFile);
       }
-      
+
       // Check for tests in __tests__ directory
       const dir = file.substring(0, file.lastIndexOf('/'));
       const fileName = file.substring(file.lastIndexOf('/') + 1);
@@ -106,13 +106,18 @@ async function runTests(testPlan) {
 
   // E2E tests
   if (testPlan.e2eTests.length > 0) {
-    console.log(`🎭 E2E tests: ${testPlan.e2eTests.join(', ')}`);
-    try {
-      execSync(`npm run test:e2e -- ${testPlan.e2eTests.join(' ')}`, { stdio: 'inherit' });
-      console.log('✅ E2E tests passed\n');
-    } catch (error) {
-      console.error('❌ E2E tests failed\n');
-      results.e2e = false;
+    const existingE2ETests = testPlan.e2eTests.filter(test => existsSync(test));
+    if (existingE2ETests.length > 0) {
+      console.log(`🎭 E2E tests: ${existingE2ETests.join(', ')}`);
+      try {
+        execSync(`npm run test:e2e -- ${existingE2ETests.join(' ')}`, { stdio: 'inherit' });
+        console.log('✅ E2E tests passed\n');
+      } catch (error) {
+        console.error('❌ E2E tests failed\n');
+        results.e2e = false;
+      }
+    } else {
+      console.log('⏭️  Related E2E test files not found\n');
     }
   } else {
     console.log('⏭️  No related E2E tests found\n');
@@ -138,7 +143,7 @@ async function runTests(testPlan) {
 // Main execution
 async function main() {
   const changedFiles = getChangedFiles();
-  
+
   if (changedFiles.length === 0) {
     console.log('ℹ️  No changed files detected, running all tests');
     execSync('npm run test:run', { stdio: 'inherit' });
@@ -146,18 +151,18 @@ async function main() {
   }
 
   console.log(`📋 Changed files: ${changedFiles.join(', ')}\n`);
-  
+
   const testPlan = findRelatedTests(changedFiles);
-  
+
   if (testPlan.unitTests.length === 0 && testPlan.e2eTests.length === 0 && !testPlan.needsRuleValidation) {
     console.log('ℹ️  No related tests found for changed files');
     return;
   }
 
   const results = await runTests(testPlan);
-  
+
   const allPassed = results.unit && results.e2e && results.rules;
-  
+
   if (allPassed) {
     console.log('🎉 All related tests passed!');
   } else {
