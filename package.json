@@ -57,12 +57,17 @@
     "lint:fix": "eslint . --fix",
     "validate-rules": "tsx scripts/validate-rules.ts"
   },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "vitest related --run --passWithNoTests"
-    ]
-  },
+    "lint-staged": {
+        "*.{ts,tsx}": [
+            "eslint --fix"
+        ],
+        "*.{ts,tsx}": [
+            "vitest related --run --passWithNoTests"
+        ],
+        "src/rules/**/*.json": [
+            "npm run validate-rules"
+        ]
+    },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@eslint/js": "^9.36.0",
