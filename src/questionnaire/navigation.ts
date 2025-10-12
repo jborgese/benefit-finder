@@ -35,7 +35,7 @@ export class SkipLogicManager {
   addSkipRule(rule: SkipRule): void {
     this.skipRules.push(rule);
     // Sort by priority (higher first)
-    this.skipRules.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    this.skipRules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   }
 
   /**
@@ -263,7 +263,7 @@ export function evaluateBranches(
 
   // Sort by priority
   const sortedBranches = [...node.branches].sort(
-    (a, b) => (b.priority || 0) - (a.priority || 0)
+    (a, b) => (b.priority ?? 0) - (a.priority ?? 0)
   );
 
   for (const branch of sortedBranches) {

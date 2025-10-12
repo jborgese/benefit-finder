@@ -300,13 +300,11 @@ export function generateCombinationTests(
 
   for (const combination of combinations) {
     const input: Record<string, unknown> = {};
-    for (let i = 0; i < varNames.length; i++) {
-      const varName = varNames[i];
-      const value = combination[i];
-      if (varName !== undefined && value !== undefined) {
-        input[varName] = value;
-      }
-    }
+    // eslint-disable-next-line security/detect-object-injection -- varName comes from Object.keys(), safe to use as property accessor
+    varNames.forEach((varName, i) => {
+      // eslint-disable-next-line security/detect-object-injection -- i is a controlled loop index
+      input[varName] = combination[i];
+    });
 
     testCases.push({
       description: `Combination: ${JSON.stringify(input)}`,
@@ -429,7 +427,9 @@ function deepEqual(a: unknown, b: unknown): boolean {
   if (aKeys.length !== bKeys.length) return false;
 
   return aKeys.every((key) => {
+    // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
     const aValue = aRecord[key];
+    // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
     const bValue = bRecord[key];
     return deepEqual(aValue, bValue);
   });

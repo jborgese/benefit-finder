@@ -299,8 +299,10 @@ export function QuestionComponent(): React.JSX.Element {
     validationErrors: state.validationErrors,
   }));
 
+  // Safe: currentQuestionId is validated before use
+  // eslint-disable-next-line security/detect-object-injection
   const currentAnswer = currentQuestionId
-    ? answers[currentQuestionId]?.value ?? null
+    ? (answers[currentQuestionId]?.value ?? null)
     : null;
 
   const handleSubmit = (): void => {
@@ -309,6 +311,8 @@ export function QuestionComponent(): React.JSX.Element {
     }
   };
 
+  // Safe: currentQuestionId is validated before use
+  // eslint-disable-next-line security/detect-object-injection
   const currentValidationError = currentQuestionId ? validationErrors[currentQuestionId] : undefined;
   const hasValidationError = currentQuestionId ? currentQuestionId in validationErrors : false;
 

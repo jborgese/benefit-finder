@@ -65,8 +65,9 @@ beforeAll(() => {
       if (array && 'length' in array && 'BYTES_PER_ELEMENT' in array) {
         const typedArray = array as unknown as Uint8Array;
         for (let i = 0; i < typedArray.length; i++) {
-          const index = i as number;
-          typedArray[index] = Math.floor(Math.random() * 256);
+          // Safe: i is a controlled loop counter within array bounds
+          // eslint-disable-next-line security/detect-object-injection
+          typedArray[i] = Math.floor(Math.random() * 256);
         }
       }
       return array;

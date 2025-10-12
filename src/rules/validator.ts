@@ -79,7 +79,6 @@ export const JsonLogicRuleSchema: z.ZodType<JsonLogicRule> = z.lazy(() =>
     z.number(),
     z.boolean(),
     z.null(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Required for recursive array type in Zod
     z.array(z.any()),
     z.record(z.unknown()),
   ])
@@ -375,6 +374,7 @@ function calculateComplexity(rule: JsonLogicRule): number {
         complexity += 1; // Standard operator
       }
 
+      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
       const value = nodeAsRecord[key];
       if (value !== undefined) {
         visit(value as JsonLogicRule, depth + 1);
@@ -414,6 +414,7 @@ function extractOperators(rule: JsonLogicRule): string[] {
         operators.push(key);
       }
 
+      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
       const value = nodeAsRecord[key];
       if (value !== undefined) {
         visit(value as JsonLogicRule);
@@ -449,27 +450,38 @@ function extractVariables(rule: JsonLogicRule): string[] {
         continue;
       }
 
+      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+      const keyValue = nodeAsRecord[key];
+
       if (key === 'var') {
-        const varPath = nodeAsRecord[key];
-        if (typeof varPath === 'string') {
-          variables.push(varPath);
-        } else if (Array.isArray(varPath)) {
-          const firstElement = varPath[0];
-          if (typeof firstElement === 'string') {
-            variables.push(firstElement);
-          }
-        }
+        extractVariableFromVarOperator(keyValue, variables);
       }
 
-      const value = nodeAsRecord[key];
-      if (value !== undefined) {
-        visit(value as JsonLogicRule);
+      if (keyValue !== undefined) {
+        visit(keyValue as JsonLogicRule);
       }
     }
   };
 
   visit(rule);
   return variables;
+}
+
+/**
+ * Extract variable name from a var operator value
+ */
+function extractVariableFromVarOperator(
+  varPath: unknown,
+  variables: string[]
+): void {
+  if (typeof varPath === 'string') {
+    variables.push(varPath);
+  } else if (Array.isArray(varPath)) {
+    const firstElement = varPath[0];
+    if (typeof firstElement === 'string') {
+      variables.push(firstElement);
+    }
+  }
 }
 
 /**
@@ -544,10 +556,12 @@ export function sanitizeRule(
         continue; // Skip disallowed operators
       }
 
+      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
       const value = nodeAsRecord[key];
       const sanitizedValue = sanitize(value as JsonLogicRule);
 
       if (sanitizedValue !== null) {
+        // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
         sanitized[key] = sanitizedValue;
       }
     }

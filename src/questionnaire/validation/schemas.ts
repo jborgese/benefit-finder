@@ -27,9 +27,9 @@ export const ssnSchema = z
   .transform((val) => val.replace(/\D/g, ''));
 
 // Simple ZIP code pattern - no backtracking risk
-// eslint-disable-next-line security/detect-unsafe-regex
 export const zipCodeSchema = z
   .string()
+  // eslint-disable-next-line security/detect-unsafe-regex
   .regex(/^\d{5}(-\d{4})?$/, 'Please enter a valid ZIP code');
 
 /**

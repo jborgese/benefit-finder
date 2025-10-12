@@ -236,7 +236,7 @@ export async function deriveKeyFromPassphrase(
  *
  * @returns CryptoKey for AES-GCM encryption
  */
-export async function generateEncryptionKey(): Promise<CryptoKey> {
+export function generateEncryptionKey(): Promise<CryptoKey> {
   return crypto.subtle.generateKey(
     {
       name: ENCRYPTION_CONFIG.ALGORITHM,
@@ -372,7 +372,7 @@ export async function encryptToString(
  * @param key Decryption key
  * @returns Decrypted data as string
  */
-export async function decryptFromString(
+export function decryptFromString(
   encryptedString: string,
   key: CryptoKey
 ): Promise<string> {

@@ -172,7 +172,7 @@ export class CheckpointManager {
    * Get checkpoint by ID
    */
   getCheckpoint(id: string): ProgressCheckpoint | null {
-    return this.checkpoints.find((c) => c.id === id) || null;
+    return this.checkpoints.find((c) => c.id === id) ?? null;
   }
 
   /**
@@ -305,7 +305,7 @@ export class TimeTracker {
    * Record time spent on a question
    */
   recordQuestionTime(questionId: string, duration: number): void {
-    const existing = this.questionTimes.get(questionId) || 0;
+    const existing = this.questionTimes.get(questionId) ?? 0;
     this.questionTimes.set(questionId, existing + duration);
   }
 
@@ -333,7 +333,7 @@ export class TimeTracker {
    * Get time for specific question
    */
   getQuestionTime(questionId: string): number {
-    return this.questionTimes.get(questionId) || 0;
+    return this.questionTimes.get(questionId) ?? 0;
   }
 
   /**
@@ -359,6 +359,40 @@ export class TimeTracker {
 // ============================================================================
 
 /**
+ * Check if all required questions are answered
+ */
+function checkRequiredQuestionsAnswered(
+  visibleQuestions: QuestionDefinition[],
+  questionStates: Map<string, QuestionState>
+): boolean {
+  for (const question of visibleQuestions) {
+    if (question.required) {
+      const state = questionStates.get(question.id);
+      if (state?.status !== 'answered') {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/**
+ * Check if any questions remain pending or current
+ */
+function checkAnyQuestionsRemaining(
+  visibleQuestions: QuestionDefinition[],
+  questionStates: Map<string, QuestionState>
+): boolean {
+  for (const question of visibleQuestions) {
+    const state = questionStates.get(question.id);
+    if (state?.status === 'pending' || state?.status === 'current') {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Check if flow is complete
  *
  * @param flow Question flow
@@ -375,25 +409,9 @@ export function isFlowComplete(
   const visibleQuestions = engine.getVisibleQuestions();
 
   if (requireAllRequired) {
-    // Check all required questions are answered
-    for (const question of visibleQuestions) {
-      if (question.required) {
-        const state = questionStates.get(question.id);
-        if (state?.status !== 'answered') {
-          return false;
-        }
-      }
-    }
-    return true;
+    return checkRequiredQuestionsAnswered(visibleQuestions, questionStates);
   } else {
-    // Check if any questions remain
-    for (const question of visibleQuestions) {
-      const state = questionStates.get(question.id);
-      if (state?.status === 'pending' || state?.status === 'current') {
-        return false;
-      }
-    }
-    return true;
+    return !checkAnyQuestionsRemaining(visibleQuestions, questionStates);
   }
 }
 

@@ -32,7 +32,7 @@ export const SaveProgressButton: React.FC<{
 }> = ({ onSave, className = '' }) => {
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     // Progress is auto-saved, so just show confirmation
     setSaved(true);
     onSave?.();
@@ -84,7 +84,7 @@ export const ResumeDialog: React.FC<SaveResumeProps> = ({
     }
   }, [metadata.exists, store.started]);
 
-  const handleResume = () => {
+  const handleResume = (): void => {
     const saved = loadSavedProgress(storageKey);
 
     if (!saved) {
@@ -98,7 +98,7 @@ export const ResumeDialog: React.FC<SaveResumeProps> = ({
     setOpen(false);
   };
 
-  const handleStartNew = () => {
+  const handleStartNew = (): void => {
     clearSavedProgress(storageKey);
     onClear?.();
     setOpen(false);
@@ -202,7 +202,11 @@ export const ExitConfirmDialog: React.FC<{
 /**
  * Hook for exit confirmation
  */
-export function useExitConfirmation(enabled = true) {
+export function useExitConfirmation(enabled = true): {
+  showDialog: boolean;
+  setShowDialog: (show: boolean) => void;
+  confirmExit: () => Promise<boolean>;
+} {
   const [showDialog, setShowDialog] = React.useState(false);
   const store = useQuestionFlowStore();
 
@@ -211,8 +215,9 @@ export function useExitConfirmation(enabled = true) {
       return;
     }
 
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent): string => {
       e.preventDefault();
+      // eslint-disable-next-line no-param-reassign
       e.returnValue = 'Your progress has been saved. Are you sure you want to leave?';
       return e.returnValue;
     };
@@ -224,7 +229,7 @@ export function useExitConfirmation(enabled = true) {
     };
   }, [enabled, store.started, store.completed]);
 
-  const confirmExit = () => {
+  const confirmExit = (): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
       setShowDialog(true);
 

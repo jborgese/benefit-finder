@@ -294,68 +294,106 @@ function generateExplanationTree(
   rule: JsonLogicRule,
   level: number
 ): RuleExplanationNode[] {
-  const nodes: RuleExplanationNode[] = [];
-
+  // Handle primitive values
   if (rule === null || typeof rule !== 'object') {
-    nodes.push({
-      type: 'constant',
-      value: rule,
-      description: `Constant value: ${formatValue(rule)}`,
-      level,
-    });
-    return nodes;
+    return generateConstantNode(rule, level);
   }
 
+  // Handle arrays
   if (Array.isArray(rule)) {
-    nodes.push({
-      type: 'expression',
-      description: `Array of ${rule.length} items`,
-      level,
-      children: rule.flatMap((item) => generateExplanationTree(item, level + 1)),
-    });
-    return nodes;
+    return generateArrayNode(rule, level);
   }
+
+  // Handle object rules (operators and variables)
+  return generateOperatorNodes(rule, level);
+}
+
+/**
+ * Generate constant value node
+ */
+function generateConstantNode(rule: JsonLogicRule, level: number): RuleExplanationNode[] {
+  return [{
+    type: 'constant',
+    value: rule,
+    description: `Constant value: ${formatValue(rule)}`,
+    level,
+  }];
+}
+
+/**
+ * Generate array node
+ */
+function generateArrayNode(rule: JsonLogicRule[], level: number): RuleExplanationNode[] {
+  return [{
+    type: 'expression',
+    description: `Array of ${rule.length} items`,
+    level,
+    children: rule.flatMap((item) => generateExplanationTree(item, level + 1)),
+  }];
+}
+
+/**
+ * Generate operator nodes
+ */
+function generateOperatorNodes(rule: JsonLogicRule, level: number): RuleExplanationNode[] {
+  const nodes: RuleExplanationNode[] = [];
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
     if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) continue;
 
-    const operandValue = ruleAsRecord[operator];
+    const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
     if (operandValue === undefined) continue;
 
     const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
     const descriptionFn = Object.prototype.hasOwnProperty.call(OPERATOR_DESCRIPTIONS, operator)
-      ? OPERATOR_DESCRIPTIONS[operator]
+      ? OPERATOR_DESCRIPTIONS[operator] // eslint-disable-line security/detect-object-injection -- operator from known operator set, not user input
       : undefined;
     const description = descriptionFn
       ? descriptionFn(operands as unknown[])
       : `Operation: ${operator}`;
 
     if (operator === 'var') {
-      const varName = operandValue as string;
-      nodes.push({
-        type: 'variable',
-        operator,
-        variable: varName,
-        description: `Get ${formatFieldName(varName)}`,
-        level,
-      });
+      nodes.push(generateVariableNode(operandValue as string, operator, level));
     } else {
-      const children = (operands as JsonLogicRule[]).flatMap((operand) =>
-        generateExplanationTree(operand, level + 1)
-      );
-
-      nodes.push({
-        type: 'operator',
-        operator,
-        description,
-        level,
-        children: children.length > 0 ? children : undefined,
-      });
+      nodes.push(generateOperatorNode(operator, description, operands as JsonLogicRule[], level));
     }
   }
 
   return nodes;
+}
+
+/**
+ * Generate variable node
+ */
+function generateVariableNode(varName: string, operator: string, level: number): RuleExplanationNode {
+  return {
+    type: 'variable',
+    operator,
+    variable: varName,
+    description: `Get ${formatFieldName(varName)}`,
+    level,
+  };
+}
+
+/**
+ * Generate operator node with children
+ */
+function generateOperatorNode(
+  operator: string,
+  description: string,
+  operands: JsonLogicRule[],
+  level: number
+): RuleExplanationNode {
+  const children = operands.flatMap((operand) => generateExplanationTree(operand, level + 1));
+
+  return {
+    type: 'operator',
+    operator,
+    description,
+    level,
+    children: children.length > 0 ? children : undefined,
+  };
 }
 
 /**
@@ -383,7 +421,7 @@ function generateRuleDescription(
     return 'Invalid rule structure';
   }
 
-  const operandValue = ruleAsRecord[operator];
+  const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
   const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
 
   switch (languageLevel) {
@@ -394,7 +432,7 @@ function generateRuleDescription(
     case 'standard':
     default: {
       const descriptionFn = Object.prototype.hasOwnProperty.call(OPERATOR_DESCRIPTIONS, operator)
-        ? OPERATOR_DESCRIPTIONS[operator]
+        ? OPERATOR_DESCRIPTIONS[operator] // eslint-disable-line security/detect-object-injection -- operator from known operator set, not user input
         : undefined;
       return descriptionFn
         ? descriptionFn(operands as unknown[])
@@ -420,7 +458,7 @@ function generateSimpleDescription(operator: string, _operands: JsonLogicRule[])
   };
 
   return Object.prototype.hasOwnProperty.call(simpleDescriptions, operator)
-    ? simpleDescriptions[operator]
+    ? simpleDescriptions[operator] // eslint-disable-line security/detect-object-injection -- operator from known operator set, not user input
     : 'You must meet this requirement';
 }
 
@@ -575,8 +613,8 @@ export function explainDifference(
       continue;
     }
 
-    const value1 = Object.prototype.hasOwnProperty.call(data1, key) ? data1[key] : undefined;
-    const value2 = Object.prototype.hasOwnProperty.call(data2, key) ? data2[key] : undefined;
+    const value1 = Object.prototype.hasOwnProperty.call(data1, key) ? data1[key] : undefined; // eslint-disable-line security/detect-object-injection -- key from data object keys, not user input
+    const value2 = Object.prototype.hasOwnProperty.call(data2, key) ? data2[key] : undefined; // eslint-disable-line security/detect-object-injection -- key from data object keys, not user input
 
     if (value1 !== value2) {
       changedFields.push({
@@ -646,7 +684,7 @@ function analyzeRuleForSuggestions(
     const ruleAsRecord = rule as Record<string, unknown>;
     if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) continue;
 
-    const operandValue = ruleAsRecord[operator];
+    const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
     if (operandValue === undefined) continue;
 
     const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
@@ -681,7 +719,7 @@ function getComparisonSuggestion(
   }
 
   const varName = (left as { var: string }).var;
-  const currentValue = Object.prototype.hasOwnProperty.call(data, varName) ? data[varName] : undefined;
+  const currentValue = Object.prototype.hasOwnProperty.call(data, varName) ? data[varName] : undefined; // eslint-disable-line security/detect-object-injection -- varName from rule structure, not user input
 
   if (operator === '>' || operator === '>=') {
     return `Increase ${formatFieldName(varName)} from ${formatValue(currentValue)} to at least ${formatValue(right)}`;

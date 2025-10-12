@@ -7,6 +7,24 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useQuestionFlowStore } from '../store';
 
+/**
+ * Default storage key for auto-save functionality
+ */
+const DEFAULT_STORAGE_KEY = 'bf-questionnaire-autosave';
+
+/**
+ * Saved progress data structure
+ */
+export interface SavedProgressData {
+  sessionId: string;
+  flowId: string;
+  currentNodeId: string;
+  answers: [string, unknown][];
+  history: string[];
+  startedAt: number;
+  updatedAt: number;
+}
+
 export interface AutoSaveOptions {
   /** Storage key prefix */
   storageKey?: string;
@@ -15,7 +33,7 @@ export interface AutoSaveOptions {
   /** Enable/disable auto-save */
   enabled?: boolean;
   /** Callback when save occurs */
-  onSave?: (data: any) => void;
+  onSave?: (data: SavedProgressData) => void;
   /** Callback when save fails */
   onError?: (error: Error) => void;
 }
@@ -23,9 +41,12 @@ export interface AutoSaveOptions {
 /**
  * Hook for auto-saving questionnaire progress
  */
-export function useAutoSave(options: AutoSaveOptions = {}) {
+export function useAutoSave(options: AutoSaveOptions = {}): {
+  save: () => void;
+  clear: () => void;
+} {
   const {
-    storageKey = 'bf-questionnaire-autosave',
+    storageKey = DEFAULT_STORAGE_KEY,
     debounceMs = 1000,
     enabled = true,
     onSave,
@@ -33,7 +54,7 @@ export function useAutoSave(options: AutoSaveOptions = {}) {
   } = options;
 
   const store = useQuestionFlowStore();
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastSavedRef = useRef<string>('');
 
   const saveToStorage = useCallback(() => {
@@ -113,15 +134,7 @@ export function useAutoSave(options: AutoSaveOptions = {}) {
 /**
  * Load saved progress from localStorage
  */
-export function loadSavedProgress(storageKey = 'bf-questionnaire-autosave'): {
-  sessionId: string;
-  flowId: string;
-  currentNodeId: string;
-  answers: [string, any][];
-  history: string[];
-  startedAt: number;
-  updatedAt: number;
-} | null {
+export function loadSavedProgress(storageKey = DEFAULT_STORAGE_KEY): SavedProgressData | null {
   try {
     const saved = localStorage.getItem(storageKey);
 
@@ -147,21 +160,21 @@ export function loadSavedProgress(storageKey = 'bf-questionnaire-autosave'): {
 /**
  * Check if there is saved progress
  */
-export function hasSavedProgress(storageKey = 'bf-questionnaire-autosave'): boolean {
+export function hasSavedProgress(storageKey = DEFAULT_STORAGE_KEY): boolean {
   return localStorage.getItem(storageKey) !== null;
 }
 
 /**
  * Clear saved progress
  */
-export function clearSavedProgress(storageKey = 'bf-questionnaire-autosave'): void {
+export function clearSavedProgress(storageKey = DEFAULT_STORAGE_KEY): void {
   localStorage.removeItem(storageKey);
 }
 
 /**
  * Get saved progress metadata
  */
-export function getSavedProgressMetadata(storageKey = 'bf-questionnaire-autosave'): {
+export function getSavedProgressMetadata(storageKey = DEFAULT_STORAGE_KEY): {
   exists: boolean;
   lastSaved?: Date;
   flowId?: string;

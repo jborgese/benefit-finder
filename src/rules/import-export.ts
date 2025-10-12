@@ -616,7 +616,7 @@ function convertDatabaseRuleToDefinition(
   if (options.includeTests !== false && dbRule.testCases) {
     definition.testCases = dbRule.testCases.map((tc) => ({
       id: `test-${Date.now()}-${Math.random()}`,
-      description: tc.description ?? '',
+      description: tc.description,
       input: tc.input,
       expected: tc.expectedOutput,
     }));

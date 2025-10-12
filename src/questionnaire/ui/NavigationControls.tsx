@@ -45,7 +45,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
 
   const [isNavigating, setIsNavigating] = React.useState(false);
 
-  const handleBack = async () => {
+  const handleBack = async (): Promise<void> => {
     if (isNavigating) return;
 
     setIsNavigating(true);
@@ -63,7 +63,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
     }
   };
 
-  const handleForward = async () => {
+  const handleForward = async (): Promise<void> => {
     if (isNavigating) return;
 
     setIsNavigating(true);
@@ -81,7 +81,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
     }
   };
 
-  const progressPercent = progress?.progressPercent || 0;
+  const progressPercent = progress?.progressPercent ?? 0;
   const isLastQuestion = !canGoForward();
 
   return (
@@ -119,7 +119,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
         {showBack && (
           <button
             type="button"
-            onClick={handleBack}
+            onClick={() => void handleBack()}
             disabled={!canGoBack() || isNavigating}
             className="
               flex items-center gap-2 px-4 py-2
@@ -150,7 +150,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
         {showForward && (
           <button
             type="button"
-            onClick={handleForward}
+            onClick={() => void handleForward()}
             disabled={(!canGoForward() && !completed) || isNavigating}
             className={`
               flex items-center gap-2 px-6 py-2 rounded-md
@@ -196,7 +196,7 @@ export const CompactNavigationControls: React.FC<NavigationControlsProps> = (pro
   return (
     <NavigationControls
       {...props}
-      className={`${props.className || ''} compact-navigation`}
+      className={`${props.className ?? ''} compact-navigation`}
     />
   );
 };

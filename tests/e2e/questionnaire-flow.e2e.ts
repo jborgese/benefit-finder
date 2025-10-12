@@ -292,9 +292,6 @@ test.describe('Questionnaire Flow', () => {
       const yesNoButton = page.locator('button, input[type="radio"]', { hasText: /(yes|no)/i }).first();
 
       if (await yesNoButton.isVisible()) {
-        // Count visible questions before
-        const questionsBefore = await page.locator('input, select, textarea').count();
-
         // Click yes/no
         await yesNoButton.click();
         await page.waitForTimeout(500);
@@ -404,9 +401,6 @@ test.describe('Questionnaire Flow', () => {
         await page.goto('/');
         await waitForPageReady(page);
 
-        // Look for resume prompt
-        const resumePrompt = page.locator('text=/resume|continue|in progress/i');
-
         // May or may not show depending on implementation
         // Just check page is functional
         expect(true).toBeTruthy();
@@ -479,7 +473,7 @@ test.describe('Questionnaire Flow', () => {
         // Focus should move to next radio
         const focusedElement = await page.evaluate(() => {
           const el = document.activeElement as HTMLInputElement;
-          return el?.type;
+          return el.type;
         });
 
         expect(focusedElement).toBe('radio');
@@ -566,8 +560,6 @@ test.describe('Questionnaire Flow', () => {
       // Check focused element has focus indicator
       const hasFocusIndicator = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement;
-        if (!el) return false;
-
         const computed = window.getComputedStyle(el);
         return computed.outlineWidth !== '0px' && computed.outline !== 'none';
       });

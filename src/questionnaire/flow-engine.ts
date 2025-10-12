@@ -48,14 +48,14 @@ export class FlowEngine {
    * Get starting node
    */
   getStartNode(): FlowNode | null {
-    return this.flow.nodes.get(this.flow.startNodeId) || null;
+    return this.flow.nodes.get(this.flow.startNodeId) ?? null;
   }
 
   /**
    * Get node by ID
    */
   getNode(nodeId: string): FlowNode | null {
-    return this.flow.nodes.get(nodeId) || null;
+    return this.flow.nodes.get(nodeId) ?? null;
   }
 
   /**
@@ -63,13 +63,16 @@ export class FlowEngine {
    */
   getQuestion(nodeId: string): QuestionDefinition | null {
     const node = this.getNode(nodeId);
-    return node?.question || null;
+    return node?.question ?? null;
   }
 
   /**
    * Update context with answer
    */
   updateContext(fieldName: string, value: unknown): void {
+    // Using bracket notation for dynamic field access
+    // This is intentional and safe as fieldName comes from trusted question definitions
+    // eslint-disable-next-line security/detect-object-injection
     this.context[fieldName] = value;
   }
 
@@ -154,7 +157,7 @@ export class FlowEngine {
     // Evaluate branches (sorted by priority)
     if (currentNode.branches && currentNode.branches.length > 0) {
       const sortedBranches = [...currentNode.branches].sort(
-        (a, b) => (b.priority || 0) - (a.priority || 0)
+        (a, b) => (b.priority ?? 0) - (a.priority ?? 0)
       );
 
       for (const branch of sortedBranches) {
@@ -289,14 +292,47 @@ export class FlowEngine {
     const missingBranches: string[] = [];
 
     // Check start node exists
+    this.validateStartNode(errors);
+
+    // Check all nodes
+    this.validateAllNodes(errors, missingBranches);
+
+    // Check for orphaned nodes (not reachable from start)
+    this.validateReachability(errors, orphanedNodes);
+
+    // Check for circular references
+    this.validateCycles(errors, circularReferences);
+
+    return {
+      valid: errors.filter((e) => e.severity === 'error').length === 0,
+      errors,
+      orphanedNodes,
+      circularReferences,
+      missingBranches,
+    };
+  }
+
+  /**
+   * Validate that start node exists
+   */
+  private validateStartNode(
+    errors: Array<{ nodeId?: string; message: string; severity: 'error' | 'warning' }>
+  ): void {
     if (!this.flow.nodes.has(this.flow.startNodeId)) {
       errors.push({
         message: 'Start node not found in flow',
         severity: 'error',
       });
     }
+  }
 
-    // Check all nodes
+  /**
+   * Validate all nodes in the flow
+   */
+  private validateAllNodes(
+    errors: Array<{ nodeId?: string; message: string; severity: 'error' | 'warning' }>,
+    missingBranches: string[]
+  ): void {
     for (const [nodeId, node] of this.flow.nodes.entries()) {
       // Check next node exists
       if (node.nextId && !this.flow.nodes.has(node.nextId)) {
@@ -309,18 +345,7 @@ export class FlowEngine {
       }
 
       // Check branch targets exist
-      if (node.branches) {
-        for (const branch of node.branches) {
-          if (!this.flow.nodes.has(branch.targetId)) {
-            errors.push({
-              nodeId,
-              message: `Branch target ${branch.targetId} not found`,
-              severity: 'error',
-            });
-            missingBranches.push(branch.targetId);
-          }
-        }
-      }
+      this.validateNodeBranches(nodeId, node, errors, missingBranches);
 
       // Check for required field
       if (!node.question.fieldName) {
@@ -331,8 +356,40 @@ export class FlowEngine {
         });
       }
     }
+  }
 
-    // Check for orphaned nodes (not reachable from start)
+  /**
+   * Validate node branch targets
+   */
+  private validateNodeBranches(
+    nodeId: string,
+    node: FlowNode,
+    errors: Array<{ nodeId?: string; message: string; severity: 'error' | 'warning' }>,
+    missingBranches: string[]
+  ): void {
+    if (!node.branches) {
+      return;
+    }
+
+    for (const branch of node.branches) {
+      if (!this.flow.nodes.has(branch.targetId)) {
+        errors.push({
+          nodeId,
+          message: `Branch target ${branch.targetId} not found`,
+          severity: 'error',
+        });
+        missingBranches.push(branch.targetId);
+      }
+    }
+  }
+
+  /**
+   * Validate node reachability
+   */
+  private validateReachability(
+    errors: Array<{ nodeId?: string; message: string; severity: 'error' | 'warning' }>,
+    orphanedNodes: string[]
+  ): void {
     const reachable = this.findReachableNodes();
     for (const nodeId of this.flow.nodes.keys()) {
       if (!reachable.has(nodeId)) {
@@ -344,8 +401,15 @@ export class FlowEngine {
         });
       }
     }
+  }
 
-    // Check for circular references
+  /**
+   * Validate for circular references
+   */
+  private validateCycles(
+    errors: Array<{ nodeId?: string; message: string; severity: 'error' | 'warning' }>,
+    circularReferences: string[][]
+  ): void {
     const cycles = this.detectCycles();
     if (cycles.length > 0) {
       circularReferences.push(...cycles);
@@ -356,14 +420,6 @@ export class FlowEngine {
         });
       }
     }
-
-    return {
-      valid: errors.filter((e) => e.severity === 'error').length === 0,
-      errors,
-      orphanedNodes,
-      circularReferences,
-      missingBranches,
-    };
   }
 
   /**
@@ -374,7 +430,12 @@ export class FlowEngine {
     const queue = [this.flow.startNodeId];
 
     while (queue.length > 0) {
-      const nodeId = queue.shift()!;
+      const nodeId = queue.shift();
+      
+      // Skip if queue was empty (shouldn't happen due to while condition)
+      if (!nodeId) {
+        continue;
+      }
 
       if (reachable.has(nodeId)) {
         continue;
@@ -490,6 +551,7 @@ export function createFlowNode(
 
 /**
  * Add node to flow
+ * Note: Mutates flow in place for performance and API consistency
  */
 export function addNodeToFlow(
   flow: QuestionFlow,
@@ -502,6 +564,7 @@ export function addNodeToFlow(
 
 /**
  * Link two nodes (create default path)
+ * Note: Mutates flow in place for performance and API consistency
  */
 export function linkNodes(
   flow: QuestionFlow,
@@ -524,6 +587,7 @@ export function linkNodes(
 
 /**
  * Add conditional branch to node
+ * Note: Mutates flow in place for performance and API consistency
  */
 export function addBranch(
   flow: QuestionFlow,
@@ -536,9 +600,8 @@ export function addBranch(
     throw new Error(`Node ${fromNodeId} not found`);
   }
 
-  if (!node.branches) {
-    node.branches = [];
-  }
+  // Initialize branches array if needed using nullish coalescing assignment
+  node.branches ??= [];
 
   node.branches.push(branch);
   flow.updatedAt = Date.now();

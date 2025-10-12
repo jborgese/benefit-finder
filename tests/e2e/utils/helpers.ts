@@ -1,6 +1,6 @@
 /**
  * E2E Test Helpers
- * 
+ *
  * Utility functions for Playwright tests.
  */
 
@@ -12,7 +12,7 @@ import { Page, Locator, expect } from '@playwright/test';
 export async function waitForPageReady(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle');
   await page.waitForLoadState('domcontentloaded');
-  
+
   // Wait for React to be ready
   await page.waitForFunction(() => {
     return document.readyState === 'complete';
@@ -24,11 +24,11 @@ export async function waitForPageReady(page: Page): Promise<void> {
  */
 export async function clearAllStorage(page: Page): Promise<void> {
   await page.context().clearCookies();
-  
+
   await page.evaluate(async () => {
     localStorage.clear();
     sessionStorage.clear();
-    
+
     // Clear IndexedDB
     const databases = await window.indexedDB.databases();
     for (const db of databases) {
@@ -57,7 +57,7 @@ export async function takeScreenshot(
  */
 export async function waitForStable(locator: Locator): Promise<void> {
   await locator.waitFor({ state: 'visible' });
-  
+
   // Wait for animations to complete
   await locator.evaluate((element) => {
     return Promise.all(
@@ -76,7 +76,7 @@ export async function fillFormField(
 ): Promise<void> {
   const input = page.getByLabel(label, { exact: false });
   await input.fill(value);
-  
+
   // Verify value was set
   await expect(input).toHaveValue(value);
 }
@@ -89,7 +89,7 @@ export async function clickAndWait(
   waitFor: 'navigation' | 'response' | 'load' = 'load'
 ): Promise<void> {
   const page = locator.page();
-  
+
   if (waitFor === 'navigation') {
     await Promise.all([
       page.waitForNavigation(),
@@ -109,8 +109,8 @@ export async function clickAndWait(
 /**
  * Check if element is visible in viewport
  */
-export async function isInViewport(locator: Locator): Promise<boolean> {
-  return await locator.evaluate((element) => {
+export function isInViewport(locator: Locator): Promise<boolean> {
+  return locator.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     return (
       rect.top >= 0 &&
@@ -128,7 +128,7 @@ export async function scrollIntoView(locator: Locator): Promise<void> {
   await locator.evaluate((element) => {
     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
-  
+
   // Wait for scroll to complete
   await locator.page().waitForTimeout(500);
 }
@@ -136,13 +136,14 @@ export async function scrollIntoView(locator: Locator): Promise<void> {
 /**
  * Get localStorage data
  */
-export async function getLocalStorage(page: Page): Promise<Record<string, string>> {
-  return await page.evaluate(() => {
+export function getLocalStorage(page: Page): Promise<Record<string, string>> {
+  return page.evaluate(() => {
     const items: Record<string, string> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key) {
-        items[key] = localStorage.getItem(key) || '';
+        // eslint-disable-next-line security/detect-object-injection
+        items[key] = localStorage.getItem(key) ?? '';
       }
     }
     return items;
@@ -166,15 +167,15 @@ export async function setLocalStorage(
 /**
  * Check console for errors
  */
-export async function checkConsoleErrors(page: Page): Promise<string[]> {
+export function checkConsoleErrors(page: Page): string[] {
   const errors: string[] = [];
-  
+
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
       errors.push(msg.text());
     }
   });
-  
+
   return errors;
 }
 

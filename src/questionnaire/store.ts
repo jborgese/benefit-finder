@@ -22,6 +22,54 @@ import type {
 } from './types';
 
 // ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Update current question state to answered
+ */
+function updateCurrentQuestionState(
+  questionStates: Map<string, QuestionState>,
+  currentNodeId: string
+): void {
+  const currentState = questionStates.get(currentNodeId);
+  if (currentState && currentState.status === 'current') {
+    currentState.status = 'answered';
+  }
+}
+
+/**
+ * Update next question state to current
+ */
+function updateNextQuestionState(
+  questionStates: Map<string, QuestionState>,
+  targetNodeId: string
+): void {
+  const nextState = questionStates.get(targetNodeId);
+  if (nextState) {
+    nextState.status = 'current';
+    nextState.visited = true;
+    nextState.visitCount++;
+  }
+}
+
+/**
+ * Mark skipped questions
+ */
+function markSkippedQuestions(
+  questionStates: Map<string, QuestionState>,
+  skippedIds: string[]
+): void {
+  for (const skippedId of skippedIds) {
+    const skippedState = questionStates.get(skippedId);
+    if (skippedState) {
+      skippedState.status = 'skipped';
+      skippedState.visible = false;
+    }
+  }
+}
+
+// ============================================================================
 // STORE STATE
 // ============================================================================
 
@@ -314,29 +362,13 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         if (result.success && result.targetNodeId) {
           const newQuestionStates = new Map(state.questionStates);
 
-          // Update current question state
-          const currentState = newQuestionStates.get(state.currentNodeId);
-          if (currentState && currentState.status === 'current') {
-            currentState.status = 'answered';
-          }
-
-          // Set new question as current
-          const nextState = newQuestionStates.get(result.targetNodeId);
-          if (nextState) {
-            nextState.status = 'current';
-            nextState.visited = true;
-            nextState.visitCount++;
-          }
+          // Update question states
+          updateCurrentQuestionState(newQuestionStates, state.currentNodeId);
+          updateNextQuestionState(newQuestionStates, result.targetNodeId);
 
           // Mark skipped questions
           if (result.questionsSkipped) {
-            for (const skippedId of result.questionsSkipped) {
-              const skippedState = newQuestionStates.get(skippedId);
-              if (skippedState) {
-                skippedState.status = 'skipped';
-                skippedState.visible = false;
-              }
-            }
+            markSkippedQuestions(newQuestionStates, result.questionsSkipped);
           }
 
           const now = Date.now();
@@ -569,7 +601,7 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         }
 
         const node = state.flow.nodes.get(state.currentNodeId);
-        return node?.question || null;
+        return node?.question ?? null;
       },
 
       getAnswerContext: (): QuestionContext => {
@@ -648,10 +680,11 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
       // Hydration function to restore Maps
       onRehydrateStorage: () => (state) => {
         if (state && Array.isArray(state.answers)) {
-          state.answers = new Map(state.answers as any);
+          // Convert persisted array back to Map
+          state.answers = new Map(state.answers as Array<[string, QuestionAnswer]>);
         }
-        if (!state?.questionStates) {
-          state!.questionStates = new Map();
+        if (state && !state.questionStates) {
+          state.questionStates = new Map();
         }
       },
     }
