@@ -284,7 +284,7 @@ function checkPerformanceTargets(results: PerformanceResult[]): boolean {
 // MAIN EXECUTION
 // ============================================================================
 
-async function main(): Promise<void> {
+function main(): void {
   console.log('╔═══════════════════════════════════════════════════╗');
   console.log('║         BenefitFinder Performance Tests          ║');
   console.log('╚═══════════════════════════════════════════════════╝');
@@ -317,8 +317,10 @@ async function main(): Promise<void> {
 }
 
 // Run tests
-main().catch(error => {
+try {
+  main();
+} catch (error) {
   console.error('Performance tests failed:', error);
   process.exit(1);
-});
+}
 
