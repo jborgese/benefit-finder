@@ -202,7 +202,7 @@ export async function runTestSuite(
  * @param options Evaluation options
  * @returns Array of test suite results
  */
-export async function runTestSuites(
+export function runTestSuites(
   suites: RuleTestSuite[],
   options: Partial<RuleEvaluationOptions> = {}
 ): Promise<RuleTestSuiteResult[]> {
@@ -301,7 +301,11 @@ export function generateCombinationTests(
   for (const combination of combinations) {
     const input: Record<string, unknown> = {};
     for (let i = 0; i < varNames.length; i++) {
-      input[varNames[i]] = combination[i];
+      const varName = varNames[i];
+      const value = combination[i];
+      if (varName !== undefined && value !== undefined) {
+        input[varName] = value;
+      }
     }
 
     testCases.push({
@@ -374,8 +378,8 @@ export function generateCoverageReport(
   coveragePercent: number;
 } {
   const validation = validateRule(rule);
-  const allOperators = validation.operators || [];
-  const allVariables = validation.variables || [];
+  const allOperators = validation.operators ?? [];
+  const allVariables = validation.variables ?? [];
 
   // Extract covered operators and variables from test cases
   const coveredVariables = new Set<string>();
@@ -417,14 +421,18 @@ function deepEqual(a: unknown, b: unknown): boolean {
   if (a === null || b === null) return a === b;
   if (typeof a !== 'object' || typeof b !== 'object') return a === b;
 
-  const aKeys = Object.keys(a as object);
-  const bKeys = Object.keys(b as object);
+  const aRecord = a as Record<string, unknown>;
+  const bRecord = b as Record<string, unknown>;
+  const aKeys = Object.keys(aRecord);
+  const bKeys = Object.keys(bRecord);
 
   if (aKeys.length !== bKeys.length) return false;
 
-  return aKeys.every(
-    (key) => deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key])
-  );
+  return aKeys.every((key) => {
+    const aValue = aRecord[key];
+    const bValue = bRecord[key];
+    return deepEqual(aValue, bValue);
+  });
 }
 
 /**
@@ -480,7 +488,9 @@ export class TestSuiteBuilder {
    * Add a test case
    */
   test(testCase: RuleTestCase): TestSuiteBuilder {
-    this.suite.testCases!.push(testCase);
+    if (this.suite.testCases) {
+      this.suite.testCases.push(testCase);
+    }
     return this;
   }
 
@@ -488,7 +498,9 @@ export class TestSuiteBuilder {
    * Add multiple test cases
    */
   tests(testCases: RuleTestCase[]): TestSuiteBuilder {
-    this.suite.testCases!.push(...testCases);
+    if (this.suite.testCases) {
+      this.suite.testCases.push(...testCases);
+    }
     return this;
   }
 

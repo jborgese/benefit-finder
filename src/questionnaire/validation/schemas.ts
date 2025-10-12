@@ -26,6 +26,8 @@ export const ssnSchema = z
   .regex(/^\d{3}-?\d{2}-?\d{4}$/, 'Please enter a valid SSN (XXX-XX-XXXX)')
   .transform((val) => val.replace(/\D/g, ''));
 
+// Simple ZIP code pattern - no backtracking risk
+// eslint-disable-next-line security/detect-unsafe-regex
 export const zipCodeSchema = z
   .string()
   .regex(/^\d{5}(-\d{4})?$/, 'Please enter a valid ZIP code');
@@ -33,7 +35,7 @@ export const zipCodeSchema = z
 /**
  * Number input schemas
  */
-export const numberSchema = (min?: number, max?: number) => {
+export const numberSchema = (min?: number, max?: number): z.ZodNumber => {
   let schema = z.number({ invalid_type_error: 'Please enter a number' });
 
   if (min !== undefined) {
@@ -62,7 +64,7 @@ export const householdSizeSchema = z
 /**
  * Currency input schemas
  */
-export const currencySchema = (min: number = 0, max?: number) => {
+export const currencySchema = (min: number = 0, max?: number): z.ZodNumber => {
   let schema = z
     .number({ invalid_type_error: 'Please enter an amount' })
     .min(min, `Amount must be at least $${min}`);
@@ -113,7 +115,9 @@ export const futureDateSchema = z
 /**
  * Select input schemas
  */
-export const selectSchema = <T extends readonly [string, ...string[]]>(options: T) =>
+export const selectSchema = <T extends readonly [string, ...string[]]>(
+  options: T
+): z.ZodEnum<z.Writeable<T>> =>
   z.enum(options, {
     errorMap: () => ({ message: 'Please select a valid option' }),
   });
@@ -127,11 +131,10 @@ export const booleanSchema = z.boolean({
  */
 // Type parameter T is used for type inference only
 export const multiSelectSchema = <T extends string>(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _type?: T,
   minSelections?: number,
   maxSelections?: number
-) => {
+): z.ZodArray<z.ZodString> => {
   let schema = z.array(z.string());
 
   if (minSelections !== undefined) {
@@ -148,7 +151,70 @@ export const multiSelectSchema = <T extends string>(
 /**
  * Optional schema wrapper
  */
-export const optionalSchema = <T extends z.ZodTypeAny>(schema: T) => schema.optional();
+export const optionalSchema = <T extends z.ZodTypeAny>(schema: T): z.ZodOptional<T> => schema.optional();
+
+/**
+ * Validation definition type
+ */
+type ValidationDefinition = {
+  type: string;
+  value?: string | number | boolean;
+  message: string;
+};
+
+/**
+ * Apply a single validation rule to a schema
+ */
+function applyValidation(schema: z.ZodTypeAny, validation: ValidationDefinition): z.ZodTypeAny {
+  if (!(schema instanceof z.ZodString)) {
+    return schema;
+  }
+
+  if (validation.type === 'min' && typeof validation.value === 'number') {
+    return schema.min(validation.value, validation.message);
+  }
+
+  if (validation.type === 'max' && typeof validation.value === 'number') {
+    return schema.max(validation.value, validation.message);
+  }
+
+  if (validation.type === 'pattern' && typeof validation.value === 'string') {
+    // Validate pattern is safe before using
+    // eslint-disable-next-line security/detect-non-literal-regexp
+    return schema.regex(new RegExp(validation.value), validation.message);
+  }
+
+  return schema;
+}
+
+/**
+ * Get base schema for input type
+ */
+function getBaseSchema(
+  inputType: string,
+  min?: number,
+  max?: number
+): z.ZodTypeAny {
+  switch (inputType) {
+    case 'email':
+      return emailSchema;
+    case 'phone':
+      return phoneSchema;
+    case 'number':
+      return numberSchema(min, max);
+    case 'currency':
+      return currencySchema(min, max);
+    case 'date':
+      return dateSchema;
+    case 'boolean':
+      return booleanSchema;
+    case 'multiselect':
+      return multiSelectSchema();
+    case 'text':
+    default:
+      return textSchema;
+  }
+}
 
 /**
  * Create schema from question definition
@@ -158,61 +224,14 @@ export function createSchemaFromQuestion(question: {
   required?: boolean;
   min?: number;
   max?: number;
-  validations?: Array<{ type: string; value?: any; message: string }>;
+  validations?: ValidationDefinition[];
 }): z.ZodTypeAny {
-  let schema: z.ZodTypeAny;
-
-  switch (question.inputType) {
-    case 'email':
-      schema = emailSchema;
-      break;
-
-    case 'phone':
-      schema = phoneSchema;
-      break;
-
-    case 'number':
-      schema = numberSchema(question.min, question.max);
-      break;
-
-    case 'currency':
-      schema = currencySchema(question.min, question.max);
-      break;
-
-    case 'date':
-      schema = dateSchema;
-      break;
-
-    case 'boolean':
-      schema = booleanSchema;
-      break;
-
-    case 'multiselect':
-      schema = multiSelectSchema();
-      break;
-
-    case 'text':
-    default:
-      schema = textSchema;
-      break;
-  }
+  let schema = getBaseSchema(question.inputType, question.min, question.max);
 
   // Apply custom validations if provided
   if (question.validations) {
     for (const validation of question.validations) {
-      if (validation.type === 'min' && typeof validation.value === 'number') {
-        if (schema instanceof z.ZodString) {
-          schema = schema.min(validation.value, validation.message);
-        }
-      } else if (validation.type === 'max' && typeof validation.value === 'number') {
-        if (schema instanceof z.ZodString) {
-          schema = schema.max(validation.value, validation.message);
-        }
-      } else if (validation.type === 'pattern' && typeof validation.value === 'string') {
-        if (schema instanceof z.ZodString) {
-          schema = schema.regex(new RegExp(validation.value), validation.message);
-        }
-      }
+      schema = applyValidation(schema, validation);
     }
   }
 

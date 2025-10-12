@@ -5,13 +5,14 @@
  * These examples showcase best practices for state management in BenefitFinder.
  */
 
+import React from 'react';
 import { useAppSettingsStore, useQuestionnaireStore, useUIStore } from '../index';
 
 /**
  * Example 1: Theme Switcher Component
  * Demonstrates using app settings store for theme management
  */
-export function ThemeSwitcher(): JSX.Element {
+export function ThemeSwitcher(): React.JSX.Element {
   const theme = useAppSettingsStore((state) => state.theme);
   const setTheme = useAppSettingsStore((state) => state.setTheme);
 
@@ -49,7 +50,7 @@ export function ThemeSwitcher(): JSX.Element {
  * Example 2: Language Selector
  * Shows multi-language support implementation
  */
-export function LanguageSelector(): JSX.Element {
+export function LanguageSelector(): React.JSX.Element {
   const { language, setLanguage } = useAppSettingsStore((state) => ({
     language: state.language,
     setLanguage: state.setLanguage,
@@ -72,7 +73,7 @@ export function LanguageSelector(): JSX.Element {
  * Example 3: Questionnaire Progress Bar
  * Demonstrates questionnaire state tracking
  */
-export function QuestionnaireProgress(): JSX.Element {
+export function QuestionnaireProgress(): React.JSX.Element {
   const progress = useQuestionnaireStore((state) => state.progress);
 
   return (
@@ -102,7 +103,7 @@ export function QuestionnaireProgress(): JSX.Element {
  * Example 4: Toast Notification Trigger
  * Shows how to display toast messages
  */
-export function SaveButton(): JSX.Element {
+export function SaveButton(): React.JSX.Element {
   const addToast = useUIStore((state) => state.addToast);
 
   const handleSave = async (): Promise<void> => {
@@ -138,7 +139,7 @@ export function SaveButton(): JSX.Element {
  * Example 5: Modal Opener
  * Demonstrates modal management
  */
-export function DeleteProfileButton(): JSX.Element {
+export function DeleteProfileButton(): React.JSX.Element {
   const { openModal, closeModal, addToast } = useUIStore((state) => ({
     openModal: state.openModal,
     closeModal: state.closeModal,
@@ -180,7 +181,7 @@ export function DeleteProfileButton(): JSX.Element {
  * Example 6: Loading Overlay
  * Shows loading state management
  */
-export function AsyncOperationButton(): JSX.Element {
+export function AsyncOperationButton(): React.JSX.Element {
   const { isLoading, setLoading } = useUIStore((state) => ({
     isLoading: state.isLoading,
     setLoading: state.setLoading,
@@ -217,7 +218,7 @@ export function AsyncOperationButton(): JSX.Element {
  * Example 7: Accessibility Settings Panel
  * Demonstrates accessibility preferences management
  */
-export function AccessibilitySettings(): JSX.Element {
+export function AccessibilitySettings(): React.JSX.Element {
   const {
     highContrast,
     reduceMotion,
@@ -281,7 +282,7 @@ export function AccessibilitySettings(): JSX.Element {
  * Example 8: Questionnaire Question Component
  * Shows complete questionnaire flow integration
  */
-export function QuestionComponent(): JSX.Element {
+export function QuestionComponent(): React.JSX.Element {
   const {
     currentQuestionId,
     answers,
@@ -299,7 +300,7 @@ export function QuestionComponent(): JSX.Element {
   }));
 
   const currentAnswer = currentQuestionId
-    ? answers.get(currentQuestionId)?.value ?? null
+    ? answers[currentQuestionId]?.value ?? null
     : null;
 
   const handleSubmit = (): void => {
@@ -308,8 +309,8 @@ export function QuestionComponent(): JSX.Element {
     }
   };
 
-  const currentValidationError = currentQuestionId ? validationErrors.get(currentQuestionId) : undefined;
-  const hasValidationError = currentQuestionId ? validationErrors.has(currentQuestionId) : false;
+  const currentValidationError = currentQuestionId ? validationErrors[currentQuestionId] : undefined;
+  const hasValidationError = currentQuestionId ? currentQuestionId in validationErrors : false;
 
   return (
     <div className="space-y-4">

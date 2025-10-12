@@ -318,12 +318,16 @@ function generateExplanationTree(
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
+    if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) continue;
+
     const operandValue = ruleAsRecord[operator];
     if (operandValue === undefined) continue;
 
     const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
-    const descriptionFn = OPERATOR_DESCRIPTIONS[operator];
-    const description = descriptionFn !== undefined
+    const descriptionFn = Object.prototype.hasOwnProperty.call(OPERATOR_DESCRIPTIONS, operator)
+      ? OPERATOR_DESCRIPTIONS[operator]
+      : undefined;
+    const description = descriptionFn
       ? descriptionFn(operands as unknown[])
       : `Operation: ${operator}`;
 
@@ -375,6 +379,10 @@ function generateRuleDescription(
   }
 
   const ruleAsRecord = rule as Record<string, unknown>;
+  if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) {
+    return 'Invalid rule structure';
+  }
+
   const operandValue = ruleAsRecord[operator];
   const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
 
@@ -385,8 +393,10 @@ function generateRuleDescription(
       return `Rule: ${JSON.stringify(rule)}`;
     case 'standard':
     default: {
-      const descriptionFn = OPERATOR_DESCRIPTIONS[operator];
-      return descriptionFn !== undefined
+      const descriptionFn = Object.prototype.hasOwnProperty.call(OPERATOR_DESCRIPTIONS, operator)
+        ? OPERATOR_DESCRIPTIONS[operator]
+        : undefined;
+      return descriptionFn
         ? descriptionFn(operands as unknown[])
         : `Must meet ${operator} condition`;
     }
@@ -409,8 +419,9 @@ function generateSimpleDescription(operator: string, _operands: JsonLogicRule[])
     'between': 'Your value must be in the acceptable range',
   };
 
-  const description = simpleDescriptions[operator];
-  return description ?? 'You must meet this requirement';
+  return Object.prototype.hasOwnProperty.call(simpleDescriptions, operator)
+    ? simpleDescriptions[operator]
+    : 'You must meet this requirement';
 }
 
 /**
@@ -560,8 +571,12 @@ export function explainDifference(
   const allKeys = new Set([...Object.keys(data1), ...Object.keys(data2)]);
 
   for (const key of allKeys) {
-    const value1 = data1[key];
-    const value2 = data2[key];
+    if (!Object.prototype.hasOwnProperty.call(data1, key) && !Object.prototype.hasOwnProperty.call(data2, key)) {
+      continue;
+    }
+
+    const value1 = Object.prototype.hasOwnProperty.call(data1, key) ? data1[key] : undefined;
+    const value2 = Object.prototype.hasOwnProperty.call(data2, key) ? data2[key] : undefined;
 
     if (value1 !== value2) {
       changedFields.push({
@@ -629,6 +644,8 @@ function analyzeRuleForSuggestions(
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
+    if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) continue;
+
     const operandValue = ruleAsRecord[operator];
     if (operandValue === undefined) continue;
 
@@ -664,7 +681,7 @@ function getComparisonSuggestion(
   }
 
   const varName = (left as { var: string }).var;
-  const currentValue = data[varName];
+  const currentValue = Object.prototype.hasOwnProperty.call(data, varName) ? data[varName] : undefined;
 
   if (operator === '>' || operator === '>=') {
     return `Increase ${formatFieldName(varName)} from ${formatValue(currentValue)} to at least ${formatValue(right)}`;

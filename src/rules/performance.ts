@@ -224,11 +224,13 @@ export function calculateStats(metrics: PerformanceMetrics[]): PerformanceStats 
   // Calculate percentiles
   const p95Index = Math.floor(times.length * 0.95);
   const p99Index = Math.floor(times.length * 0.99);
-  const p95 = times[p95Index] || times[times.length - 1];
-  const p99 = times[p99Index] || times[times.length - 1];
+  // eslint-disable-next-line security/detect-object-injection -- Array access with computed index is safe here
+  const p95 = times[p95Index] ?? times[times.length - 1];
+  // eslint-disable-next-line security/detect-object-injection -- Array access with computed index is safe here
+  const p99 = times[p99Index] ?? times[times.length - 1];
 
   // Calculate standard deviation
-  const squareDiffs = times.map((time) => Math.pow(time - average, 2));
+  const squareDiffs = times.map((time) => (time - average) ** 2);
   const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / times.length;
   const stdDev = Math.sqrt(avgSquareDiff);
 
@@ -308,9 +310,9 @@ export function getPerformanceWarnings(thresholds: {
   const warnings: PerformanceWarning[] = [];
 
   const defaultThresholds = {
-    slowEvaluation: thresholds.slowEvaluation || 100, // 100ms
-    highComplexity: thresholds.highComplexity || 80,
-    lowCacheHitRate: thresholds.lowCacheHitRate || 0.5, // 50%
+    slowEvaluation: thresholds.slowEvaluation ?? 100, // 100ms
+    highComplexity: thresholds.highComplexity ?? 80,
+    lowCacheHitRate: thresholds.lowCacheHitRate ?? 0.5, // 50%
   };
 
   const allMetrics = monitor.getAll();
@@ -332,7 +334,7 @@ export function getPerformanceWarnings(thresholds: {
   const byRule = new Map<string, PerformanceMetrics[]>();
   for (const metric of allMetrics) {
     if (metric.ruleId) {
-      const existing = byRule.get(metric.ruleId) || [];
+      const existing = byRule.get(metric.ruleId) ?? [];
       existing.push(metric);
       byRule.set(metric.ruleId, existing);
     }
@@ -397,7 +399,7 @@ export function generatePerformanceReport(): string {
   const byRule = new Map<string, PerformanceMetrics[]>();
   for (const metric of allMetrics) {
     if (metric.ruleId) {
-      const existing = byRule.get(metric.ruleId) || [];
+      const existing = byRule.get(metric.ruleId) ?? [];
       existing.push(metric);
       byRule.set(metric.ruleId, existing);
     }
@@ -581,7 +583,7 @@ export function analyzePerformance(rule: JsonLogicRule): {
   const suggestions: string[] = [];
   let complexity = 0;
 
-  const analyze = (node: JsonLogicRule, depth: number) => {
+  const analyze = (node: JsonLogicRule, depth: number): void => {
     if (node === null || typeof node !== 'object') {
       complexity += 1;
       return;
@@ -611,6 +613,7 @@ export function analyzePerformance(rule: JsonLogicRule): {
       }
 
       const nodeAsRecord = node as Record<string, unknown>;
+      // eslint-disable-next-line security/detect-object-injection -- Dynamic property access is safe here, operator is from Object.keys()
       const value = nodeAsRecord[operator];
       if (value !== undefined) {
         analyze(value as JsonLogicRule, depth + 1);
@@ -660,6 +663,7 @@ export async function benchmarkRule(
 
   for (let i = 0; i < testDataSets.length; i++) {
     const evalStart = performance.now();
+    // eslint-disable-next-line security/detect-object-injection -- Array access with loop index is safe here
     const result = await evaluateRule(rule, testDataSets[i]);
     const evalEnd = performance.now();
 

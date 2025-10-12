@@ -71,6 +71,111 @@ function unregisterCustomOperators(operatorNames: string[]): void {
 // ============================================================================
 
 /**
+ * Validate rule and data inputs
+ */
+function validateInputs(rule: JsonLogicRule, data: JsonLogicData): void {
+  if (!rule) {
+    throw createEvaluationError(
+      'Rule cannot be null or undefined',
+      EVALUATION_ERROR_CODES.INVALID_RULE,
+      rule,
+      data
+    );
+  }
+
+  if (typeof data !== 'object') {
+    throw createEvaluationError(
+      'Data must be an object',
+      EVALUATION_ERROR_CODES.INVALID_DATA,
+      rule,
+      data
+    );
+  }
+}
+
+/**
+ * Setup custom operators and return registered operator names
+ */
+function setupCustomOperators(operators: Record<string, (...args: unknown[]) => unknown>): string[] {
+  if (Object.keys(operators).length === 0) {
+    return [];
+  }
+
+  const operatorNames = Object.keys(operators);
+  registerCustomOperators(operators);
+  return operatorNames;
+}
+
+/**
+ * Validate rule depth
+ */
+function validateRuleDepth(rule: JsonLogicRule, maxDepth: number, data: JsonLogicData): void {
+  const depth = calculateRuleDepth(rule);
+  if (depth > maxDepth) {
+    throw createEvaluationError(
+      `Rule depth (${depth}) exceeds maximum (${maxDepth})`,
+      EVALUATION_ERROR_CODES.MAX_DEPTH_EXCEEDED,
+      rule,
+      data
+    );
+  }
+}
+
+/**
+ * Create success result
+ */
+function createSuccessResult<T>(
+  result: T,
+  startTime: number,
+  measureTime: boolean,
+  captureContext: boolean,
+  data: JsonLogicData
+): RuleEvaluationResult<T> {
+  const endTime = measureTime ? performance.now() : 0;
+  const executionTime = measureTime ? endTime - startTime : undefined;
+
+  return {
+    result,
+    success: true,
+    executionTime,
+    context: captureContext ? { ...data } : undefined,
+  };
+}
+
+/**
+ * Create error result
+ */
+function createErrorResult<T>(
+  error: unknown,
+  rule: JsonLogicRule,
+  data: JsonLogicData,
+  startTime: number,
+  measureTime: boolean,
+  captureContext: boolean
+): RuleEvaluationResult<T> {
+  const endTime = measureTime ? performance.now() : 0;
+  const executionTime = measureTime ? endTime - startTime : undefined;
+
+  const errorDetails = error instanceof Error
+    ? createEvaluationErrorFromException(error, rule, data)
+    : createEvaluationError(
+        'Unknown error occurred',
+        EVALUATION_ERROR_CODES.UNKNOWN_ERROR,
+        rule,
+        data
+      );
+
+  return {
+    result: false as T,
+    success: false,
+    error: errorDetails.message,
+    errorDetails,
+    executionTime,
+    context: captureContext ? { ...data } : undefined,
+  };
+}
+
+/**
  * Evaluate a JSON Logic rule
  *
  * @param rule JSON Logic rule to evaluate
@@ -95,89 +200,39 @@ export async function evaluateRule<T = boolean>(
   options: Partial<RuleEvaluationOptions> = {}
 ): Promise<RuleEvaluationResult<T>> {
   const opts = { ...DEFAULT_EVALUATION_OPTIONS, ...options };
-
   const startTime = opts.measureTime ? performance.now() : 0;
-  const registeredOperators: string[] = [];
+  let registeredOperators: string[] = [];
 
   try {
     // Validate inputs
-    if (!rule) {
-      throw createEvaluationError(
-        'Rule cannot be null or undefined',
-        EVALUATION_ERROR_CODES.INVALID_RULE,
-        rule,
-        data
-      );
-    }
-
-    if (!data || typeof data !== 'object') {
-      throw createEvaluationError(
-        'Data must be an object',
-        EVALUATION_ERROR_CODES.INVALID_DATA,
-        rule,
-        data
-      );
-    }
+    validateInputs(rule, data);
 
     // Register custom operators
-    if (Object.keys(opts.customOperators).length > 0) {
-      registerCustomOperators(opts.customOperators);
-      registeredOperators.push(...Object.keys(opts.customOperators));
-    }
+    registeredOperators = setupCustomOperators(opts.customOperators);
 
     // Check depth
-    const depth = calculateRuleDepth(rule);
-    if (depth > opts.maxDepth) {
-      throw createEvaluationError(
-        `Rule depth (${depth}) exceeds maximum (${opts.maxDepth})`,
-        EVALUATION_ERROR_CODES.MAX_DEPTH_EXCEEDED,
-        rule,
-        data
-      );
-    }
+    validateRuleDepth(rule, opts.maxDepth, data);
 
     // Evaluate with timeout
-    const result = await evaluateWithTimeout<T>(
-      rule,
-      data,
-      opts.timeout
-    );
+    const result = await evaluateWithTimeout<T>(rule, data, opts.timeout);
 
-    const endTime = opts.measureTime ? performance.now() : 0;
-    const executionTime = opts.measureTime ? endTime - startTime : undefined;
-
-    return {
-      result,
-      success: true,
-      executionTime,
-      context: opts.captureContext ? { ...data } : undefined,
-    };
+    return createSuccessResult(result, startTime, opts.measureTime, opts.captureContext, data);
 
   } catch (error) {
-    const endTime = opts.measureTime ? performance.now() : 0;
-    const executionTime = opts.measureTime ? endTime - startTime : undefined;
-
-    const errorDetails = error instanceof Error
-      ? createEvaluationErrorFromException(error, rule, data)
-      : createEvaluationError(
-          'Unknown error occurred',
-          EVALUATION_ERROR_CODES.UNKNOWN_ERROR,
-          rule,
-          data
-        );
+    const errorResult = createErrorResult<T>(
+      error,
+      rule,
+      data,
+      startTime,
+      opts.measureTime,
+      opts.captureContext
+    );
 
     if (opts.strict) {
-      throw errorDetails;
+      throw errorResult.errorDetails;
     }
 
-    return {
-      result: false as T,
-      success: false,
-      error: errorDetails.message,
-      errorDetails,
-      executionTime,
-      context: opts.captureContext ? { ...data } : undefined,
-    };
+    return errorResult;
 
   } finally {
     // Clean up custom operators
@@ -190,7 +245,7 @@ export async function evaluateRule<T = boolean>(
 /**
  * Evaluate a rule with timeout
  */
-async function evaluateWithTimeout<T>(
+function evaluateWithTimeout<T>(
   rule: JsonLogicRule,
   data: JsonLogicData,
   timeout: number
@@ -208,7 +263,8 @@ async function evaluateWithTimeout<T>(
     }, timeout);
 
     try {
-      const result = jsonLogic.apply(rule as any, data) as T;
+      // json-logic-js types don't match our stricter types, but the library handles JsonLogicRule correctly
+      const result = jsonLogic.apply(rule as unknown as ReturnType<typeof jsonLogic.apply>, data) as T;
       clearTimeout(timeoutId);
       resolve(result);
     } catch (error) {
@@ -231,7 +287,8 @@ export function evaluateRuleSync<T = boolean>(
 ): RuleEvaluationResult<T> {
   try {
     const startTime = performance.now();
-    const result = jsonLogic.apply(rule as any, data) as T;
+    // json-logic-js types don't match our stricter types, but the library handles JsonLogicRule correctly
+    const result = jsonLogic.apply(rule as unknown as ReturnType<typeof jsonLogic.apply>, data) as T;
     const endTime = performance.now();
 
     return {
@@ -276,7 +333,7 @@ export function evaluateRuleSync<T = boolean>(
  * const results = await batchEvaluateRules(rules, data);
  * ```
  */
-export async function batchEvaluateRules<T = boolean>(
+export function batchEvaluateRules<T = boolean>(
   rules: JsonLogicRule[],
   data: JsonLogicData,
   options: Partial<RuleEvaluationOptions> = {}
@@ -293,7 +350,7 @@ export async function batchEvaluateRules<T = boolean>(
  * @param options Evaluation options
  * @returns Array of evaluation results
  */
-export async function evaluateMultiple<T = boolean>(
+export function evaluateMultiple<T = boolean>(
   ruleDataPairs: Array<[JsonLogicRule, JsonLogicData]>,
   options: Partial<RuleEvaluationOptions> = {}
 ): Promise<RuleEvaluationResult<T>[]> {

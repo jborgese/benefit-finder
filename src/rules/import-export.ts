@@ -54,11 +54,11 @@ export async function importRule(
   options: RuleImportOptions = {}
 ): Promise<RuleImportResult> {
   const opts = {
-    mode: options.mode || 'upsert',
+    mode: options.mode ?? 'upsert',
     validate: options.validate !== false,
-    skipTests: options.skipTests || false,
+    skipTests: options.skipTests ?? false,
     overwriteExisting: options.overwriteExisting !== false,
-    dryRun: options.dryRun || false,
+    dryRun: options.dryRun ?? false,
   };
 
   const result: RuleImportResult = {
@@ -85,75 +85,26 @@ export async function importRule(
 
     const rule = validation.data;
 
-    // Validate logic if requested
-    if (opts.validate) {
-      const logicValidation = await validateRuleLogic(rule);
-      if (!logicValidation.valid) {
-        result.errors.push(...logicValidation.errors.map((e) => ({
-          ruleId: rule.id,
-          message: e.message,
-          code: e.code,
-        })));
-        result.failed = 1;
-        return result;
-      }
-
-      if (logicValidation.warnings.length > 0) {
-        result.warnings.push(...logicValidation.warnings.map((w) => ({
-          ruleId: rule.id,
-          message: w.message,
-        })));
-      }
+    // Validate logic and run tests
+    const validationSuccess = await performRuleValidationAndTests(
+      rule,
+      { validate: opts.validate, skipTests: opts.skipTests },
+      result
+    );
+    if (!validationSuccess) {
+      result.failed = 1;
+      return result;
     }
 
-    // Run tests if included and not skipped
-    if (!opts.skipTests && rule.testCases && rule.testCases.length > 0) {
-      const testResult = await runRuleTests(rule);
-      if (!testResult.success) {
-        result.errors.push({
-          ruleId: rule.id,
-          message: `Tests failed: ${testResult.failed}/${testResult.total}`,
-          code: IMPORT_ERROR_CODES.TEST_FAILED,
-        });
-        result.warnings.push({
-          ruleId: rule.id,
-          message: 'Continuing import despite test failures',
-        });
-      }
-    }
-
-    // Check if rule already exists
-    const db = getDatabase();
-    const existing = await db.eligibility_rules.findOne(rule.id).exec();
-
-    if (existing) {
-      if (opts.mode === 'create') {
-        result.errors.push({
-          ruleId: rule.id,
-          message: 'Rule already exists and mode is "create"',
-          code: IMPORT_ERROR_CODES.DUPLICATE_ID,
-        });
-        result.skipped = 1;
-        return result;
-      }
-
-      if (!opts.overwriteExisting) {
-        result.skipped = 1;
-        result.warnings.push({
-          ruleId: rule.id,
-          message: 'Rule exists and overwrite is disabled',
-        });
-        return result;
-      }
-
-      // Check version conflict
-      const existingVersion = existing.version ? JSON.parse(existing.version) : null;
-      if (existingVersion && compareVersions(rule.version, existingVersion) <= 0) {
-        result.warnings.push({
-          ruleId: rule.id,
-          message: 'Importing older or same version over newer version',
-        });
-      }
+    // Check for existing rule and handle conflicts
+    const canProceed = await checkExistingRuleConflicts(
+      rule,
+      { mode: opts.mode, overwriteExisting: opts.overwriteExisting },
+      result
+    );
+    if (!canProceed) {
+      result.skipped = 1;
+      return result;
     }
 
     // Import rule (unless dry run)
@@ -199,7 +150,7 @@ export async function importRules(
     failed: 0,
     errors: [],
     warnings: [],
-    dryRun: options.dryRun || false,
+    dryRun: options.dryRun ?? false,
   };
 
   for (const ruleData of rules) {
@@ -237,7 +188,7 @@ export async function importRulePackage(
     failed: 0,
     errors: [],
     warnings: [],
-    dryRun: options.dryRun || false,
+    dryRun: options.dryRun ?? false,
   };
 
   try {
@@ -398,9 +349,7 @@ export async function exportProgramRules(
     })
     .exec();
 
-  return Promise.all(
-    rules.map((rule) => convertDatabaseRuleToDefinition(rule, options))
-  );
+  return rules.map((rule) => convertDatabaseRuleToDefinition(rule, options));
 }
 
 // ============================================================================
@@ -408,11 +357,102 @@ export async function exportProgramRules(
 // ============================================================================
 
 /**
+ * Perform validation and testing on a rule
+ */
+async function performRuleValidationAndTests(
+  rule: RuleDefinition,
+  opts: { validate: boolean; skipTests: boolean },
+  result: RuleImportResult
+): Promise<boolean> {
+  // Validate logic if requested
+  if (opts.validate) {
+    const logicValidation = validateRuleLogic(rule);
+    if (!logicValidation.valid) {
+      result.errors.push(...logicValidation.errors.map((e) => ({
+        ruleId: rule.id,
+        message: e.message,
+        code: e.code,
+      })));
+      return false;
+    }
+
+    if (logicValidation.warnings.length > 0) {
+      result.warnings.push(...logicValidation.warnings.map((w) => ({
+        ruleId: rule.id,
+        message: w.message,
+      })));
+    }
+  }
+
+  // Run tests if included and not skipped
+  if (!opts.skipTests && rule.testCases && rule.testCases.length > 0) {
+    const testResult = await runRuleTests(rule);
+    if (!testResult.success) {
+      result.errors.push({
+        ruleId: rule.id,
+        message: `Tests failed: ${testResult.failed}/${testResult.total}`,
+        code: IMPORT_ERROR_CODES.TEST_FAILED,
+      });
+      result.warnings.push({
+        ruleId: rule.id,
+        message: 'Continuing import despite test failures',
+      });
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Check for existing rule and handle conflicts
+ */
+async function checkExistingRuleConflicts(
+  rule: RuleDefinition,
+  opts: { mode: string; overwriteExisting: boolean },
+  result: RuleImportResult
+): Promise<boolean> {
+  const db = getDatabase();
+  const existing = await db.eligibility_rules.findOne(rule.id).exec();
+
+  if (!existing) {
+    return true;
+  }
+
+  if (opts.mode === 'create') {
+    result.errors.push({
+      ruleId: rule.id,
+      message: 'Rule already exists and mode is "create"',
+      code: IMPORT_ERROR_CODES.DUPLICATE_ID,
+    });
+    return false;
+  }
+
+  if (!opts.overwriteExisting) {
+    result.warnings.push({
+      ruleId: rule.id,
+      message: 'Rule exists and overwrite is disabled',
+    });
+    return false;
+  }
+
+  // Check version conflict
+  const existingVersion = existing.version ? JSON.parse(existing.version) : null;
+  if (existingVersion && compareVersions(rule.version, existingVersion) <= 0) {
+    result.warnings.push({
+      ruleId: rule.id,
+      message: 'Importing older or same version over newer version',
+    });
+  }
+
+  return true;
+}
+
+/**
  * Validate rule logic
  */
-async function validateRuleLogic(
+function validateRuleLogic(
   rule: RuleDefinition
-): Promise<RuleSchemaValidationResult> {
+): RuleSchemaValidationResult {
   const errors: Array<{
     field?: string;
     message: string;
@@ -538,7 +578,7 @@ async function saveRuleToDatabase(
  * Convert database rule to definition
  */
 function convertDatabaseRuleToDefinition(
-  dbRule: any,
+  dbRule: EligibilityRule,
   options: RuleExportOptions
 ): RuleDefinition {
   const version = dbRule.version
@@ -574,9 +614,9 @@ function convertDatabaseRuleToDefinition(
 
   // Include test cases if requested
   if (options.includeTests !== false && dbRule.testCases) {
-    definition.testCases = dbRule.testCases.map((tc: any) => ({
+    definition.testCases = dbRule.testCases.map((tc) => ({
       id: `test-${Date.now()}-${Math.random()}`,
-      description: tc.description,
+      description: tc.description ?? '',
       input: tc.input,
       expected: tc.expectedOutput,
     }));
@@ -601,11 +641,11 @@ export async function importFromJSON(
 
     // Check if it's a package or single rule or array
     if (data.metadata && data.rules) {
-      return importRulePackage(data, options);
+      return await importRulePackage(data, options);
     } else if (Array.isArray(data)) {
-      return importRules(data, options);
+      return await importRules(data, options);
     } else {
-      return importRule(data, options);
+      return await importRule(data, options);
     }
   } catch (error) {
     return {

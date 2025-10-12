@@ -69,7 +69,9 @@ export const DEFAULT_VALIDATION_OPTIONS: Required<RuleValidationOptions> = {
 
 /**
  * Zod schema for JSON Logic rule validation
- * Using z.any() as a workaround for recursive type limitation
+ * Using z.any() in array and explicit type assertion for recursive type.
+ * Justification: Zod's z.lazy() doesn't properly type recursive schemas,
+ * so we use explicit type assertion to maintain type safety at usage sites.
  */
 export const JsonLogicRuleSchema: z.ZodType<JsonLogicRule> = z.lazy(() =>
   z.union([
@@ -77,14 +79,137 @@ export const JsonLogicRuleSchema: z.ZodType<JsonLogicRule> = z.lazy(() =>
     z.number(),
     z.boolean(),
     z.null(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Required for recursive array type in Zod
     z.array(z.any()),
     z.record(z.unknown()),
   ])
-) as any;
+) as z.ZodType<JsonLogicRule>;
 
 // ============================================================================
 // VALIDATION FUNCTIONS
 // ============================================================================
+
+/**
+ * Validate rule structure
+ */
+function validateRuleStructure(
+  rule: unknown,
+  errors: RuleValidationError[]
+): JsonLogicRule | null {
+  if (rule === undefined) {
+    errors.push({
+      message: 'Rule is undefined',
+      code: VALIDATION_ERROR_CODES.INVALID_STRUCTURE,
+      severity: 'critical',
+    });
+    return null;
+  }
+
+  const structureResult = JsonLogicRuleSchema.safeParse(rule);
+  if (!structureResult.success) {
+    errors.push({
+      message: 'Invalid rule structure',
+      code: VALIDATION_ERROR_CODES.INVALID_STRUCTURE,
+      severity: 'critical',
+    });
+    return null;
+  }
+
+  return structureResult.data;
+}
+
+/**
+ * Validate rule depth and complexity
+ */
+function validateRuleMetrics(
+  rule: JsonLogicRule,
+  opts: Required<RuleValidationOptions>,
+  errors: RuleValidationError[],
+  warnings: RuleValidationWarning[]
+): number {
+  const depth = calculateDepth(rule);
+  if (depth > opts.maxDepth) {
+    errors.push({
+      message: `Rule depth (${depth}) exceeds maximum (${opts.maxDepth})`,
+      code: VALIDATION_ERROR_CODES.MAX_DEPTH_EXCEEDED,
+      severity: 'error',
+    });
+  }
+
+  const complexity = calculateComplexity(rule);
+  if (complexity > opts.maxComplexity) {
+    errors.push({
+      message: `Rule complexity (${complexity}) exceeds maximum (${opts.maxComplexity})`,
+      code: VALIDATION_ERROR_CODES.MAX_COMPLEXITY_EXCEEDED,
+      severity: 'error',
+    });
+  }
+
+  if (complexity > opts.maxComplexity * 0.8) {
+    warnings.push({
+      message: `Rule complexity (${complexity}) is approaching maximum`,
+      code: 'COMPLEXITY_WARNING',
+      severity: 'warning',
+    });
+  }
+
+  return complexity;
+}
+
+/**
+ * Validate operators
+ */
+function validateRuleOperators(
+  operators: string[],
+  opts: Required<RuleValidationOptions>,
+  errors: RuleValidationError[],
+  warnings: RuleValidationWarning[]
+): void {
+  for (const operator of operators) {
+    if (opts.disallowedOperators.includes(operator)) {
+      errors.push({
+        message: `Operator "${operator}" is disallowed`,
+        code: VALIDATION_ERROR_CODES.DISALLOWED_OPERATOR,
+        severity: 'error',
+      });
+    }
+
+    if (!opts.allowedOperators.includes(operator)) {
+      if (opts.strict) {
+        errors.push({
+          message: `Unknown operator "${operator}"`,
+          code: VALIDATION_ERROR_CODES.UNKNOWN_OPERATOR,
+          severity: 'error',
+        });
+      } else {
+        warnings.push({
+          message: `Unknown operator "${operator}" - may be custom`,
+          code: VALIDATION_ERROR_CODES.UNKNOWN_OPERATOR,
+          severity: 'warning',
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Validate required variables
+ */
+function validateRequiredVariables(
+  variables: string[],
+  opts: Required<RuleValidationOptions>,
+  errors: RuleValidationError[]
+): void {
+  for (const required of opts.requiredVariables) {
+    if (!variables.includes(required)) {
+      errors.push({
+        message: `Required variable "${required}" not found in rule`,
+        code: VALIDATION_ERROR_CODES.MISSING_REQUIRED_VARIABLE,
+        severity: 'error',
+      });
+    }
+  }
+}
 
 /**
  * Validate a JSON Logic rule
@@ -112,108 +237,24 @@ export function validateRule(
   const warnings: RuleValidationWarning[] = [];
 
   try {
-    // Check if rule is defined
-    if (rule === undefined) {
-      errors.push({
-        message: 'Rule is undefined',
-        code: VALIDATION_ERROR_CODES.INVALID_STRUCTURE,
-        severity: 'critical',
-      });
+    const validatedRule = validateRuleStructure(rule, errors);
+    if (!validatedRule) {
       return { valid: false, errors, warnings };
     }
 
-    // Validate structure with Zod
-    const structureResult = JsonLogicRuleSchema.safeParse(rule);
-    if (!structureResult.success) {
-      errors.push({
-        message: 'Invalid rule structure',
-        code: VALIDATION_ERROR_CODES.INVALID_STRUCTURE,
-        severity: 'critical',
-      });
-      return { valid: false, errors, warnings };
-    }
+    const complexity = validateRuleMetrics(validatedRule, opts, errors, warnings);
 
-    const validatedRule = structureResult.data;
-
-    // Validate depth
-    const depth = calculateDepth(validatedRule);
-    if (depth > opts.maxDepth) {
-      errors.push({
-        message: `Rule depth (${depth}) exceeds maximum (${opts.maxDepth})`,
-        code: VALIDATION_ERROR_CODES.MAX_DEPTH_EXCEEDED,
-        severity: 'error',
-      });
-    }
-
-    // Calculate complexity
-    const complexity = calculateComplexity(validatedRule);
-    if (complexity > opts.maxComplexity) {
-      errors.push({
-        message: `Rule complexity (${complexity}) exceeds maximum (${opts.maxComplexity})`,
-        code: VALIDATION_ERROR_CODES.MAX_COMPLEXITY_EXCEEDED,
-        severity: 'error',
-      });
-    }
-
-    // Extract operators and variables
     const operators = extractOperators(validatedRule);
     const variables = extractVariables(validatedRule);
 
-    // Validate operators
-    for (const operator of operators) {
-      // Check if operator is disallowed
-      if (opts.disallowedOperators.includes(operator)) {
-        errors.push({
-          message: `Operator "${operator}" is disallowed`,
-          code: VALIDATION_ERROR_CODES.DISALLOWED_OPERATOR,
-          severity: 'error',
-        });
-      }
+    validateRuleOperators(operators, opts, errors, warnings);
+    validateRequiredVariables(variables, opts, errors);
 
-      // Check if operator is unknown
-      if (!opts.allowedOperators.includes(operator)) {
-        if (opts.strict) {
-          errors.push({
-            message: `Unknown operator "${operator}"`,
-            code: VALIDATION_ERROR_CODES.UNKNOWN_OPERATOR,
-            severity: 'error',
-          });
-        } else {
-          warnings.push({
-            message: `Unknown operator "${operator}" - may be custom`,
-            code: VALIDATION_ERROR_CODES.UNKNOWN_OPERATOR,
-            severity: 'warning',
-          });
-        }
-      }
-    }
-
-    // Validate required variables
-    for (const required of opts.requiredVariables) {
-      if (!variables.includes(required)) {
-        errors.push({
-          message: `Required variable "${required}" not found in rule`,
-          code: VALIDATION_ERROR_CODES.MISSING_REQUIRED_VARIABLE,
-          severity: 'error',
-        });
-      }
-    }
-
-    // Check for circular references
     if (hasCircularReference(validatedRule)) {
       errors.push({
         message: 'Rule contains circular reference',
         code: VALIDATION_ERROR_CODES.CIRCULAR_REFERENCE,
         severity: 'critical',
-      });
-    }
-
-    // Add complexity warning if high
-    if (complexity > opts.maxComplexity * 0.8) {
-      warnings.push({
-        message: `Rule complexity (${complexity}) is approaching maximum`,
-        code: 'COMPLEXITY_WARNING',
-        severity: 'warning',
       });
     }
 
@@ -304,7 +345,7 @@ function calculateDepth(rule: JsonLogicRule, currentDepth = 0): number {
 function calculateComplexity(rule: JsonLogicRule): number {
   let complexity = 0;
 
-  const visit = (node: JsonLogicRule, depth: number) => {
+  const visit = (node: JsonLogicRule, depth: number): void => {
     if (node === null || typeof node !== 'object') {
       return;
     }
@@ -321,6 +362,11 @@ function calculateComplexity(rule: JsonLogicRule): number {
     const keys = Object.keys(node);
     const nodeAsRecord = node as Record<string, unknown>;
     for (const key of keys) {
+      // Safely access the key - it comes from Object.keys so it's safe
+      if (!Object.prototype.hasOwnProperty.call(nodeAsRecord, key)) {
+        continue;
+      }
+
       if (key === 'var') {
         complexity += 0.5;
       } else if (['map', 'filter', 'reduce', 'all', 'some', 'none'].includes(key)) {
@@ -346,7 +392,7 @@ function calculateComplexity(rule: JsonLogicRule): number {
 function extractOperators(rule: JsonLogicRule): string[] {
   const operators: string[] = [];
 
-  const visit = (node: JsonLogicRule) => {
+  const visit = (node: JsonLogicRule): void => {
     if (node === null || typeof node !== 'object') {
       return;
     }
@@ -359,6 +405,11 @@ function extractOperators(rule: JsonLogicRule): string[] {
     const keys = Object.keys(node);
     const nodeAsRecord = node as Record<string, unknown>;
     for (const key of keys) {
+      // Safely access the key - it comes from Object.keys so it's safe
+      if (!Object.prototype.hasOwnProperty.call(nodeAsRecord, key)) {
+        continue;
+      }
+
       if (key !== 'var') {
         operators.push(key);
       }
@@ -380,7 +431,7 @@ function extractOperators(rule: JsonLogicRule): string[] {
 function extractVariables(rule: JsonLogicRule): string[] {
   const variables: string[] = [];
 
-  const visit = (node: JsonLogicRule) => {
+  const visit = (node: JsonLogicRule): void => {
     if (node === null || typeof node !== 'object') {
       return;
     }
@@ -393,6 +444,11 @@ function extractVariables(rule: JsonLogicRule): string[] {
     const keys = Object.keys(node);
     const nodeAsRecord = node as Record<string, unknown>;
     for (const key of keys) {
+      // Safely access the key - it comes from Object.keys so it's safe
+      if (!Object.prototype.hasOwnProperty.call(nodeAsRecord, key)) {
+        continue;
+      }
+
       if (key === 'var') {
         const varPath = nodeAsRecord[key];
         if (typeof varPath === 'string') {
@@ -478,6 +534,11 @@ export function sanitizeRule(
     const nodeAsRecord = node as Record<string, unknown>;
 
     for (const key of keys) {
+      // Safely access the key - it comes from Object.keys so it's safe
+      if (!Object.prototype.hasOwnProperty.call(nodeAsRecord, key)) {
+        continue;
+      }
+
       // Check if operator is allowed
       if (opts.disallowedOperators.includes(key)) {
         continue; // Skip disallowed operators
