@@ -1,0 +1,34 @@
+# ESLint Ignore File
+
+# Build outputs
+dist
+build
+coverage
+
+# Dependencies
+node_modules
+
+# Test outputs
+playwright-report
+test-results
+
+# Configuration files
+*.config.js
+*.config.cjs
+*.config.ts
+
+# Generated files
+*.d.ts
+vite-env.d.ts
+
+# Logs
+*.log
+
+# IDE
+.vscode
+.idea
+
+# Cache
+.cache
+.eslintcache
+

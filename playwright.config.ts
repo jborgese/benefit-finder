@@ -1,30 +1,133 @@
+/**
+ * Playwright E2E Testing Configuration
+ * 
+ * Comprehensive configuration for end-to-end and accessibility testing.
+ */
+
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
+  // Test directory
   testDir: './tests/e2e',
-  timeout: 30 * 1000,
+  
+  // Test matching patterns
+  testMatch: '**/*.e2e.{ts,tsx}',
+  
+  // Timeouts
+  timeout: 30 * 1000, // 30 seconds per test
+  expect: {
+    timeout: 5 * 1000, // 5 seconds for assertions
+  },
+  
+  // Parallel execution
   fullyParallel: true,
+  
+  // CI settings
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   
-  reporter: [['html'], ['list']],
+  // Reporters
+  reporter: [
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['list'],
+    ['json', { outputFile: 'test-results/results.json' }],
+  ],
   
+  // Global settings
   use: {
+    // Base URL
     baseURL: 'http://localhost:5173',
-    trace: 'on-first-retry',
+    
+    // Viewport
+    viewport: { width: 1280, height: 720 },
+    
+    // Browser context options
+    ignoreHTTPSErrors: true,
+    
+    // Artifacts
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    
+    // Locale and timezone
+    locale: 'en-US',
+    timezoneId: 'America/New_York',
+    
+    // Permissions (for IndexedDB, localStorage)
+    permissions: ['clipboard-read', 'clipboard-write'],
+    
+    // Color scheme
+    colorScheme: 'light',
   },
 
+  // Development server
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    stdout: 'ignore',
+    stderr: 'pipe',
   },
 
+  // Test projects (different browsers and viewports)
   projects: [
-    { name: 'Desktop Chrome', use: { ...devices['Desktop Chrome'] } },
-    { name: 'Mobile Safari - iPhone 14', use: { ...devices['iPhone 14'] } },
+    // Desktop browsers
+    {
+      name: 'chromium',
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+      },
+    },
+    
+    {
+      name: 'firefox',
+      use: { 
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1280, height: 720 },
+      },
+    },
+    
+    {
+      name: 'webkit',
+      use: { 
+        ...devices['Desktop Safari'],
+        viewport: { width: 1280, height: 720 },
+      },
+    },
+    
+    // Mobile browsers
+    {
+      name: 'mobile-chrome',
+      use: { 
+        ...devices['Pixel 5'],
+      },
+    },
+    
+    {
+      name: 'mobile-safari',
+      use: { 
+        ...devices['iPhone 14'],
+      },
+    },
+    
+    // Tablet
+    {
+      name: 'tablet',
+      use: { 
+        ...devices['iPad Pro'],
+      },
+    },
+    
+    // Accessibility testing project
+    {
+      name: 'a11y',
+      testMatch: '**/*.a11y.{ts,tsx}',
+      use: { 
+        ...devices['Desktop Chrome'],
+      },
+    },
   ],
 });
