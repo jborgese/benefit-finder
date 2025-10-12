@@ -53,19 +53,19 @@ describe('Database Collections', () => {
 
     // TODO: Add RxDB methods
     it.skip('should get full name from profile', async () => {
-      const _profile = await createUserProfile({
+      await createUserProfile({
         firstName: 'John',
         lastName: 'Smith',
         dateOfBirth: '1990-01-01',
       });
 
-      // const fullName = _profile.getFullName();
+      // const fullName = profile.getFullName();
       // expect(fullName).toBe('John Smith');
     });
 
     // TODO: Add RxDB methods
     it.skip('should calculate age from date of birth', async () => {
-      const _profile = await createUserProfile({
+      await createUserProfile({
         firstName: 'Test',
         lastName: 'User',
         dateOfBirth: '2000-01-01',

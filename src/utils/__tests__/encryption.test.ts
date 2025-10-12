@@ -5,7 +5,7 @@
  * Tests AES-GCM encryption, key derivation, and utility functions.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   generateSalt,
   deriveKeyFromPassphrase,
@@ -460,7 +460,7 @@ describe('Encryption Utilities', () => {
 
     it('should show longer time for stronger passphrases', () => {
       // This is a rough test since actual estimates can vary
-      const weak = estimateCrackTime('pass');
+      estimateCrackTime('pass');
       const strong = estimateCrackTime('MyV3ry$tr0ng!P@ssphr@se2024');
 
       // Strong should mention years, centuries, or larger units

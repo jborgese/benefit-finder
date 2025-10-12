@@ -127,7 +127,9 @@ export function explainResult(
 
   // Extract criteria from rule
   const ruleExplanation = explainRule(rule, opts.languageLevel);
-  criteriaChecked.push(...ruleExplanation.criteriaChecked);
+  if (ruleExplanation.criteriaChecked) {
+    criteriaChecked.push(...ruleExplanation.criteriaChecked);
+  }
 
   // Analyze result
   if (result.eligible) {
@@ -268,7 +270,8 @@ function generateExplanationTree(
   }
 
   for (const operator of Object.keys(rule)) {
-    const operands = Array.isArray(rule[operator]) ? rule[operator] : [rule[operator]];
+    const ruleAsRecord = rule as Record<string, unknown>;
+    const operands = Array.isArray(ruleAsRecord[operator]) ? ruleAsRecord[operator] : [ruleAsRecord[operator]];
     const description = OPERATOR_DESCRIPTIONS[operator]
       ? OPERATOR_DESCRIPTIONS[operator](operands as unknown[])
       : `Operation: ${operator}`;
@@ -277,8 +280,8 @@ function generateExplanationTree(
       nodes.push({
         type: 'variable',
         operator,
-        variable: rule[operator] as string,
-        description: `Get ${formatFieldName(rule[operator] as string)}`,
+        variable: ruleAsRecord[operator] as string,
+        description: `Get ${formatFieldName(ruleAsRecord[operator] as string)}`,
         level,
       });
     } else {
@@ -315,7 +318,8 @@ function generateRuleDescription(
   }
 
   const operator = Object.keys(rule)[0];
-  const operands = Array.isArray(rule[operator]) ? rule[operator] : [rule[operator]];
+  const ruleAsRecord = rule as Record<string, unknown>;
+  const operands = Array.isArray(ruleAsRecord[operator]) ? ruleAsRecord[operator] : [ruleAsRecord[operator]];
 
   switch (languageLevel) {
     case 'simple':
@@ -333,7 +337,7 @@ function generateRuleDescription(
 /**
  * Generate simple language description
  */
-function generateSimpleDescription(operator: string, operands: JsonLogicRule[]): string {
+function generateSimpleDescription(operator: string, _operands: JsonLogicRule[]): string {
   const simpleDescriptions: Record<string, string> = {
     '>': 'Your value must be higher',
     '<': 'Your value must be lower',
@@ -518,13 +522,14 @@ function analyzeRuleForSuggestions(
   }
 
   for (const operator of Object.keys(rule)) {
-    const operands = Array.isArray(rule[operator]) ? rule[operator] : [rule[operator]];
+    const ruleAsRecord = rule as Record<string, unknown>;
+    const operands = Array.isArray(ruleAsRecord[operator]) ? ruleAsRecord[operator] : [ruleAsRecord[operator]];
 
     // Handle comparison operators
     if (operator === '>' || operator === '>=') {
       const [left, right] = operands as [JsonLogicRule, JsonLogicRule];
-      if (typeof left === 'object' && 'var' in left && typeof right === 'number') {
-        const varName = left.var as string;
+      if (typeof left === 'object' && left !== null && 'var' in left && typeof right === 'number') {
+        const varName = (left as { var: string }).var;
         const currentValue = data[varName];
         suggestions.push(
           `Increase ${formatFieldName(varName)} from ${formatValue(currentValue)} to at least ${formatValue(right)}`
@@ -534,8 +539,8 @@ function analyzeRuleForSuggestions(
 
     if (operator === '<' || operator === '<=') {
       const [left, right] = operands as [JsonLogicRule, JsonLogicRule];
-      if (typeof left === 'object' && 'var' in left && typeof right === 'number') {
-        const varName = left.var as string;
+      if (typeof left === 'object' && left !== null && 'var' in left && typeof right === 'number') {
+        const varName = (left as { var: string }).var;
         const currentValue = data[varName];
         suggestions.push(
           `Reduce ${formatFieldName(varName)} from ${formatValue(currentValue)} to ${formatValue(right)} or below`
@@ -601,8 +606,10 @@ export function formatRuleExplanation(explanation: RuleExplanation): string {
   lines.push('');
   lines.push('This rule checks:');
 
-  for (const criterion of explanation.criteriaChecked) {
-    lines.push(`• ${criterion}`);
+  if (explanation.criteriaChecked) {
+    for (const criterion of explanation.criteriaChecked) {
+      lines.push(`• ${criterion}`);
+    }
   }
 
   if (explanation.complexity !== 'simple') {

@@ -1,6 +1,6 @@
 /**
  * Test Utilities
- * 
+ *
  * Helper functions and utilities for writing tests.
  */
 
@@ -10,7 +10,7 @@ import { vi } from 'vitest';
 
 /**
  * Custom render function that wraps components with providers
- * 
+ *
  * Usage:
  * ```tsx
  * const { getByText } = renderWithProviders(<MyComponent />);
@@ -39,7 +39,7 @@ export function renderWithProviders(
 
 /**
  * Wait for a condition to be true
- * 
+ *
  * @param condition Function that returns true when ready
  * @param timeout Maximum wait time in ms
  * @param interval Check interval in ms
@@ -50,7 +50,7 @@ export async function waitFor(
   interval = 50
 ): Promise<void> {
   const startTime = Date.now();
-  
+
   while (!condition()) {
     if (Date.now() - startTime > timeout) {
       throw new Error('Timeout waiting for condition');
@@ -147,7 +147,7 @@ export function createMockEligibilityResult(overrides = {}) {
 
 /**
  * Mock fetch API responses
- * 
+ *
  * Usage:
  * ```tsx
  * mockFetch({ data: 'response' });
@@ -169,7 +169,7 @@ export function mockFetch(response: any, status = 200) {
  */
 export function mockLocalStorage() {
   const store: Record<string, string> = {};
-  
+
   return {
     getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {
@@ -190,7 +190,7 @@ export function mockLocalStorage() {
 
 /**
  * Suppress console methods for specific tests
- * 
+ *
  * Usage:
  * ```tsx
  * const restore = suppressConsole('error', 'warn');
@@ -199,17 +199,17 @@ export function mockLocalStorage() {
  * ```
  */
 export function suppressConsole(...methods: Array<keyof Console>) {
-  const original: Partial<Console> = {};
-  
+  const original: Partial<Record<keyof Console, any>> = {};
+
   methods.forEach((method) => {
     original[method] = console[method];
-    console[method] = vi.fn();
+    (console as any)[method] = vi.fn();
   });
-  
+
   return () => {
     methods.forEach((method) => {
       if (original[method]) {
-        console[method] = original[method] as any;
+        (console as any)[method] = original[method];
       }
     });
   };
@@ -217,7 +217,7 @@ export function suppressConsole(...methods: Array<keyof Console>) {
 
 /**
  * Create a deferred promise for async testing
- * 
+ *
  * Usage:
  * ```tsx
  * const deferred = createDeferred();
@@ -228,18 +228,18 @@ export function suppressConsole(...methods: Array<keyof Console>) {
 export function createDeferred<T = void>() {
   let resolve!: (value: T) => void;
   let reject!: (reason?: any) => void;
-  
+
   const promise = new Promise<T>((res, rej) => {
     resolve = res;
     reject = rej;
   });
-  
+
   return { promise, resolve, reject };
 }
 
 /**
  * Advance timers and flush promises
- * 
+ *
  * Useful when testing code with setTimeout/setInterval
  */
 export async function advanceTimersAndFlush(ms: number) {

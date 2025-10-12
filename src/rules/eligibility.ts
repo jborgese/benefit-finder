@@ -502,8 +502,10 @@ async function cacheResult(
       priority: step.priority || 'medium',
     })),
     requiredDocuments: result.requiredDocuments?.map(doc => ({
-      ...doc,
-      required: doc.required ?? true,
+      document: doc.document,
+      description: doc.description,
+      where: doc.where,
+      required: true,
     })),
     estimatedBenefit: result.estimatedBenefit ? {
       ...result.estimatedBenefit,

@@ -353,9 +353,8 @@ export async function encryptToString(
   key: CryptoKey
 ): Promise<string> {
   const encrypted = await encrypt(data, key);
-  return arrayBufferToBase64(
-    new TextEncoder().encode(JSON.stringify(encrypted))
-  );
+  const encodedData = new TextEncoder().encode(JSON.stringify(encrypted));
+  return arrayBufferToBase64(encodedData.buffer);
 }
 
 /**

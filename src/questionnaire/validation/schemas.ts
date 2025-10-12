@@ -125,12 +125,13 @@ export const booleanSchema = z.boolean({
 /**
  * Multi-select input schemas
  */
+// Type parameter T is used for type inference only
 export const multiSelectSchema = <T extends string>(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _type?: T,
   minSelections?: number,
   maxSelections?: number
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  type _ = T;
   let schema = z.array(z.string());
 
   if (minSelections !== undefined) {

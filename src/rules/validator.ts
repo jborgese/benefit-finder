@@ -69,6 +69,7 @@ export const DEFAULT_VALIDATION_OPTIONS: Required<RuleValidationOptions> = {
 
 /**
  * Zod schema for JSON Logic rule validation
+ * Using z.any() as a workaround for recursive type limitation
  */
 export const JsonLogicRuleSchema: z.ZodType<JsonLogicRule> = z.lazy(() =>
   z.union([
@@ -76,10 +77,10 @@ export const JsonLogicRuleSchema: z.ZodType<JsonLogicRule> = z.lazy(() =>
     z.number(),
     z.boolean(),
     z.null(),
-    z.array(JsonLogicRuleSchema),
+    z.array(z.any()),
     z.record(z.unknown()),
   ])
-);
+) as any;
 
 // ============================================================================
 // VALIDATION FUNCTIONS
@@ -318,6 +319,7 @@ function calculateComplexity(rule: JsonLogicRule): number {
 
     // Check if it's an operator
     const keys = Object.keys(node);
+    const nodeAsRecord = node as Record<string, unknown>;
     for (const key of keys) {
       if (key === 'var') {
         complexity += 0.5;
@@ -327,7 +329,7 @@ function calculateComplexity(rule: JsonLogicRule): number {
         complexity += 1; // Standard operator
       }
 
-      const value = node[key];
+      const value = nodeAsRecord[key];
       if (value !== undefined) {
         visit(value as JsonLogicRule, depth + 1);
       }
@@ -355,12 +357,13 @@ function extractOperators(rule: JsonLogicRule): string[] {
     }
 
     const keys = Object.keys(node);
+    const nodeAsRecord = node as Record<string, unknown>;
     for (const key of keys) {
       if (key !== 'var') {
         operators.push(key);
       }
 
-      const value = node[key];
+      const value = nodeAsRecord[key];
       if (value !== undefined) {
         visit(value as JsonLogicRule);
       }
@@ -388,9 +391,10 @@ function extractVariables(rule: JsonLogicRule): string[] {
     }
 
     const keys = Object.keys(node);
+    const nodeAsRecord = node as Record<string, unknown>;
     for (const key of keys) {
       if (key === 'var') {
-        const varPath = node[key];
+        const varPath = nodeAsRecord[key];
         if (typeof varPath === 'string') {
           variables.push(varPath);
         } else if (Array.isArray(varPath)) {
@@ -401,7 +405,7 @@ function extractVariables(rule: JsonLogicRule): string[] {
         }
       }
 
-      const value = node[key];
+      const value = nodeAsRecord[key];
       if (value !== undefined) {
         visit(value as JsonLogicRule);
       }
@@ -471,6 +475,7 @@ export function sanitizeRule(
 
     const sanitized: Record<string, unknown> = {};
     const keys = Object.keys(node);
+    const nodeAsRecord = node as Record<string, unknown>;
 
     for (const key of keys) {
       // Check if operator is allowed
@@ -478,7 +483,7 @@ export function sanitizeRule(
         continue; // Skip disallowed operators
       }
 
-      const value = node[key];
+      const value = nodeAsRecord[key];
       const sanitizedValue = sanitize(value as JsonLogicRule);
 
       if (sanitizedValue !== null) {
@@ -486,7 +491,7 @@ export function sanitizeRule(
       }
     }
 
-    return Object.keys(sanitized).length > 0 ? sanitized : null;
+    return Object.keys(sanitized).length > 0 ? (sanitized as JsonLogicRule) : null;
   };
 
   return sanitize(rule);

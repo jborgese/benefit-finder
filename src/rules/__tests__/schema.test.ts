@@ -13,6 +13,7 @@ import {
   incrementVersion,
   createRuleTemplate,
   calculateChecksum,
+  RuleDefinitionSchema,
   type RuleDefinition,
   type RuleVersion,
 } from '../schema';

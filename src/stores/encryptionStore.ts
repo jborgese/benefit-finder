@@ -12,6 +12,7 @@ import {
   isEncryptionEnabled,
   setEncryptionEnabled,
   getStoredSalt,
+  storeSalt,
   clearEncryptionData,
   evaluatePassphraseStrength,
   storePassphraseHint,

@@ -36,7 +36,7 @@ export async function getLatestRuleVersion(
     .find({
       selector: {
         id: {
-          $regex: new RegExp(`^${ruleId}`),
+          $regex: `^${ruleId}`,
         },
       },
     })
@@ -76,7 +76,7 @@ export async function getAllRuleVersions(
     .find({
       selector: {
         id: {
-          $regex: new RegExp(`^${ruleId}`),
+          $regex: `^${ruleId}`,
         },
       },
     })
@@ -286,7 +286,12 @@ export async function migrateAllProgramRules(
       }
 
       // Attempt migration
-      const ruleDefinition = rule.toJSON() as RuleDefinition;
+      const ruleData = rule.toJSON();
+      const ruleDefinition: RuleDefinition = {
+        ...ruleData,
+        version: parseVersion(ruleData.version || '0.1.0'),
+        ruleLogic: ruleData.ruleLogic as any,
+      } as RuleDefinition;
       const migrated = await migrateRule(ruleDefinition, target);
 
       // Update rule in database

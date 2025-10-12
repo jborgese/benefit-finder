@@ -610,7 +610,8 @@ export function analyzePerformance(rule: JsonLogicRule): {
         }
       }
 
-      const value = node[operator];
+      const nodeAsRecord = node as Record<string, unknown>;
+      const value = nodeAsRecord[operator];
       if (value !== undefined) {
         analyze(value as JsonLogicRule, depth + 1);
       }
