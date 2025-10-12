@@ -1,0 +1,314 @@
+/**
+ * Eligibility Result Explanation Component
+ *
+ * Displays human-readable explanations of eligibility results
+ * with expandable details and accessibility support.
+ */
+
+import React, { useState } from 'react';
+import * as Accordion from '@radix-ui/react-accordion';
+import { explainResult, type ResultExplanation } from '../rules/explanation';
+import type { EligibilityEvaluationResult } from '../rules/eligibility';
+import type { JsonLogicRule, JsonLogicData } from '../rules/types';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface EligibilityResultExplanationProps {
+  /** Evaluation result to explain */
+  result: EligibilityEvaluationResult;
+  /** Rule used for evaluation */
+  rule: JsonLogicRule;
+  /** Data context used */
+  data: JsonLogicData;
+  /** Language level */
+  languageLevel?: 'simple' | 'standard' | 'technical';
+  /** Show detailed breakdown */
+  showDetails?: boolean;
+  /** Custom className */
+  className?: string;
+}
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+/**
+ * Eligibility Result Explanation component
+ *
+ * @example
+ * ```tsx
+ * <EligibilityResultExplanation
+ *   result={evaluationResult}
+ *   rule={ruleLogic}
+ *   data={userData}
+ *   languageLevel="simple"
+ * />
+ * ```
+ */
+export const EligibilityResultExplanation: React.FC<
+  EligibilityResultExplanationProps
+> = ({
+  result,
+  rule,
+  data,
+  languageLevel = 'standard',
+  showDetails = true,
+  className = '',
+}) => {
+  const [expanded, setExpanded] = useState<string[]>([]);
+
+  // Generate explanation
+  const explanation = explainResult(result, rule, data, {
+    languageLevel,
+    includeSuggestions: true,
+  });
+
+  // Get status color
+  const statusColor = result.eligible
+    ? 'text-green-700 bg-green-50 border-green-200'
+    : result.incomplete
+    ? 'text-yellow-700 bg-yellow-50 border-yellow-200'
+    : 'text-red-700 bg-red-50 border-red-200';
+
+  const statusIcon = result.eligible ? '✓' : result.incomplete ? '⚠' : '✗';
+
+  return (
+    <div
+      className={`
+        rounded-lg border p-6 space-y-4
+        ${statusColor}
+        ${className}
+      `}
+      role="region"
+      aria-label="Eligibility result explanation"
+    >
+      {/* Status Header */}
+      <div className="flex items-start gap-3">
+        <span className="text-2xl" aria-hidden="true">
+          {statusIcon}
+        </span>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold mb-1">
+            {result.eligible
+              ? 'You May Be Eligible'
+              : result.incomplete
+              ? 'More Information Needed'
+              : 'Not Eligible at This Time'}
+          </h3>
+          <p className="text-sm opacity-90">{explanation.summary}</p>
+        </div>
+      </div>
+
+      {/* Plain Language Explanation */}
+      <div className="prose prose-sm max-w-none">
+        <p className="whitespace-pre-line">{explanation.plainLanguage}</p>
+      </div>
+
+      {/* Detailed Breakdown (Accordion) */}
+      {showDetails && (
+        <Accordion.Root
+          type="multiple"
+          value={expanded}
+          onValueChange={setExpanded}
+          className="space-y-2"
+        >
+          {/* Reasoning */}
+          {explanation.reasoning.length > 0 && (
+            <AccordionItem value="reasoning" title="Why This Result?">
+              <ul className="list-disc list-inside space-y-1">
+                {explanation.reasoning.map((reason, idx) => (
+                  <li key={idx} className="text-sm">
+                    {reason}
+                  </li>
+                ))}
+              </ul>
+            </AccordionItem>
+          )}
+
+          {/* Criteria Checked */}
+          {explanation.criteriaChecked.length > 0 && (
+            <AccordionItem value="criteria" title="What Was Checked">
+              <div className="space-y-2">
+                {explanation.criteriaPassed.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-green-700 mb-1">
+                      ✓ Met Requirements:
+                    </p>
+                    <ul className="list-disc list-inside text-sm space-y-1">
+                      {explanation.criteriaPassed.map((criterion, idx) => (
+                        <li key={idx} className="text-green-600">
+                          {criterion}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {explanation.criteriaFailed.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-red-700 mb-1">
+                      ✗ Unmet Requirements:
+                    </p>
+                    <ul className="list-disc list-inside text-sm space-y-1">
+                      {explanation.criteriaFailed.map((criterion, idx) => (
+                        <li key={idx} className="text-red-600">
+                          {criterion}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Missing Information */}
+          {explanation.missingInformation.length > 0 && (
+            <AccordionItem value="missing" title="Missing Information">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {explanation.missingInformation.map((field, idx) => (
+                  <li key={idx} className="text-yellow-700">
+                    {formatFieldName(field)}
+                  </li>
+                ))}
+              </ul>
+            </AccordionItem>
+          )}
+
+          {/* What Would Change */}
+          {explanation.whatWouldChange && explanation.whatWouldChange.length > 0 && (
+            <AccordionItem value="changes" title="What Would Change the Result?">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {explanation.whatWouldChange.map((change, idx) => (
+                  <li key={idx} className="text-blue-700">
+                    {change}
+                  </li>
+                ))}
+              </ul>
+            </AccordionItem>
+          )}
+
+          {/* Required Documents */}
+          {result.requiredDocuments && result.requiredDocuments.length > 0 && (
+            <AccordionItem value="documents" title="Required Documents">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.requiredDocuments.map((doc, idx) => (
+                  <li key={idx}>
+                    <span className="font-medium">{doc.document}</span>
+                    {doc.description && (
+                      <span className="text-gray-600"> - {doc.description}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </AccordionItem>
+          )}
+        </Accordion.Root>
+      )}
+
+      {/* Confidence Indicator */}
+      <div className="flex items-center gap-2 text-xs opacity-75">
+        <span>Confidence: {result.confidence}%</span>
+        {result.executionTime && (
+          <span>• Evaluated in {result.executionTime.toFixed(0)}ms</span>
+        )}
+        {result.needsReview && (
+          <span className="text-yellow-700">• Needs Manual Review</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Accordion item component
+ */
+const AccordionItem: React.FC<{
+  value: string;
+  title: string;
+  children: React.ReactNode;
+}> = ({ value, title, children }) => {
+  return (
+    <Accordion.Item
+      value={value}
+      className="border border-gray-300 rounded-md overflow-hidden bg-white"
+    >
+      <Accordion.Header>
+        <Accordion.Trigger className="w-full px-4 py-3 text-left text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-between group">
+          <span>{title}</span>
+          <span
+            className="transform transition-transform group-data-[state=open]:rotate-180"
+            aria-hidden="true"
+          >
+            ▼
+          </span>
+        </Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content className="px-4 py-3 text-sm bg-gray-50">
+        {children}
+      </Accordion.Content>
+    </Accordion.Item>
+  );
+};
+
+/**
+ * Compact result summary (no details)
+ */
+export const EligibilityResultSummary: React.FC<{
+  result: EligibilityEvaluationResult;
+  className?: string;
+}> = ({ result, className = '' }) => {
+  const statusColor = result.eligible
+    ? 'text-green-700 bg-green-50 border-green-200'
+    : result.incomplete
+    ? 'text-yellow-700 bg-yellow-50 border-yellow-200'
+    : 'text-red-700 bg-red-50 border-red-200';
+
+  const statusIcon = result.eligible ? '✓' : result.incomplete ? '⚠' : '✗';
+
+  return (
+    <div
+      className={`
+        inline-flex items-center gap-2 px-4 py-2 rounded-md border
+        ${statusColor}
+        ${className}
+      `}
+      role="status"
+      aria-label={`Eligibility status: ${result.eligible ? 'Eligible' : 'Not eligible'}`}
+    >
+      <span className="text-lg" aria-hidden="true">
+        {statusIcon}
+      </span>
+      <div>
+        <p className="font-medium text-sm">
+          {result.eligible
+            ? 'Eligible'
+            : result.incomplete
+            ? 'Incomplete'
+            : 'Not Eligible'}
+        </p>
+        <p className="text-xs opacity-75">{result.confidence}% confident</p>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Format field name to human-readable
+ */
+function formatFieldName(fieldName: string): string {
+  return fieldName
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .trim();
+}
+
+export default EligibilityResultExplanation;
+

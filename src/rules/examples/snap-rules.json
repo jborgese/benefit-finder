@@ -1,0 +1,170 @@
+{
+  "metadata": {
+    "id": "snap-federal-rules-2024",
+    "name": "SNAP Federal Eligibility Rules",
+    "description": "Federal baseline SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": ["snap-federal"],
+    "tags": ["snap", "food", "federal", "2024"],
+    "createdAt": 1697068800000,
+    "updatedAt": 1697068800000
+  },
+  "rules": [
+    {
+      "id": "snap-federal-gross-income",
+      "programId": "snap-federal",
+      "name": "SNAP Gross Income Test",
+      "description": "Household gross income must be at or below 130% of the federal poverty line",
+      "ruleLogic": {
+        "<=": [
+          { "var": "householdIncome" },
+          { "*": [{ "var": "householdSize" }, 1500] }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP, your household's gross monthly income must be at or below 130% of the federal poverty level. For example, a household of 3 must have income at or below $2,495/month.",
+      "requiredFields": ["householdIncome", "householdSize"],
+      "requiredDocuments": [
+        {
+          "id": "proof-income",
+          "name": "Proof of Income",
+          "description": "Recent pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": ["W-2 forms", "1099 forms", "Bank statements"],
+          "where": "Employer, IRS, or bank"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Eligibility Requirements",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-eligible-single",
+          "description": "Single person with low income - should qualify",
+          "input": {
+            "householdIncome": 1200,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": ["eligible", "single"]
+        },
+        {
+          "id": "test-ineligible-high-income",
+          "description": "Family with high income - should not qualify",
+          "input": {
+            "householdIncome": 6000,
+            "householdSize": 3
+          },
+          "expected": false,
+          "tags": ["ineligible", "high-income"]
+        },
+        {
+          "id": "test-boundary-3-person",
+          "description": "3-person household at exact limit",
+          "input": {
+            "householdIncome": 4500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": ["boundary"]
+        }
+      ],
+      "createdAt": 1697068800000,
+      "updatedAt": 1697068800000,
+      "tags": ["income", "poverty-level"],
+      "category": "financial-eligibility"
+    },
+    {
+      "id": "snap-federal-citizenship",
+      "programId": "snap-federal",
+      "name": "SNAP Citizenship Requirement",
+      "description": "Must be a U.S. citizen, U.S. national, or qualified immigrant",
+      "ruleLogic": {
+        "in": [
+          { "var": "citizenship" },
+          ["us_citizen", "permanent_resident", "refugee", "asylee"]
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "SNAP is available to U.S. citizens and certain categories of lawfully residing immigrants. Qualified immigrants include lawful permanent residents (green card holders), refugees, asylees, and others.",
+      "requiredFields": ["citizenship"],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, green card, or refugee documentation",
+          "required": true,
+          "alternatives": ["U.S. Passport", "Naturalization Certificate", "Green Card", "I-94"],
+          "where": "Government agency that issued the document"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Non-Citizen Eligibility",
+          "url": "https://www.fns.usda.gov/snap/eligibility/citizen/non-citizen-policy",
+          "legalReference": "7 CFR § 273.4"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-us-citizen",
+          "description": "U.S. citizen should qualify",
+          "input": {
+            "citizenship": "us_citizen"
+          },
+          "expected": true
+        },
+        {
+          "id": "test-refugee",
+          "description": "Refugee should qualify",
+          "input": {
+            "citizenship": "refugee"
+          },
+          "expected": true
+        },
+        {
+          "id": "test-other",
+          "description": "Other status should not qualify",
+          "input": {
+            "citizenship": "other"
+          },
+          "expected": false
+        }
+      ],
+      "createdAt": 1697068800000,
+      "updatedAt": 1697068800000,
+      "tags": ["citizenship", "immigration"],
+      "category": "eligibility-requirement"
+    }
+  ]
+}
+
