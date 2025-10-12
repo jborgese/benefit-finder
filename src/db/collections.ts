@@ -1,10 +1,10 @@
 /**
  * RxDB Collections Configuration
- * 
+ *
  * Defines all collections with their schemas and methods.
  */
 
-import type { RxCollectionCreator } from 'rxdb';
+import type { RxCollectionCreator, RxDocument, RxCollection } from 'rxdb';
 import {
   userProfileSchema,
   benefitProgramSchema,
@@ -27,25 +27,25 @@ export const userProfilesCollection: RxCollectionCreator<UserProfile> = {
     /**
      * Get full name
      */
-    getFullName(this: any): string {
-      return `${this.firstName || ''} ${this.lastName || ''}`.trim();
+    getFullName(this: RxDocument<UserProfile>): string {
+      return `${this.firstName ?? ''} ${this.lastName ?? ''}`.trim();
     },
-    
+
     /**
      * Calculate age from date of birth
      */
-    getAge(this: any): number | null {
+    getAge(this: RxDocument<UserProfile>): number | null {
       if (!this.dateOfBirth) return null;
-      
+
       const birthDate = new Date(this.dateOfBirth);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      
+
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
-      
+
       return age;
     },
   },
@@ -53,7 +53,7 @@ export const userProfilesCollection: RxCollectionCreator<UserProfile> = {
     /**
      * Get most recently updated profile
      */
-    async getLatest(this: any) {
+    getLatest(this: RxCollection<UserProfile>) {
       return this.findOne({
         sort: [{ updatedAt: 'desc' }],
       }).exec();
@@ -70,7 +70,7 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
     /**
      * Check if program is currently active
      */
-    isActive(this: any): boolean {
+    isActive(this: RxDocument<BenefitProgram>): boolean {
       return this.active === true;
     },
   },
@@ -78,7 +78,7 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
     /**
      * Get all active programs
      */
-    async getActivePrograms(this: any) {
+    getActivePrograms(this: RxCollection<BenefitProgram>) {
       return this.find({
         selector: {
           active: true,
@@ -86,11 +86,11 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
         sort: [{ name: 'asc' }],
       }).exec();
     },
-    
+
     /**
      * Get programs by jurisdiction
      */
-    async getByJurisdiction(this: any, jurisdiction: string) {
+    getByJurisdiction(this: RxCollection<BenefitProgram>, jurisdiction: string) {
       return this.find({
         selector: {
           jurisdiction,
@@ -99,11 +99,11 @@ export const benefitProgramsCollection: RxCollectionCreator<BenefitProgram> = {
         sort: [{ name: 'asc' }],
       }).exec();
     },
-    
+
     /**
      * Get programs by category
      */
-    async getByCategory(this: any, category: string) {
+    getByCategory(this: RxCollection<BenefitProgram>, category: string) {
       return this.find({
         selector: {
           category,
@@ -124,14 +124,14 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
     /**
      * Check if rule is currently valid
      */
-    isValid(this: any): boolean {
+    isValid(this: RxDocument<EligibilityRule>): boolean {
       if (!this.active) return false;
-      
+
       const now = Date.now();
-      
+
       if (this.effectiveDate && now < this.effectiveDate) return false;
       if (this.expirationDate && now > this.expirationDate) return false;
-      
+
       return true;
     },
   },
@@ -139,9 +139,9 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
     /**
      * Get active rules for a program
      */
-    async getByProgram(this: any, programId: string) {
+    getByProgram(this: RxCollection<EligibilityRule>, programId: string) {
       const now = Date.now();
-      
+
       return this.find({
         selector: {
           programId,
@@ -168,15 +168,15 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
     /**
      * Check if result is expired
      */
-    isExpired(this: any): boolean {
+    isExpired(this: RxDocument<EligibilityResult>): boolean {
       if (!this.expiresAt) return false;
       return Date.now() > this.expiresAt;
     },
-    
+
     /**
      * Check if result is eligible
      */
-    isEligible(this: any): boolean {
+    isEligible(this: RxDocument<EligibilityResult>): boolean {
       return this.eligible === true;
     },
   },
@@ -184,7 +184,7 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
     /**
      * Get results for a user profile
      */
-    async getByUserProfile(this: any, userProfileId: string) {
+    getByUserProfile(this: RxCollection<EligibilityResult>, userProfileId: string) {
       return this.find({
         selector: {
           userProfileId,
@@ -192,13 +192,13 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
         sort: [{ evaluatedAt: 'desc' }],
       }).exec();
     },
-    
+
     /**
      * Get non-expired results for a user
      */
-    async getValidResults(this: any, userProfileId: string) {
+    getValidResults(this: RxCollection<EligibilityResult>, userProfileId: string) {
       const now = Date.now();
-      
+
       return this.find({
         selector: {
           userProfileId,
@@ -210,13 +210,13 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
         sort: [{ evaluatedAt: 'desc' }],
       }).exec();
     },
-    
+
     /**
      * Clear expired results
      */
-    async clearExpired(this: any) {
+    async clearExpired(this: RxCollection<EligibilityResult>) {
       const now = Date.now();
-      
+
       const expiredDocs = await this.find({
         selector: {
           expiresAt: {
@@ -224,11 +224,11 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
           },
         },
       }).exec();
-      
+
       for (const doc of expiredDocs) {
         await doc.remove();
       }
-      
+
       return expiredDocs.length;
     },
   },
@@ -243,7 +243,7 @@ export const appSettingsCollection: RxCollectionCreator<AppSetting> = {
     /**
      * Get typed value
      */
-    getValue(this: any): unknown {
+    getValue(this: RxDocument<AppSetting>): unknown {
       try {
         return JSON.parse(this.value);
       } catch {
@@ -255,29 +255,29 @@ export const appSettingsCollection: RxCollectionCreator<AppSetting> = {
     /**
      * Get setting value by key
      */
-    async get(this: any, key: string): Promise<unknown> {
+    async get(this: RxCollection<AppSetting>, key: string): Promise<unknown> {
       const setting = await this.findOne({
         selector: { key },
       }).exec();
-      
+
       if (!setting) return null;
-      
+
       return setting.getValue();
     },
-    
+
     /**
      * Set setting value
      */
-    async set(this: any, key: string, value: unknown, encrypted = false) {
+    async set(this: RxCollection<AppSetting>, key: string, value: unknown, encrypted = false) {
       const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-      
+
       let type: 'string' | 'number' | 'boolean' | 'object' | 'array' = 'string';
-      
+
       if (typeof value === 'number') type = 'number';
       else if (typeof value === 'boolean') type = 'boolean';
       else if (Array.isArray(value)) type = 'array';
       else if (typeof value === 'object') type = 'object';
-      
+
       await this.upsert({
         key,
         value: serialized,

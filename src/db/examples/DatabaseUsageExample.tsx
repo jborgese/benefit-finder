@@ -4,7 +4,7 @@
  * Demonstrates how to use RxDB in React components.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent, type ReactNode } from 'react';
 import {
   useUserProfiles,
   useUserProfile,
@@ -21,7 +21,7 @@ import {
  * Example 1: Display User Profiles
  * Shows reactive query that auto-updates
  */
-export function UserProfilesList() {
+export function UserProfilesList(): JSX.Element {
   const { result: profiles, isFetching } = useUserProfiles();
 
   if (isFetching) {
@@ -39,7 +39,7 @@ export function UserProfilesList() {
         <div key={profile.id} className="p-4 border rounded-lg bg-white shadow">
           <h3 className="text-lg font-semibold">{profile.firstName} {profile.lastName}</h3>
           <p className="text-sm text-secondary-600">
-            Household Size: {profile.householdSize || 'N/A'}
+            Household Size: {profile.householdSize ?? 'N/A'}
           </p>
           <p className="text-xs text-secondary-500">
             Last updated: {new Date(profile.updatedAt).toLocaleDateString()}
@@ -54,7 +54,7 @@ export function UserProfilesList() {
  * Example 2: Create User Profile Form
  * Demonstrates creating documents
  */
-export function CreateProfileForm() {
+export function CreateProfileForm(): JSX.Element {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -63,8 +63,9 @@ export function CreateProfileForm() {
   const [state, setState] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -87,8 +88,10 @@ export function CreateProfileForm() {
       setHouseholdSize(1);
       setHouseholdIncome(0);
       setState('');
+      setSuccess(true);
 
-      alert('Profile created successfully!');
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       setError(`Failed to create profile: ${err}`);
     } finally {
@@ -97,12 +100,18 @@ export function CreateProfileForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+    <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4 max-w-md">
       <h2 className="text-2xl font-bold">Create Profile</h2>
 
       {error && (
         <div className="p-3 bg-error-50 border border-error-500 text-error-900 rounded">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="p-3 bg-success-50 border border-success-500 text-success-900 rounded">
+          Profile created successfully!
         </div>
       )}
 
@@ -209,14 +218,16 @@ export function CreateProfileForm() {
  * Example 3: Edit Profile
  * Demonstrates updating documents
  */
-export function EditProfileButton({ profileId }: { profileId: string }) {
+export function EditProfileButton({ profileId }: { profileId: string }): JSX.Element {
   const { result: profile, isFetching } = useUserProfile(profileId);
   const [editing, setEditing] = useState(false);
   const [income, setIncome] = useState<number>(0);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
-      setIncome(profile.householdIncome || 0);
+      setIncome(profile.householdIncome ?? 0);
     }
   }, [profile]);
 
@@ -226,9 +237,11 @@ export function EditProfileButton({ profileId }: { profileId: string }) {
         householdIncome: income,
       });
       setEditing(false);
-      alert('Profile updated!');
+      setSuccess(true);
+      setError(null);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      alert(`Failed to update: ${err}`);
+      setError(`Failed to update: ${err}`);
     }
   };
 
@@ -237,12 +250,24 @@ export function EditProfileButton({ profileId }: { profileId: string }) {
 
   if (!editing) {
     return (
-      <button
-        onClick={() => setEditing(true)}
-        className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-      >
-        Edit Income
-      </button>
+      <div className="space-y-2">
+        {success && (
+          <div className="p-2 bg-success-50 border border-success-500 text-success-900 rounded text-sm">
+            Profile updated!
+          </div>
+        )}
+        {error && (
+          <div className="p-2 bg-error-50 border border-error-500 text-error-900 rounded text-sm">
+            {error}
+          </div>
+        )}
+        <button
+          onClick={() => setEditing(true)}
+          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+        >
+          Edit Income
+        </button>
+      </div>
     );
   }
 
@@ -256,7 +281,7 @@ export function EditProfileButton({ profileId }: { profileId: string }) {
       />
       <div className="flex gap-2">
         <button
-          onClick={handleUpdate}
+          onClick={() => { void handleUpdate(); }}
           className="px-4 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700"
         >
           Save
@@ -276,41 +301,65 @@ export function EditProfileButton({ profileId }: { profileId: string }) {
  * Example 4: Delete Profile with Confirmation
  * Demonstrates deleting documents
  */
-export function DeleteProfileButton({ profileId }: { profileId: string }) {
+export function DeleteProfileButton({ profileId }: { profileId: string }): JSX.Element {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async (): Promise<void> => {
     setDeleting(true);
+    setError(null);
 
     try {
       await deleteUserProfile(profileId);
-      alert('Profile deleted successfully');
+      setSuccess(true);
+      setConfirming(false);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      alert(`Failed to delete: ${err}`);
+      setError(`Failed to delete: ${err}`);
     } finally {
       setDeleting(false);
-      setConfirming(false);
     }
   };
 
+  if (success) {
+    return (
+      <div className="p-2 bg-success-50 border border-success-500 text-success-900 rounded text-sm">
+        Profile deleted successfully
+      </div>
+    );
+  }
+
   if (!confirming) {
     return (
-      <button
-        onClick={() => setConfirming(true)}
-        className="px-4 py-2 bg-error-600 text-white rounded-lg hover:bg-error-700"
-      >
-        Delete Profile
-      </button>
+      <div className="space-y-2">
+        {error && (
+          <div className="p-2 bg-error-50 border border-error-500 text-error-900 rounded text-sm">
+            {error}
+          </div>
+        )}
+        <button
+          onClick={() => setConfirming(true)}
+          className="px-4 py-2 bg-error-600 text-white rounded-lg hover:bg-error-700"
+        >
+          Delete Profile
+        </button>
+      </div>
     );
   }
 
   return (
     <div className="space-y-2">
       <p className="text-sm text-error-600">Are you sure? This cannot be undone.</p>
+      {error && (
+        <div className="p-2 bg-error-50 border border-error-500 text-error-900 rounded text-sm">
+          {error}
+        </div>
+      )}
       <div className="flex gap-2">
         <button
-          onClick={handleDelete}
+          onClick={() => { void handleDelete(); }}
           disabled={deleting}
           className="px-4 py-2 bg-error-600 text-white rounded-lg hover:bg-error-700 disabled:opacity-50"
         >
@@ -331,7 +380,7 @@ export function DeleteProfileButton({ profileId }: { profileId: string }) {
  * Example 5: Benefit Programs List
  * Demonstrates querying with filters
  */
-export function BenefitProgramsList({ jurisdiction }: { jurisdiction?: string }) {
+export function BenefitProgramsList({ jurisdiction }: { jurisdiction?: string }): JSX.Element {
   const { result: programs, isFetching } = useBenefitPrograms(jurisdiction);
 
   if (isFetching) {
@@ -382,7 +431,7 @@ export function BenefitProgramsList({ jurisdiction }: { jurisdiction?: string })
  * Example 6: Eligibility Results Display
  * Demonstrates complex queries and encrypted data
  */
-export function EligibilityResultsList({ userProfileId }: { userProfileId: string }) {
+export function EligibilityResultsList({ userProfileId }: { userProfileId: string }): JSX.Element {
   const { result: results, isFetching } = useEligibilityResults(userProfileId);
   const { result: programs } = useBenefitPrograms();
 
@@ -417,7 +466,7 @@ export function EligibilityResultsList({ userProfileId }: { userProfileId: strin
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">
-                      {program?.name || 'Unknown Program'}
+                      {program?.name ?? 'Unknown Program'}
                     </h3>
                     <p className={`text-sm font-medium ${
                       result.eligible ? 'text-success-700' : 'text-secondary-700'
@@ -446,7 +495,7 @@ export function EligibilityResultsList({ userProfileId }: { userProfileId: strin
                   <div className="mt-3">
                     <p className="text-sm font-medium">Next Steps:</p>
                     <ul className="mt-1 text-sm text-secondary-700 list-disc list-inside">
-                      {result.nextSteps?.map((step, idx) => (
+                      {result.nextSteps.map((step, idx) => (
                         <li key={idx}>{typeof step === 'string' ? step : step.step}</li>
                       ))}
                     </ul>
@@ -465,7 +514,7 @@ export function EligibilityResultsList({ userProfileId }: { userProfileId: strin
  * Example 7: Initialize Database in App
  * Shows how to set up database when app starts
  */
-export function DatabaseInitializer({ children }: { children: React.ReactNode }) {
+export function DatabaseInitializer({ children }: { children: ReactNode }): JSX.Element {
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -481,7 +530,7 @@ export function DatabaseInitializer({ children }: { children: React.ReactNode })
       }
     };
 
-    init();
+    void init();
   }, []);
 
   if (error) {
@@ -497,7 +546,7 @@ export function DatabaseInitializer({ children }: { children: React.ReactNode })
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto" />
           <p className="mt-4 text-secondary-600">Initializing database...</p>
         </div>
       </div>

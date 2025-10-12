@@ -591,14 +591,77 @@ export function isEligibleResult(result: EligibilityResult): boolean {
 // Example 8: Validation Functions
 // ============================================================================
 
+interface ValidationError {
+  field: string;
+  message: string;
+  severity: 'error' | 'warning';
+}
+
+/**
+ * Checks if a value is empty (null, undefined, or empty string)
+ */
+function isEmptyValue(value: unknown): boolean {
+  return value === null || value === undefined || value === '';
+}
+
+/**
+ * Validates numeric bounds for number and currency inputs
+ */
+function validateNumericBounds(
+  question: QuestionDefinition,
+  value: unknown,
+  errors: ValidationError[]
+): void {
+  const num = Number(value);
+
+  if (question.min !== undefined && num < question.min) {
+    errors.push({
+      field: question.key,
+      message: `Value must be at least ${question.min}`,
+      severity: 'error',
+    });
+  }
+
+  if (question.max !== undefined && num > question.max) {
+    errors.push({
+      field: question.key,
+      message: `Value must be at most ${question.max}`,
+      severity: 'error',
+    });
+  }
+}
+
+/**
+ * Validates custom validation rules
+ */
+function validateCustomRules(
+  question: QuestionDefinition,
+  value: unknown,
+  errors: ValidationError[]
+): void {
+  if (!question.validations) {
+    return;
+  }
+
+  for (const validation of question.validations) {
+    if (validation.validator && !validation.validator(value)) {
+      errors.push({
+        field: question.key,
+        message: validation.message,
+        severity: 'error',
+      });
+    }
+  }
+}
+
 export function validateQuestionAnswer(
   question: QuestionDefinition,
-  value: any
-): ValidationResult<any> {
-  const errors: any[] = [];
+  value: unknown
+): ValidationResult<unknown> {
+  const errors: ValidationError[] = [];
 
   // Check required
-  if (question.required && (value === null || value === undefined || value === '')) {
+  if (question.required && isEmptyValue(value)) {
     errors.push({
       field: question.key,
       message: `${question.question} is required`,
@@ -608,37 +671,11 @@ export function validateQuestionAnswer(
 
   // Check type-specific validation
   if (question.type === 'number' || question.type === 'currency') {
-    const num = Number(value);
-
-    if (question.min !== undefined && num < question.min) {
-      errors.push({
-        field: question.key,
-        message: `Value must be at least ${question.min}`,
-        severity: 'error',
-      });
-    }
-
-    if (question.max !== undefined && num > question.max) {
-      errors.push({
-        field: question.key,
-        message: `Value must be at most ${question.max}`,
-        severity: 'error',
-      });
-    }
+    validateNumericBounds(question, value, errors);
   }
 
   // Check custom validations
-  if (question.validations) {
-    for (const validation of question.validations) {
-      if (validation.validator && !validation.validator(value)) {
-        errors.push({
-          field: question.key,
-          message: validation.message,
-          severity: 'error',
-        });
-      }
-    }
-  }
+  validateCustomRules(question, value, errors);
 
   return {
     valid: errors.length === 0,
@@ -663,7 +700,7 @@ export async function fetchProgramAsync(
       success: true,
       data: program,
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: `Program not found: ${programId}`,

@@ -114,74 +114,26 @@ export function explainResult(
   options: ExplanationOptions = {}
 ): ResultExplanation {
   const opts = {
-    includeTechnical: options.includeTechnical || false,
-    languageLevel: options.languageLevel || 'standard',
+    includeTechnical: options.includeTechnical ?? false,
+    languageLevel: options.languageLevel ?? 'standard',
     includeSuggestions: options.includeSuggestions !== false,
-    maxLength: options.maxLength || 1000,
+    maxLength: options.maxLength ?? 1000,
   };
-
-  const reasoning: string[] = [];
-  const criteriaChecked: string[] = [];
-  const criteriaPassed: string[] = [];
-  const criteriaFailed: string[] = [];
 
   // Extract criteria from rule
   const ruleExplanation = explainRule(rule, opts.languageLevel);
-  if (ruleExplanation.criteriaChecked) {
-    criteriaChecked.push(...ruleExplanation.criteriaChecked);
-  }
+  const criteriaChecked = [...(ruleExplanation.criteriaChecked ?? [])];
 
-  // Analyze result
-  if (result.eligible) {
-    reasoning.push('You meet all the eligibility requirements for this program.');
-    criteriaPassed.push(...criteriaChecked);
-  } else if (result.incomplete) {
-    reasoning.push('We need more information to determine your eligibility.');
+  // Analyze result based on status
+  const { reasoning, criteriaPassed, criteriaFailed } = analyzeEligibilityResult(
+    result,
+    criteriaChecked
+  );
 
-    if (result.missingFields) {
-      for (const field of result.missingFields) {
-        const fieldName = formatFieldName(field);
-        reasoning.push(`Missing: ${fieldName}`);
-        criteriaFailed.push(`${fieldName} information not provided`);
-      }
-    }
-  } else {
-    reasoning.push('Based on the information provided, you do not currently meet the eligibility requirements.');
-
-    // Analyze criteria
-    if (result.criteriaResults) {
-      for (const criterion of result.criteriaResults) {
-        const desc = criterion.description || formatFieldName(criterion.criterion);
-
-        if (criterion.met) {
-          criteriaPassed.push(desc);
-        } else {
-          criteriaFailed.push(desc);
-          reasoning.push(`• ${desc}`);
-        }
-      }
-    }
-  }
-
-  // Generate "what would change" suggestions
-  const whatWouldChange: string[] = [];
-
-  if (opts.includeSuggestions && !result.eligible) {
-    if (result.missingFields && result.missingFields.length > 0) {
-      whatWouldChange.push('Provide the missing information to get a complete evaluation');
-    }
-
-    if (result.criteriaResults) {
-      for (const criterion of result.criteriaResults) {
-        if (!criterion.met && criterion.threshold !== undefined) {
-          const fieldName = formatFieldName(criterion.criterion);
-          whatWouldChange.push(
-            `${fieldName}: Change from ${formatValue(criterion.value)} to meet threshold of ${formatValue(criterion.threshold)}`
-          );
-        }
-      }
-    }
-  }
+  // Generate suggestions if needed
+  const whatWouldChange = opts.includeSuggestions && !result.eligible
+    ? generateChangeSuggestions(result)
+    : undefined;
 
   // Build plain language explanation
   const plainLanguage = generatePlainLanguageExplanation(
@@ -196,10 +148,105 @@ export function explainResult(
     criteriaChecked,
     criteriaPassed,
     criteriaFailed,
-    missingInformation: result.missingFields || [],
-    whatWouldChange: whatWouldChange.length > 0 ? whatWouldChange : undefined,
+    missingInformation: result.missingFields ?? [],
+    whatWouldChange: whatWouldChange && whatWouldChange.length > 0 ? whatWouldChange : undefined,
     plainLanguage,
   };
+}
+
+/**
+ * Analyze eligibility result to extract reasoning and criteria
+ */
+function analyzeEligibilityResult(
+  result: EligibilityEvaluationResult,
+  criteriaChecked: string[]
+): {
+  reasoning: string[];
+  criteriaPassed: string[];
+  criteriaFailed: string[];
+} {
+  const reasoning: string[] = [];
+  const criteriaPassed: string[] = [];
+  const criteriaFailed: string[] = [];
+
+  if (result.eligible) {
+    reasoning.push('You meet all the eligibility requirements for this program.');
+    criteriaPassed.push(...criteriaChecked);
+  } else if (result.incomplete) {
+    processIncompleteResult(result, reasoning, criteriaFailed);
+  } else {
+    processIneligibleResult(result, reasoning, criteriaPassed, criteriaFailed);
+  }
+
+  return { reasoning, criteriaPassed, criteriaFailed };
+}
+
+/**
+ * Process incomplete evaluation result
+ */
+function processIncompleteResult(
+  result: EligibilityEvaluationResult,
+  reasoning: string[],
+  criteriaFailed: string[]
+): void {
+  reasoning.push('We need more information to determine your eligibility.');
+
+  if (result.missingFields) {
+    for (const field of result.missingFields) {
+      const fieldName = formatFieldName(field);
+      reasoning.push(`Missing: ${fieldName}`);
+      criteriaFailed.push(`${fieldName} information not provided`);
+    }
+  }
+}
+
+/**
+ * Process ineligible evaluation result
+ */
+function processIneligibleResult(
+  result: EligibilityEvaluationResult,
+  reasoning: string[],
+  criteriaPassed: string[],
+  criteriaFailed: string[]
+): void {
+  reasoning.push('Based on the information provided, you do not currently meet the eligibility requirements.');
+
+  if (result.criteriaResults) {
+    for (const criterion of result.criteriaResults) {
+      const desc = criterion.description ?? formatFieldName(criterion.criterion);
+
+      if (criterion.met) {
+        criteriaPassed.push(desc);
+      } else {
+        criteriaFailed.push(desc);
+        reasoning.push(`• ${desc}`);
+      }
+    }
+  }
+}
+
+/**
+ * Generate suggestions for what would change the result
+ */
+function generateChangeSuggestions(result: EligibilityEvaluationResult): string[] {
+  const suggestions: string[] = [];
+
+  if (result.missingFields && result.missingFields.length > 0) {
+    suggestions.push('Provide the missing information to get a complete evaluation');
+  }
+
+  if (result.criteriaResults) {
+    for (const criterion of result.criteriaResults) {
+      if (!criterion.met && criterion.threshold !== undefined) {
+        const fieldName = formatFieldName(criterion.criterion);
+        suggestions.push(
+          `${fieldName}: Change from ${formatValue(criterion.value)} to meet threshold of ${formatValue(criterion.threshold)}`
+        );
+      }
+    }
+  }
+
+  return suggestions;
 }
 
 /**
@@ -217,9 +264,9 @@ export function explainRule(
   const breakdown = generateExplanationTree(rule, 0);
 
   const description = generateRuleDescription(rule, languageLevel);
-  const criteriaChecked = validation.variables?.map(formatFieldName) || [];
+  const criteriaChecked = validation.variables?.map(formatFieldName) ?? [];
 
-  const complexity = validation.complexity || 0;
+  const complexity = validation.complexity ?? 0;
   let complexityLevel: 'simple' | 'moderate' | 'complex' | 'very-complex' = 'simple';
 
   if (complexity > 80) complexityLevel = 'very-complex';
@@ -229,8 +276,8 @@ export function explainRule(
   return {
     description,
     breakdown,
-    variables: validation.variables || [],
-    operators: validation.operators || [],
+    variables: validation.variables ?? [],
+    operators: validation.operators ?? [],
     complexity: complexityLevel,
     criteriaChecked,
   };
@@ -271,17 +318,22 @@ function generateExplanationTree(
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
-    const operands = Array.isArray(ruleAsRecord[operator]) ? ruleAsRecord[operator] : [ruleAsRecord[operator]];
-    const description = OPERATOR_DESCRIPTIONS[operator]
-      ? OPERATOR_DESCRIPTIONS[operator](operands as unknown[])
+    const operandValue = ruleAsRecord[operator];
+    if (operandValue === undefined) continue;
+
+    const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
+    const descriptionFn = OPERATOR_DESCRIPTIONS[operator];
+    const description = descriptionFn !== undefined
+      ? descriptionFn(operands as unknown[])
       : `Operation: ${operator}`;
 
     if (operator === 'var') {
+      const varName = operandValue as string;
       nodes.push({
         type: 'variable',
         operator,
-        variable: ruleAsRecord[operator] as string,
-        description: `Get ${formatFieldName(ruleAsRecord[operator] as string)}`,
+        variable: varName,
+        description: `Get ${formatFieldName(varName)}`,
         level,
       });
     } else {
@@ -318,8 +370,13 @@ function generateRuleDescription(
   }
 
   const operator = Object.keys(rule)[0];
+  if (!operator) {
+    return 'Empty rule';
+  }
+
   const ruleAsRecord = rule as Record<string, unknown>;
-  const operands = Array.isArray(ruleAsRecord[operator]) ? ruleAsRecord[operator] : [ruleAsRecord[operator]];
+  const operandValue = ruleAsRecord[operator];
+  const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
 
   switch (languageLevel) {
     case 'simple':
@@ -327,10 +384,12 @@ function generateRuleDescription(
     case 'technical':
       return `Rule: ${JSON.stringify(rule)}`;
     case 'standard':
-    default:
-      return OPERATOR_DESCRIPTIONS[operator]
-        ? OPERATOR_DESCRIPTIONS[operator](operands as unknown[])
+    default: {
+      const descriptionFn = OPERATOR_DESCRIPTIONS[operator];
+      return descriptionFn !== undefined
+        ? descriptionFn(operands as unknown[])
         : `Must meet ${operator} condition`;
+    }
   }
 }
 
@@ -350,7 +409,8 @@ function generateSimpleDescription(operator: string, _operands: JsonLogicRule[])
     'between': 'Your value must be in the acceptable range',
   };
 
-  return simpleDescriptions[operator] || 'You must meet this requirement';
+  const description = simpleDescriptions[operator];
+  return description ?? 'You must meet this requirement';
 }
 
 /**
@@ -363,62 +423,105 @@ function generatePlainLanguageExplanation(
 ): string {
   const parts: string[] = [];
 
-  // Main status
+  // Main status message
+  parts.push(getStatusMessage(result, languageLevel));
+
+  // Add reasoning details
+  addReasoningDetails(parts, reasoning, languageLevel);
+
+  // Add next steps if eligible
+  addNextSteps(parts, result, languageLevel);
+
+  // Add missing information if incomplete
+  addMissingInformation(parts, result, languageLevel);
+
+  return parts.join('\n');
+}
+
+/**
+ * Get status message based on result
+ */
+function getStatusMessage(
+  result: EligibilityEvaluationResult,
+  languageLevel: 'simple' | 'standard' | 'technical'
+): string {
   if (result.eligible) {
-    parts.push(
-      languageLevel === 'simple'
-        ? 'Good news! You qualify for this program.'
-        : 'Based on the information you provided, you appear to be eligible for this benefit program.'
-    );
-  } else if (result.incomplete) {
-    parts.push(
-      languageLevel === 'simple'
-        ? 'We need more information to check if you qualify.'
-        : 'We need additional information to complete your eligibility evaluation.'
-    );
-  } else {
-    parts.push(
-      languageLevel === 'simple'
-        ? 'Unfortunately, you do not qualify for this program right now.'
-        : 'Based on the information provided, you do not currently meet the eligibility requirements for this program.'
-    );
+    return languageLevel === 'simple'
+      ? 'Good news! You qualify for this program.'
+      : 'Based on the information you provided, you appear to be eligible for this benefit program.';
   }
 
-  // Add reasoning
+  if (result.incomplete) {
+    return languageLevel === 'simple'
+      ? 'We need more information to check if you qualify.'
+      : 'We need additional information to complete your eligibility evaluation.';
+  }
+
+  return languageLevel === 'simple'
+    ? 'Unfortunately, you do not qualify for this program right now.'
+    : 'Based on the information provided, you do not currently meet the eligibility requirements for this program.';
+}
+
+/**
+ * Add reasoning details to explanation
+ */
+function addReasoningDetails(
+  parts: string[],
+  reasoning: string[],
+  languageLevel: 'simple' | 'standard' | 'technical'
+): void {
   if (reasoning.length > 0 && languageLevel !== 'simple') {
     parts.push('');
     parts.push(...reasoning);
   }
+}
 
-  // Next steps
-  if (result.eligible && result.nextSteps && result.nextSteps.length > 0) {
-    parts.push('');
-    parts.push(
-      languageLevel === 'simple'
-        ? 'Here\'s what to do next:'
-        : 'Recommended next steps:'
-    );
-
-    for (const step of result.nextSteps) {
-      parts.push(`• ${step.step}`);
-    }
+/**
+ * Add next steps for eligible results
+ */
+function addNextSteps(
+  parts: string[],
+  result: EligibilityEvaluationResult,
+  languageLevel: 'simple' | 'standard' | 'technical'
+): void {
+  if (!result.eligible || !result.nextSteps || result.nextSteps.length === 0) {
+    return;
   }
 
-  // Missing information
-  if (result.incomplete && result.missingFields && result.missingFields.length > 0) {
-    parts.push('');
-    parts.push(
-      languageLevel === 'simple'
-        ? 'We need to know:'
-        : 'Please provide the following information:'
-    );
+  parts.push('');
+  parts.push(
+    languageLevel === 'simple'
+      ? 'Here\'s what to do next:'
+      : 'Recommended next steps:'
+  );
 
-    for (const field of result.missingFields) {
-      parts.push(`• ${formatFieldName(field)}`);
-    }
+  for (const step of result.nextSteps) {
+    parts.push(`• ${step.step}`);
+  }
+}
+
+/**
+ * Add missing information for incomplete results
+ */
+function addMissingInformation(
+  parts: string[],
+  result: EligibilityEvaluationResult,
+  languageLevel: 'simple' | 'standard' | 'technical'
+): void {
+  if (!result.incomplete || !result.missingFields || result.missingFields.length === 0) {
+    return;
   }
 
-  return parts.join('\n');
+  parts.push('');
+  parts.push(
+    languageLevel === 'simple'
+      ? 'We need to know:'
+      : 'Please provide the following information:'
+  );
+
+  for (const field of result.missingFields) {
+    parts.push(`• ${formatFieldName(field)}`);
+  }
 }
 
 // ============================================================================
@@ -457,15 +560,18 @@ export function explainDifference(
   const allKeys = new Set([...Object.keys(data1), ...Object.keys(data2)]);
 
   for (const key of allKeys) {
-    if (data1[key] !== data2[key]) {
+    const value1 = data1[key];
+    const value2 = data2[key];
+
+    if (value1 !== value2) {
       changedFields.push({
         field: formatFieldName(key),
-        before: data1[key],
-        after: data2[key],
+        before: value1,
+        after: value2,
       });
 
       differences.push(
-        `${formatFieldName(key)} changed from ${formatValue(data1[key])} to ${formatValue(data2[key])}`
+        `${formatFieldName(key)} changed from ${formatValue(value1)} to ${formatValue(value2)}`
       );
     }
   }
@@ -523,29 +629,15 @@ function analyzeRuleForSuggestions(
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
-    const operands = Array.isArray(ruleAsRecord[operator]) ? ruleAsRecord[operator] : [ruleAsRecord[operator]];
+    const operandValue = ruleAsRecord[operator];
+    if (operandValue === undefined) continue;
+
+    const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
 
     // Handle comparison operators
-    if (operator === '>' || operator === '>=') {
-      const [left, right] = operands as [JsonLogicRule, JsonLogicRule];
-      if (typeof left === 'object' && left !== null && 'var' in left && typeof right === 'number') {
-        const varName = (left as { var: string }).var;
-        const currentValue = data[varName];
-        suggestions.push(
-          `Increase ${formatFieldName(varName)} from ${formatValue(currentValue)} to at least ${formatValue(right)}`
-        );
-      }
-    }
-
-    if (operator === '<' || operator === '<=') {
-      const [left, right] = operands as [JsonLogicRule, JsonLogicRule];
-      if (typeof left === 'object' && left !== null && 'var' in left && typeof right === 'number') {
-        const varName = (left as { var: string }).var;
-        const currentValue = data[varName];
-        suggestions.push(
-          `Reduce ${formatFieldName(varName)} from ${formatValue(currentValue)} to ${formatValue(right)} or below`
-        );
-      }
+    const operatorSuggestion = getComparisonSuggestion(operator, operands, data);
+    if (operatorSuggestion) {
+      suggestions.push(operatorSuggestion);
     }
 
     // Recursively check nested rules
@@ -555,6 +647,34 @@ function analyzeRuleForSuggestions(
   }
 
   return suggestions;
+}
+
+/**
+ * Get suggestion for comparison operators
+ */
+function getComparisonSuggestion(
+  operator: string,
+  operands: unknown[],
+  data: JsonLogicData
+): string | null {
+  const [left, right] = operands as [JsonLogicRule, JsonLogicRule];
+
+  if (typeof left !== 'object' || left === null || !('var' in left) || typeof right !== 'number') {
+    return null;
+  }
+
+  const varName = (left as { var: string }).var;
+  const currentValue = data[varName];
+
+  if (operator === '>' || operator === '>=') {
+    return `Increase ${formatFieldName(varName)} from ${formatValue(currentValue)} to at least ${formatValue(right)}`;
+  }
+
+  if (operator === '<' || operator === '<=') {
+    return `Reduce ${formatFieldName(varName)} from ${formatValue(currentValue)} to ${formatValue(right)} or below`;
+  }
+
+  return null;
 }
 
 // ============================================================================
@@ -590,7 +710,7 @@ function formatValue(value: unknown): string {
   if (typeof value === 'string') return `"${value}"`;
   if (Array.isArray(value)) return `[${value.length} items]`;
   if (typeof value === 'object' && 'var' in value) {
-    return formatFieldName((value as any).var);
+    return formatFieldName((value as Record<string, unknown>).var as string);
   }
 
   return JSON.stringify(value);

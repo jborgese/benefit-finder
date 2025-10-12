@@ -202,7 +202,7 @@ export const useEncryptionStore = create<EncryptionStore>()(
             isEnabled: true,
             isKeyLoaded: true,
             passphraseStrength: strength,
-            passphraseHint: hint || null,
+            passphraseHint: hint ?? null,
             _encryptionKey: derived.key,
             _salt: derived.salt,
           });
@@ -219,7 +219,7 @@ export const useEncryptionStore = create<EncryptionStore>()(
           const state = get();
 
           // Get stored salt
-          const salt = state._salt || getStoredSalt();
+          const salt = state._salt ?? getStoredSalt();
           if (!salt) {
             console.error('No salt found for key derivation');
             return false;
@@ -291,7 +291,7 @@ export const useEncryptionStore = create<EncryptionStore>()(
       },
 
       getHint: (): string | null => {
-        return get().passphraseHint || getPassphraseHint();
+        return get().passphraseHint ?? getPassphraseHint();
       },
 
       getKey: (): CryptoKey | null => {

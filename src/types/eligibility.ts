@@ -5,6 +5,7 @@
  */
 
 import type { EligibilityResult as DbEligibilityResult } from '../db/schemas';
+import type { HouseholdProfile } from './household';
 
 /**
  * Eligibility Status
@@ -25,8 +26,8 @@ export type EligibilityStatus =
 export interface CriterionResult {
   criterion: string;
   met: boolean;
-  value?: any;
-  threshold?: any;
+  value?: unknown;
+  threshold?: unknown;
   comparison?: string;
   message?: string;
   importance?: 'required' | 'preferred' | 'optional';
@@ -126,7 +127,7 @@ export interface BatchEligibilityResult {
 export interface EligibilityComparison {
   scenarios: {
     name: string;
-    profile: Record<string, any>;
+    profile: HouseholdProfile;
     result: EligibilityResult;
   }[];
   differences: string[];

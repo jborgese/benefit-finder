@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [
+      "node",
+      "@playwright/test"
+    ]
+  },
+  "include": [
+    "tests/**/*.ts",
+    "playwright.config.ts"
+  ]
+}
+

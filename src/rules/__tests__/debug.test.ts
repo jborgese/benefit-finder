@@ -15,11 +15,11 @@ import type { JsonLogicRule, JsonLogicData } from '../types';
 
 describe('Debug Utilities', () => {
   describe('debugRule', () => {
-    it('should trace rule execution', async () => {
+    it('should trace rule execution', () => {
       const rule: JsonLogicRule = { '>': [{ var: 'age' }, 18] };
       const data: JsonLogicData = { age: 25 };
 
-      const debug = await debugRule(rule, data);
+      const debug = debugRule(rule, data);
 
       expect(debug.success).toBe(true);
       expect(debug.result).toBe(true);
@@ -29,20 +29,20 @@ describe('Debug Utilities', () => {
       expect(debug.operatorsUsed.size).toBeGreaterThanOrEqual(0);
     });
 
-    it('should track execution time', async () => {
+    it('should track execution time', () => {
       const rule: JsonLogicRule = { '>': [{ var: 'value' }, 0] };
       const data: JsonLogicData = { value: 1 };
 
-      const debug = await debugRule(rule, data);
+      const debug = debugRule(rule, data);
 
       expect(debug.totalTime).toBeGreaterThan(0);
     });
 
-    it('should handle errors', async () => {
+    it('should handle errors', () => {
       const rule: JsonLogicRule = { invalid_operator: [] };
       const data: JsonLogicData = {};
 
-      const debug = await debugRule(rule, data);
+      const debug = debugRule(rule, data);
 
       // Debug should complete even with unknown operators
       expect(debug).toBeDefined();
@@ -139,11 +139,11 @@ describe('Debug Utilities', () => {
   });
 
   describe('formatDebugTrace', () => {
-    it('should format debug trace as string', async () => {
+    it('should format debug trace as string', () => {
       const rule: JsonLogicRule = { '>': [{ var: 'age' }, 18] };
       const data: JsonLogicData = { age: 25 };
 
-      const debug = await debugRule(rule, data);
+      const debug = debugRule(rule, data);
       const formatted = formatDebugTrace(debug.trace);
 
       expect(formatted).toContain('Debug Trace');

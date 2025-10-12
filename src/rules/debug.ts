@@ -117,7 +117,7 @@ export interface RuleInspection {
  *
  * @example
  * ```typescript
- * const result = await debugRule(
+ * const result = debugRule(
  *   { '>': [{ var: 'age' }, 18] },
  *   { age: 25 }
  * );
@@ -126,10 +126,10 @@ export interface RuleInspection {
  * console.log('Variables accessed:', result.variablesAccessed);
  * ```
  */
-export async function debugRule(
+export function debugRule(
   rule: JsonLogicRule,
   data: JsonLogicData
-): Promise<DebugResult> {
+): DebugResult {
   const startTime = performance.now();
   const trace: DebugTraceStep[] = [];
   const variablesAccessed = new Set<string>();
@@ -159,21 +159,28 @@ export async function debugRule(
         const varPath = rule.var as string;
         variablesAccessed.add(varPath);
 
+        // Safe access using Object.prototype.hasOwnProperty
+        const value = Object.prototype.hasOwnProperty.call(data, varPath)
+          ? data[varPath as keyof JsonLogicData]
+          : undefined;
+
         trace.push({
           step: stepCounter++,
           operation: `Access variable: ${varPath}`,
           operator: 'var',
           operands: [varPath],
-          result: data[varPath],
+          result: value,
           context: data,
           level,
         });
 
-        return data[varPath];
+        return value;
       }
 
       // Handle operators
       const operator = Object.keys(rule)[0];
+      if (!operator) return null;
+
       operatorsUsed.add(operator);
 
       const stepStart = performance.now();
@@ -182,11 +189,22 @@ export async function debugRule(
         const result = jsonLogic.apply(rule, data);
         const stepEnd = performance.now();
 
+        // Safe access to rule properties
+        const ruleRecord = rule as Record<string, unknown>;
+        const operatorValue = Object.prototype.hasOwnProperty.call(ruleRecord, operator)
+          ? ruleRecord[operator]
+          : undefined;
+        const operands = Array.isArray(operatorValue)
+          ? operatorValue
+          : operatorValue !== undefined
+            ? [operatorValue]
+            : [];
+
         trace.push({
           step: stepCounter++,
           operation: `Operator: ${operator}`,
           operator,
-          operands: Array.isArray(rule[operator]) ? rule[operator] : [rule[operator]],
+          operands,
           result,
           level,
           duration: stepEnd - stepStart,
@@ -259,7 +277,10 @@ export function inspectVariable(
 
   for (const key of path) {
     if (value && typeof value === 'object') {
-      value = (value as Record<string, unknown>)[key];
+      const objValue = value as Record<string, unknown>;
+      value = Object.prototype.hasOwnProperty.call(objValue, key)
+        ? objValue[key]
+        : undefined;
     } else {
       value = undefined;
       break;
@@ -288,7 +309,7 @@ export function inspectAllVariables(
   data: JsonLogicData
 ): VariableInspection[] {
   const validation = validateRule(rule);
-  const variables = validation.variables || [];
+  const variables = validation.variables ?? [];
 
   return variables.map((varName) => inspectVariable(varName, data));
 }
@@ -306,14 +327,14 @@ export function inspectRule(
 ): RuleInspection {
   const validation = validateRule(rule);
 
-  const operators = validation.operators || [];
-  const variables = validation.variables || [];
+  const operators = validation.operators ?? [];
+  const variables = validation.variables ?? [];
 
   // Count variable usage
   const variableUsage = new Map<string, number>();
   const operatorUsage = new Map<string, number>();
 
-  const countUsage = (node: JsonLogicRule) => {
+  const countUsage = (node: JsonLogicRule): void => {
     if (node === null || typeof node !== 'object') return;
 
     if (Array.isArray(node)) {
@@ -323,13 +344,20 @@ export function inspectRule(
 
     for (const key of Object.keys(node)) {
       if (key === 'var') {
-        const varPath = typeof node[key] === 'string' ? node[key] as string : String(node[key]);
-        variableUsage.set(varPath, (variableUsage.get(varPath) || 0) + 1);
+        const nodeRecord = node as Record<string, unknown>;
+        const nodeValue = Object.prototype.hasOwnProperty.call(nodeRecord, key)
+          ? nodeRecord[key]
+          : undefined;
+        const varPath = typeof nodeValue === 'string' ? nodeValue : String(nodeValue);
+        variableUsage.set(varPath, (variableUsage.get(varPath) ?? 0) + 1);
       } else {
-        operatorUsage.set(key, (operatorUsage.get(key) || 0) + 1);
+        operatorUsage.set(key, (operatorUsage.get(key) ?? 0) + 1);
       }
 
-      const value = (node as any)[key];
+      const nodeRecord = node as Record<string, unknown>;
+      const value = Object.prototype.hasOwnProperty.call(nodeRecord, key)
+        ? nodeRecord[key]
+        : undefined;
       if (value !== undefined) {
         countUsage(value as JsonLogicRule);
       }
@@ -363,7 +391,7 @@ export function inspectRule(
       operators,
       variables,
       depth: validation.complexity ? Math.floor(validation.complexity / 10) : 0,
-      complexity: validation.complexity || 0,
+      complexity: validation.complexity ?? 0,
     },
     validation: {
       valid: validation.valid,
@@ -439,11 +467,16 @@ export async function compareEvaluations(
   const allKeys = new Set([...Object.keys(data1), ...Object.keys(data2)]);
 
   for (const key of allKeys) {
-    if (data1[key] !== data2[key]) {
+    const hasKey1 = Object.prototype.hasOwnProperty.call(data1, key);
+    const hasKey2 = Object.prototype.hasOwnProperty.call(data2, key);
+    const value1 = hasKey1 ? data1[key as keyof JsonLogicData] : undefined;
+    const value2 = hasKey2 ? data2[key as keyof JsonLogicData] : undefined;
+
+    if (value1 !== value2) {
       differences.push({
         field: key,
-        value1: data1[key],
-        value2: data2[key],
+        value1,
+        value2,
       });
     }
   }

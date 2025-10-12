@@ -59,7 +59,7 @@ export type JsonLogicOperator =
  * See: https://jsonlogic.com/
  */
 export type RuleLogic =
-  | { [operator: string]: any }
+  | { [operator: string]: RuleLogic | RuleLogic[] }
   | string
   | number
   | boolean
@@ -76,7 +76,7 @@ export interface RuleVariable {
   type: 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object';
   description: string;
   required: boolean;
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 /**
@@ -99,7 +99,7 @@ export interface RuleCriterion {
  * Test case for validating rule logic.
  */
 export interface RuleTestCase {
-  input: Record<string, any>;
+  input: Record<string, unknown>;
   expectedOutput: boolean;
   description: string;
   notes?: string;
@@ -134,9 +134,9 @@ export interface RuleDefinition extends DbEligibilityRule {
  * Context data available during rule evaluation.
  */
 export interface RuleEvaluationContext {
-  profile: Record<string, any>;
-  constants?: Record<string, any>;
-  helpers?: Record<string, (...args: any[]) => any>;
+  profile: Record<string, unknown>;
+  constants?: Record<string, unknown>;
+  helpers?: Record<string, (...args: unknown[]) => unknown>;
   timestamp: number;
 }
 
@@ -152,13 +152,13 @@ export interface RuleEvaluationResult {
   criteriaResults?: {
     criterionId: string;
     passed: boolean;
-    value?: any;
-    threshold?: any;
+    value?: unknown;
+    threshold?: unknown;
     message?: string;
   }[];
   errors?: string[];
   warnings?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -193,11 +193,11 @@ export interface RuleSet {
  * Helper type for building rules programmatically.
  */
 export interface RuleBuilder {
-  equals: (field: string, value: any) => RuleLogic;
+  equals: (field: string, value: unknown) => RuleLogic;
   lessThan: (field: string, value: number) => RuleLogic;
   greaterThan: (field: string, value: number) => RuleLogic;
   between: (field: string, min: number, max: number) => RuleLogic;
-  in: (field: string, values: any[]) => RuleLogic;
+  in: (field: string, values: unknown[]) => RuleLogic;
   and: (...conditions: RuleLogic[]) => RuleLogic;
   or: (...conditions: RuleLogic[]) => RuleLogic;
   not: (condition: RuleLogic) => RuleLogic;

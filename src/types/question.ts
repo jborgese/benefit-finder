@@ -25,6 +25,21 @@ export type QuestionType =
   | 'email';
 
 /**
+ * Answer Value Type
+ *
+ * Possible types for question answers and conditional values.
+ */
+export type AnswerValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | Date
+  | null
+  | undefined;
+
+/**
  * Question Option
  *
  * Option for select, radio, or checkbox questions.
@@ -44,9 +59,9 @@ export interface QuestionOption {
  */
 export interface QuestionValidation {
   type: 'required' | 'min' | 'max' | 'pattern' | 'custom';
-  value?: any;
+  value?: string | number | RegExp;
   message: string;
-  validator?: (value: any) => boolean;
+  validator?: (value: unknown) => boolean;
 }
 
 /**
@@ -59,7 +74,7 @@ export interface ConditionalLogic {
   conditions: {
     questionId: string;
     comparison: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'in' | 'contains';
-    value: any;
+    value: AnswerValue;
   }[];
 }
 
@@ -103,7 +118,7 @@ export interface QuestionDefinition {
   ariaDescribedBy?: string;
 
   // Navigation
-  nextQuestionId?: string | ((answer: any) => string);
+  nextQuestionId?: string | ((answer: AnswerValue) => string);
   previousQuestionId?: string;
   allowSkip?: boolean;
 
@@ -168,7 +183,7 @@ export interface QuestionSection {
 export interface QuestionAnswer {
   questionId: string;
   questionKey?: string;
-  value: any;
+  value: AnswerValue;
   timestamp: number;
   source?: 'user' | 'prefilled' | 'calculated';
   confidence?: number;

@@ -9,7 +9,7 @@
  *
  * Generic validation result type.
  */
-export interface ValidationResult<T = any> {
+export interface ValidationResult<T = unknown> {
   valid: boolean;
   data?: T;
   errors?: ValidationError[];

@@ -15,6 +15,7 @@ import {
   type RuleDefinition,
   type RuleChange,
 } from './schema';
+import type { JsonLogicRule } from './types';
 
 // ============================================================================
 // VERSION MANAGEMENT
@@ -28,7 +29,7 @@ import {
  */
 export async function getLatestRuleVersion(
   ruleId: string
-): Promise<{ rule: any; version: RuleVersion } | null> {
+): Promise<{ rule: RuleDefinition; version: RuleVersion } | null> {
   const db = getDatabase();
 
   // Find all rules with this ID (may have version suffixes)
@@ -69,7 +70,7 @@ export async function getLatestRuleVersion(
  */
 export async function getAllRuleVersions(
   ruleId: string
-): Promise<Array<{ rule: any; version: RuleVersion }>> {
+): Promise<Array<{ rule: RuleDefinition; version: RuleVersion }>> {
   const db = getDatabase();
 
   const rules = await db.eligibility_rules
@@ -121,7 +122,7 @@ export async function createRuleVersion(
   const changeRecord: RuleChange = {
     version: newVersion,
     date: now,
-    author: author || 'system',
+    author: author ?? 'system',
     description: changes,
     breaking: level === 'major',
   };
@@ -133,7 +134,7 @@ export async function createRuleVersion(
     updatedAt: now,
     supersedes: ruleId,
     changelog: [
-      ...(latest.rule.changelog || []),
+      ...(latest.rule.changelog ?? []),
       changeRecord,
     ],
   };
@@ -148,7 +149,7 @@ export async function createRuleVersion(
 /**
  * Migration function type
  */
-export type RuleMigration = (rule: any) => Promise<any> | any;
+export type RuleMigration = (rule: RuleDefinition) => Promise<RuleDefinition> | RuleDefinition;
 
 /**
  * Version migration definition
@@ -175,7 +176,7 @@ export function registerMigration(
   programId: string,
   migration: VersionMigration
 ): void {
-  const migrations = migrationRegistry.get(programId) || [];
+  const migrations = migrationRegistry.get(programId) ?? [];
   migrations.push(migration);
   migrationRegistry.set(programId, migrations);
 }
@@ -193,7 +194,7 @@ export function getMigrations(
   fromVersion: RuleVersion,
   toVersion: RuleVersion
 ): VersionMigration[] {
-  const allMigrations = migrationRegistry.get(programId) || [];
+  const allMigrations = migrationRegistry.get(programId) ?? [];
 
   return allMigrations.filter((m) => {
     const afterFrom = compareVersions(m.fromVersion, fromVersion) >= 0;
@@ -277,7 +278,7 @@ export async function migrateAllProgramRules(
       const currentVersion = parseVersion(rule.version || '0.1.0');
 
       // Determine target version if not specified
-      const target = targetVersion || { major: currentVersion.major + 1, minor: 0, patch: 0 };
+      const target = targetVersion ?? { major: currentVersion.major + 1, minor: 0, patch: 0 };
 
       // Check if migration is needed
       if (compareVersions(currentVersion, target) >= 0) {
@@ -290,7 +291,7 @@ export async function migrateAllProgramRules(
       const ruleDefinition: RuleDefinition = {
         ...ruleData,
         version: parseVersion(ruleData.version || '0.1.0'),
-        ruleLogic: ruleData.ruleLogic as any,
+        ruleLogic: ruleData.ruleLogic as JsonLogicRule,
       } as RuleDefinition;
       const migrated = await migrateRule(ruleDefinition, target);
 
@@ -485,7 +486,7 @@ export const exampleMigration_v1_to_v2: VersionMigration = {
   fromVersion: { major: 1, minor: 0, patch: 0 },
   toVersion: { major: 2, minor: 0, patch: 0 },
   description: 'Update rule logic to use new operator format',
-  migrate: async (rule: RuleDefinition) => {
+  migrate: (rule: RuleDefinition) => {
     // Example: Convert old operator to new operator
     const migratedLogic = JSON.parse(JSON.stringify(rule.ruleLogic));
 

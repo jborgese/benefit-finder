@@ -34,7 +34,13 @@ import { useQuestionnaireStore as questionnaireStore } from './questionnaireStor
  * Composite hook that returns commonly used store selectors.
  * Use this for quick access to frequently needed state.
  */
-export function useCommonState() {
+export function useCommonState(): {
+  theme: 'light' | 'dark' | 'system';
+  language: 'en' | 'es' | 'fr';
+  isLoading: boolean;
+  addToast: (toast: Omit<import('./uiStore').Toast, 'id'>) => string;
+  isQuestionnaireActive: boolean;
+} {
   const theme = appSettingsStore((state) => state.theme);
   const language = appSettingsStore((state) => state.language);
   const isLoading = uiStore((state) => state.isLoading);

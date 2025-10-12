@@ -212,9 +212,31 @@ export default [
     }
   },
 
-  // Test files have relaxed rules
+  // Unit test files have relaxed rules
   {
-    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/test/**', '**/tests/**'],
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', 'src/test/**'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'no-console': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+    }
+  },
+
+  // E2E test files use separate TypeScript config
+  {
+    files: ['tests/**/*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: './tsconfig.e2e.json',
+      },
+      globals: {
+        ...globals.node,
+      }
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',

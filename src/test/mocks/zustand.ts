@@ -1,6 +1,6 @@
 /**
  * Zustand Store Mocks
- * 
+ *
  * Mock implementations of Zustand stores for testing.
  */
 
@@ -108,19 +108,19 @@ export const mockQuestionnaireStore = {
 /**
  * Helper to reset all store mocks
  */
-export function resetAllStoreMocks() {
+export function resetAllStoreMocks(): void {
   Object.values(mockAppSettingsStore).forEach((value) => {
     if (typeof value === 'function' && 'mockReset' in value) {
       value.mockReset();
     }
   });
-  
+
   Object.values(mockUIStore).forEach((value) => {
     if (typeof value === 'function' && 'mockReset' in value) {
       value.mockReset();
     }
   });
-  
+
   Object.values(mockQuestionnaireStore).forEach((value) => {
     if (typeof value === 'function' && 'mockReset' in value) {
       value.mockReset();

@@ -8,8 +8,8 @@
 import { nanoid } from 'nanoid';
 import { getDatabase } from '../db/database';
 import { evaluateRule, registerBenefitOperators } from './evaluator';
-import type { EligibilityResult } from '../db/schemas';
-import type { JsonLogicData, RuleEvaluationOptions } from './types';
+import type { EligibilityResult, EligibilityResultDocument, EligibilityRuleDocument, UserProfileDocument } from '../db/schemas';
+import type { JsonLogicData, JsonLogicRule, RuleEvaluationOptions, RuleEvaluationResult } from './types';
 
 // ============================================================================
 // TYPES
@@ -163,9 +163,9 @@ export async function evaluateEligibility(
   const opts = {
     cacheResult: options.cacheResult !== false,
     includeBreakdown: options.includeBreakdown !== false,
-    forceReEvaluation: options.forceReEvaluation || false,
-    expiresIn: options.expiresIn || 1000 * 60 * 60 * 24 * 30, // 30 days
-    evaluationOptions: options.evaluationOptions || {},
+    forceReEvaluation: options.forceReEvaluation ?? false,
+    expiresIn: options.expiresIn ?? 1000 * 60 * 60 * 24 * 30, // 30 days
+    evaluationOptions: options.evaluationOptions ?? {},
   };
 
   try {
@@ -200,19 +200,19 @@ export async function evaluateEligibility(
     }
 
     // Use the highest priority rule
-    const sortedRules = rules.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
     const rule = sortedRules[0];
 
     // Prepare data context
     const data = prepareDataContext(profile);
 
     // Check for missing required fields
-    const missingFields = checkMissingFields(data, rule.requiredFields || []);
+    const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
     const incomplete = missingFields.length > 0;
 
     // Evaluate rule
     const evalResult = await evaluateRule(
-      rule.ruleLogic as any,
+      rule.ruleLogic as JsonLogicRule,
       data,
       opts.evaluationOptions
     );
@@ -225,7 +225,7 @@ export async function evaluateEligibility(
       profileId,
       programId,
       ruleId: rule.id,
-      eligible: evalResult.success ? (evalResult.result as boolean) : false,
+      eligible: evalResult.success ? Boolean(evalResult.result) : false,
       confidence: calculateConfidence(evalResult, incomplete),
       reason: generateReason(evalResult, rule, incomplete),
       missingFields: incomplete ? missingFields : undefined,
@@ -353,8 +353,8 @@ export async function evaluateAllPrograms(
 /**
  * Prepare data context from user profile
  */
-function prepareDataContext(profile: any): JsonLogicData {
-  const data = profile.toJSON ? profile.toJSON() : profile;
+function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
+  const data = profile.toJSON();
 
   // Add computed fields
   return {
@@ -371,6 +371,7 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
   const missing: string[] = [];
 
   for (const field of requiredFields) {
+    // eslint-disable-next-line security/detect-object-injection
     if (data[field] === undefined || data[field] === null || data[field] === '') {
       missing.push(field);
     }
@@ -383,7 +384,7 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
  * Calculate confidence score
  */
 function calculateConfidence(
-  evalResult: any,
+  evalResult: RuleEvaluationResult,
   incomplete: boolean
 ): number {
   if (!evalResult.success) {
@@ -402,8 +403,8 @@ function calculateConfidence(
  * Generate human-readable reason
  */
 function generateReason(
-  evalResult: any,
-  rule: any,
+  evalResult: RuleEvaluationResult,
+  rule: EligibilityRuleDocument,
   incomplete: boolean
 ): string {
   if (!evalResult.success) {
@@ -415,7 +416,7 @@ function generateReason(
   }
 
   if (evalResult.result) {
-    return rule.explanation || 'You meet the eligibility criteria for this program';
+    return rule.explanation ?? 'You meet the eligibility criteria for this program';
   }
 
   return 'You do not meet the eligibility criteria for this program';
@@ -425,9 +426,9 @@ function generateReason(
  * Generate detailed criteria breakdown
  */
 function generateCriteriaBreakdown(
-  rule: any,
+  rule: EligibilityRuleDocument,
   data: JsonLogicData,
-  _evalResult: any
+  _evalResult: RuleEvaluationResult
 ): Array<{ criterion: string; met: boolean; value?: unknown; threshold?: unknown; description?: string }> {
   // This is a simplified implementation
   // In production, you'd want more sophisticated logic analysis
@@ -443,11 +444,13 @@ function generateCriteriaBreakdown(
   // Extract criteria from rule logic (simplified)
   if (rule.requiredFields) {
     for (const field of rule.requiredFields) {
+      // eslint-disable-next-line security/detect-object-injection
+      const fieldValue = data[field];
       breakdown.push({
         criterion: field,
-        met: data[field] !== undefined && data[field] !== null,
-        value: data[field],
-        description: `${field} is ${data[field] !== undefined ? 'provided' : 'missing'}`,
+        met: fieldValue !== undefined && fieldValue !== null,
+        value: fieldValue,
+        description: `${field} is ${fieldValue !== undefined ? 'provided' : 'missing'}`,
       });
     }
   }
@@ -461,7 +464,7 @@ function generateCriteriaBreakdown(
 async function getCachedResult(
   profileId: string,
   programId: string
-): Promise<any | null> {
+): Promise<EligibilityResultDocument | null> {
   const db = getDatabase();
 
   const results = await db.eligibility_results
@@ -475,7 +478,7 @@ async function getCachedResult(
     })
     .exec();
 
-  return results[0] || null;
+  return results[0] ?? null;
 }
 
 /**
@@ -499,7 +502,7 @@ async function cacheResult(
     missingFields: result.missingFields,
     nextSteps: result.nextSteps?.map(step => ({
       ...step,
-      priority: step.priority || 'medium',
+      priority: step.priority ?? 'medium',
     })),
     requiredDocuments: result.requiredDocuments?.map(doc => ({
       document: doc.document,
@@ -509,7 +512,7 @@ async function cacheResult(
     })),
     estimatedBenefit: result.estimatedBenefit ? {
       ...result.estimatedBenefit,
-      frequency: result.estimatedBenefit.frequency || 'monthly',
+      frequency: result.estimatedBenefit.frequency ?? 'monthly',
       currency: 'USD' as const,
     } : undefined,
     ruleVersion: result.ruleVersion,
@@ -534,7 +537,9 @@ export async function clearCachedResults(
 ): Promise<number> {
   const db = getDatabase();
 
-  const selector: any = { userProfileId: profileId };
+  const selector: { userProfileId: string; programId?: string } = {
+    userProfileId: profileId
+  };
   if (programId) {
     selector.programId = programId;
   }

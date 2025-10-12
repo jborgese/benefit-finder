@@ -111,6 +111,8 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.length; i++) {
+    // Safe: i is a controlled loop counter within array bounds
+    // eslint-disable-next-line security/detect-object-injection
     binary += String.fromCharCode(bytes[i]);
   }
   return btoa(binary);
@@ -126,6 +128,8 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
+    // Safe: i is a controlled loop counter within array bounds
+    // eslint-disable-next-line security/detect-object-injection
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes.buffer;
@@ -135,12 +139,12 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
  * Generate cryptographically secure random bytes
  *
  * @param length Number of bytes to generate
- * @returns ArrayBuffer with random bytes
+ * @returns Uint8Array with random bytes
  */
-function generateRandomBytes(length: number): ArrayBuffer {
+function generateRandomBytes(length: number): Uint8Array {
   const array = new Uint8Array(length);
   crypto.getRandomValues(array);
-  return array.buffer;
+  return array;
 }
 
 // ============================================================================
@@ -154,7 +158,7 @@ function generateRandomBytes(length: number): ArrayBuffer {
  */
 export function generateSalt(): string {
   const saltBuffer = generateRandomBytes(ENCRYPTION_CONFIG.SALT_LENGTH);
-  return arrayBufferToBase64(saltBuffer);
+  return arrayBufferToBase64(saltBuffer.buffer);
 }
 
 /**
@@ -185,7 +189,7 @@ export async function deriveKeyFromPassphrase(
   }
 
   // Use provided salt or generate new one
-  const saltString = salt || generateSalt();
+  const saltString = salt ?? generateSalt();
   const saltBuffer = base64ToArrayBuffer(saltString);
 
   // Convert passphrase to key material
@@ -202,10 +206,12 @@ export async function deriveKeyFromPassphrase(
   );
 
   // Derive AES-GCM key using PBKDF2
+  // Ensure saltBuffer is a proper Uint8Array for Node.js compatibility
+  const saltArray = new Uint8Array(saltBuffer);
   const derivedKey = await crypto.subtle.deriveKey(
     {
       name: ENCRYPTION_CONFIG.KDF_ALGORITHM,
-      salt: saltBuffer,
+      salt: saltArray,
       iterations,
       hash: ENCRYPTION_CONFIG.HASH_FUNCTION,
     },
@@ -231,7 +237,7 @@ export async function deriveKeyFromPassphrase(
  * @returns CryptoKey for AES-GCM encryption
  */
 export async function generateEncryptionKey(): Promise<CryptoKey> {
-  return await crypto.subtle.generateKey(
+  return crypto.subtle.generateKey(
     {
       name: ENCRYPTION_CONFIG.ALGORITHM,
       length: ENCRYPTION_CONFIG.KEY_LENGTH,
@@ -288,7 +294,7 @@ export async function encrypt(
 
   return {
     ciphertext: arrayBufferToBase64(encryptedBuffer),
-    iv: arrayBufferToBase64(iv),
+    iv: arrayBufferToBase64(iv.buffer),
     algorithm: ENCRYPTION_CONFIG.ALGORITHM,
     timestamp: Date.now(),
   };
@@ -317,14 +323,16 @@ export async function decrypt(
 
   // Convert from Base64
   const ciphertext = base64ToArrayBuffer(validated.ciphertext);
-  const iv = base64ToArrayBuffer(validated.iv);
+  const ivBuffer = base64ToArrayBuffer(validated.iv);
 
   try {
     // Decrypt using AES-GCM
+    // Ensure iv is a proper Uint8Array for Node.js compatibility
+    const ivArray = new Uint8Array(ivBuffer);
     const decryptedBuffer = await crypto.subtle.decrypt(
       {
         name: ENCRYPTION_CONFIG.ALGORITHM,
-        iv,
+        iv: ivArray,
         tagLength: ENCRYPTION_CONFIG.TAG_LENGTH,
       },
       key,
@@ -334,7 +342,7 @@ export async function decrypt(
     // Convert back to string
     const decoder = new TextDecoder();
     return decoder.decode(decryptedBuffer);
-  } catch (error) {
+  } catch {
     throw new Error(
       'Decryption failed. The data may be corrupted or the key is incorrect.'
     );
@@ -372,12 +380,67 @@ export async function decryptFromString(
     base64ToArrayBuffer(encryptedString)
   );
   const encrypted = JSON.parse(jsonString) as EncryptedData;
-  return await decrypt(encrypted, key);
+  return decrypt(encrypted, key);
 }
 
 // ============================================================================
 // PASSPHRASE STRENGTH
 // ============================================================================
+
+/**
+ * Calculate length-based score
+ */
+function getLengthScore(length: number): number {
+  let score = 0;
+  if (length >= 8) score += 1;
+  if (length >= 12) score += 1;
+  if (length >= 16) score += 1;
+  if (length >= 20) score += 1;
+  return score;
+}
+
+/**
+ * Calculate character diversity score
+ */
+function getCharacterDiversityScore(passphrase: string): number {
+  let score = 0;
+  if (/[a-z]/.test(passphrase)) score += 1; // Lowercase
+  if (/[A-Z]/.test(passphrase)) score += 1; // Uppercase
+  if (/[0-9]/.test(passphrase)) score += 1; // Numbers
+  if (/[^a-zA-Z0-9]/.test(passphrase)) score += 1; // Special characters
+  return score;
+}
+
+/**
+ * Calculate penalty for common patterns
+ */
+function getCommonPatternPenalty(passphrase: string): number {
+  const commonPatterns = [
+    /^password/i,
+    /^12345/,
+    /^qwerty/i,
+    /(.)\1{2,}/, // Repeated characters
+  ];
+
+  let penalty = 0;
+  for (const pattern of commonPatterns) {
+    if (pattern.test(passphrase)) {
+      penalty += 2;
+    }
+  }
+  return penalty;
+}
+
+/**
+ * Convert score to strength rating
+ */
+function scoreToStrength(score: number): EncryptionStrength {
+  if (score >= 8) return 'very-strong';
+  if (score >= 6) return 'strong';
+  if (score >= 4) return 'medium';
+  if (score >= 2) return 'weak';
+  return 'none';
+}
 
 /**
  * Evaluate passphrase strength
@@ -401,40 +464,16 @@ export function evaluatePassphraseStrength(passphrase: string): EncryptionStreng
     return 'none';
   }
 
-  let score = 0;
+  const lengthScore = getLengthScore(passphrase.length);
+  const diversityScore = getCharacterDiversityScore(passphrase);
+  const penalty = getCommonPatternPenalty(passphrase);
 
-  // Length scoring
-  if (passphrase.length >= 8) score += 1;
-  if (passphrase.length >= 12) score += 1;
-  if (passphrase.length >= 16) score += 1;
-  if (passphrase.length >= 20) score += 1;
+  // Calculate total score, but ensure minimum of 2 if there's any positive scoring
+  // This prevents weak passphrases with penalties from falling to 'none'
+  const rawScore = lengthScore + diversityScore - penalty;
+  const totalScore = (lengthScore + diversityScore > 0) ? Math.max(rawScore, 2) : rawScore;
 
-  // Character diversity scoring
-  if (/[a-z]/.test(passphrase)) score += 1; // Lowercase
-  if (/[A-Z]/.test(passphrase)) score += 1; // Uppercase
-  if (/[0-9]/.test(passphrase)) score += 1; // Numbers
-  if (/[^a-zA-Z0-9]/.test(passphrase)) score += 1; // Special characters
-
-  // Penalty for common patterns
-  const commonPatterns = [
-    /^password/i,
-    /^12345/,
-    /^qwerty/i,
-    /(.)\1{2,}/, // Repeated characters
-  ];
-
-  for (const pattern of commonPatterns) {
-    if (pattern.test(passphrase)) {
-      score -= 2;
-    }
-  }
-
-  // Convert score to strength rating
-  if (score >= 7) return 'very-strong';
-  if (score >= 5) return 'strong';
-  if (score >= 3) return 'medium';
-  if (score >= 1) return 'weak';
-  return 'none';
+  return scoreToStrength(totalScore);
 }
 
 /**
@@ -592,7 +631,7 @@ export function estimateCrackTime(passphrase: string): string {
   const secondsPerAttempt = iterations / hashesPerSecond;
 
   // Total possible combinations
-  const combinations = Math.pow(2, entropy);
+  const combinations = 2 ** entropy;
 
   // Average time to crack (half the keyspace)
   const secondsToCrack = (combinations / 2) * secondsPerAttempt;

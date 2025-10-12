@@ -44,7 +44,7 @@ export const Question: React.FC<QuestionProps> = ({
   const [touched, setTouched] = React.useState(false);
 
   // Validate on change
-  const handleChange = (newValue: unknown) => {
+  const handleChange = (newValue: unknown): void => {
     onChange(newValue);
 
     // Validate if touched
@@ -54,25 +54,25 @@ export const Question: React.FC<QuestionProps> = ({
   };
 
   // Validate value
-  const validateValue = (val: unknown) => {
+  const validateValue = (val: unknown): void => {
     const schema = createSchemaFromQuestion(question);
     const result = validateWithSchema(schema, val);
 
     if (!result.success) {
-      setErrors(result.errors || []);
+      setErrors(result.errors ?? []);
     } else {
       setErrors([]);
     }
   };
 
   // Mark as touched on blur
-  const handleBlur = () => {
+  const handleBlur = (): void => {
     setTouched(true);
     validateValue(value);
   };
 
   // Render appropriate input component
-  const renderInput = () => {
+  const renderInput = (): React.ReactNode => {
     const commonProps = {
       question,
       value,
@@ -100,7 +100,7 @@ export const Question: React.FC<QuestionProps> = ({
           <SelectInput
             {...commonProps}
             value={value as string | number}
-            options={question.options || []}
+            options={question.options ?? []}
             variant={question.inputType === 'radio' ? 'radio' : 'dropdown'}
           />
         );
@@ -111,7 +111,7 @@ export const Question: React.FC<QuestionProps> = ({
           <MultiSelectInput
             {...commonProps}
             value={value as (string | number)[]}
-            options={question.options || []}
+            options={question.options ?? []}
             variant={question.inputType === 'checkbox' ? 'checkbox' : 'pills'}
           />
         );

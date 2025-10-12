@@ -65,8 +65,8 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
   useAutoSave({
     enabled: autoSave,
     debounceMs: autoSaveDelay,
-    onSave: (data) => {
-      console.log('Progress auto-saved', data);
+    onSave: () => {
+      // Progress auto-saved silently
     },
   });
 
@@ -91,7 +91,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
   }, [store.completed, onComplete, store]);
 
   // Handle answer changes
-  const handleAnswerChange = (value: unknown) => {
+  const handleAnswerChange = (value: unknown): void => {
     if (!currentQuestion) return;
 
     store.answerQuestion(
@@ -107,7 +107,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" />
           <p className="text-gray-600">Loading questionnaire...</p>
         </div>
       </div>
@@ -177,14 +177,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
           showBack
           showForward
           showProgress={showProgress}
-          onBeforeNavigate={async (direction) => {
-            // Validate before moving forward
-            if (direction === 'forward') {
-              // Could add validation here
-              return true;
-            }
-            return true;
-          }}
+          onBeforeNavigate={() => true}
         />
       )}
 

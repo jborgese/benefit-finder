@@ -4,7 +4,7 @@
  * Helper functions and utilities for writing tests.
  */
 
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { ReactElement, ReactNode } from 'react';
 import { vi } from 'vitest';
 
@@ -19,9 +19,9 @@ import { vi } from 'vitest';
 export function renderWithProviders(
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
-) {
+): RenderResult {
   // Create a wrapper with all necessary providers
-  function Wrapper({ children }: { children: ReactNode }) {
+  function Wrapper({ children }: { children: ReactNode }): ReactElement {
     return (
       <>
         {/* Add global providers here when needed */}
@@ -62,7 +62,7 @@ export async function waitFor(
 /**
  * Create a mock user profile for testing
  */
-export function createMockUserProfile(overrides = {}) {
+export function createMockUserProfile(overrides = {}): Record<string, any> {
   return {
     id: 'test-profile-123',
     firstName: 'Jane',
@@ -83,7 +83,7 @@ export function createMockUserProfile(overrides = {}) {
 /**
  * Create a mock benefit program for testing
  */
-export function createMockBenefitProgram(overrides = {}) {
+export function createMockBenefitProgram(overrides = {}): Record<string, any> {
   return {
     id: 'test-program-123',
     name: 'SNAP (Food Stamps)',
@@ -104,7 +104,7 @@ export function createMockBenefitProgram(overrides = {}) {
 /**
  * Create a mock eligibility rule for testing
  */
-export function createMockEligibilityRule(overrides = {}) {
+export function createMockEligibilityRule(overrides = {}): Record<string, any> {
   return {
     id: 'test-rule-123',
     programId: 'test-program-123',
@@ -128,7 +128,7 @@ export function createMockEligibilityRule(overrides = {}) {
 /**
  * Create a mock eligibility result for testing
  */
-export function createMockEligibilityResult(overrides = {}) {
+export function createMockEligibilityResult(overrides = {}): Record<string, any> {
   return {
     id: 'test-result-123',
     userProfileId: 'test-profile-123',
@@ -153,13 +153,13 @@ export function createMockEligibilityResult(overrides = {}) {
  * mockFetch({ data: 'response' });
  * ```
  */
-export function mockFetch(response: any, status = 200) {
+export function mockFetch(response: any, status = 200): void {
   global.fetch = vi.fn(() =>
     Promise.resolve({
       ok: status >= 200 && status < 300,
       status,
-      json: async () => response,
-      text: async () => JSON.stringify(response),
+      json: () => Promise.resolve(response),
+      text: () => Promise.resolve(JSON.stringify(response)),
     } as Response)
   );
 }
@@ -167,23 +167,28 @@ export function mockFetch(response: any, status = 200) {
 /**
  * Mock localStorage for tests
  */
-export function mockLocalStorage() {
+export function mockLocalStorage(): Storage {
   const store: Record<string, string> = {};
 
   return {
+    // eslint-disable-next-line security/detect-object-injection
     getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {
+      // eslint-disable-next-line security/detect-object-injection
       store[key] = value;
     }),
     removeItem: vi.fn((key: string) => {
+      // eslint-disable-next-line security/detect-object-injection
       delete store[key];
     }),
     clear: vi.fn(() => {
+      // eslint-disable-next-line security/detect-object-injection
       Object.keys(store).forEach((key) => delete store[key]);
     }),
     get length() {
       return Object.keys(store).length;
     },
+    // eslint-disable-next-line security/detect-object-injection
     key: vi.fn((index: number) => Object.keys(store)[index] || null),
   };
 }
@@ -198,17 +203,21 @@ export function mockLocalStorage() {
  * restore();
  * ```
  */
-export function suppressConsole(...methods: Array<keyof Console>) {
+export function suppressConsole(...methods: Array<keyof Console>): () => void {
   const original: Partial<Record<keyof Console, any>> = {};
 
   methods.forEach((method) => {
+    // eslint-disable-next-line security/detect-object-injection
     original[method] = console[method];
+    // eslint-disable-next-line security/detect-object-injection
     (console as any)[method] = vi.fn();
   });
 
   return () => {
     methods.forEach((method) => {
+      // eslint-disable-next-line security/detect-object-injection
       if (original[method]) {
+        // eslint-disable-next-line security/detect-object-injection
         (console as any)[method] = original[method];
       }
     });
@@ -225,7 +234,11 @@ export function suppressConsole(...methods: Array<keyof Console>) {
  * await deferred.promise;
  * ```
  */
-export function createDeferred<T = void>() {
+export function createDeferred<T = void>(): {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason?: any) => void;
+} {
   let resolve!: (value: T) => void;
   let reject!: (reason?: any) => void;
 
@@ -242,7 +255,7 @@ export function createDeferred<T = void>() {
  *
  * Useful when testing code with setTimeout/setInterval
  */
-export async function advanceTimersAndFlush(ms: number) {
+export async function advanceTimersAndFlush(ms: number): Promise<void> {
   vi.advanceTimersByTime(ms);
   await Promise.resolve();
 }

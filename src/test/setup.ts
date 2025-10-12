@@ -1,6 +1,6 @@
 /**
  * Vitest Setup File
- * 
+ *
  * Global test configuration and setup.
  * This file runs before each test suite.
  */
@@ -35,32 +35,41 @@ beforeAll(() => {
   // Mock IntersectionObserver
   global.IntersectionObserver = class IntersectionObserver {
     constructor() {}
-    disconnect() {}
-    observe() {}
-    takeRecords() {
+    disconnect(): void {}
+    observe(): void {}
+    takeRecords(): IntersectionObserverEntry[] {
       return [];
     }
-    unobserve() {}
+    unobserve(): void {}
   } as any;
 
   // Mock ResizeObserver
   global.ResizeObserver = class ResizeObserver {
     constructor() {}
-    disconnect() {}
-    observe() {}
-    unobserve() {}
+    disconnect(): void {}
+    observe(): void {}
+    unobserve(): void {}
   } as any;
 
   // Mock crypto.getRandomValues (for encryption tests)
-  if (!global.crypto) {
-    global.crypto = {} as any;
+  // Use type assertion to handle environments where crypto might not be fully available
+  const globalWithCrypto = global as typeof global & {
+    crypto: Crypto & { getRandomValues?: <T extends ArrayBufferView | null>(array: T) => T };
+  };
+
+  if (typeof globalWithCrypto.crypto === 'undefined') {
+    globalWithCrypto.crypto = {} as Crypto;
   }
-  if (!global.crypto.getRandomValues) {
-    global.crypto.getRandomValues = (arr: any) => {
-      for (let i = 0; i < arr.length; i++) {
-        arr[i] = Math.floor(Math.random() * 256);
+  if (typeof globalWithCrypto.crypto.getRandomValues === 'undefined') {
+    globalWithCrypto.crypto.getRandomValues = <T extends ArrayBufferView | null>(array: T): T => {
+      if (array && 'length' in array && 'BYTES_PER_ELEMENT' in array) {
+        const typedArray = array as unknown as Uint8Array;
+        for (let i = 0; i < typedArray.length; i++) {
+          const index = i as number;
+          typedArray[index] = Math.floor(Math.random() * 256);
+        }
       }
-      return arr;
+      return array;
     };
   }
 

@@ -276,7 +276,7 @@ describe('Encryption Utilities', () => {
       // Tamper with ciphertext
       const tamperedEncrypted: EncryptedData = {
         ...encrypted,
-        ciphertext: encrypted.ciphertext.slice(0, -4) + 'XXXX',
+        ciphertext: `${encrypted.ciphertext.slice(0, -4)}XXXX`,
       };
 
       await expect(decrypt(tamperedEncrypted, key)).rejects.toThrow();

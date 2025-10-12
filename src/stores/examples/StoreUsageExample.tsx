@@ -1,6 +1,6 @@
 /**
  * Store Usage Examples
- * 
+ *
  * This file demonstrates how to use the Zustand stores in React components.
  * These examples showcase best practices for state management in BenefitFinder.
  */
@@ -11,10 +11,10 @@ import { useAppSettingsStore, useQuestionnaireStore, useUIStore } from '../index
  * Example 1: Theme Switcher Component
  * Demonstrates using app settings store for theme management
  */
-export function ThemeSwitcher() {
+export function ThemeSwitcher(): JSX.Element {
   const theme = useAppSettingsStore((state) => state.theme);
   const setTheme = useAppSettingsStore((state) => state.setTheme);
-  
+
   return (
     <div className="flex gap-2">
       <button
@@ -49,12 +49,12 @@ export function ThemeSwitcher() {
  * Example 2: Language Selector
  * Shows multi-language support implementation
  */
-export function LanguageSelector() {
+export function LanguageSelector(): JSX.Element {
   const { language, setLanguage } = useAppSettingsStore((state) => ({
     language: state.language,
     setLanguage: state.setLanguage,
   }));
-  
+
   return (
     <select
       value={language}
@@ -72,9 +72,9 @@ export function LanguageSelector() {
  * Example 3: Questionnaire Progress Bar
  * Demonstrates questionnaire state tracking
  */
-export function QuestionnaireProgress() {
+export function QuestionnaireProgress(): JSX.Element {
   const progress = useQuestionnaireStore((state) => state.progress);
-  
+
   return (
     <div className="w-full">
       <div className="flex justify-between text-sm text-secondary-600 mb-2">
@@ -102,20 +102,20 @@ export function QuestionnaireProgress() {
  * Example 4: Toast Notification Trigger
  * Shows how to display toast messages
  */
-export function SaveButton() {
+export function SaveButton(): JSX.Element {
   const addToast = useUIStore((state) => state.addToast);
-  
+
   const handleSave = async (): Promise<void> => {
     try {
       // Simulate async save operation
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       addToast({
         type: 'success',
         message: 'Your information has been saved successfully.',
         duration: 3000,
       });
-    } catch (error) {
+    } catch {
       addToast({
         type: 'error',
         message: 'Failed to save. Please try again.',
@@ -123,10 +123,10 @@ export function SaveButton() {
       });
     }
   };
-  
+
   return (
     <button
-      onClick={handleSave}
+      onClick={() => { void handleSave(); }}
       className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-touch"
     >
       Save Progress
@@ -138,13 +138,13 @@ export function SaveButton() {
  * Example 5: Modal Opener
  * Demonstrates modal management
  */
-export function DeleteProfileButton() {
+export function DeleteProfileButton(): JSX.Element {
   const { openModal, closeModal, addToast } = useUIStore((state) => ({
     openModal: state.openModal,
     closeModal: state.closeModal,
     addToast: state.addToast,
   }));
-  
+
   const handleDelete = (): void => {
     const modalId = openModal({
       type: 'confirm',
@@ -165,7 +165,7 @@ export function DeleteProfileButton() {
       },
     });
   };
-  
+
   return (
     <button
       onClick={handleDelete}
@@ -180,31 +180,31 @@ export function DeleteProfileButton() {
  * Example 6: Loading Overlay
  * Shows loading state management
  */
-export function AsyncOperationButton() {
+export function AsyncOperationButton(): JSX.Element {
   const { isLoading, setLoading } = useUIStore((state) => ({
     isLoading: state.isLoading,
     setLoading: state.setLoading,
   }));
-  
+
   const handleOperation = async (): Promise<void> => {
     setLoading(true, 'Processing your request...', 0);
-    
+
     try {
       // Simulate work with progress updates
       for (let i = 0; i <= 100; i += 20) {
         await new Promise((resolve) => setTimeout(resolve, 500));
         setLoading(true, 'Processing your request...', i);
       }
-      
+
       setLoading(false);
-    } catch (error) {
+    } catch {
       setLoading(false);
     }
   };
-  
+
   return (
     <button
-      onClick={handleOperation}
+      onClick={() => { void handleOperation(); }}
       disabled={isLoading}
       className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-touch"
     >
@@ -217,7 +217,7 @@ export function AsyncOperationButton() {
  * Example 7: Accessibility Settings Panel
  * Demonstrates accessibility preferences management
  */
-export function AccessibilitySettings() {
+export function AccessibilitySettings(): JSX.Element {
   const {
     highContrast,
     reduceMotion,
@@ -233,11 +233,11 @@ export function AccessibilitySettings() {
     setReduceMotion: state.setReduceMotion,
     setFontSize: state.setFontSize,
   }));
-  
+
   return (
     <div className="space-y-4 p-4 border rounded-lg">
       <h3 className="text-lg font-semibold">Accessibility Settings</h3>
-      
+
       <label className="flex items-center gap-3">
         <input
           type="checkbox"
@@ -247,7 +247,7 @@ export function AccessibilitySettings() {
         />
         <span>High Contrast Mode</span>
       </label>
-      
+
       <label className="flex items-center gap-3">
         <input
           type="checkbox"
@@ -257,7 +257,7 @@ export function AccessibilitySettings() {
         />
         <span>Reduce Motion</span>
       </label>
-      
+
       <div>
         <label htmlFor="font-size" className="block mb-2">
           Font Size
@@ -281,7 +281,7 @@ export function AccessibilitySettings() {
  * Example 8: Questionnaire Question Component
  * Shows complete questionnaire flow integration
  */
-export function QuestionComponent() {
+export function QuestionComponent(): JSX.Element {
   const {
     currentQuestionId,
     answers,
@@ -297,21 +297,24 @@ export function QuestionComponent() {
     goToPreviousQuestion: state.goToPreviousQuestion,
     validationErrors: state.validationErrors,
   }));
-  
-  const currentAnswer = currentQuestionId 
-    ? answers[currentQuestionId]?.value 
+
+  const currentAnswer = currentQuestionId
+    ? answers.get(currentQuestionId)?.value ?? null
     : null;
-  
+
   const handleSubmit = (): void => {
     if (currentQuestionId) {
       goToNextQuestion('next-question-id');
     }
   };
-  
+
+  const currentValidationError = currentQuestionId ? validationErrors.get(currentQuestionId) : undefined;
+  const hasValidationError = currentQuestionId ? validationErrors.has(currentQuestionId) : false;
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Question</h2>
-      
+
       <div>
         <label htmlFor="answer" className="block mb-2">
           Your Answer:
@@ -319,19 +322,19 @@ export function QuestionComponent() {
         <input
           id="answer"
           type="text"
-          value={currentAnswer?.toString() || ''}
+          value={currentAnswer?.toString() ?? ''}
           onChange={(e) => currentQuestionId && setAnswer(currentQuestionId, e.target.value)}
           className="w-full px-4 py-2 border rounded-lg"
-          aria-invalid={currentQuestionId ? !!validationErrors[currentQuestionId] : false}
-          aria-describedby={currentQuestionId && validationErrors[currentQuestionId] ? 'error' : undefined}
+          aria-invalid={hasValidationError}
+          aria-describedby={hasValidationError ? 'error' : undefined}
         />
-        {currentQuestionId && validationErrors[currentQuestionId] && (
+        {hasValidationError && (
           <p id="error" className="mt-1 text-sm text-error-600">
-            {validationErrors[currentQuestionId]}
+            {currentValidationError}
           </p>
         )}
       </div>
-      
+
       <div className="flex gap-4">
         <button
           onClick={goToPreviousQuestion}
