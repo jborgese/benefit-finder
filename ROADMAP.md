@@ -44,25 +44,26 @@ Every feature must satisfy:
 ### 1.2 Core Data Architecture (Week 2)
 
 #### Database Schema
-- [ ] Define RxDB collections schema with Zod:
-  - `UserProfiles` — encrypted household data
-  - `Programs` — benefit program definitions
-  - `Rules` — eligibility rule sets
-  - `EligibilityResults` — cached evaluations
-  - `AppSettings` — user preferences and app state
+- [x] Define RxDB collections schema with Zod:
+  - ✅ `UserProfiles` — encrypted household data (17 fields, 14 encrypted)
+  - ✅ `Programs` — benefit program definitions (19 fields)
+  - ✅ `Rules` — eligibility rule sets (21 fields with JSON Logic)
+  - ✅ `EligibilityResults` — cached evaluations (15 fields, 9 encrypted)
+  - ✅ `AppSettings` — user preferences and app state (10 fields)
 
 #### Type System
-- [ ] Create comprehensive TypeScript types:
-  - `HouseholdProfile` interface
-  - `BenefitProgram` interface
-  - `RuleDefinition` interface
-  - `EligibilityResult` interface
-  - `QuestionDefinition` interface
+- [x] Create comprehensive TypeScript types:
+  - ✅ `HouseholdProfile` interface (+ 9 related types)
+  - ✅ `BenefitProgram` interface (+ 11 related types)
+  - ✅ `RuleDefinition` interface (+ 11 related types)
+  - ✅ `EligibilityResult` interface (+ 8 related types)
+  - ✅ `QuestionDefinition` interface (+ 15 related types)
+  - ✅ 18 utility types (ValidationResult, AsyncResult, etc.)
 
 #### Encryption
-- [ ] Implement AES-GCM encryption wrapper for RxDB
-- [ ] Create secure key derivation from user passphrase (optional)
-- [ ] Add encryption indicator UI component
+- [x] Implement AES-GCM encryption wrapper for RxDB
+- [x] Create secure key derivation from user passphrase
+- [x] Add encryption indicator UI component
 
 **Deliverables:**
 - RxDB collections initialized with encryption

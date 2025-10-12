@@ -23,7 +23,24 @@
             "vite/client",
             "@testing-library/jest-dom",
             "vitest/globals"
-        ]
+        ],
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"],
+            "@/types": ["src/types"],
+            "@/db": ["src/db"],
+            "@/stores": ["src/stores"],
+            "@/components": ["src/components"],
+            "@/hooks": ["src/hooks"],
+            "@/utils": ["src/utils"],
+            "@/test": ["src/test"]
+        }
     },
     "include": [
         "src",

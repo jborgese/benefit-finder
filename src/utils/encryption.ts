@@ -1,0 +1,610 @@
+/**
+ * Encryption Utilities
+ *
+ * Provides AES-GCM encryption/decryption and secure key derivation.
+ * All operations happen in the browser with no external dependencies.
+ *
+ * Features:
+ * - AES-256-GCM encryption for data at rest
+ * - PBKDF2 key derivation from user passphrases
+ * - Secure random salt generation
+ * - Base64 encoding for storage
+ * - Type-safe API with Zod validation
+ */
+
+import { z } from 'zod';
+
+// ============================================================================
+// CONSTANTS & CONFIGURATION
+// ============================================================================
+
+/**
+ * Encryption algorithm parameters
+ */
+export const ENCRYPTION_CONFIG = {
+  /** Algorithm name for AES-GCM */
+  ALGORITHM: 'AES-GCM' as const,
+  /** Key length in bits (AES-256) */
+  KEY_LENGTH: 256,
+  /** IV length in bytes (96 bits = 12 bytes recommended for GCM) */
+  IV_LENGTH: 12,
+  /** Authentication tag length in bits */
+  TAG_LENGTH: 128,
+  /** PBKDF2 iterations (OWASP recommended minimum for 2023+) */
+  PBKDF2_ITERATIONS: 600000,
+  /** Salt length in bytes */
+  SALT_LENGTH: 32,
+  /** Key derivation algorithm */
+  KDF_ALGORITHM: 'PBKDF2' as const,
+  /** Hash function for PBKDF2 */
+  HASH_FUNCTION: 'SHA-256' as const,
+} as const;
+
+/**
+ * Storage keys for encryption metadata
+ */
+export const STORAGE_KEYS = {
+  ENCRYPTION_SALT: 'bf_encryption_salt',
+  ENCRYPTION_ENABLED: 'bf_encryption_enabled',
+  KEY_DERIVATION_HINT: 'bf_kdf_hint',
+} as const;
+
+// ============================================================================
+// TYPES & SCHEMAS
+// ============================================================================
+
+/**
+ * Encrypted data structure
+ */
+export interface EncryptedData {
+  /** Base64-encoded encrypted data */
+  ciphertext: string;
+  /** Base64-encoded initialization vector */
+  iv: string;
+  /** Base64-encoded authentication tag (included in ciphertext for GCM) */
+  tag?: string;
+  /** Algorithm identifier */
+  algorithm: typeof ENCRYPTION_CONFIG.ALGORITHM;
+  /** Timestamp when encrypted */
+  timestamp: number;
+}
+
+/**
+ * Zod schema for encrypted data validation
+ */
+export const EncryptedDataSchema = z.object({
+  ciphertext: z.string().min(1),
+  iv: z.string().min(1),
+  tag: z.string().optional(),
+  algorithm: z.literal(ENCRYPTION_CONFIG.ALGORITHM),
+  timestamp: z.number().positive(),
+});
+
+/**
+ * Key derivation result
+ */
+export interface DerivedKey {
+  /** CryptoKey for encryption/decryption */
+  key: CryptoKey;
+  /** Base64-encoded salt used for derivation */
+  salt: string;
+  /** Number of PBKDF2 iterations used */
+  iterations: number;
+}
+
+/**
+ * Encryption strength indicator
+ */
+export type EncryptionStrength = 'none' | 'weak' | 'medium' | 'strong' | 'very-strong';
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Convert ArrayBuffer to Base64 string
+ *
+ * @param buffer ArrayBuffer to convert
+ * @returns Base64-encoded string
+ */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+/**
+ * Convert Base64 string to ArrayBuffer
+ *
+ * @param base64 Base64-encoded string
+ * @returns ArrayBuffer
+ */
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+/**
+ * Generate cryptographically secure random bytes
+ *
+ * @param length Number of bytes to generate
+ * @returns ArrayBuffer with random bytes
+ */
+function generateRandomBytes(length: number): ArrayBuffer {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return array.buffer;
+}
+
+// ============================================================================
+// KEY DERIVATION
+// ============================================================================
+
+/**
+ * Generate a random salt for key derivation
+ *
+ * @returns Base64-encoded salt
+ */
+export function generateSalt(): string {
+  const saltBuffer = generateRandomBytes(ENCRYPTION_CONFIG.SALT_LENGTH);
+  return arrayBufferToBase64(saltBuffer);
+}
+
+/**
+ * Derive encryption key from passphrase using PBKDF2
+ *
+ * Uses PBKDF2 with SHA-256 and 600,000 iterations (OWASP 2023 recommendation).
+ * This makes brute-force attacks computationally expensive.
+ *
+ * @param passphrase User-provided passphrase
+ * @param salt Base64-encoded salt (generates new one if not provided)
+ * @param iterations Number of PBKDF2 iterations (defaults to recommended value)
+ * @returns Derived key and salt
+ *
+ * @example
+ * ```typescript
+ * const { key, salt } = await deriveKeyFromPassphrase('my-secure-passphrase');
+ * // Store salt for later use
+ * localStorage.setItem('salt', salt);
+ * ```
+ */
+export async function deriveKeyFromPassphrase(
+  passphrase: string,
+  salt?: string,
+  iterations: number = ENCRYPTION_CONFIG.PBKDF2_ITERATIONS
+): Promise<DerivedKey> {
+  if (!passphrase || passphrase.length === 0) {
+    throw new Error('Passphrase cannot be empty');
+  }
+
+  // Use provided salt or generate new one
+  const saltString = salt || generateSalt();
+  const saltBuffer = base64ToArrayBuffer(saltString);
+
+  // Convert passphrase to key material
+  const encoder = new TextEncoder();
+  const passphraseBuffer = encoder.encode(passphrase);
+
+  // Import passphrase as raw key material
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    passphraseBuffer,
+    { name: ENCRYPTION_CONFIG.KDF_ALGORITHM },
+    false,
+    ['deriveBits', 'deriveKey']
+  );
+
+  // Derive AES-GCM key using PBKDF2
+  const derivedKey = await crypto.subtle.deriveKey(
+    {
+      name: ENCRYPTION_CONFIG.KDF_ALGORITHM,
+      salt: saltBuffer,
+      iterations,
+      hash: ENCRYPTION_CONFIG.HASH_FUNCTION,
+    },
+    keyMaterial,
+    {
+      name: ENCRYPTION_CONFIG.ALGORITHM,
+      length: ENCRYPTION_CONFIG.KEY_LENGTH,
+    },
+    false, // Not extractable for security
+    ['encrypt', 'decrypt']
+  );
+
+  return {
+    key: derivedKey,
+    salt: saltString,
+    iterations,
+  };
+}
+
+/**
+ * Generate a random encryption key (for non-passphrase usage)
+ *
+ * @returns CryptoKey for AES-GCM encryption
+ */
+export async function generateEncryptionKey(): Promise<CryptoKey> {
+  return await crypto.subtle.generateKey(
+    {
+      name: ENCRYPTION_CONFIG.ALGORITHM,
+      length: ENCRYPTION_CONFIG.KEY_LENGTH,
+    },
+    false, // Not extractable
+    ['encrypt', 'decrypt']
+  );
+}
+
+// ============================================================================
+// ENCRYPTION & DECRYPTION
+// ============================================================================
+
+/**
+ * Encrypt data using AES-256-GCM
+ *
+ * AES-GCM provides both encryption and authentication, preventing
+ * tampering with encrypted data.
+ *
+ * @param data Data to encrypt (string or object)
+ * @param key CryptoKey for encryption
+ * @returns Encrypted data structure
+ *
+ * @example
+ * ```typescript
+ * const key = await generateEncryptionKey();
+ * const encrypted = await encrypt({ secret: 'data' }, key);
+ * ```
+ */
+export async function encrypt(
+  data: string | Record<string, unknown>,
+  key: CryptoKey
+): Promise<EncryptedData> {
+  // Convert data to string if it's an object
+  const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+
+  // Convert to ArrayBuffer
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(dataString);
+
+  // Generate random IV
+  const iv = generateRandomBytes(ENCRYPTION_CONFIG.IV_LENGTH);
+
+  // Encrypt using AES-GCM
+  const encryptedBuffer = await crypto.subtle.encrypt(
+    {
+      name: ENCRYPTION_CONFIG.ALGORITHM,
+      iv,
+      tagLength: ENCRYPTION_CONFIG.TAG_LENGTH,
+    },
+    key,
+    dataBuffer
+  );
+
+  return {
+    ciphertext: arrayBufferToBase64(encryptedBuffer),
+    iv: arrayBufferToBase64(iv),
+    algorithm: ENCRYPTION_CONFIG.ALGORITHM,
+    timestamp: Date.now(),
+  };
+}
+
+/**
+ * Decrypt data using AES-256-GCM
+ *
+ * @param encryptedData Encrypted data structure
+ * @param key CryptoKey for decryption
+ * @returns Decrypted data as string
+ * @throws Error if decryption fails (wrong key or tampered data)
+ *
+ * @example
+ * ```typescript
+ * const decrypted = await decrypt(encrypted, key);
+ * const data = JSON.parse(decrypted);
+ * ```
+ */
+export async function decrypt(
+  encryptedData: EncryptedData,
+  key: CryptoKey
+): Promise<string> {
+  // Validate encrypted data structure
+  const validated = EncryptedDataSchema.parse(encryptedData);
+
+  // Convert from Base64
+  const ciphertext = base64ToArrayBuffer(validated.ciphertext);
+  const iv = base64ToArrayBuffer(validated.iv);
+
+  try {
+    // Decrypt using AES-GCM
+    const decryptedBuffer = await crypto.subtle.decrypt(
+      {
+        name: ENCRYPTION_CONFIG.ALGORITHM,
+        iv,
+        tagLength: ENCRYPTION_CONFIG.TAG_LENGTH,
+      },
+      key,
+      ciphertext
+    );
+
+    // Convert back to string
+    const decoder = new TextDecoder();
+    return decoder.decode(decryptedBuffer);
+  } catch (error) {
+    throw new Error(
+      'Decryption failed. The data may be corrupted or the key is incorrect.'
+    );
+  }
+}
+
+/**
+ * Encrypt and encode data as a single string for storage
+ *
+ * @param data Data to encrypt
+ * @param key Encryption key
+ * @returns Base64-encoded JSON string
+ */
+export async function encryptToString(
+  data: string | Record<string, unknown>,
+  key: CryptoKey
+): Promise<string> {
+  const encrypted = await encrypt(data, key);
+  return arrayBufferToBase64(
+    new TextEncoder().encode(JSON.stringify(encrypted))
+  );
+}
+
+/**
+ * Decrypt data from encoded string
+ *
+ * @param encryptedString Base64-encoded encrypted data
+ * @param key Decryption key
+ * @returns Decrypted data as string
+ */
+export async function decryptFromString(
+  encryptedString: string,
+  key: CryptoKey
+): Promise<string> {
+  const jsonString = new TextDecoder().decode(
+    base64ToArrayBuffer(encryptedString)
+  );
+  const encrypted = JSON.parse(jsonString) as EncryptedData;
+  return await decrypt(encrypted, key);
+}
+
+// ============================================================================
+// PASSPHRASE STRENGTH
+// ============================================================================
+
+/**
+ * Evaluate passphrase strength
+ *
+ * Checks:
+ * - Length (minimum 12 characters recommended)
+ * - Character diversity (uppercase, lowercase, numbers, symbols)
+ * - Common patterns
+ *
+ * @param passphrase Passphrase to evaluate
+ * @returns Strength rating
+ *
+ * @example
+ * ```typescript
+ * const strength = evaluatePassphraseStrength('MyP@ssw0rd123!');
+ * // Returns: 'strong'
+ * ```
+ */
+export function evaluatePassphraseStrength(passphrase: string): EncryptionStrength {
+  if (!passphrase || passphrase.length === 0) {
+    return 'none';
+  }
+
+  let score = 0;
+
+  // Length scoring
+  if (passphrase.length >= 8) score += 1;
+  if (passphrase.length >= 12) score += 1;
+  if (passphrase.length >= 16) score += 1;
+  if (passphrase.length >= 20) score += 1;
+
+  // Character diversity scoring
+  if (/[a-z]/.test(passphrase)) score += 1; // Lowercase
+  if (/[A-Z]/.test(passphrase)) score += 1; // Uppercase
+  if (/[0-9]/.test(passphrase)) score += 1; // Numbers
+  if (/[^a-zA-Z0-9]/.test(passphrase)) score += 1; // Special characters
+
+  // Penalty for common patterns
+  const commonPatterns = [
+    /^password/i,
+    /^12345/,
+    /^qwerty/i,
+    /(.)\1{2,}/, // Repeated characters
+  ];
+
+  for (const pattern of commonPatterns) {
+    if (pattern.test(passphrase)) {
+      score -= 2;
+    }
+  }
+
+  // Convert score to strength rating
+  if (score >= 7) return 'very-strong';
+  if (score >= 5) return 'strong';
+  if (score >= 3) return 'medium';
+  if (score >= 1) return 'weak';
+  return 'none';
+}
+
+/**
+ * Get user-friendly message for passphrase strength
+ *
+ * @param strength Strength rating
+ * @returns Human-readable message
+ */
+export function getStrengthMessage(strength: EncryptionStrength): string {
+  switch (strength) {
+    case 'none':
+      return 'Please enter a passphrase';
+    case 'weak':
+      return 'Weak - Add more characters and variety';
+    case 'medium':
+      return 'Medium - Consider making it longer';
+    case 'strong':
+      return 'Strong - Good passphrase';
+    case 'very-strong':
+      return 'Very Strong - Excellent passphrase';
+  }
+}
+
+// ============================================================================
+// STORAGE HELPERS
+// ============================================================================
+
+/**
+ * Check if encryption is enabled
+ *
+ * @returns True if encryption is enabled
+ */
+export function isEncryptionEnabled(): boolean {
+  return localStorage.getItem(STORAGE_KEYS.ENCRYPTION_ENABLED) === 'true';
+}
+
+/**
+ * Set encryption enabled state
+ *
+ * @param enabled Whether encryption is enabled
+ */
+export function setEncryptionEnabled(enabled: boolean): void {
+  localStorage.setItem(STORAGE_KEYS.ENCRYPTION_ENABLED, String(enabled));
+}
+
+/**
+ * Get stored salt for key derivation
+ *
+ * @returns Base64-encoded salt or null if not found
+ */
+export function getStoredSalt(): string | null {
+  return localStorage.getItem(STORAGE_KEYS.ENCRYPTION_SALT);
+}
+
+/**
+ * Store salt for key derivation
+ *
+ * @param salt Base64-encoded salt
+ */
+export function storeSalt(salt: string): void {
+  localStorage.setItem(STORAGE_KEYS.ENCRYPTION_SALT, salt);
+}
+
+/**
+ * Clear all encryption-related data from storage
+ *
+ * WARNING: This will make encrypted data unrecoverable!
+ */
+export function clearEncryptionData(): void {
+  localStorage.removeItem(STORAGE_KEYS.ENCRYPTION_SALT);
+  localStorage.removeItem(STORAGE_KEYS.ENCRYPTION_ENABLED);
+  localStorage.removeItem(STORAGE_KEYS.KEY_DERIVATION_HINT);
+}
+
+/**
+ * Store a hint for the passphrase (not the passphrase itself!)
+ *
+ * @param hint User-provided hint
+ */
+export function storePassphraseHint(hint: string): void {
+  localStorage.setItem(STORAGE_KEYS.KEY_DERIVATION_HINT, hint);
+}
+
+/**
+ * Get stored passphrase hint
+ *
+ * @returns Hint or null if not found
+ */
+export function getPassphraseHint(): string | null {
+  return localStorage.getItem(STORAGE_KEYS.KEY_DERIVATION_HINT);
+}
+
+// ============================================================================
+// TESTING UTILITIES
+// ============================================================================
+
+/**
+ * Test encryption/decryption round-trip
+ *
+ * Useful for verifying that encryption is working correctly.
+ *
+ * @param key CryptoKey to test
+ * @returns True if encryption and decryption work correctly
+ */
+export async function testEncryption(key: CryptoKey): Promise<boolean> {
+  const testData = { test: 'data', timestamp: Date.now() };
+
+  try {
+    const encrypted = await encrypt(testData, key);
+    const decrypted = await decrypt(encrypted, key);
+    const parsed = JSON.parse(decrypted);
+
+    return (
+      parsed.test === testData.test &&
+      parsed.timestamp === testData.timestamp
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Estimate time to crack passphrase (rough approximation)
+ *
+ * Based on passphrase entropy and estimated attack speed.
+ * This is a simplified calculation for user education only.
+ *
+ * @param passphrase Passphrase to analyze
+ * @returns Human-readable time estimate
+ */
+export function estimateCrackTime(passphrase: string): string {
+  // Character set sizes
+  const charSets = {
+    lowercase: 26,
+    uppercase: 26,
+    numbers: 10,
+    symbols: 32,
+  };
+
+  // Determine character set size
+  let charSetSize = 0;
+  if (/[a-z]/.test(passphrase)) charSetSize += charSets.lowercase;
+  if (/[A-Z]/.test(passphrase)) charSetSize += charSets.uppercase;
+  if (/[0-9]/.test(passphrase)) charSetSize += charSets.numbers;
+  if (/[^a-zA-Z0-9]/.test(passphrase)) charSetSize += charSets.symbols;
+
+  // Calculate entropy (bits)
+  const entropy = passphrase.length * Math.log2(charSetSize);
+
+  // Estimate with PBKDF2 iterations (makes brute force much slower)
+  const iterations = ENCRYPTION_CONFIG.PBKDF2_ITERATIONS;
+
+  // Assume attacker can do ~10^9 hashes per second (conservative)
+  const hashesPerSecond = 1e9;
+  const secondsPerAttempt = iterations / hashesPerSecond;
+
+  // Total possible combinations
+  const combinations = Math.pow(2, entropy);
+
+  // Average time to crack (half the keyspace)
+  const secondsToCrack = (combinations / 2) * secondsPerAttempt;
+
+  // Convert to human-readable format
+  if (secondsToCrack < 1) return 'Less than 1 second';
+  if (secondsToCrack < 60) return `${Math.round(secondsToCrack)} seconds`;
+  if (secondsToCrack < 3600) return `${Math.round(secondsToCrack / 60)} minutes`;
+  if (secondsToCrack < 86400) return `${Math.round(secondsToCrack / 3600)} hours`;
+  if (secondsToCrack < 31536000) return `${Math.round(secondsToCrack / 86400)} days`;
+  if (secondsToCrack < 3153600000) return `${Math.round(secondsToCrack / 31536000)} years`;
+  return 'Centuries';
+}
+

@@ -1,6 +1,6 @@
 /**
  * RxDB Database Configuration
- * 
+ *
  * Main database initialization and export.
  * All collections are defined and exported from here.
  */
@@ -45,6 +45,26 @@ export {
   useAppSetting,
 } from './hooks';
 
+// Validators
+export {
+  validateUserProfile,
+  validateUserProfileSafe,
+  validateBenefitProgram,
+  validateBenefitProgramSafe,
+  validateEligibilityRule,
+  validateEligibilityRuleSafe,
+  validateEligibilityResult,
+  validateEligibilityResultSafe,
+  validateAppSetting,
+  validateAppSettingSafe,
+  formatZodError,
+  PartialUserProfileZodSchema,
+  PartialBenefitProgramZodSchema,
+  PartialEligibilityRuleZodSchema,
+  PartialEligibilityResultZodSchema,
+  PartialAppSettingZodSchema,
+} from './validators';
+
 // Types
 export type { BenefitFinderDatabase, BenefitFinderCollections } from './database';
 
@@ -64,5 +84,14 @@ export type {
   AppSetting,
   AppSettingDocument,
   AppSettingCollection,
+} from './schemas';
+
+// Zod Schemas (for advanced usage)
+export {
+  UserProfileZodSchema,
+  BenefitProgramZodSchema,
+  EligibilityRuleZodSchema,
+  EligibilityResultZodSchema,
+  AppSettingZodSchema,
 } from './schemas';
 

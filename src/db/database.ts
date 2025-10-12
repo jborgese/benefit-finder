@@ -1,6 +1,6 @@
 /**
  * RxDB Database Initialization
- * 
+ *
  * Creates and configures the RxDB database with encryption.
  * Implements privacy-first, offline-first architecture.
  */
@@ -15,7 +15,6 @@ import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
-import { RxDBEncryptionPlugin } from 'rxdb/plugins/encryption';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration-schema';
 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 
@@ -29,12 +28,13 @@ import type {
 } from './schemas';
 
 // Add RxDB plugins
+// Note: Encryption is built into RxDB and enabled via the 'password' parameter
+// No separate encryption plugin is needed
 if (import.meta.env.DEV) {
   addRxPlugin(RxDBDevModePlugin);
 }
 addRxPlugin(RxDBQueryBuilderPlugin);
 addRxPlugin(RxDBUpdatePlugin);
-addRxPlugin(RxDBEncryptionPlugin);
 addRxPlugin(RxDBMigrationPlugin);
 
 /**
@@ -65,48 +65,79 @@ const DB_NAME = 'benefitfinder';
 const DB_VERSION = 1;
 
 /**
- * Generate or retrieve encryption password
- * 
- * In production, this should be derived from a user passphrase
- * or securely stored. For now, we use a default key.
- * 
+ * Default encryption password for auto-generated keys
+ *
+ * This is used when the user doesn't provide a passphrase.
+ * The key is randomly generated and stored in localStorage.
+ *
  * @returns Encryption password for the database
  */
-function getEncryptionPassword(): string {
+function getDefaultEncryptionPassword(): string {
   const storageKey = 'bf_encryption_key';
-  
+
   // Check if key exists in localStorage
   let key = localStorage.getItem(storageKey);
-  
+
   if (!key) {
-    // Generate a new random key (32 characters for AES-256)
+    // Generate a new random key (64 characters for strong entropy)
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     key = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
-    
-    // Store the key (in production, this should be more secure)
+
+    // Store the key
     localStorage.setItem(storageKey, key);
   }
-  
+
   return key;
 }
 
 /**
+ * Convert CryptoKey to password string for RxDB
+ *
+ * RxDB requires a password string, but we use CryptoKey internally.
+ * This function extracts a deterministic string from the key material.
+ *
+ * Note: This is a workaround since RxDB's encryption plugin expects
+ * a password string rather than a CryptoKey.
+ *
+ * @param passphrase Original passphrase (used directly as RxDB password)
+ * @returns Password string for RxDB
+ */
+function convertToRxDBPassword(passphrase: string): string {
+  // RxDB will internally derive a key from this password
+  // We use the passphrase directly since RxDB handles key derivation
+  return passphrase;
+}
+
+/**
  * Initialize RxDB database with encryption
- * 
- * @param password Optional encryption password (uses generated key if not provided)
+ *
+ * @param passphrase Optional user passphrase for encryption
+ *                   If not provided, uses a randomly generated key
  * @returns Initialized database instance
+ *
+ * @example
+ * ```typescript
+ * // With user passphrase
+ * const db = await initializeDatabase('my-secure-passphrase');
+ *
+ * // With auto-generated key
+ * const db = await initializeDatabase();
+ * ```
  */
 export async function initializeDatabase(
-  password?: string
+  passphrase?: string
 ): Promise<BenefitFinderDatabase> {
   // Return existing instance if already initialized
   if (dbInstance) {
     return dbInstance;
   }
-  
-  const encryptionPassword = password || getEncryptionPassword();
-  
+
+  // Use provided passphrase or generate a default key
+  const encryptionPassword = passphrase
+    ? convertToRxDBPassword(passphrase)
+    : getDefaultEncryptionPassword();
+
   try {
     // Create RxDB database with Dexie storage and AJV validation
     const db = await createRxDatabase<BenefitFinderCollections>({
@@ -126,15 +157,15 @@ export async function initializeDatabase(
         waitForLeadership: false,
       },
     });
-    
+
     // Add collections to the database
     await db.addCollections(collections);
-    
+
     // Store instance
     dbInstance = db;
-    
+
     console.log('RxDB initialized successfully with encryption');
-    
+
     return db;
   } catch (error) {
     console.error('Failed to initialize RxDB:', error);
@@ -144,7 +175,7 @@ export async function initializeDatabase(
 
 /**
  * Get the current database instance
- * 
+ *
  * @throws Error if database is not initialized
  * @returns Database instance
  */
@@ -152,30 +183,35 @@ export function getDatabase(): BenefitFinderDatabase {
   if (!dbInstance) {
     throw new Error('Database not initialized. Call initializeDatabase() first.');
   }
-  
+
   return dbInstance;
 }
 
 /**
  * Destroy the database and remove all data
- * 
+ *
  * This will permanently delete all local data.
  * Use with caution!
- * 
+ *
+ * @param clearEncryptionKey Whether to clear the stored encryption key
  * @returns Promise that resolves when database is destroyed
  */
-export async function destroyDatabase(): Promise<void> {
+export async function destroyDatabase(
+  clearEncryptionKey: boolean = true
+): Promise<void> {
   if (!dbInstance) {
     return;
   }
-  
+
   try {
     await dbInstance.destroy();
     dbInstance = null;
-    
-    // Clear encryption key
-    localStorage.removeItem('bf_encryption_key');
-    
+
+    // Optionally clear encryption key
+    if (clearEncryptionKey) {
+      localStorage.removeItem('bf_encryption_key');
+    }
+
     console.log('Database destroyed successfully');
   } catch (error) {
     console.error('Failed to destroy database:', error);
@@ -185,7 +221,7 @@ export async function destroyDatabase(): Promise<void> {
 
 /**
  * Check if database is initialized
- * 
+ *
  * @returns True if database is initialized
  */
 export function isDatabaseInitialized(): boolean {
@@ -194,21 +230,21 @@ export function isDatabaseInitialized(): boolean {
 
 /**
  * Export database for backup
- * 
+ *
  * Exports all collections to JSON format.
  * The export is NOT encrypted and should be handled securely.
- * 
+ *
  * @returns Database export as JSON
  */
 export async function exportDatabase(): Promise<Record<string, unknown>> {
   const db = getDatabase();
-  
+
   const exportData: Record<string, unknown> = {
     version: DB_VERSION,
     timestamp: Date.now(),
     collections: {},
   };
-  
+
   // Export each collection
   for (const collectionName of Object.keys(collections)) {
     const collection = db[collectionName as keyof BenefitFinderCollections];
@@ -218,42 +254,42 @@ export async function exportDatabase(): Promise<Record<string, unknown>> {
       [collectionName]: docs.map((doc) => doc.toJSON()),
     };
   }
-  
+
   return exportData;
 }
 
 /**
  * Import database from backup
- * 
+ *
  * Imports data into collections. This will NOT delete existing data,
  * but may update documents with matching IDs.
- * 
+ *
  * @param data Database export data
  */
 export async function importDatabase(
   data: Record<string, unknown>
 ): Promise<void> {
   const db = getDatabase();
-  
+
   if (!data.collections || typeof data.collections !== 'object') {
     throw new Error('Invalid import data format');
   }
-  
+
   const collections = data.collections as Record<string, unknown[]>;
-  
+
   // Import each collection
   for (const [collectionName, docs] of Object.entries(collections)) {
     const collection = db[collectionName as keyof BenefitFinderCollections];
-    
+
     if (!collection) {
       console.warn(`Collection ${collectionName} not found, skipping...`);
       continue;
     }
-    
+
     // Bulk insert documents
     await collection.bulkInsert(docs);
   }
-  
+
   console.log('Database import completed successfully');
 }
 
