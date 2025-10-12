@@ -122,6 +122,12 @@ src/
 - Run `npm run lint` before committing
 - Ensure tests pass before pushing
 
+## Command Execution
+- **Always verify you are in the project root** (`C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder`) before executing commands
+- Exception: Only navigate to subdirectories when the command explicitly requires it (e.g., testing a specific module)
+- If not in the project root, use `cd` to navigate back before running build, test, lint, or dependency management commands
+- The project root contains key files: `package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`
+
 ## When Suggesting Code
 1. Always consider privacy and security implications
 2. Verify TypeScript types are correct and specific
