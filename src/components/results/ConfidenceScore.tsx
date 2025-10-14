@@ -1,37 +1,114 @@
 /**
  * Confidence Score Component
  *
- * Displays confidence level and score for eligibility determination
+ * Displays context-aware confidence labels for eligibility determination
  */
 
 import React from 'react';
-import { ConfidenceLevel } from './types';
+import { ConfidenceLevel, EligibilityStatus } from './types';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 interface ConfidenceScoreProps {
   level: ConfidenceLevel;
-  score: number; // 0-100
+  score: number; // 0-100 (for future use)
+  status: EligibilityStatus;
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }
 
 export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
   level,
-  score,
+  score: _score, // Renamed to indicate it's unused for now
+  status,
   showLabel = true,
   size = 'md',
 }) => {
-  const getColorClass = (): string => {
-    switch (level) {
-      case 'high':
-        return 'text-green-600 bg-green-100 border-green-300';
-      case 'medium':
-        return 'text-yellow-600 bg-yellow-100 border-yellow-300';
-      case 'low':
-        return 'text-orange-600 bg-orange-100 border-orange-300';
-      default:
-        return 'text-gray-600 bg-gray-100 border-gray-300';
+  /**
+   * Get context-aware label based on eligibility status and confidence
+   */
+  const getContextualLabel = (): { text: string; icon: string } => {
+    // For qualified results
+    if (status === 'qualified') {
+      switch (level) {
+        case 'high':
+          return { text: 'Strong Match', icon: '👍' };
+        case 'medium':
+          return { text: 'Good Match', icon: '✓' };
+        case 'low':
+          return { text: 'Possible Match', icon: '?' };
+      }
     }
+
+    // For not qualified results
+    if (status === 'not-qualified') {
+      switch (level) {
+        case 'high':
+          return { text: 'Clear Mismatch', icon: '' };
+        case 'medium':
+          return { text: 'Likely Ineligible', icon: '' };
+        case 'low':
+          return { text: 'Insufficient Data', icon: '?' };
+      }
+    }
+
+    // For uncertain results (likely, maybe, unlikely)
+    if (status === 'likely') {
+      switch (level) {
+        case 'high':
+          return { text: 'Strong Match', icon: '👍' };
+        case 'medium':
+          return { text: 'Good Match', icon: '✓' };
+        case 'low':
+          return { text: 'Needs Verification', icon: '?' };
+      }
+    }
+
+    if (status === 'maybe') {
+      switch (level) {
+        case 'high':
+        case 'medium':
+          return { text: 'Needs Verification', icon: '?' };
+        case 'low':
+          return { text: 'More Info Required', icon: '❓' };
+      }
+    }
+
+    if (status === 'unlikely') {
+      switch (level) {
+        case 'high':
+        case 'medium':
+          return { text: 'Likely Ineligible', icon: '' };
+        case 'low':
+          return { text: 'Insufficient Data', icon: '?' };
+        default:
+          return { text: 'Uncertain', icon: '?' };
+      }
+    }
+
+    // Fallback
+    return { text: 'Uncertain', icon: '?' };
+  };
+
+  const getColorClass = (): string => {
+    // Color based on status, not just confidence level
+    if (status === 'qualified' || status === 'likely') {
+      return 'text-green-700 bg-green-100 border-green-300';
+    }
+
+    if (status === 'maybe') {
+      return 'text-blue-700 bg-blue-100 border-blue-300';
+    }
+
+    if (status === 'unlikely') {
+      return 'text-orange-700 bg-orange-100 border-orange-300';
+    }
+
+    if (status === 'not-qualified') {
+      return 'text-gray-700 bg-gray-100 border-gray-300';
+    }
+
+    // Fallback
+    return 'text-gray-600 bg-gray-100 border-gray-300';
   };
 
   const getSizeClass = (): string => {
@@ -47,14 +124,39 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
   };
 
   const getTooltipText = (): string => {
-    const explanations: Record<ConfidenceLevel, string> = {
-      high: 'We have high confidence in this determination based on clear eligibility rules and complete information.',
-      medium: 'We have moderate confidence in this determination. Some factors may need verification.',
-      low: 'We have lower confidence in this determination. Additional information or verification may be needed.',
-    };
-    // eslint-disable-next-line security/detect-object-injection
-    return explanations[level];
+    // Context-aware explanations
+    if (status === 'qualified' || status === 'likely') {
+      if (level === 'high') {
+        return 'You meet all the requirements we can verify. This is a reliable match.';
+      } else if (level === 'medium') {
+        return 'You appear to qualify, but some information may need verification during application.';
+      } else {
+        return 'You might qualify, but we need more complete information to be certain.';
+      }
+    }
+
+    if (status === 'not-qualified') {
+      if (level === 'high') {
+        return 'Based on the information provided, you clearly do not meet the requirements.';
+      } else if (level === 'medium') {
+        return 'You likely do not qualify, but double-check with the program directly.';
+      } else {
+        return 'We cannot determine eligibility with the available information.';
+      }
+    }
+
+    if (status === 'maybe') {
+      return 'Your eligibility is uncertain. Consider contacting the program for clarification or provide more information.';
+    }
+
+    if (status === 'unlikely') {
+      return 'You probably do not qualify, but there may be special circumstances or additional programs to consider.';
+    }
+
+    return 'Eligibility determination is uncertain. Contact the program for more information.';
   };
+
+  const contextualLabel = getContextualLabel();
 
   return (
     <Tooltip.Provider>
@@ -67,12 +169,12 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
               ${getSizeClass()}
             `}
             role="status"
-            aria-label={`Confidence: ${level}, ${score}%`}
+            aria-label={`Result confidence: ${contextualLabel.text}`}
           >
-            {showLabel && (
-              <span className="mr-1.5 capitalize">{level}</span>
+            {showLabel && contextualLabel.icon && (
+              <span className="mr-1.5">{contextualLabel.icon}</span>
             )}
-            <span>{score}%</span>
+            <span>{contextualLabel.text}</span>
           </div>
         </Tooltip.Trigger>
         <Tooltip.Portal>

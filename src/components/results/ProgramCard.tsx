@@ -130,6 +130,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
           <ConfidenceScore
             level={result.confidence}
             score={result.confidenceScore}
+            status={result.status}
           />
         </div>
 

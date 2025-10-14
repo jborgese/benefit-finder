@@ -739,7 +739,35 @@ function App(): React.ReactElement {
                 <QuestionnaireAnswersCard />
 
                 <div className="mt-8 space-y-6">
+                  {/* Qualified Programs */}
                   {currentResults.qualified.map((result) => (
+                    <ProgramCard
+                      key={result.programId}
+                      result={result}
+                      className="max-w-4xl mx-auto"
+                    />
+                  ))}
+
+                  {/* Maybe Programs */}
+                  {currentResults.maybe.map((result) => (
+                    <ProgramCard
+                      key={result.programId}
+                      result={result}
+                      className="max-w-4xl mx-auto"
+                    />
+                  ))}
+
+                  {/* Likely Programs */}
+                  {currentResults.likely.map((result) => (
+                    <ProgramCard
+                      key={result.programId}
+                      result={result}
+                      className="max-w-4xl mx-auto"
+                    />
+                  ))}
+
+                  {/* Not Qualified Programs */}
+                  {currentResults.notQualified.map((result) => (
                     <ProgramCard
                       key={result.programId}
                       result={result}

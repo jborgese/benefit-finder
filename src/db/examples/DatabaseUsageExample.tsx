@@ -457,20 +457,18 @@ export function EligibilityResultsList({ userProfileId }: { userProfileId: strin
             return (
               <div
                 key={result.id}
-                className={`p-4 border rounded-lg ${
-                  result.eligible
+                className={`p-4 border rounded-lg ${result.eligible
                     ? 'bg-success-50 border-success-500'
                     : 'bg-neutral-50 border-neutral-300'
-                } ${isExpired ? 'opacity-50' : ''}`}
+                  } ${isExpired ? 'opacity-50' : ''}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">
                       {program?.name ?? 'Unknown Program'}
                     </h3>
-                    <p className={`text-sm font-medium ${
-                      result.eligible ? 'text-success-700' : 'text-secondary-700'
-                    }`}>
+                    <p className={`text-sm font-medium ${result.eligible ? 'text-success-700' : 'text-secondary-700'
+                      }`}>
                       {result.eligible ? '✓ You may be eligible!' : '✗ May not qualify'}
                     </p>
                     {result.reason && (
@@ -478,10 +476,16 @@ export function EligibilityResultsList({ userProfileId }: { userProfileId: strin
                     )}
                   </div>
                   <div className="text-right">
-                    <span className="text-2xl font-bold text-secondary-900">
-                      {result.confidence}%
-                    </span>
-                    <p className="text-xs text-secondary-500">confidence</p>
+                    <div className="text-right">
+                      <span className="text-lg font-bold text-secondary-900">
+                        {(() => {
+                          if (result.confidence >= 90) return result.eligible ? 'Strong Match' : 'Clear Mismatch';
+                          if (result.confidence >= 70) return result.eligible ? 'Good Match' : 'Likely Ineligible';
+                          return 'Uncertain';
+                        })()}
+                      </span>
+                      <p className="text-xs text-secondary-500">assessment</p>
+                    </div>
                   </div>
                 </div>
 

@@ -8,6 +8,7 @@
 export { ResultsSummary } from './ResultsSummary';
 export { ProgramCard } from './ProgramCard';
 export { ConfidenceScore } from './ConfidenceScore';
+export { getContextualLabelFromBasicData } from './confidenceUtils';
 export { DocumentChecklist } from './DocumentChecklist';
 export { NextStepsList } from './NextStepsList';
 export { WhyExplanation } from './WhyExplanation';

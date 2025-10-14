@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { explainResult } from '../rules/explanation';
+import { getContextualLabelFromBasicData } from './results/confidenceUtils';
 import type { EligibilityEvaluationResult } from '../rules/eligibility';
 import type { JsonLogicRule, JsonLogicData } from '../rules/types';
 
@@ -57,161 +58,169 @@ export const EligibilityResultExplanation: React.FC<
   showDetails = true,
   className = '',
 }) => {
-  const [expanded, setExpanded] = useState<string[]>([]);
+    const [expanded, setExpanded] = useState<string[]>([]);
 
-  // Generate explanation
-  const explanation = explainResult(result, rule, data, {
-    languageLevel,
-    includeSuggestions: true,
-  });
+    // Generate explanation
+    const explanation = explainResult(result, rule, data, {
+      languageLevel,
+      includeSuggestions: true,
+    });
 
-  // Get status color
-  const statusColor = getStatusColor(result.eligible, result.incomplete ?? false);
-  const statusIcon = getStatusIcon(result.eligible, result.incomplete ?? false);
+    // Get status color
+    const statusColor = getStatusColor(result.eligible, result.incomplete ?? false);
+    const statusIcon = getStatusIcon(result.eligible, result.incomplete ?? false);
 
-  return (
-    <div
-      className={`
+    return (
+      <div
+        className={`
         rounded-lg border p-6 space-y-4
         ${statusColor}
         ${className}
       `}
-      role="region"
-      aria-label="Eligibility result explanation"
-    >
-      {/* Status Header */}
-      <div className="flex items-start gap-3">
-        <span className="text-2xl" aria-hidden="true">
-          {statusIcon}
-        </span>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold mb-1">
-            {getStatusHeading(result.eligible, result.incomplete ?? false)}
-          </h3>
-          <p className="text-sm opacity-90">{explanation.summary}</p>
+        role="region"
+        aria-label="Eligibility result explanation"
+      >
+        {/* Status Header */}
+        <div className="flex items-start gap-3">
+          <span className="text-2xl" aria-hidden="true">
+            {statusIcon}
+          </span>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold mb-1">
+              {getStatusHeading(result.eligible, result.incomplete ?? false)}
+            </h3>
+            <p className="text-sm opacity-90">{explanation.summary}</p>
+          </div>
+        </div>
+
+        {/* Plain Language Explanation */}
+        <div className="prose prose-sm max-w-none">
+          <p className="whitespace-pre-line">{explanation.plainLanguage}</p>
+        </div>
+
+        {/* Detailed Breakdown (Accordion) */}
+        {showDetails && (
+          <Accordion.Root
+            type="multiple"
+            value={expanded}
+            onValueChange={setExpanded}
+            className="space-y-2"
+          >
+            {/* Reasoning */}
+            {explanation.reasoning.length > 0 && (
+              <AccordionItem value="reasoning" title="Why This Result?">
+                <ul className="list-disc list-inside space-y-1">
+                  {explanation.reasoning.map((reason, idx) => (
+                    <li key={idx} className="text-sm">
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
+              </AccordionItem>
+            )}
+
+            {/* Criteria Checked */}
+            {explanation.criteriaChecked.length > 0 && (
+              <AccordionItem value="criteria" title="What Was Checked">
+                <div className="space-y-2">
+                  {explanation.criteriaPassed.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-green-700 mb-1">
+                        ✓ Met Requirements:
+                      </p>
+                      <ul className="list-disc list-inside text-sm space-y-1">
+                        {explanation.criteriaPassed.map((criterion, idx) => (
+                          <li key={idx} className="text-green-600">
+                            {criterion}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {explanation.criteriaFailed.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-red-700 mb-1">
+                        ✗ Unmet Requirements:
+                      </p>
+                      <ul className="list-disc list-inside text-sm space-y-1">
+                        {explanation.criteriaFailed.map((criterion, idx) => (
+                          <li key={idx} className="text-red-600">
+                            {criterion}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </AccordionItem>
+            )}
+
+            {/* Missing Information */}
+            {explanation.missingInformation.length > 0 && (
+              <AccordionItem value="missing" title="Missing Information">
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {explanation.missingInformation.map((field, idx) => (
+                    <li key={idx} className="text-yellow-700">
+                      {formatFieldName(field)}
+                    </li>
+                  ))}
+                </ul>
+              </AccordionItem>
+            )}
+
+            {/* What Would Change */}
+            {explanation.whatWouldChange && explanation.whatWouldChange.length > 0 && (
+              <AccordionItem value="changes" title="What Would Change the Result?">
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {explanation.whatWouldChange.map((change, idx) => (
+                    <li key={idx} className="text-blue-700">
+                      {change}
+                    </li>
+                  ))}
+                </ul>
+              </AccordionItem>
+            )}
+
+            {/* Required Documents */}
+            {result.requiredDocuments && result.requiredDocuments.length > 0 && (
+              <AccordionItem value="documents" title="Required Documents">
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {result.requiredDocuments.map((doc, idx) => (
+                    <li key={idx}>
+                      <span className="font-medium">{doc.document}</span>
+                      {doc.description && (
+                        <span className="text-gray-600"> - {doc.description}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </AccordionItem>
+            )}
+          </Accordion.Root>
+        )}
+
+        {/* Confidence Indicator */}
+        <div className="flex items-center gap-2 text-xs opacity-75">
+          {(() => {
+            const confidenceLabel = getContextualLabelFromBasicData(result.eligible, result.confidence, result.incomplete);
+            return (
+              <span className="inline-flex items-center gap-1">
+                <span className="font-medium">{confidenceLabel.text}</span>
+                {confidenceLabel.icon && <span>{confidenceLabel.icon}</span>}
+              </span>
+            );
+          })()}
+          {result.executionTime && (
+            <span>• Evaluated in {result.executionTime.toFixed(0)}ms</span>
+          )}
+          {result.needsReview && (
+            <span className="text-yellow-700">• Needs Manual Review</span>
+          )}
         </div>
       </div>
-
-      {/* Plain Language Explanation */}
-      <div className="prose prose-sm max-w-none">
-        <p className="whitespace-pre-line">{explanation.plainLanguage}</p>
-      </div>
-
-      {/* Detailed Breakdown (Accordion) */}
-      {showDetails && (
-        <Accordion.Root
-          type="multiple"
-          value={expanded}
-          onValueChange={setExpanded}
-          className="space-y-2"
-        >
-          {/* Reasoning */}
-          {explanation.reasoning.length > 0 && (
-            <AccordionItem value="reasoning" title="Why This Result?">
-              <ul className="list-disc list-inside space-y-1">
-                {explanation.reasoning.map((reason, idx) => (
-                  <li key={idx} className="text-sm">
-                    {reason}
-                  </li>
-                ))}
-              </ul>
-            </AccordionItem>
-          )}
-
-          {/* Criteria Checked */}
-          {explanation.criteriaChecked.length > 0 && (
-            <AccordionItem value="criteria" title="What Was Checked">
-              <div className="space-y-2">
-                {explanation.criteriaPassed.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-green-700 mb-1">
-                      ✓ Met Requirements:
-                    </p>
-                    <ul className="list-disc list-inside text-sm space-y-1">
-                      {explanation.criteriaPassed.map((criterion, idx) => (
-                        <li key={idx} className="text-green-600">
-                          {criterion}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {explanation.criteriaFailed.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-red-700 mb-1">
-                      ✗ Unmet Requirements:
-                    </p>
-                    <ul className="list-disc list-inside text-sm space-y-1">
-                      {explanation.criteriaFailed.map((criterion, idx) => (
-                        <li key={idx} className="text-red-600">
-                          {criterion}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* Missing Information */}
-          {explanation.missingInformation.length > 0 && (
-            <AccordionItem value="missing" title="Missing Information">
-              <ul className="list-disc list-inside text-sm space-y-1">
-                {explanation.missingInformation.map((field, idx) => (
-                  <li key={idx} className="text-yellow-700">
-                    {formatFieldName(field)}
-                  </li>
-                ))}
-              </ul>
-            </AccordionItem>
-          )}
-
-          {/* What Would Change */}
-          {explanation.whatWouldChange && explanation.whatWouldChange.length > 0 && (
-            <AccordionItem value="changes" title="What Would Change the Result?">
-              <ul className="list-disc list-inside text-sm space-y-1">
-                {explanation.whatWouldChange.map((change, idx) => (
-                  <li key={idx} className="text-blue-700">
-                    {change}
-                  </li>
-                ))}
-              </ul>
-            </AccordionItem>
-          )}
-
-          {/* Required Documents */}
-          {result.requiredDocuments && result.requiredDocuments.length > 0 && (
-            <AccordionItem value="documents" title="Required Documents">
-              <ul className="list-disc list-inside text-sm space-y-1">
-                {result.requiredDocuments.map((doc, idx) => (
-                  <li key={idx}>
-                    <span className="font-medium">{doc.document}</span>
-                    {doc.description && (
-                      <span className="text-gray-600"> - {doc.description}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </AccordionItem>
-          )}
-        </Accordion.Root>
-      )}
-
-      {/* Confidence Indicator */}
-      <div className="flex items-center gap-2 text-xs opacity-75">
-        <span>Confidence: {result.confidence}%</span>
-        {result.executionTime && (
-          <span>• Evaluated in {result.executionTime.toFixed(0)}ms</span>
-        )}
-        {result.needsReview && (
-          <span className="text-yellow-700">• Needs Manual Review</span>
-        )}
-      </div>
-    </div>
-  );
-};
+    );
+  };
 
 /**
  * Accordion item component
@@ -270,7 +279,9 @@ export const EligibilityResultSummary: React.FC<{
       </span>
       <div>
         <p className="font-medium text-sm">{statusLabel}</p>
-        <p className="text-xs opacity-75">{result.confidence}% confident</p>
+        <p className="text-xs opacity-75">
+          {getContextualLabelFromBasicData(result.eligible, result.confidence, result.incomplete).text}
+        </p>
       </div>
     </div>
   );
