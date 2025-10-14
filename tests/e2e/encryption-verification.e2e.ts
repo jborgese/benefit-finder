@@ -312,16 +312,16 @@ test.describe('Encryption - Data Protection', () => {
     page.on('request', request => {
       const url = request.url();
       // Track any external domain requests (exclude localhost and common dev resources)
-      if (url.match(/^https?:\/\/(?!localhost|127\.0\.0\.1)/)) {
-      // Exclude common legitimate external resources
-      if (!url.includes('apple.com') &&
-          !url.includes('safari') &&
-          !url.includes('webkit') &&
-          !url.includes('fonts.googleapis.com') &&
-          !url.includes('fonts.gstatic.com') &&
-          !url.includes('rxdb.info')) {
+      if (
+        url.match(/^https?:\/\/(?!localhost|127\.0\.0\.1)/) &&
+        !url.includes('apple.com') &&
+        !url.includes('safari') &&
+        !url.includes('webkit') &&
+        !url.includes('fonts.googleapis.com') &&
+        !url.includes('fonts.gstatic.com') &&
+        !url.includes('rxdb.info')
+      ) {
         externalCalls.push(url);
-      }
       }
     });
 

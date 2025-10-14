@@ -198,7 +198,7 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
     }
   });
 
-  test('should trap focus in dialogs', async ({ page }) => {
+test('should trap focus in dialogs', () => {
     // Skip for now - dialog focus trapping requires complex setup
     // This would be tested when results page is properly set up
     expect(true).toBeTruthy();
@@ -282,7 +282,7 @@ test.describe('Results Accessibility - Forms', () => {
       } else {
         expect(formViolations).toEqual([]);
       }
-    } catch (error) {
+    } catch {
       // If axe scan fails due to no matching elements, that's fine (no dialogs present)
       expect(true).toBeTruthy();
     }

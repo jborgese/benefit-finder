@@ -42,6 +42,22 @@ export const EVALUATION_ERROR_CODES = {
   UNKNOWN_ERROR: 'EVAL_UNKNOWN',
 } as const;
 
+// ----------------------------------------------------------------------------
+// ENVIRONMENT HELPERS
+// ----------------------------------------------------------------------------
+/**
+ * Detect whether we're running in a development environment across Vite/browser and Node contexts
+ */
+function isDevelopmentEnv(): boolean {
+  // Vite provides typed env flags via ImportMeta
+  type ViteMeta = { env?: { DEV?: boolean } };
+  const viteDev = ((import.meta as unknown) as ViteMeta).env?.DEV ?? false;
+
+  // Node (tests, scripts) - access via globalThis with a typed shape to avoid any
+  const nodeEnv = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV;
+  return Boolean(viteDev) || nodeEnv === 'development';
+}
+
 // ============================================================================
 // CUSTOM OPERATORS
 // ============================================================================
@@ -289,8 +305,7 @@ export function evaluateRuleSync<T = boolean>(
     const startTime = performance.now();
 
     // Add comprehensive debugging for JSON Logic evaluation
-    const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
-                  (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
+    const isDev = isDevelopmentEnv();
 
     if (isDev) {
       console.warn('🔍 [DEBUG] JSON Logic Evaluation:', {
@@ -551,8 +566,7 @@ export const BENEFIT_OPERATORS = {
    */
   snap_income_threshold_130_fpl: (householdSize: number): number => {
     // Debug logging - check for both browser and Node.js environments
-    const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
-                  (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
+    const isDev = isDevelopmentEnv();
 
     if (isDev) {
       console.warn(`🔍 [DEBUG] Calculating SNAP 130% FPL threshold for household size: ${householdSize}`);
@@ -598,8 +612,7 @@ export const BENEFIT_OPERATORS = {
     const isEligible = householdIncome <= threshold;
 
     // Debug logging - check for both browser and Node.js environments
-    const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
-                  (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
+    const isDev = isDevelopmentEnv();
 
     if (isDev) {
       console.warn(`🔍 [DEBUG] SNAP Income Eligibility Check:`);

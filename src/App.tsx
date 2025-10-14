@@ -572,10 +572,13 @@ function App(): React.ReactElement {
         evaluatedAt: new Date()
       };
 
+      // Immediately transition to results view so UI renders while save completes
+      setAppState('results');
+      setAnnouncementMessage('Assessment completed. Preparing results...');
+
       await saveResults({ results });
       setHasResults(true);
-      setAppState('results');
-      setAnnouncementMessage('Assessment completed. Results are ready.');
+      setAnnouncementMessage('Results are ready.');
     } catch (error) {
       console.error('Error evaluating eligibility:', error);
       setAnnouncementMessage('Error evaluating eligibility. Please try again.');
