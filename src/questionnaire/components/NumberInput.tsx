@@ -21,6 +21,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   step,
   decimals = 0,
   showSteppers = true,
+  onEnterKey,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
@@ -72,6 +73,13 @@ export const NumberInput: React.FC<NumberInputProps> = ({
 
   const handleFocus = (): void => {
     setIsFocused(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
   };
 
   const handleIncrement = (): void => {
@@ -128,6 +136,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           min={minValue}
           max={maxValue}

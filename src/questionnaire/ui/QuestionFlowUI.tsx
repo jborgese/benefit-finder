@@ -110,6 +110,16 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     setIsCurrentQuestionValid(isValid);
   };
 
+  // Handle Enter key press - navigate forward if valid
+  const handleEnterKey = (): void => {
+    if (isCurrentQuestionValid && store.canGoForward()) {
+      const result = store.next();
+      if (!result.success) {
+        console.warn('Navigation failed:', result.error);
+      }
+    }
+  };
+
   if (!store.started || !currentQuestion) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -176,6 +186,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
           value={currentAnswer}
           onChange={handleAnswerChange}
           onValidationChange={handleValidationChange}
+          onEnterKey={handleEnterKey}
           autoFocus
         />
       </div>

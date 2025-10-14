@@ -24,6 +24,8 @@ export interface BaseQuestionProps<T = unknown> {
   className?: string;
   /** Auto-focus on mount */
   autoFocus?: boolean;
+  /** Enter key handler */
+  onEnterKey?: () => void;
 }
 
 /**

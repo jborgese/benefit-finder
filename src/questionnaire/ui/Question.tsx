@@ -32,6 +32,8 @@ export interface QuestionProps {
   className?: string;
   /** Validation state change handler */
   onValidationChange?: (isValid: boolean, errors: string[]) => void;
+  /** Enter key handler */
+  onEnterKey?: () => void;
 }
 
 export const Question: React.FC<QuestionProps> = ({
@@ -42,6 +44,7 @@ export const Question: React.FC<QuestionProps> = ({
   autoFocus = false,
   className = '',
   onValidationChange,
+  onEnterKey,
 }) => {
   const [errors, setErrors] = React.useState<string[]>([]);
   const [touched, setTouched] = React.useState(false);
@@ -94,6 +97,7 @@ export const Question: React.FC<QuestionProps> = ({
       error: errors.length > 0 ? errors : undefined,
       disabled,
       autoFocus,
+      onEnterKey,
     };
 
     switch (question.inputType) {

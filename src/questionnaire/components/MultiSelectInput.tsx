@@ -19,6 +19,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   minSelections,
   maxSelections,
   variant = 'checkbox',
+  onEnterKey,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
@@ -47,6 +48,13 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
     onChange(newValue);
     setIsTouched(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
   };
 
   const isOptionSelected = (optionValue: string | number): boolean => {
@@ -100,7 +108,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   if (variant === 'pills') {
     return (
-      <div className={`question-multiselect-pills ${className}`}>
+      <div className={`question-multiselect-pills ${className}`} onKeyDown={handleKeyDown}>
         <div className="mb-2">
           <label className="block text-sm font-medium text-gray-700">
             {question.text}
@@ -142,10 +150,9 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
                 className={`
                   inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
                   transition-all border-2
-                  ${
-                    isSelected
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                  ${isSelected
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
                   }
                   ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
@@ -187,7 +194,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   // Checkbox variant
   return (
     <div className={`question-multiselect-checkbox ${className}`}>
-      <fieldset>
+      <fieldset onKeyDown={handleKeyDown}>
         <legend className="block text-sm font-medium text-gray-700 mb-2">
           {question.text}
           {question.required && (

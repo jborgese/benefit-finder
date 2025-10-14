@@ -24,11 +24,18 @@ let isInitializing = false;
 
 // Initialize database and load sample data
 async function initializeApp(): Promise<void> {
+  if (import.meta.env.DEV) {
+    console.log('[DEBUG] initializeApp: Starting app initialization');
+  }
+
   // Prevent multiple simultaneous initializations
   if (isInitializing) {
-    console.warn('App initialization already in progress, waiting...');
+    console.warn('[DEBUG] initializeApp: App initialization already in progress, waiting...');
     // Wait for the current initialization to complete
-    while (isInitializing) {
+    // Poll until the flag is cleared by the other initialization
+    const maxAttempts = 100; // 10 seconds max wait (100ms * 100)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isInitializing is modified asynchronously
+    for (let attempt = 0; attempt < maxAttempts && isInitializing; attempt++) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     return;
@@ -36,6 +43,9 @@ async function initializeApp(): Promise<void> {
 
   isInitializing = true;
   try {
+    if (import.meta.env.DEV) {
+      console.log('[DEBUG] initializeApp: Initializing database...');
+    }
     // Initialize database
     await initializeDatabase();
 
@@ -91,13 +101,20 @@ async function initializeApp(): Promise<void> {
     await importRulePackage(medicaidRules.default);
 
   } catch (error) {
-    console.error('Error initializing app:', error);
+    console.error('[DEBUG] initializeApp: Error initializing app:', error);
 
     // If it's a database initialization error, try clearing and retrying once
     if (error instanceof Error && error.message.includes('Database initialization failed')) {
-      console.warn('Attempting to clear database and retry initialization...');
+      console.warn('[DEBUG] initializeApp: Attempting to clear database and retry initialization...');
       try {
+        if (import.meta.env.DEV) {
+          console.log('[DEBUG] initializeApp: Clearing database...');
+        }
         await clearDatabase();
+
+        if (import.meta.env.DEV) {
+          console.log('[DEBUG] initializeApp: Re-initializing database...');
+        }
         await initializeDatabase();
 
         const db = getDatabase();

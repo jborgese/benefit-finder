@@ -20,6 +20,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   max,
   format = 'medium',
   showPicker = true,
+  onEnterKey,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
@@ -50,6 +51,13 @@ export const DateInput: React.FC<DateInputProps> = ({
 
   const handleFocus = (): void => {
     setIsFocused(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
   };
 
   const formatDateForDisplay = (isoDate: string): string => {
@@ -128,6 +136,7 @@ export const DateInput: React.FC<DateInputProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           min={min}
           max={max}

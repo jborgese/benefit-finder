@@ -20,6 +20,7 @@ export const TextInput: React.FC<TextInputProps> = ({
   maxLength,
   pattern,
   autoComplete,
+  onEnterKey,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
@@ -48,6 +49,13 @@ export const TextInput: React.FC<TextInputProps> = ({
 
   const handleFocus = (): void => {
     setIsFocused(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
   };
 
   // Format SSN as user types (if field is SSN)
@@ -93,6 +101,7 @@ export const TextInput: React.FC<TextInputProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           maxLength={maxLength ?? question.maxLength}
           pattern={pattern}

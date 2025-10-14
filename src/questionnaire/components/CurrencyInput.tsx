@@ -20,6 +20,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   min: _min = 0,
   max: _max,
   allowNegative = false,
+  onEnterKey,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
@@ -149,6 +150,13 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     e.target.select();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
+  };
+
   return (
     <div className={`question-currency-input ${className}`}>
       <label
@@ -185,6 +193,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder={question.placeholder ?? '0.00'}
           autoFocus={autoFocus}

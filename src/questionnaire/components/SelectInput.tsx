@@ -20,6 +20,7 @@ export const SelectInput: React.FC<SelectProps> = ({
   placeholder = 'Select an option...',
   searchable = false,
   variant = 'dropdown',
+  onEnterKey,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
@@ -40,8 +41,8 @@ export const SelectInput: React.FC<SelectProps> = ({
 
   const filteredOptions = searchable
     ? options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : options;
 
   const handleBlur = (): void => {
@@ -53,10 +54,17 @@ export const SelectInput: React.FC<SelectProps> = ({
     setIsFocused(true);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
+  };
+
   if (variant === 'radio') {
     return (
       <div className={`question-select-radio ${className}`}>
-        <fieldset>
+        <fieldset onKeyDown={handleKeyDown}>
           <legend className="block text-sm font-medium text-gray-700 mb-2">
             {question.text}
             {question.required && (
@@ -195,6 +203,7 @@ export const SelectInput: React.FC<SelectProps> = ({
         onChange={(e) => onChange(e.target.value)}
         onBlur={handleBlur}
         onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
         disabled={disabled}
         autoFocus={autoFocus}
         required={question.required}
