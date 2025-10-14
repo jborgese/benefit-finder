@@ -538,15 +538,16 @@ function App(): React.ReactElement {
           rulesVersion: result.ruleVersion ?? '1.0.0'
         }));
 
-      const likelyResults = evaluationResults
-        .filter((result: EligibilityEvaluationResult) => !result.eligible && result.confidence > 50)
+      // Handle ineligible results based on confidence and completeness
+      const maybeResults = evaluationResults
+        .filter((result: EligibilityEvaluationResult) => !result.eligible && (result.incomplete || result.confidence < 70))
         .map((result: EligibilityEvaluationResult) => ({
           programId: result.programId,
           programName: getProgramName(result.programId),
           programDescription: getProgramDescription(result.programId),
           jurisdiction: US_FEDERAL_JURISDICTION,
-          status: 'likely' as const,
-          confidence: 'medium' as const,
+          status: 'maybe' as const,
+          confidence: result.confidence < 50 ? 'low' as const : 'medium' as const,
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
@@ -570,14 +571,14 @@ function App(): React.ReactElement {
         }));
 
       const notQualifiedResults = evaluationResults
-        .filter((result: EligibilityEvaluationResult) => !result.eligible && result.confidence <= 50)
+        .filter((result: EligibilityEvaluationResult) => !result.eligible && !result.incomplete && result.confidence >= 70)
         .map((result: EligibilityEvaluationResult) => ({
           programId: result.programId,
           programName: getProgramName(result.programId),
           programDescription: getProgramDescription(result.programId),
           jurisdiction: US_FEDERAL_JURISDICTION,
           status: 'not-qualified' as const,
-          confidence: 'low' as const,
+          confidence: result.confidence >= 90 ? 'high' as const : 'medium' as const,
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
@@ -602,8 +603,8 @@ function App(): React.ReactElement {
 
       const results = {
         qualified: qualifiedResults,
-        likely: likelyResults,
-        maybe: [], // Could add logic for "maybe" results based on incomplete data
+        likely: [], // No "likely" category - either qualified, maybe, or not qualified
+        maybe: maybeResults,
         notQualified: notQualifiedResults,
         totalPrograms: evaluationResults.length,
         evaluatedAt: new Date()
