@@ -258,112 +258,6 @@ const sampleFlow: QuestionFlow = {
   nodes: new Map(nodes.map(node => [node.id, node]))
 };
 
-// Sample results for testing
-const sampleResults = {
-  qualified: [
-    {
-      programId: 'snap',
-      programName: 'Supplemental Nutrition Assistance Program (SNAP)',
-      programDescription: 'SNAP helps low-income individuals and families buy food',
-      jurisdiction: US_FEDERAL_JURISDICTION,
-      status: 'qualified' as const,
-      confidence: 'high' as const,
-      confidenceScore: 95,
-      explanation: {
-        reason: 'You qualify based on your household size and income',
-        details: ['Income is below the threshold', 'Household size qualifies'],
-        rulesCited: ['SNAP-INCOME-001', 'SNAP-HOUSEHOLD-001']
-      },
-      requiredDocuments: [
-        {
-          id: 'snap-doc-1',
-          name: 'Proof of income',
-          required: true
-        },
-        {
-          id: 'snap-doc-2',
-          name: 'Social Security card',
-          required: true
-        },
-        {
-          id: 'snap-doc-3',
-          name: 'Proof of residency',
-          required: true
-        }
-      ],
-      nextSteps: [
-        {
-          step: 'Contact your local SNAP office',
-          priority: 'high' as const
-        },
-        {
-          step: 'Schedule an interview',
-          priority: 'high' as const
-        },
-        {
-          step: 'Gather required documents',
-          priority: 'medium' as const
-        }
-      ],
-      estimatedBenefit: {
-        amount: 194,
-        frequency: 'monthly' as const,
-        description: 'Based on household size and income'
-      },
-      evaluatedAt: new Date(),
-      rulesVersion: '1.0.0'
-    },
-    {
-      programId: 'medicaid',
-      programName: 'Medicaid',
-      programDescription: 'Health coverage for low-income individuals and families',
-      jurisdiction: US_FEDERAL_JURISDICTION,
-      status: 'qualified' as const,
-      confidence: 'medium' as const,
-      confidenceScore: 75,
-      explanation: {
-        reason: 'You may qualify for Medicaid coverage',
-        details: ['Income is within Medicaid threshold', 'State eligibility requirements met'],
-        rulesCited: ['MEDICAID-INCOME-001']
-      },
-      requiredDocuments: [
-        {
-          id: 'medicaid-doc-1',
-          name: 'Proof of income',
-          required: true
-        },
-        {
-          id: 'medicaid-doc-2',
-          name: 'Birth certificate',
-          required: true
-        },
-        {
-          id: 'medicaid-doc-3',
-          name: 'Social Security card',
-          required: true
-        }
-      ],
-      nextSteps: [
-        {
-          step: 'Apply online at healthcare.gov',
-          url: 'https://www.healthcare.gov',
-          priority: 'high' as const
-        },
-        {
-          step: 'Contact state Medicaid office',
-          priority: 'medium' as const
-        }
-      ],
-      evaluatedAt: new Date(),
-      rulesVersion: '1.0.0'
-    }
-  ],
-  likely: [],
-  maybe: [],
-  notQualified: [],
-  totalPrograms: 2,
-  evaluatedAt: new Date()
-};
 
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 
@@ -383,7 +277,7 @@ function App(): React.ReactElement {
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const { saveResults, loadAllResults } = useResultsManagement();
+  const { saveResults, loadAllResults, loadResult } = useResultsManagement();
 
   // Check for existing results on app startup
   useEffect(() => {
@@ -394,7 +288,10 @@ function App(): React.ReactElement {
           setHasResults(true);
           // Load the most recent results for display
           const mostRecent = results[0]; // loadAllResults should return sorted by date
-          setCurrentResults(mostRecent.results);
+          const actualResults = await loadResult(mostRecent.id);
+          if (actualResults) {
+            setCurrentResults(actualResults);
+          }
         }
       } catch (error) {
         console.error('Failed to check for existing results:', error);
@@ -402,7 +299,7 @@ function App(): React.ReactElement {
     };
 
     void checkExistingResults();
-  }, [loadAllResults]);
+  }, [loadAllResults, loadResult]);
 
   // Lightweight routing: if URL path includes "results", show results view immediately
   useEffect(() => {
@@ -815,6 +712,8 @@ function App(): React.ReactElement {
 
         {appState === 'results' && (
           <div>
+            {currentResults ? (
+              <div>
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h2 className="text-2xl font-bold">Your Benefit Eligibility Results</h2>
@@ -828,19 +727,19 @@ function App(): React.ReactElement {
                     New Assessment
                   </Button>
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <ResultsExport results={currentResults || sampleResults} />
+                    <ResultsExport results={currentResults!} />
                     <ResultsImport onImport={(results) => void handleImportResults(results)} />
                   </div>
                 </div>
               </div>
             </div>
 
-            <ResultsSummary results={currentResults || sampleResults} />
+            <ResultsSummary results={currentResults!} />
 
             <QuestionnaireAnswersCard />
 
             <div className="mt-8 space-y-6">
-              {(currentResults || sampleResults).qualified.map((result) => (
+              {currentResults!.qualified.map((result) => (
                 <ProgramCard
                   key={result.programId}
                   result={result}
@@ -907,6 +806,25 @@ function App(): React.ReactElement {
                 </div>
               </div>
             </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm border p-8 text-center max-w-2xl mx-auto">
+                <div className="text-6xl mb-4" aria-hidden="true">📝</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  No Results Available
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Complete the eligibility questionnaire to see which government benefit programs you may qualify for.
+                </p>
+                <Button
+                  onClick={handleNewAssessment}
+                  variant="primary"
+                  className="inline-flex items-center gap-2"
+                >
+                  Start Assessment
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </main>
