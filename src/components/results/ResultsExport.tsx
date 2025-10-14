@@ -4,7 +4,7 @@
  * UI for exporting results as PDF or encrypted file
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { EligibilityResults } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { exportToPDF, exportEncrypted, downloadBlob, generateExportFilename } from './exportUtils';
@@ -28,6 +28,38 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+
+  // Validate passwords in real-time
+  useEffect(() => {
+    const isValid = password.length >= 8 && password === confirmPassword;
+    setIsPasswordValid(isValid);
+  }, [password, confirmPassword]);
+
+  // Clear password state when dialog closes
+  useEffect(() => {
+    if (!showEncryptDialog) {
+      setPassword('');
+      setConfirmPassword('');
+      setExportError(null);
+    }
+  }, [showEncryptDialog]);
+
+  const handlePasswordChange = (value: string): void => {
+    setPassword(value);
+    if (passwordRef.current) {
+      passwordRef.current.value = value;
+    }
+  };
+
+  const handleConfirmPasswordChange = (value: string): void => {
+    setConfirmPassword(value);
+    if (confirmPasswordRef.current) {
+      confirmPasswordRef.current.value = value;
+    }
+  };
 
   const handlePDFExport = (): void => {
     try {
@@ -49,19 +81,9 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
   const handleEncryptedExport = async (): Promise<void> => {
     setExportError(null);
 
-    const password = passwordRef.current?.value || '';
-    const confirmPassword = confirmPasswordRef.current?.value || '';
-
-    // Validate password
-    if (!password || password.length < 8) {
-      setExportError('Password must be at least 8 characters');
-      return;
-    }
-
-    // Note: Timing attack not a concern here as comparison happens locally in browser
-    // eslint-disable-next-line security/detect-possible-timing-attacks
-    if (password !== confirmPassword) {
-      setExportError('Passwords do not match');
+    // Additional validation (shouldn't be needed since button is disabled, but good for safety)
+    if (!isPasswordValid) {
+      setExportError('Password must be at least 8 characters and passwords must match');
       return;
     }
 
@@ -84,9 +106,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
       setIsExporting(false);
       setShowEncryptDialog(false);
 
-      // Clear password fields
-      if (passwordRef.current) passwordRef.current.value = '';
-      if (confirmPasswordRef.current) confirmPasswordRef.current.value = '';
+      // Clear password fields (handled by useEffect when dialog closes)
     } catch (err) {
       console.error('Encrypted export failed:', err);
       setExportError('Failed to export encrypted file');
@@ -151,6 +171,8 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
                   <input
                     type="password"
                     ref={passwordRef}
+                    value={password}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter a strong password"
                     minLength={8}
@@ -164,6 +186,8 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
                   <input
                     type="password"
                     ref={confirmPasswordRef}
+                    value={confirmPassword}
+                    onChange={(e) => handleConfirmPasswordChange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Re-enter password"
                     minLength={8}
@@ -191,7 +215,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
                 onClick={() => {
                   void handleEncryptedExport();
                 }}
-                disabled={isExporting}
+                disabled={isExporting || !isPasswordValid}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {isExporting ? 'Exporting...' : 'Export File'}

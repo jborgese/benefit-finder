@@ -66,7 +66,7 @@ test.describe('Results Export', () => {
     }
   });
 
-  test('should show error when passwords do not match', async ({ page }) => {
+  test('should disable button when passwords do not match', async ({ page }) => {
     const exportButton = page.locator('button:has-text("Export Encrypted")');
 
     if (await exportButton.isVisible()) {
@@ -76,11 +76,15 @@ test.describe('Results Export', () => {
       await page.fill('input[type="password"]', 'password123', { strict: false });
       await page.locator('input[type="password"]').nth(1).fill('differentPassword');
 
-      // Try to export
-      await page.click('button:has-text("Export File")');
+      // Export button should be disabled
+      const exportDialogButton = page.locator('button:has-text("Export File")');
+      await expect(exportDialogButton).toBeDisabled();
 
-      // Error should appear
-      await expect(page.locator('text=/do not match|mismatch/i')).toBeVisible();
+      // Fill with matching passwords
+      await page.locator('input[type="password"]').nth(1).fill('password123');
+
+      // Export button should now be enabled
+      await expect(exportDialogButton).toBeEnabled();
     }
   });
 
