@@ -540,7 +540,7 @@ function App(): React.ReactElement {
 
       // Handle ineligible results based on confidence and completeness
       const maybeResults = evaluationResults
-        .filter((result: EligibilityEvaluationResult) => !result.eligible && (result.incomplete || result.confidence < 70))
+        .filter((result: EligibilityEvaluationResult) => !result.eligible && ((result.incomplete ?? false) || result.confidence < 70))
         .map((result: EligibilityEvaluationResult) => ({
           programId: result.programId,
           programName: getProgramName(result.programId),
