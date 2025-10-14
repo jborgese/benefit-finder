@@ -173,6 +173,67 @@ BenefitFinder is a privacy-preserving, offline-first application for checking go
 - Keep state as close to where it's used as possible
 - Use Immer for immutable state updates when needed
 
+### Debug Logging
+When a user requests debug logging to be added to a file:
+
+1. **Check for Existing Helper**: Always search the file first for existing debug logging helper functions
+   - Look for patterns like `debugLog`, `logDebug`, `debug`, or similar utilities
+   - Check for existing debug configuration or constants (e.g., `DEBUG`, `VERBOSE`)
+
+2. **Cognitive Complexity Management**:
+   - **DO** create or use a helper function to centralize debug logic
+   - **DON'T** add inline debug statements that increase cognitive complexity
+   - Debug helpers should handle conditional logging, formatting, and context
+
+3. **Helper Function Pattern**:
+   ```typescript
+   // Preferred pattern: Centralized debug helper
+   const debugLog = (message: string, data?: unknown): void => {
+     if (import.meta.env.DEV || localStorage.getItem('DEBUG_MODE')) {
+       console.log(`[ComponentName] ${message}`, data ?? '');
+     }
+   };
+   ```
+
+4. **Revision Strategy**:
+   - If a helper exists but doesn't meet the user's needs, revise it rather than creating a new one
+   - Extend existing helpers with additional parameters or functionality
+   - Maintain consistent debug patterns within the same file
+
+5. **Best Practices**:
+   - Include component/module name in debug messages for context
+   - Use appropriate log levels (log, warn, error, debug)
+   - Never log sensitive user data (see Security section)
+   - Consider using a debug flag that can be toggled via localStorage or env var
+   - Group related debug statements with `console.group()` when using a helper
+
+6. **Example Implementation**:
+   ```typescript
+   // Helper function at top of file (after imports)
+   const createDebugLogger = (moduleName: string) => ({
+     log: (msg: string, data?: unknown) => {
+       if (import.meta.env.DEV) console.log(`[${moduleName}] ${msg}`, data ?? '');
+     },
+     warn: (msg: string, data?: unknown) => {
+       if (import.meta.env.DEV) console.warn(`[${moduleName}] ${msg}`, data ?? '');
+     },
+     error: (msg: string, data?: unknown) => {
+       console.error(`[${moduleName}] ${msg}`, data ?? '');
+     }
+   });
+
+   const debug = createDebugLogger('EligibilityEngine');
+
+   // Usage in code
+   debug.log('Evaluating rules', { ruleCount: rules.length });
+   debug.warn('Missing required field', { field: 'income' });
+   ```
+
+7. **When to Skip Helpers**:
+   - Single debug statement in entire file (use inline)
+   - Temporary debugging during development (with TODO comment to remove)
+   - Error boundaries or critical error logging (always keep these simple)
+
 ## Prohibited Patterns
 - ❌ No hosted servers or cloud services
 - ❌ No external API calls (except for optional device-to-device sync over local Wi-Fi)

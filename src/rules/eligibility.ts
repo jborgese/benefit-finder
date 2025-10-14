@@ -245,19 +245,26 @@ export async function ensureSNAPRulesAreCorrect(): Promise<void> {
 
     // Check if any rule is using the old incorrect logic
     const hasIncorrectRule = snapRules.some(rule => {
-      const ruleLogic = rule.ruleLogic;
-      if (typeof ruleLogic === 'object' && ruleLogic !== null && !Array.isArray(ruleLogic)) {
-        // Check for the old logic pattern: {"<=": [{"var": "householdIncome"}, {"*": [{"var": "householdSize"}, 1500]}]}
-        if (ruleLogic['<='] && Array.isArray(ruleLogic['<='])) {
-          const [_incomeVar, thresholdCalc] = ruleLogic['<='];
-          if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc['*']) {
-            const [_sizeVar, multiplier] = thresholdCalc['*'];
-            if (multiplier === 1500) {
-              return true; // Found old incorrect logic
-            }
-          }
+      const { ruleLogic } = rule;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Array check is necessary for runtime safety
+      if (typeof ruleLogic !== 'object' || ruleLogic === null || Array.isArray(ruleLogic)) {
+        return false;
+      }
+
+      const lessOrEqual = ruleLogic['<='];
+      if (!Array.isArray(lessOrEqual)) {
+        return false;
+      }
+
+      // Check for the old logic pattern: {"<=": [{"var": "householdIncome"}, {"*": [{"var": "householdSize"}, 1500]}]}
+      const [_incomeVar, thresholdCalc] = lessOrEqual;
+      if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc['*']) {
+        const [_sizeVar, multiplier] = thresholdCalc['*'];
+        if (multiplier === 1500) {
+          return true; // Found old incorrect logic
         }
       }
+
       return false;
     });
 
@@ -265,10 +272,8 @@ export async function ensureSNAPRulesAreCorrect(): Promise<void> {
       console.warn('🚨 [WARNING] ensureSNAPRulesAreCorrect: Found SNAP rules with incorrect logic! Rules need to be reloaded.');
       console.warn('🔧 [INFO] To fix this, run: window.clearBenefitFinderDatabase() then refresh the page');
       console.warn('🔧 [INFO] This will clear the database and reload rules from the updated JSON files.');
-    } else {
-      if (import.meta.env.DEV) {
-        console.warn('✅ [DEBUG] ensureSNAPRulesAreCorrect: SNAP rules appear to be correct');
-      }
+    } else if (import.meta.env.DEV) {
+      console.warn('✅ [DEBUG] ensureSNAPRulesAreCorrect: SNAP rules appear to be correct');
     }
 
     // Log current rule logic for debugging

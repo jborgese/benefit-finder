@@ -181,6 +181,110 @@ function evaluateProgram(
 }
 
 /**
+ * Debug SNAP income rule calculations
+ */
+function debugSnapIncomeRule(
+  rule: RuleDefinition,
+  profile: UserProfile,
+  evaluationResult: { result: boolean }
+): void {
+  if (!import.meta.env.DEV) return;
+  if (!rule.id.includes('snap') || !rule.id.includes('income')) return;
+
+  const { householdIncome, householdSize } = profile;
+
+  console.warn(`🔍 [DEBUG] SNAP Income Rule Analysis:`);
+  console.warn(`  - Household Income: $${householdIncome?.toLocaleString()}/month`);
+  console.warn(`  - Household Size: ${householdSize}`);
+
+  if (householdIncome === undefined || householdSize === undefined) return;
+
+  const currentThreshold = householdSize * 1500;
+  console.warn(`  - Current Rule Threshold: $${currentThreshold.toLocaleString()}/month (householdSize * 1500)`);
+  console.warn(`  - Current Rule Result: ${householdIncome} <= ${currentThreshold} = ${householdIncome <= currentThreshold}`);
+
+  const correctThresholds: Record<number, number> = {
+    1: 1696, 2: 2292, 3: 2888, 4: 3483,
+    5: 4079, 6: 4675, 7: 5271, 8: 5867
+  };
+
+  const correctThreshold = householdSize <= 8
+    // eslint-disable-next-line security/detect-object-injection -- householdSize is validated as a number in questionnaire
+    ? correctThresholds[householdSize]
+    : correctThresholds[8] + (596 * (householdSize - 8));
+
+  console.warn(`  - Correct Threshold (130% FPL): $${correctThreshold.toLocaleString()}/month`);
+  console.warn(`  - Correct Result: ${householdIncome} <= ${correctThreshold} = ${householdIncome <= correctThreshold}`);
+  console.warn(`  - DIFFERENCE: Current rule allows ${currentThreshold - correctThreshold > 0 ? 'MORE' : 'LESS'} income by $${Math.abs(currentThreshold - correctThreshold).toLocaleString()}`);
+
+  if (householdIncome > correctThreshold && evaluationResult.result === true) {
+    console.error(`🚨 [ERROR] Rule is incorrectly passing! Income $${householdIncome} > Correct threshold $${correctThreshold}`);
+  }
+}
+
+/**
+ * Process a single rule evaluation result
+ */
+function processRuleResult(
+  rule: RuleDefinition,
+  evaluationResult: { result: boolean },
+  details: string[]
+): boolean {
+  const passed = evaluationResult.result === true;
+
+  if (import.meta.env.DEV) {
+    console.warn(`${passed ? '✅' : '❌'} [DEBUG] Rule ${rule.id} ${passed ? 'PASSED' : 'FAILED'}`);
+  }
+
+  if (rule.explanation) {
+    details.push(`${passed ? '✓' : '✗'} ${rule.explanation}`);
+  }
+
+  return passed;
+}
+
+/**
+ * Log rule evaluation start debug info
+ */
+function logEvaluationStart(profile: UserProfile): void {
+  if (!import.meta.env.DEV) return;
+  console.warn('🔍 [DEBUG] Starting rule evaluation with profile:', {
+    householdIncome: profile.householdIncome,
+    householdSize: profile.householdSize,
+    citizenship: profile.citizenship,
+    age: profile.age,
+  });
+}
+
+/**
+ * Log rule evaluation summary debug info
+ */
+function logEvaluationSummary(passedRules: number, totalRules: number, rulesCited: string[]): void {
+  if (!import.meta.env.DEV) return;
+  console.warn(`🔍 [DEBUG] Rule evaluation summary:`, {
+    passedRules,
+    totalRules,
+    passRate: totalRules > 0 ? (passedRules / totalRules).toFixed(2) : '0',
+    rulesCited,
+  });
+}
+
+/**
+ * Log individual rule debug info
+ */
+function logRuleDebug(rule: RuleDefinition, evaluationResult: { success: boolean; result: boolean; error?: string; executionTime?: number }): void {
+  if (!import.meta.env.DEV) return;
+  console.warn(`🔍 [DEBUG] Evaluating rule: ${rule.id}`);
+  console.warn(`🔍 [DEBUG] Rule logic:`, JSON.stringify(rule.ruleLogic, null, 2));
+  console.warn(`🔍 [DEBUG] Rule ${rule.id} evaluation result:`, {
+    success: evaluationResult.success,
+    result: evaluationResult.result,
+    error: evaluationResult.error,
+    executionTime: evaluationResult.executionTime,
+  });
+}
+
+/**
  * Evaluates all rules and returns evaluation data
  */
 function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
@@ -196,106 +300,25 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
   const details: string[] = [];
   const calculations: Array<{ label: string; value: string | number; comparison?: string }> = [];
 
-  if (import.meta.env.DEV) {
-    console.warn('🔍 [DEBUG] Starting rule evaluation with profile:', {
-      householdIncome: profile.householdIncome,
-      householdSize: profile.householdSize,
-      citizenship: profile.citizenship,
-      age: profile.age,
-    });
-  }
+  logEvaluationStart(profile);
 
   for (const rule of rules) {
     if (rule.ruleType !== 'eligibility') continue;
 
     totalRules++;
-    if (import.meta.env.DEV) {
-      console.warn(`🔍 [DEBUG] Evaluating rule: ${rule.id}`);
-      console.warn(`🔍 [DEBUG] Rule logic:`, JSON.stringify(rule.ruleLogic, null, 2));
-    }
 
     try {
       const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
+      logRuleDebug(rule, evaluationResult);
+      debugSnapIncomeRule(rule, profile, evaluationResult);
 
-      if (import.meta.env.DEV) {
-        console.warn(`🔍 [DEBUG] Rule ${rule.id} evaluation result:`, {
-          success: evaluationResult.success,
-          result: evaluationResult.result,
-          error: evaluationResult.error,
-          executionTime: evaluationResult.executionTime,
-        });
-      }
-
-      // Add detailed debugging for SNAP income rules
-      if (rule.id.includes('snap') && rule.id.includes('income')) {
-        const { householdIncome, householdSize } = profile;
-
-        if (import.meta.env.DEV) {
-          console.warn(`🔍 [DEBUG] SNAP Income Rule Analysis:`);
-          console.warn(`  - Household Income: $${householdIncome?.toLocaleString()}/month`);
-          console.warn(`  - Household Size: ${householdSize}`);
-        }
-
-        // Calculate what the rule actually does
-        if (householdIncome !== undefined && householdSize !== undefined) {
-          // The current rule logic: householdSize * 1500
-          const currentThreshold = householdSize * 1500;
-
-          if (import.meta.env.DEV) {
-            console.warn(`  - Current Rule Threshold: $${currentThreshold.toLocaleString()}/month (householdSize * 1500)`);
-            console.warn(`  - Current Rule Result: ${householdIncome} <= ${currentThreshold} = ${householdIncome <= currentThreshold}`);
-          }
-
-          // What the correct threshold should be (2024 130% FPL)
-          const correctThresholds: Record<number, number> = {
-            1: 1696,
-            2: 2292,
-            3: 2888,
-            4: 3483,
-            5: 4079,
-            6: 4675,
-            7: 5271,
-            8: 5867
-          };
-
-          // eslint-disable-next-line security/detect-object-injection -- householdSize is validated as a number in questionnaire
-          const correctThreshold = householdSize <= 8
-            ? correctThresholds[householdSize]
-            : correctThresholds[8] + (596 * (householdSize - 8));
-
-          if (import.meta.env.DEV) {
-            console.warn(`  - Correct Threshold (130% FPL): $${correctThreshold.toLocaleString()}/month`);
-            console.warn(`  - Correct Result: ${householdIncome} <= ${correctThreshold} = ${householdIncome <= correctThreshold}`);
-            console.warn(`  - DIFFERENCE: Current rule allows ${currentThreshold - correctThreshold > 0 ? 'MORE' : 'LESS'} income by $${Math.abs(currentThreshold - correctThreshold).toLocaleString()}`);
-          }
-
-          if (householdIncome > correctThreshold && evaluationResult.result === true) {
-            console.error(`🚨 [ERROR] Rule is incorrectly passing! Income $${householdIncome} > Correct threshold $${correctThreshold}`);
-          }
-        }
-      }
-
-      // Generate calculation details for specific rule types
       const ruleCalculation = generateRuleCalculation(rule, profile);
       if (ruleCalculation) {
         calculations.push(ruleCalculation);
       }
 
-      if (evaluationResult.result === true) {
+      if (processRuleResult(rule, evaluationResult, details)) {
         passedRules++;
-        if (import.meta.env.DEV) {
-          console.warn(`✅ [DEBUG] Rule ${rule.id} PASSED`);
-        }
-        if (rule.explanation) {
-          details.push(`✓ ${rule.explanation}`);
-        }
-      } else {
-        if (import.meta.env.DEV) {
-          console.warn(`❌ [DEBUG] Rule ${rule.id} FAILED`);
-        }
-        if (rule.explanation) {
-          details.push(`✗ ${rule.explanation}`);
-        }
       }
 
       rulesCited.push(rule.id);
@@ -304,14 +327,7 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
     }
   }
 
-  if (import.meta.env.DEV) {
-    console.warn(`🔍 [DEBUG] Rule evaluation summary:`, {
-      passedRules,
-      totalRules,
-      passRate: totalRules > 0 ? (passedRules / totalRules).toFixed(2) : '0',
-      rulesCited,
-    });
-  }
+  logEvaluationSummary(passedRules, totalRules, rulesCited);
 
   return { passedRules, totalRules, rulesCited, details, calculations };
 }
@@ -420,100 +436,109 @@ function deduplicateSteps(steps: NextStep[]): NextStep[] {
 }
 
 /**
+ * Calculate SNAP income threshold for household size
+ */
+function calculateSnapIncomeThreshold(householdSize: number): number {
+  const snapIncomeLimits: Record<number, number> = {
+    1: 1696, 2: 2292, 3: 2888, 4: 3483,
+    5: 4079, 6: 4675, 7: 5271, 8: 5867
+  };
+
+  return householdSize <= 8
+    // eslint-disable-next-line security/detect-object-injection -- householdSize is validated as a number in questionnaire
+    ? snapIncomeLimits[householdSize]
+    : snapIncomeLimits[8] + (596 * (householdSize - 8));
+}
+
+/**
+ * Generate SNAP income calculation details
+ */
+function generateSnapIncomeCalculation(profile: UserProfile): { label: string; value: string; comparison: string } | null {
+  const { householdIncome, householdSize } = profile;
+  if (householdIncome === undefined || householdSize === undefined) return null;
+
+  const threshold = calculateSnapIncomeThreshold(householdSize);
+  const meetsThreshold = householdIncome <= threshold;
+
+  if (import.meta.env.DEV) {
+    console.warn(`🔍 [DEBUG] SNAP Calculation Display:`, {
+      householdIncome, householdSize, threshold, meetsThreshold
+    });
+  }
+
+  return {
+    label: 'Monthly income limit (130% of poverty)',
+    value: `$${threshold.toLocaleString()}`,
+    comparison: `Your income: $${householdIncome.toLocaleString()}/month (${meetsThreshold ? 'qualifies' : 'exceeds limit'})`
+  };
+}
+
+/**
+ * Generate household size calculation details
+ */
+function generateHouseholdCalculation(profile: UserProfile): { label: string; value: number; comparison: string } | null {
+  const { householdSize } = profile;
+  if (householdSize === undefined) return null;
+
+  return {
+    label: 'Household size',
+    value: householdSize,
+    comparison: `${householdSize} ${householdSize === 1 ? 'person' : 'people'}`
+  };
+}
+
+/**
+ * Generate citizenship calculation details
+ */
+function generateCitizenshipCalculation(profile: UserProfile): { label: string; value: string; comparison: string } | null {
+  const { citizenship } = profile;
+  if (!citizenship) return null;
+
+  const citizenshipMap: Record<string, string> = {
+    'us_citizen': 'U.S. Citizen',
+    'permanent_resident': 'Permanent Resident',
+    'refugee': 'Refugee',
+    'asylee': 'Asylee'
+  };
+
+  return {
+    label: 'Citizenship status',
+    // eslint-disable-next-line security/detect-object-injection -- citizenship is validated string from questionnaire
+    value: citizenshipMap[citizenship] || citizenship,
+    comparison: 'Meets program requirements'
+  };
+}
+
+/**
+ * Generate age calculation details
+ */
+function generateAgeCalculation(profile: UserProfile): { label: string; value: number; comparison: string } | null {
+  const { age } = profile;
+  if (age === undefined) return null;
+
+  return {
+    label: 'Age',
+    value: age,
+    comparison: `${age} years old`
+  };
+}
+
+/**
  * Generate calculation details for specific rule types
  */
 function generateRuleCalculation(rule: RuleDefinition, profile: UserProfile): { label: string; value: string | number; comparison?: string } | null {
-  // Rule logic is available in rule.ruleLogic if needed for future enhancements
-
-  // Handle SNAP income rules
   if (rule.id.includes('snap') && rule.id.includes('income')) {
-    const { householdIncome, householdSize } = profile;
-
-    if (householdIncome !== undefined && householdSize !== undefined) {
-      // Use actual USDA 2024 SNAP income limits (130% of poverty level)
-      const snapIncomeLimits: Record<number, number> = {
-        1: 1696,
-        2: 2292,
-        3: 2888,
-        4: 3483,
-        5: 4079,
-        6: 4675,
-        7: 5271,
-        8: 5867
-      };
-
-      // For households larger than 8, add $596 per additional member
-      // eslint-disable-next-line security/detect-object-injection -- householdSize is validated as a number in questionnaire
-      const threshold = householdSize <= 8
-        ? snapIncomeLimits[householdSize]
-        : snapIncomeLimits[8] + (596 * (householdSize - 8));
-
-      const meetsThreshold = householdIncome <= threshold;
-
-      if (import.meta.env.DEV) {
-        console.warn(`🔍 [DEBUG] SNAP Calculation Display:`, {
-          householdIncome,
-          householdSize,
-          threshold,
-          meetsThreshold,
-        });
-      }
-
-      return {
-        label: 'Monthly income limit (130% of poverty)',
-        value: `$${threshold.toLocaleString()}`,
-        comparison: `Your income: $${householdIncome.toLocaleString()}/month (${meetsThreshold ? 'qualifies' : 'exceeds limit'})`
-      };
-    }
+    return generateSnapIncomeCalculation(profile);
   }
-
-  // Handle household size requirements
   if (rule.id.includes('household')) {
-    const { householdSize } = profile;
-
-    if (householdSize !== undefined) {
-      return {
-        label: 'Household size',
-        value: householdSize,
-        comparison: `${householdSize} ${householdSize === 1 ? 'person' : 'people'}`
-      };
-    }
+    return generateHouseholdCalculation(profile);
   }
-
-  // Handle citizenship rules
   if (rule.id.includes('citizenship')) {
-    const { citizenship } = profile;
-
-    if (citizenship) {
-      const citizenshipMap: Record<string, string> = {
-        'us_citizen': 'U.S. Citizen',
-        'permanent_resident': 'Permanent Resident',
-        'refugee': 'Refugee',
-        'asylee': 'Asylee'
-      };
-
-      // eslint-disable-next-line security/detect-object-injection -- citizenship is validated string from questionnaire
-      return {
-        label: 'Citizenship status',
-        value: citizenshipMap[citizenship] || citizenship,
-        comparison: 'Meets program requirements'
-      };
-    }
+    return generateCitizenshipCalculation(profile);
   }
-
-  // Handle age-based rules
   if (rule.id.includes('age')) {
-    const { age } = profile;
-
-    if (age !== undefined) {
-      return {
-        label: 'Age',
-        value: age,
-        comparison: `${age} years old`
-      };
-    }
+    return generateAgeCalculation(profile);
   }
-
   return null;
 }
 

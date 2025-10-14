@@ -57,7 +57,7 @@
         "test:e2e:changed": "playwright test",
         "test:a11y": "playwright test --project=a11y",
     "test:perf": "tsx scripts/performance-tests.ts",
-    "lint": "eslint .",
+    "lint": "eslint . --no-cache",
     "lint:fix": "eslint . --fix",
     "validate-rules": "tsx scripts/validate-rules.ts"
   },
