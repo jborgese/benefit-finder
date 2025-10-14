@@ -176,10 +176,9 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
               focus:outline-none focus:ring-2 focus:ring-offset-2
               disabled:opacity-50 disabled:cursor-not-allowed
               transition-colors ml-auto
-              ${
-                isLastQuestion || completed
-                  ? 'bg-green-500 hover:bg-green-600 focus:ring-green-500 text-white'
-                  : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 text-white'
+              ${isLastQuestion || completed
+                ? 'bg-green-500 hover:bg-green-600 focus:ring-green-500 text-white'
+                : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 text-white'
               }
             `}
           >
@@ -227,18 +226,24 @@ export const QuestionBreadcrumb: React.FC<{
   onJumpTo?: (questionId: string) => void;
   className?: string;
 }> = ({ onJumpTo, className = '' }) => {
-  const { history, getCurrentQuestion } = useQuestionFlowStore();
+  const { history, getCurrentQuestion, progress } = useQuestionFlowStore();
   const currentQuestion = getCurrentQuestion();
 
   if (!currentQuestion || history.length <= 1) {
     return null;
   }
 
+  // Calculate the starting question number for the breadcrumb
+  // The current question position tells us what question number we're on
+  const currentQuestionNumber = progress?.currentQuestionPosition ?? 1;
+  const startQuestionNumber = currentQuestionNumber - history.length + 1;
+
   return (
     <nav aria-label="Question breadcrumb" className={`mb-4 ${className}`}>
       <ol className="flex items-center space-x-2 text-sm">
         {history.map((nodeId, index) => {
           const isCurrentQuestion = index === history.length - 1;
+          const questionNumber = startQuestionNumber + index;
 
           return (
             <li key={nodeId} className="flex items-center">
@@ -258,7 +263,7 @@ export const QuestionBreadcrumb: React.FC<{
 
               {isCurrentQuestion ? (
                 <span className="text-gray-700 font-medium">
-                  Question {index + 1}
+                  Question {questionNumber}
                 </span>
               ) : (
                 <button
@@ -266,7 +271,7 @@ export const QuestionBreadcrumb: React.FC<{
                   onClick={() => onJumpTo?.(nodeId)}
                   className="text-blue-600 hover:text-blue-800 hover:underline"
                 >
-                  Question {index + 1}
+                  Question {questionNumber}
                 </button>
               )}
             </li>
