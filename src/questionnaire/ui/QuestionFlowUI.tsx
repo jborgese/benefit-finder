@@ -110,13 +110,19 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     setIsCurrentQuestionValid(isValid);
   };
 
-  // Handle Enter key press - navigate forward if valid
+  // Handle Enter key press - navigate forward or complete questionnaire if valid
   const handleEnterKey = (): void => {
-    if (isCurrentQuestionValid && store.canGoForward()) {
+    if (!isCurrentQuestionValid) return;
+
+    // Check if we can go forward (not on last question)
+    if (store.canGoForward()) {
       const result = store.next();
       if (!result.success) {
         console.warn('Navigation failed:', result.error);
       }
+    } else {
+      // On last question - trigger completion
+      store.complete();
     }
   };
 
