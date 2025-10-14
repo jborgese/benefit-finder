@@ -107,18 +107,20 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
             >
               <div className="flex items-start gap-3">
                 {/* Step Number & Checkbox */}
-                <div className="flex-shrink-0 flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border-2 border-blue-700">
                     {index + 1}
                   </div>
+                  <div className="text-xs text-gray-500 font-medium">Step {index + 1}</div>
                   <Checkbox.Root
                     checked={step.completed ?? false}
                     onCheckedChange={(checked) => handleCheckboxChange(originalIndex, checked === true)}
-                    className="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 transition-colors print:hidden"
+                    className="w-6 h-6 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 transition-colors print:hidden"
+                    aria-label={`Mark step ${index + 1} as completed`}
                   >
                     <Checkbox.Indicator>
                       <svg
-                        className="w-3 h-3 text-white"
+                        className="w-4 h-4 text-white"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -132,6 +134,7 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
                       </svg>
                     </Checkbox.Indicator>
                   </Checkbox.Root>
+                  <div className="text-xs text-gray-500">✓ Complete</div>
                 </div>
 
                 {/* Step Content */}

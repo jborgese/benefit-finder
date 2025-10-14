@@ -7,6 +7,7 @@
 // Main components
 export { Question } from './Question';
 export { QuestionFlowUI, SimpleQuestionnaire } from './QuestionFlowUI';
+export { EnhancedQuestionnaire } from './EnhancedQuestionnaire';
 export { NavigationControls, CompactNavigationControls, QuestionBreadcrumb } from './NavigationControls';
 
 // Save & Resume

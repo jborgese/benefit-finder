@@ -21,6 +21,10 @@ export interface NavigationControlsProps {
   forwardLabel?: string;
   /** Callback before navigation */
   onBeforeNavigate?: (direction: 'back' | 'forward') => boolean | Promise<boolean>;
+  /** Is forward navigation disabled */
+  forwardDisabled?: boolean;
+  /** Is current question valid (used for Complete button on last question) */
+  isCurrentQuestionValid?: boolean;
   /** Additional CSS classes */
   className?: string;
 }
@@ -32,11 +36,14 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
   backLabel = 'Back',
   forwardLabel = 'Next',
   onBeforeNavigate,
+  forwardDisabled = false,
+  isCurrentQuestionValid = true,
   className = '',
 }) => {
   const {
     previous,
     next,
+    complete,
     canGoBack,
     canGoForward,
     progress,
@@ -75,7 +82,11 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
         return;
       }
 
-      next();
+      if (isLastQuestion) {
+        complete();
+      } else {
+        next();
+      }
     } finally {
       setIsNavigating(false);
     }
@@ -84,13 +95,17 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
   const progressPercent = progress?.progressPercent ?? 0;
   const isLastQuestion = !canGoForward();
 
+  // Use the current question position from progress calculation
+  const currentQuestionNumber = progress?.currentQuestionPosition ?? 1;
+  const totalQuestions = progress?.totalQuestions ?? 0;
+
   return (
     <div className={`navigation-controls ${className}`}>
       {showProgress && progress && (
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700">
-              Question {progress.answeredQuestions + 1} of {progress.totalQuestions}
+              Question {currentQuestionNumber} of {totalQuestions}
             </span>
             <span className="text-sm text-gray-500">
               {progressPercent}% Complete
@@ -121,6 +136,8 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
             type="button"
             onClick={() => void handleBack()}
             disabled={!canGoBack() || isNavigating}
+            data-testid="nav-back-button"
+            aria-label="Go to previous question"
             className="
               flex items-center gap-2 px-4 py-2
               border border-gray-300 bg-white text-gray-700 rounded-md
@@ -151,7 +168,9 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
           <button
             type="button"
             onClick={() => void handleForward()}
-            disabled={(!canGoForward() && !completed) || isNavigating}
+            disabled={(!canGoForward() && !completed && !isLastQuestion) || (!isLastQuestion && forwardDisabled) || (isLastQuestion && !isCurrentQuestionValid) || isNavigating}
+            data-testid="nav-forward-button"
+            aria-label={isLastQuestion || completed ? 'Submit questionnaire' : 'Go to next question'}
             className={`
               flex items-center gap-2 px-6 py-2 rounded-md
               focus:outline-none focus:ring-2 focus:ring-offset-2
@@ -164,7 +183,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
               }
             `}
           >
-            {isLastQuestion || completed ? 'Submit' : forwardLabel}
+            {isLastQuestion || completed ? 'Complete' : forwardLabel}
             {!isLastQuestion && !completed && (
               <svg
                 className="w-5 h-5"
@@ -218,48 +237,41 @@ export const QuestionBreadcrumb: React.FC<{
   return (
     <nav aria-label="Question breadcrumb" className={`mb-4 ${className}`}>
       <ol className="flex items-center space-x-2 text-sm">
-        {history.slice(0, -1).map((nodeId, index) => (
-          <li key={nodeId} className="flex items-center">
-            {index > 0 && (
-              <svg
-                className="w-4 h-4 mx-2 text-gray-400"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            )}
+        {history.map((nodeId, index) => {
+          const isCurrentQuestion = index === history.length - 1;
 
-            <button
-              type="button"
-              onClick={() => onJumpTo?.(nodeId)}
-              className="text-blue-600 hover:text-blue-800 hover:underline"
-            >
-              Question {index + 1}
-            </button>
-          </li>
-        ))}
+          return (
+            <li key={nodeId} className="flex items-center">
+              {index > 0 && (
+                <svg
+                  className="w-4 h-4 mx-2 text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
 
-        <li className="flex items-center">
-          <svg
-            className="w-4 h-4 mx-2 text-gray-400"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span className="text-gray-700 font-medium">
-            Question {history.length}
-          </span>
-        </li>
+              {isCurrentQuestion ? (
+                <span className="text-gray-700 font-medium">
+                  Question {index + 1}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onJumpTo?.(nodeId)}
+                  className="text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  Question {index + 1}
+                </button>
+              )}
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );

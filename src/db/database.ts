@@ -32,6 +32,13 @@ import type {
   EligibilityResultDocument,
 } from './schemas';
 
+/**
+ * Extended Window interface for development utilities
+ */
+interface WindowWithDevUtils extends Window {
+  clearBenefitFinderDatabase?: () => Promise<void>;
+}
+
 // Add RxDB plugins
 // Note: Encryption is handled by wrappedKeyEncryptionCryptoJsStorage wrapper
 // which is configured when creating the database with a password
@@ -143,6 +150,123 @@ function convertToRxDBPassword(passphrase: string): string {
 }
 
 /**
+ * Register development utilities on window object
+ */
+function registerDevUtilities(): void {
+  if (import.meta.env.DEV) {
+    (window as WindowWithDevUtils).clearBenefitFinderDatabase = clearDatabase;
+  }
+}
+
+/**
+ * Create database with given configuration
+ */
+async function createDatabaseWithConfig(
+  encryptionPassword: string,
+  options: { closeDuplicates?: boolean } = {}
+): Promise<BenefitFinderDatabase> {
+  const db = await createRxDatabase<BenefitFinderCollections>({
+    name: DB_NAME,
+    storage: wrappedValidateAjvStorage({
+      storage: wrappedKeyEncryptionCryptoJsStorage({
+        storage: getRxStorageDexie(),
+      }),
+    }),
+    password: encryptionPassword,
+    multiInstance: false,
+    eventReduce: true,
+    ignoreDuplicate: !options.closeDuplicates,
+    closeDuplicates: options.closeDuplicates,
+    cleanupPolicy: {
+      minimumDeletedTime: 1000 * 60 * 60 * 24 * 7, // 7 days
+      minimumCollectionAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      runEach: 1000 * 60 * 5, // Run every 5 minutes
+      awaitReplicationsInSync: false,
+      waitForLeadership: false,
+    },
+  });
+
+  await db.addCollections(collections);
+  return db;
+}
+
+/**
+ * Handle duplicate database error (DB8)
+ */
+async function handleDuplicateDatabaseError(
+  encryptionPassword: string
+): Promise<BenefitFinderDatabase> {
+  console.warn('Attempting to close duplicate database instances...');
+
+  // Force close any existing instances
+  await destroyDatabase(false);
+
+  // Try again with closeDuplicates
+  const db = await createDatabaseWithConfig(encryptionPassword, { closeDuplicates: true });
+
+  if (import.meta.env.DEV) {
+    console.warn('RxDB initialized successfully after closing duplicates');
+  }
+
+  return db;
+}
+
+/**
+ * Handle encryption key mismatch error (DB1)
+ */
+async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
+  console.warn('Encryption key mismatch detected, clearing database and retrying...');
+
+  // Clear all database data completely
+  await clearDatabase();
+
+  // Use a fresh encryption key by clearing the stored key first
+  const storageKey = 'bf_encryption_key';
+  localStorage.removeItem(storageKey);
+
+  // Generate a completely new encryption key
+  const newEncryptionPassword = getDefaultEncryptionPassword();
+
+  const db = await createDatabaseWithConfig(newEncryptionPassword);
+
+  if (import.meta.env.DEV) {
+    console.warn('RxDB initialized successfully with new encryption key');
+  }
+
+  return db;
+}
+
+/**
+ * Handle database initialization errors
+ */
+async function handleDatabaseError(
+  error: unknown,
+  encryptionPassword: string
+): Promise<BenefitFinderDatabase> {
+  if (error && typeof error === 'object' && 'code' in error) {
+    const errorCode = error.code as string;
+
+    if (errorCode === 'DB8') {
+      try {
+        return await handleDuplicateDatabaseError(encryptionPassword);
+      } catch (retryError) {
+        console.error('Failed to initialize RxDB after retry:', retryError);
+        throw new Error(`Database initialization failed: ${retryError}`);
+      }
+    } else if (errorCode === 'DB1') {
+      try {
+        return await handleEncryptionKeyMismatch();
+      } catch (retryError) {
+        console.error('Failed to initialize RxDB after encryption key reset:', retryError);
+        throw new Error(`Database initialization failed: ${retryError}`);
+      }
+    }
+  }
+
+  throw new Error(`Database initialization failed: ${error}`);
+}
+
+/**
  * Initialize RxDB database with encryption
  *
  * @param passphrase Optional user passphrase for encryption
@@ -173,40 +297,25 @@ export async function initializeDatabase(
 
   try {
     // Create RxDB database with Dexie storage, encryption, and AJV validation
-    const db = await createRxDatabase<BenefitFinderCollections>({
-      name: DB_NAME,
-      storage: wrappedValidateAjvStorage({
-        storage: wrappedKeyEncryptionCryptoJsStorage({
-          storage: getRxStorageDexie(),
-        }),
-      }),
-      password: encryptionPassword,
-      multiInstance: false, // Disable multi-tab support for better performance
-      eventReduce: true, // Enable event reduce for better performance
-      cleanupPolicy: {
-        // Automatic cleanup configuration
-        minimumDeletedTime: 1000 * 60 * 60 * 24 * 7, // 7 days
-        minimumCollectionAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-        runEach: 1000 * 60 * 5, // Run every 5 minutes
-        awaitReplicationsInSync: false,
-        waitForLeadership: false,
-      },
-    });
-
-    // Add collections to the database
-    await db.addCollections(collections);
+    const db = await createDatabaseWithConfig(encryptionPassword);
 
     // Store instance
     dbInstance = db;
 
     if (import.meta.env.DEV) {
       console.warn('RxDB initialized successfully with encryption');
+      registerDevUtilities();
     }
 
     return db;
   } catch (error) {
     console.error('Failed to initialize RxDB:', error);
-    throw new Error(`Database initialization failed: ${error}`);
+
+    // Handle specific RxDB errors and retry
+    const db = await handleDatabaseError(error, encryptionPassword);
+    dbInstance = db;
+    registerDevUtilities();
+    return db;
   }
 }
 
@@ -265,6 +374,62 @@ export async function destroyDatabase(
  */
 export function isDatabaseInitialized(): boolean {
   return dbInstance !== null;
+}
+
+/**
+ * Clear all database data and reset
+ * This is useful for development and testing
+ *
+ * @returns Promise that resolves when database is cleared
+ */
+export async function clearDatabase(): Promise<void> {
+  if (dbInstance) {
+    await destroyDatabase(true);
+  }
+
+  // Clear any remaining localStorage data
+  const keys = Object.keys(localStorage);
+  keys.forEach(key => {
+    if (key.startsWith('bf_') || key.includes('benefitfinder')) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  // Clear IndexedDB completely
+  try {
+    // Delete the entire IndexedDB database
+    const deleteReq = indexedDB.deleteDatabase(DB_NAME);
+    await new Promise<void>((resolve, reject) => {
+      deleteReq.onsuccess = () => resolve();
+      deleteReq.onerror = () => reject(deleteReq.error);
+      deleteReq.onblocked = () => {
+        console.warn('Database deletion blocked, trying again...');
+        setTimeout(() => {
+          indexedDB.deleteDatabase(DB_NAME);
+          resolve();
+        }, 100);
+      };
+    });
+
+    // Also try to delete any Dexie-related databases
+    const dexieDeleteReq = indexedDB.deleteDatabase('DexieDB');
+    await new Promise<void>((resolve, _reject) => {
+      dexieDeleteReq.onsuccess = () => resolve();
+      dexieDeleteReq.onerror = () => resolve(); // Ignore errors for Dexie cleanup
+      dexieDeleteReq.onblocked = () => resolve(); // Ignore blocked for Dexie cleanup
+    });
+
+  } catch (error) {
+    console.warn('Error clearing IndexedDB:', error);
+  }
+
+  // Reset instance
+  dbInstance = null;
+
+  if (import.meta.env.DEV) {
+    console.warn('Database cleared successfully');
+    registerDevUtilities();
+  }
 }
 
 /**

@@ -11,6 +11,7 @@ export {
   getDatabase,
   destroyDatabase,
   isDatabaseInitialized,
+  clearDatabase,
   exportDatabase,
   importDatabase,
 } from './database';

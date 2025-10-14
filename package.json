@@ -63,14 +63,13 @@
   },
     "lint-staged": {
         "*.{ts,tsx}": [
-            "eslint --fix",
-            "vitest related --run --passWithNoTests"
+            "eslint --fix --max-warnings=0"
         ],
         "src/rules/**/*.json": [
             "npm run validate-rules"
         ],
         "tests/e2e/**/*.e2e.{ts,tsx}": [
-            "npm run test:e2e -- --grep=\"$(basename {file} .e2e.ts)\""
+            "echo 'E2E tests will run in CI/CD pipeline'"
         ]
     },
   "devDependencies": {

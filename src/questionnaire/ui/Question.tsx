@@ -30,6 +30,8 @@ export interface QuestionProps {
   autoFocus?: boolean;
   /** Additional CSS classes */
   className?: string;
+  /** Validation state change handler */
+  onValidationChange?: (isValid: boolean, errors: string[]) => void;
 }
 
 export const Question: React.FC<QuestionProps> = ({
@@ -39,29 +41,41 @@ export const Question: React.FC<QuestionProps> = ({
   disabled = false,
   autoFocus = false,
   className = '',
+  onValidationChange,
 }) => {
   const [errors, setErrors] = React.useState<string[]>([]);
   const [touched, setTouched] = React.useState(false);
+
+  // Validate value
+  const validateValue = React.useCallback((val: unknown): void => {
+    const schema = createSchemaFromQuestion(question);
+    const result = validateWithSchema(schema, val);
+
+    if (!result.success) {
+      const validationErrors = result.errors ?? [];
+      setErrors(validationErrors);
+      onValidationChange?.(false, validationErrors);
+    } else {
+      setErrors([]);
+      onValidationChange?.(true, []);
+    }
+  }, [question, onValidationChange]);
+
+  // Validate initial value and notify parent
+  React.useEffect(() => {
+    // Always validate for required questions, even if not touched
+    if (question.required || touched) {
+      validateValue(value);
+    }
+  }, [question.required, value, touched, validateValue]);
 
   // Validate on change
   const handleChange = (newValue: unknown): void => {
     onChange(newValue);
 
-    // Validate if touched
-    if (touched) {
+    // Validate if touched OR if question is required (immediate validation for required fields)
+    if (touched || question.required) {
       validateValue(newValue);
-    }
-  };
-
-  // Validate value
-  const validateValue = (val: unknown): void => {
-    const schema = createSchemaFromQuestion(question);
-    const result = validateWithSchema(schema, val);
-
-    if (!result.success) {
-      setErrors(result.errors ?? []);
-    } else {
-      setErrors([]);
     }
   };
 
@@ -138,7 +152,12 @@ export const Question: React.FC<QuestionProps> = ({
   };
 
   return (
-    <div className={`question-wrapper ${className}`} onBlur={handleBlur}>
+    <div
+      className={`question-wrapper ${className}`}
+      onBlur={handleBlur}
+      role="group"
+      aria-label={`Question: ${question.text}`}
+    >
       {renderInput()}
     </div>
   );

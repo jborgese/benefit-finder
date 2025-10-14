@@ -12,6 +12,7 @@ export { DocumentChecklist } from './DocumentChecklist';
 export { NextStepsList } from './NextStepsList';
 export { WhyExplanation } from './WhyExplanation';
 export { PrintView } from './PrintView';
+export { QuestionnaireAnswersCard } from './QuestionnaireAnswersCard';
 
 // Management Components
 export { ResultsHistory } from './ResultsHistory';

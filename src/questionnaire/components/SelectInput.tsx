@@ -203,13 +203,14 @@ export const SelectInput: React.FC<SelectProps> = ({
         aria-label={question.ariaLabel ?? question.text}
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm
+          bg-white text-gray-900
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-          disabled:bg-gray-100 disabled:cursor-not-allowed
+          disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500
           ${showError ? 'border-red-500' : 'border-gray-300'}
           ${isFocused ? 'ring-2 ring-blue-500' : ''}
         `}
       >
-        <option value="" disabled>
+        <option value="" disabled className="text-gray-500">
           {placeholder}
         </option>
 
@@ -218,6 +219,7 @@ export const SelectInput: React.FC<SelectProps> = ({
             key={option.value}
             value={option.value}
             disabled={option.disabled}
+            className={option.disabled ? 'text-gray-400' : 'text-gray-900'}
           >
             {option.icon ? `${option.icon} ${option.label}` : option.label}
           </option>

@@ -279,6 +279,8 @@ export interface ProgressMetrics {
   skippedQuestions: number;
   /** Remaining questions */
   remainingQuestions: number;
+  /** Current question position (1-based) */
+  currentQuestionPosition: number;
   /** Progress percentage (0-100) */
   progressPercent: number;
   /** Completion percentage for required questions */

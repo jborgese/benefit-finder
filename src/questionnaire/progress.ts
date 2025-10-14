@@ -73,12 +73,16 @@ export function calculateProgress(
 
   const remainingQuestions = totalQuestions - answeredQuestions - skippedQuestions;
 
+  // Calculate current question position (answered questions + current question)
+  const currentQuestionPosition = answeredQuestions + 1;
+
   return {
     totalQuestions,
     requiredQuestions,
     answeredQuestions,
     skippedQuestions,
     remainingQuestions,
+    currentQuestionPosition,
     progressPercent: Math.round(progressPercent),
     requiredProgressPercent: Math.round(requiredProgressPercent),
   };

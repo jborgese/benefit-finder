@@ -24,7 +24,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
   // Constants for repeated style classes and status values
   const GRAY_STYLE = 'bg-gray-100 text-gray-800 border-gray-300';
   const ACTIVE_FILTER_RING = ' border-current ring-2';
-  const DEFAULT_BUTTON_STYLE = 'bg-white border-gray-200 hover:border-gray-300';
+  const DEFAULT_BUTTON_STYLE = 'bg-white border-gray-200 hover:border-gray-300 text-gray-700';
   const NOT_QUALIFIED_STATUS = 'not-qualified' as const;
 
   const statusCounts = {
@@ -136,7 +136,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           `}
           aria-label={`Show ${statusCounts.qualified} qualified programs`}
         >
-          <span className="text-2xl mb-1">{getStatusIcon('qualified')}</span>
+          <span className={`text-2xl mb-1 ${activeFilter === 'qualified' ? 'text-green-800' : 'text-green-600'}`}>{getStatusIcon('qualified')}</span>
           <span className="text-sm font-medium">Qualified</span>
           <span className="text-xl font-bold text-green-600">{statusCounts.qualified}</span>
         </button>
@@ -151,7 +151,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           `}
           aria-label={`Show ${statusCounts.likely} likely programs`}
         >
-          <span className="text-2xl mb-1">{getStatusIcon('likely')}</span>
+          <span className={`text-2xl mb-1 ${activeFilter === 'likely' ? 'text-blue-800' : 'text-blue-600'}`}>{getStatusIcon('likely')}</span>
           <span className="text-sm font-medium">Likely</span>
           <span className="text-xl font-bold text-blue-600">{statusCounts.likely}</span>
         </button>
@@ -166,7 +166,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           `}
           aria-label={`Show ${statusCounts.maybe} maybe programs`}
         >
-          <span className="text-2xl mb-1">{getStatusIcon('maybe')}</span>
+          <span className={`text-2xl mb-1 ${activeFilter === 'maybe' ? 'text-yellow-800' : 'text-yellow-600'}`}>{getStatusIcon('maybe')}</span>
           <span className="text-sm font-medium">Maybe</span>
           <span className="text-xl font-bold text-yellow-600">{statusCounts.maybe}</span>
         </button>
@@ -184,7 +184,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
             statusCounts[NOT_QUALIFIED_STATUS]
           } not qualified programs`}
         >
-          <span className="text-2xl mb-1">{getStatusIcon(NOT_QUALIFIED_STATUS)}</span>
+          <span className={`text-2xl mb-1 ${activeFilter === NOT_QUALIFIED_STATUS ? 'text-gray-800' : 'text-gray-600'}`}>{getStatusIcon(NOT_QUALIFIED_STATUS)}</span>
           <span className="text-sm font-medium">Not Qualified</span>
           <span className="text-xl font-bold text-gray-600">{
             // eslint-disable-next-line security/detect-object-injection

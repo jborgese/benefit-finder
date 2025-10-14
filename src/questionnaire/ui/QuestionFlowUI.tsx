@@ -61,6 +61,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
 }) => {
   const store = useQuestionFlowStore();
   const currentQuestion = store.getCurrentQuestion();
+  const [isCurrentQuestionValid, setIsCurrentQuestionValid] = React.useState(false);
 
   // Auto-save
   useAutoSave({
@@ -102,6 +103,11 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     );
 
     onAnswerChange?.(currentQuestion.id, value);
+  };
+
+  // Handle validation changes
+  const handleValidationChange = (isValid: boolean, _errors: string[]): void => {
+    setIsCurrentQuestionValid(isValid);
   };
 
   if (!store.started || !currentQuestion) {
@@ -169,6 +175,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
           question={currentQuestion}
           value={currentAnswer}
           onChange={handleAnswerChange}
+          onValidationChange={handleValidationChange}
           autoFocus
         />
       </div>
@@ -178,7 +185,15 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
           showBack
           showForward
           showProgress={showProgress}
-          onBeforeNavigate={() => true}
+          forwardDisabled={!isCurrentQuestionValid}
+          isCurrentQuestionValid={isCurrentQuestionValid}
+          onBeforeNavigate={(direction) => {
+            // Only allow forward navigation if current question is valid
+            if (direction === 'forward') {
+              return isCurrentQuestionValid;
+            }
+            return true;
+          }}
         />
       )}
 

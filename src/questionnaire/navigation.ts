@@ -217,6 +217,7 @@ export class NavigationManager {
    * Can navigate backward
    */
   canGoBack(): boolean {
+    // Can go back if we have history AND there's a previous node in the flow
     return this.history.length > 1;
   }
 

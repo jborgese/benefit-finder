@@ -67,6 +67,7 @@ describe('Progress Tracking', () => {
         answeredQuestions: 3,
         skippedQuestions: 0,
         remainingQuestions: 7,
+        currentQuestionPosition: 3,
         progressPercent: 30,
         requiredProgressPercent: 60,
       };

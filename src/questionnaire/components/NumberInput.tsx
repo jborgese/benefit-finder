@@ -139,7 +139,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
           aria-label={question.ariaLabel ?? question.text}
           className={`
-            flex-1 px-3 py-2 border rounded-md shadow-sm
+            flex-1 px-3 py-2 border rounded-md shadow-sm text-gray-900
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
             disabled:bg-gray-100 disabled:cursor-not-allowed
             ${showError ? 'border-red-500' : 'border-gray-300'}

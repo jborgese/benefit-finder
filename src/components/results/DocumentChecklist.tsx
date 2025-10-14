@@ -39,11 +39,12 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
             id={doc.id}
             checked={doc.obtained ?? false}
             onCheckedChange={(checked) => handleCheckboxChange(doc.id, checked === true)}
-            className="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-colors"
+            className="w-6 h-6 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 transition-colors"
+            aria-label={`Mark ${doc.name} as obtained`}
           >
             <Checkbox.Indicator>
               <svg
-                className="w-3 h-3 text-white"
+                className="w-4 h-4 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -126,10 +127,6 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
       {/* Required Documents */}
       {requiredDocs.length > 0 && (
         <div>
-          <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="text-red-600 mr-2">*</span>
-            Required Documents ({requiredDocs.length})
-          </h4>
           <div className="space-y-3">
             {requiredDocs.map(renderDocument)}
           </div>

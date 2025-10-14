@@ -13,7 +13,7 @@ async function fillFormField(
   page: Page,
   selector: string,
   value: string,
-  waitMs = 200
+  waitMs = 300
 ): Promise<boolean> {
   const input = page.locator(selector).first();
   if (!(await input.isVisible())) {
@@ -24,19 +24,29 @@ async function fillFormField(
   return true;
 }
 
-// Helper to click a button and wait
-async function clickButton(
-  page: Page,
-  selector: string,
-  waitMs = 500
-): Promise<boolean> {
-  const button = page.locator(selector).first();
-  if (!(await button.isVisible())) {
+// Helper to click navigation forward button
+async function clickNext(page: Page): Promise<boolean> {
+  const nextButton = page.getByTestId('nav-forward-button');
+
+  try {
+    // Wait for button to exist
+    await nextButton.waitFor({ state: 'visible', timeout: 3000 });
+
+    // Wait for button to become enabled (validation takes time)
+    await page.waitForFunction(
+      () => {
+        const btn = document.querySelector('[data-testid="nav-forward-button"]');
+        return btn !== null && !(btn as HTMLButtonElement).disabled;
+      },
+      { timeout: 5000 }
+    );
+
+    await nextButton.click();
+    await page.waitForTimeout(500);
+    return true;
+  } catch {
     return false;
   }
-  await button.click();
-  await page.waitForTimeout(waitMs);
-  return true;
 }
 
 // Helper to fill household size step
@@ -48,19 +58,20 @@ async function fillHouseholdStep(page: Page): Promise<boolean> {
   );
   if (!filled) return false;
 
-  return clickButton(page, 'button', 500);
+  return clickNext(page);
 }
 
 // Helper to fill income step
 async function fillIncomeStep(page: Page): Promise<boolean> {
+  // Currency input uses type="text" with inputMode="decimal"
   const filled = await fillFormField(
     page,
-    'input[name="monthlyIncome"], input[type="number"]',
+    'input[name="monthlyIncome"], input[inputmode="decimal"], input[type="text"]',
     '1500'
   );
   if (!filled) return false;
 
-  return clickButton(page, 'button', 500);
+  return clickNext(page);
 }
 
 // Helper to fill age step and submit
@@ -72,7 +83,7 @@ async function fillAgeStepAndSubmit(page: Page): Promise<boolean> {
   );
   if (!filled) return false;
 
-  return clickButton(page, 'button', 1000);
+  return clickNext(page);
 }
 
 // Helper to navigate to results through the app flow
@@ -81,8 +92,13 @@ async function navigateToResults(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle');
 
   // Click start assessment button
-  const started = await clickButton(page, 'button');
-  if (!started) return;
+  const startButton = page.locator('button:has-text("Start Assessment")');
+  if (await startButton.isVisible()) {
+    await startButton.click();
+    await page.waitForTimeout(500);
+  } else {
+    return;
+  }
 
   // Fill questionnaire steps sequentially
   const householdFilled = await fillHouseholdStep(page);
@@ -92,6 +108,9 @@ async function navigateToResults(page: Page): Promise<void> {
   if (!incomeFilled) return;
 
   await fillAgeStepAndSubmit(page);
+
+  // Wait for results page to load
+  await page.waitForTimeout(1000);
 }
 
 test.describe('Results Export', () => {
@@ -281,15 +300,16 @@ test.describe('Export/Import Round-Trip', () => {
 });
 
 test.describe('PDF Export', () => {
-  test('should show print button', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await navigateToResults(page);
+  });
 
+  test('should show print button', async ({ page }) => {
     const printButton = page.locator('button:has-text("Print"), button:has-text("PDF")').first();
     await expect(printButton).toBeVisible();
   });
 
   test('should trigger print when clicked', async ({ page }) => {
-    await navigateToResults(page);
 
     const printButton = page.locator('button:has-text("Print"), button:has-text("PDF")').first();
 

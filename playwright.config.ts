@@ -85,7 +85,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 1280, height: 720 },
-        permissions: ['clipboard-read', 'clipboard-write'],
+        // Firefox doesn't support clipboard permissions
       },
     },
 
@@ -120,7 +120,7 @@ export default defineConfig({
       name: 'tablet',
       use: {
         ...devices['iPad Pro'],
-        permissions: ['clipboard-read', 'clipboard-write'],
+        // Safari/WebKit doesn't support clipboard permissions
       },
     },
 

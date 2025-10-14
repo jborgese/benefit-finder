@@ -30,9 +30,9 @@ import type {
  */
 function updateCurrentQuestionState(
   questionStates: Map<string, QuestionState>,
-  currentNodeId: string
+  questionId: string
 ): void {
-  const currentState = questionStates.get(currentNodeId);
+  const currentState = questionStates.get(questionId);
   if (currentState && currentState.status === 'current') {
     currentState.status = 'answered';
   }
@@ -43,9 +43,9 @@ function updateCurrentQuestionState(
  */
 function updateNextQuestionState(
   questionStates: Map<string, QuestionState>,
-  targetNodeId: string
+  questionId: string
 ): void {
-  const nextState = questionStates.get(targetNodeId);
+  const nextState = questionStates.get(questionId);
   if (nextState) {
     nextState.status = 'current';
     nextState.visited = true;
@@ -150,10 +150,6 @@ export interface QuestionFlowActions {
    */
   resume: () => void;
 
-  /**
-   * Complete flow
-   */
-  complete: () => void;
 
   /**
    * Reset flow
@@ -194,6 +190,11 @@ export interface QuestionFlowActions {
    * Check if can navigate backward
    */
   canGoBack: () => boolean;
+
+  /**
+   * Complete the questionnaire
+   */
+  complete: () => void;
 }
 
 export type QuestionFlowStore = QuestionFlowState & QuestionFlowActions;
@@ -276,7 +277,7 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
           currentNodeId: flow.startNodeId,
           history: [flow.startNodeId],
           questionStates,
-          answers: new Map(),
+          answers: new Map(), // Clear any existing answers
           started: true,
           completed: false,
           paused: false,
@@ -314,11 +315,12 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         const newAnswers = new Map(state.answers);
         newAnswers.set(questionId, answer);
 
-        // Update question state
+        // Update question state (keep as 'current' until user navigates away)
         const newQuestionStates = new Map(state.questionStates);
         const questionState = newQuestionStates.get(questionId);
         if (questionState) {
-          questionState.status = 'answered';
+          // Keep status as 'current' until navigation occurs
+          // This ensures progress calculation shows correct question position
           questionState.answer = answer;
           questionState.errors = [];
         }
@@ -363,8 +365,16 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
           const newQuestionStates = new Map(state.questionStates);
 
           // Update question states
-          updateCurrentQuestionState(newQuestionStates, state.currentNodeId);
-          updateNextQuestionState(newQuestionStates, result.targetNodeId);
+          // Get question IDs from node IDs
+          const currentQuestion = state.flow?.nodes.get(state.currentNodeId)?.question;
+          const nextQuestion = state.flow?.nodes.get(result.targetNodeId)?.question;
+
+          if (currentQuestion) {
+            updateCurrentQuestionState(newQuestionStates, currentQuestion.id);
+          }
+          if (nextQuestion) {
+            updateNextQuestionState(newQuestionStates, nextQuestion.id);
+          }
 
           // Mark skipped questions
           if (result.questionsSkipped) {
@@ -514,22 +524,6 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         });
       },
 
-      complete: () => {
-        const now = Date.now();
-
-        set({
-          completed: true,
-          completedAt: now,
-          updatedAt: now,
-          events: [
-            ...get().events,
-            {
-              type: 'complete',
-              timestamp: now,
-            },
-          ],
-        });
-      },
 
       reset: () => {
         set(initialState);
@@ -657,6 +651,42 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         }
 
         return state._navigationManager.canGoBack();
+      },
+
+      complete: () => {
+        const state = get();
+
+        if (!state.currentNodeId) {
+          return;
+        }
+
+        const newQuestionStates = new Map(state.questionStates);
+
+        // Mark current question as answered
+        const currentQuestion = state.flow?.nodes.get(state.currentNodeId)?.question;
+        if (currentQuestion) {
+          updateCurrentQuestionState(newQuestionStates, currentQuestion.id);
+        }
+
+        const now = Date.now();
+
+        set({
+          questionStates: newQuestionStates,
+          completed: true,
+          completedAt: now,
+          updatedAt: now,
+          events: [
+            ...state.events,
+            {
+              type: 'complete',
+              timestamp: now,
+              nodeId: state.currentNodeId,
+            },
+          ],
+        });
+
+        // Update progress to reflect completion
+        get().updateProgress();
       },
     }),
     {

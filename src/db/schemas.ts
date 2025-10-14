@@ -40,7 +40,8 @@ export const UserProfileZodSchema = z.object({
 
   // Household Information (will be encrypted)
   householdSize: z.number().int().positive().max(50).optional().describe('Number of people in household'),
-  householdIncome: z.number().nonnegative().max(10000000).optional().describe('Annual household income in dollars'),
+  householdIncome: z.number().nonnegative().max(10000000).optional().describe('Household income in dollars (stored as annual)'),
+  incomePeriod: z.enum(['monthly', 'annual']).optional().describe('Original income entry frequency'),
 
   // Location (will be encrypted)
   state: z.string().length(2).optional().describe('US state code (e.g., GA, CA)'),
@@ -79,6 +80,7 @@ export const userProfileSchema: RxJsonSchema<UserProfile> = {
     dateOfBirth: { type: 'string' },
     householdSize: { type: 'number', minimum: 1, maximum: 50, multipleOf: 1 },
     householdIncome: { type: 'number', minimum: 0, maximum: 10000000 },
+    incomePeriod: { type: 'string', enum: ['monthly', 'annual'] },
     state: { type: 'string', maxLength: 2 },
     zipCode: { type: 'string', maxLength: 10 },
     county: { type: 'string', maxLength: 100 },
@@ -99,6 +101,7 @@ export const userProfileSchema: RxJsonSchema<UserProfile> = {
     'dateOfBirth',
     'householdSize',
     'householdIncome',
+    'incomePeriod',
     'state',
     'zipCode',
     'county',

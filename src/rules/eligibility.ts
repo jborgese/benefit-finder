@@ -429,11 +429,19 @@ function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
   const data = profile.toJSON();
 
   // Add computed fields
-  return {
+  const processedData = {
     ...data,
     // Add any derived fields here
     _timestamp: Date.now(),
   };
+
+  // Convert stored annual income to monthly income for rule evaluation
+  // We always store income as annual in the profile, but eligibility rules expect monthly income
+  if (processedData.householdIncome && typeof processedData.householdIncome === 'number') {
+    processedData.householdIncome = Math.round(processedData.householdIncome / 12);
+  }
+
+  return processedData;
 }
 
 /**

@@ -15,6 +15,108 @@ interface WhyExplanationProps {
   onClose: () => void;
 }
 
+/**
+ * Convert technical rule codes to user-friendly descriptions
+ */
+function getUserFriendlyRuleDescription(ruleCode: string): string {
+  // Common rule patterns and their user-friendly descriptions
+  const ruleDescriptions: Record<string, string> = {
+    // SNAP rules
+    'SNAP-INCOME-001': 'Income must be below the program threshold',
+    'SNAP-INCOME-002': 'Net income calculation requirements',
+    'SNAP-INCOME-003': 'Gross income limits',
+    'SNAP-HOUSEHOLD-001': 'Household size eligibility requirements',
+    'SNAP-HOUSEHOLD-002': 'Household composition rules',
+    'SNAP-ASSETS-001': 'Asset limits for eligibility',
+    'SNAP-WORK-001': 'Work requirements and exemptions',
+    'SNAP-CITIZENSHIP-001': 'Citizenship and immigration status requirements',
+
+    // Medicaid rules
+    'MEDICAID-INCOME-001': 'Income eligibility limits',
+    'MEDICAID-ASSETS-001': 'Asset eligibility limits',
+    'MEDICAID-HOUSEHOLD-001': 'Household size requirements',
+    'MEDICAID-AGE-001': 'Age-based eligibility criteria',
+    'MEDICAID-DISABILITY-001': 'Disability status requirements',
+    'MEDICAID-PREGNANCY-001': 'Pregnancy-related eligibility',
+
+    // WIC rules
+    'WIC-INCOME-001': 'Income eligibility for WIC benefits',
+    'WIC-HOUSEHOLD-001': 'Household composition requirements',
+    'WIC-NUTRITION-001': 'Nutritional risk assessment',
+    'WIC-CATEGORY-001': 'Participant category requirements (pregnant, postpartum, infant, child)',
+
+    // TANF rules
+    'TANF-INCOME-001': 'Income limits for cash assistance',
+    'TANF-ASSETS-001': 'Asset limits for assistance',
+    'TANF-WORK-001': 'Work participation requirements',
+    'TANF-TIME-001': 'Time limits for assistance',
+
+    // Housing assistance rules
+    'HOUSING-INCOME-001': 'Income limits for housing assistance',
+    'HOUSING-HOUSEHOLD-001': 'Household size for housing units',
+    'HOUSING-CITIZENSHIP-001': 'Citizenship requirements for housing assistance',
+
+    // General eligibility rules
+    'GENERAL-AGE-001': 'Age requirements',
+    'GENERAL-INCOME-001': 'Income eligibility requirements',
+    'GENERAL-ASSETS-001': 'Asset eligibility requirements',
+    'GENERAL-HOUSEHOLD-001': 'Household size requirements',
+    'GENERAL-CITIZENSHIP-001': 'Citizenship or immigration status requirements',
+    'GENERAL-RESIDENCE-001': 'Residency requirements',
+    'GENERAL-DISABILITY-001': 'Disability status requirements',
+  };
+
+  // Check for exact match first
+  if (Object.prototype.hasOwnProperty.call(ruleDescriptions, ruleCode)) {
+    // eslint-disable-next-line security/detect-object-injection -- ruleCode is validated via hasOwnProperty check
+    return ruleDescriptions[ruleCode];
+  }
+
+  // Parse common patterns for fallback descriptions
+  const parts = ruleCode.split('-');
+  if (parts.length >= 3) {
+    const program = parts[0];
+    const category = parts[1];
+
+    const categoryDescriptions: Record<string, string> = {
+      'INCOME': 'income eligibility requirements',
+      'ASSETS': 'asset eligibility requirements',
+      'HOUSEHOLD': 'household size and composition requirements',
+      'AGE': 'age-based eligibility criteria',
+      'CITIZENSHIP': 'citizenship and immigration status requirements',
+      'WORK': 'work participation requirements',
+      'DISABILITY': 'disability status requirements',
+      'RESIDENCE': 'residency requirements',
+      'NUTRITION': 'nutritional risk requirements',
+      'CATEGORY': 'participant category requirements',
+      'TIME': 'time limit requirements',
+    };
+
+    const programDescriptions: Record<string, string> = {
+      'SNAP': 'Supplemental Nutrition Assistance Program',
+      'MEDICAID': 'Medicaid health insurance',
+      'WIC': 'Women, Infants, and Children nutrition program',
+      'TANF': 'Temporary Assistance for Needy Families',
+      'HOUSING': 'Housing assistance',
+      'GENERAL': 'general program',
+    };
+
+    const programName = Object.prototype.hasOwnProperty.call(programDescriptions, program)
+      // eslint-disable-next-line security/detect-object-injection -- program is validated via hasOwnProperty check
+      ? programDescriptions[program]
+      : program;
+    const categoryDesc = Object.prototype.hasOwnProperty.call(categoryDescriptions, category)
+      // eslint-disable-next-line security/detect-object-injection -- category is validated via hasOwnProperty check
+      ? categoryDescriptions[category]
+      : category.toLowerCase();
+
+    return `${programName} ${categoryDesc}`;
+  }
+
+  // Fallback for unrecognized rule codes
+  return `Program eligibility requirement (${ruleCode})`;
+}
+
 export const WhyExplanation: React.FC<WhyExplanationProps> = ({
   programName,
   status,
@@ -141,14 +243,14 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
       {/* Rules Cited */}
       {explanation.rulesCited.length > 0 && (
         <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-3">Based on these rules:</h4>
+          <h4 className="font-semibold text-gray-900 mb-3">Based on these requirements:</h4>
           <div className="space-y-2">
             {explanation.rulesCited.map((rule, index) => (
               <div
                 key={index}
-                className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border border-gray-200"
+                className="text-sm text-gray-700 bg-blue-50 px-3 py-2 rounded border border-blue-200"
               >
-                <code className="font-mono text-xs">{rule}</code>
+                {getUserFriendlyRuleDescription(rule)}
               </div>
             ))}
           </div>

@@ -151,6 +151,9 @@ describe('QuestionFlowStore', () => {
         required: true,
       }));
 
+      // Link the nodes so navigation works
+      linkNodes(flow, 'node1', 'node2');
+
       store.startFlow(flow);
 
       let state = useQuestionFlowStore.getState();
@@ -158,6 +161,14 @@ describe('QuestionFlowStore', () => {
       expect(state.progress?.progressPercent).toBe(0);
 
       store.answerQuestion('q1', 'f1', 'answer1');
+
+      state = useQuestionFlowStore.getState();
+      // Question should still be counted as current (not answered) until navigation
+      expect(state.progress?.answeredQuestions).toBe(0);
+      expect(state.progress?.progressPercent).toBe(0);
+
+      // Navigate to next question to mark q1 as answered
+      store.next();
 
       state = useQuestionFlowStore.getState();
       expect(state.progress?.answeredQuestions).toBe(1);

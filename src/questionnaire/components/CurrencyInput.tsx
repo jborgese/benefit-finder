@@ -49,14 +49,24 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     const absAmount = Math.abs(amount);
     const [integerPart, decimalPart] = absAmount.toFixed(2).split('.');
 
-    // Add commas to integer part (safer than complex regex)
-    const formattedInteger = integerPart.split('').reverse().reduce((acc, digit, index) => {
-      const separator = index > 0 && index % 3 === 0 ? ',' : '';
-      return separator + digit + acc;
-    }, '');
+    // Add commas to integer part - safe manual implementation
+    // Process digits from right to left, adding comma every 3 digits
+    const digits = integerPart.split('');
+    const formatted: string[] = [];
+    for (let i = digits.length - 1, count = 0; i >= 0; i--, count++) {
+      if (count > 0 && count % 3 === 0) {
+        formatted.unshift(',');
+      }
+      // Use .at() method for safe array access
+      const digit = digits.at(i);
+      if (digit) {
+        formatted.unshift(digit);
+      }
+    }
+    const formattedInteger = formatted.join('');
 
-    const formatted = `${formattedInteger}.${decimalPart}`;
-    return withSymbol ? `${currencySymbol}${formatted}` : formatted;
+    const formattedAmount = `${formattedInteger}.${decimalPart}`;
+    return withSymbol ? `${currencySymbol}${formattedAmount}` : formattedAmount;
   }
 
   function getCurrencySymbol(code: string): string {
@@ -183,7 +193,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
           aria-label={question.ariaLabel ?? question.text}
           className={`
-            w-full pl-8 pr-3 py-2 border rounded-md shadow-sm
+            w-full pl-8 pr-3 py-2 border rounded-md shadow-sm text-gray-900
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
             disabled:bg-gray-100 disabled:cursor-not-allowed
             ${showError ? 'border-red-500' : 'border-gray-300'}
@@ -200,7 +210,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
 
       {!showError && value !== undefined && value >= 1000 && (
         <p className="mt-1 text-xs text-gray-600">
-          {formatCurrency(value)} {currency}
+          {formatCurrency(value, false)} {currency}
         </p>
       )}
 

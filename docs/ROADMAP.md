@@ -1,6 +1,6 @@
 # BenefitFinder Development Roadmap
 
-**Version:** 0.1.0
+npm **Version:** 0.1.0
 **Last Updated:** October 12, 2025
 
 This roadmap outlines the development phases for BenefitFinder, a privacy-preserving, offline-first government benefits eligibility checker. All features maintain strict privacy standards with no server dependencies.

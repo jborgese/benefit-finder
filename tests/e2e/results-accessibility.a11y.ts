@@ -60,14 +60,34 @@ test.describe('Results Accessibility', () => {
         await newAssessmentButton.click();
 
         // Fill out the questionnaire quickly
+        // Step 1: Household size
         await page.fill('input[type="number"]', '3');
-        await page.click('button:has-text("Next")');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
 
-        await page.fill('input[type="text"]', '2500');
-        await page.click('button:has-text("Next")');
+        // Step 2: Income period (select monthly or annual)
+        const select = page.locator('select').first();
+        if (await select.isVisible()) {
+          await select.selectOption('monthly');
+        } else {
+          await page.locator('input[type="radio"][value="monthly"]').first().click();
+        }
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
 
+        // Step 3: Income amount
+        await page.fill('input[inputmode="decimal"]', '2500');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
+
+        // Step 4: Age
         await page.fill('input[type="number"]', '35');
-        await page.click('button:has-text("Complete")');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(1000);
       }
     }
 
@@ -253,14 +273,34 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
         await newAssessmentButton.click();
 
         // Fill out the questionnaire quickly
+        // Step 1: Household size
         await page.fill('input[type="number"]', '3');
-        await page.click('button:has-text("Next")');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
 
-        await page.fill('input[type="text"]', '2500');
-        await page.click('button:has-text("Next")');
+        // Step 2: Income period (select monthly or annual)
+        const select = page.locator('select').first();
+        if (await select.isVisible()) {
+          await select.selectOption('monthly');
+        } else {
+          await page.locator('input[type="radio"][value="monthly"]').first().click();
+        }
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
 
+        // Step 3: Income amount
+        await page.fill('input[inputmode="decimal"]', '2500');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
+
+        // Step 4: Age
         await page.fill('input[type="number"]', '35');
-        await page.click('button:has-text("Complete")');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(1000);
       }
     }
 
@@ -292,10 +332,10 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -328,10 +368,10 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -358,10 +398,10 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -406,10 +446,10 @@ test.describe('Results Accessibility - Keyboard Navigation', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -487,14 +527,34 @@ test.describe('Results Accessibility - Screen Reader Support', () => {
         await newAssessmentButton.click();
 
         // Fill out the questionnaire quickly
+        // Step 1: Household size
         await page.fill('input[type="number"]', '3');
-        await page.click('button:has-text("Next")');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
 
-        await page.fill('input[type="text"]', '2500');
-        await page.click('button:has-text("Next")');
+        // Step 2: Income period (select monthly or annual)
+        const select = page.locator('select').first();
+        if (await select.isVisible()) {
+          await select.selectOption('monthly');
+        } else {
+          await page.locator('input[type="radio"][value="monthly"]').first().click();
+        }
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
 
+        // Step 3: Income amount
+        await page.fill('input[inputmode="decimal"]', '2500');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(500);
+
+        // Step 4: Age
         await page.fill('input[type="number"]', '35');
-        await page.click('button:has-text("Complete")');
+        await page.waitForTimeout(300);
+        await page.getByTestId('nav-forward-button').click();
+        await page.waitForTimeout(1000);
       }
     }
 
@@ -532,10 +592,10 @@ test.describe('Results Accessibility - Screen Reader Support', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -561,10 +621,10 @@ test.describe('Results Accessibility - Forms', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -598,10 +658,10 @@ test.describe('Results Accessibility - Forms', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -632,10 +692,10 @@ test.describe('Results Accessibility - Touch Targets', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -662,10 +722,10 @@ test.describe('Results Accessibility - Touch Targets', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -699,13 +759,13 @@ test.describe('Results Accessibility - Comprehensive Audit', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
-    await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.fill('input[type="number"]', '2500');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
-    await page.click('button:has-text("Complete")');
+    await page.getByTestId('nav-forward-button').click();
 
     // Wait for results to load
     await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")');
@@ -733,10 +793,10 @@ test.describe('Results Accessibility - Comprehensive Audit', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
@@ -765,10 +825,10 @@ test.describe('Results Accessibility - Comprehensive Audit', () => {
 
     // Complete the questionnaire to get to results
     await page.fill('input[type="number"]', '3');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="text"]', '2500');
-    await page.click('button:has-text("Next")');
+    await page.getByTestId('nav-forward-button').click();
 
     await page.fill('input[type="number"]', '35');
     await page.click('button:has-text("Complete")');
