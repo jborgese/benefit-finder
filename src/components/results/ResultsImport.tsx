@@ -34,7 +34,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
   };
 
   const handleImport = async (): Promise<void> => {
-    const password = passwordRef.current?.value || '';
+    const password = passwordRef.current?.value ?? '';
 
     if (!selectedFile || !password) return;
 
