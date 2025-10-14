@@ -223,12 +223,86 @@ function debugSnapIncomeRule(
 }
 
 /**
+ * Maps technical field names to user-friendly descriptions
+ */
+const FIELD_NAME_MAPPINGS: Record<string, string> = {
+  // Demographics
+  'age': 'your age',
+  'isPregnant': 'pregnancy status',
+  'hasChildren': 'whether you have children',
+  'hasQualifyingDisability': 'qualifying disability status',
+  'isCitizen': 'citizenship status',
+  'isLegalResident': 'legal residency status',
+  'ssn': 'Social Security number',
+
+  // Financial
+  'householdIncome': 'your household\'s monthly income',
+  'householdSize': 'your household size',
+  'income': 'your income',
+  'grossIncome': 'your gross income',
+  'netIncome': 'your net income',
+  'monthlyIncome': 'your monthly income',
+  'annualIncome': 'your annual income',
+  'assets': 'your household assets',
+  'resources': 'your available resources',
+  'liquidAssets': 'your liquid assets',
+  'vehicleValue': 'your vehicle value',
+  'bankBalance': 'your bank account balance',
+
+  // Location & State
+  'state': 'your state of residence',
+  'stateHasExpanded': 'whether your state has expanded coverage',
+  'zipCode': 'your ZIP code',
+  'county': 'your county',
+  'jurisdiction': 'your location',
+
+  // Program-specific
+  'hasHealthInsurance': 'current health insurance coverage',
+  'employmentStatus': 'your employment status',
+  'isStudent': 'student status',
+  'isVeteran': 'veteran status',
+  'isSenior': 'senior status (65+)',
+  'hasMinorChildren': 'whether you have children under 18',
+
+  // Housing
+  'housingCosts': 'your housing costs',
+  'rentAmount': 'your monthly rent',
+  'mortgageAmount': 'your monthly mortgage',
+  'isHomeless': 'housing situation',
+
+  // Benefits
+  'receivesSSI': 'Supplemental Security Income (SSI)',
+  'receivesSNAP': 'SNAP benefits',
+  'receivesTANF': 'TANF benefits',
+  'receivesWIC': 'WIC benefits',
+  'receivesUnemployment': 'unemployment benefits',
+};
+
+/**
+ * Format field name to human-readable description
+ */
+function formatFieldName(fieldName: string): string {
+  // Check if we have a specific mapping for this field
+  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
+    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+  }
+
+  // Fall back to converting camelCase or snake_case to Title Case
+  return fieldName
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .trim();
+}
+
+/**
  * Process a single rule evaluation result
  */
 function processRuleResult(
   rule: RuleDefinition,
   evaluationResult: { result: boolean },
-  details: string[]
+  details: string[],
+  profile: UserProfile
 ): boolean {
   const passed = evaluationResult.result === true;
 
@@ -236,8 +310,30 @@ function processRuleResult(
     console.warn(`${passed ? '✅' : '❌'} [DEBUG] Rule ${rule.id} ${passed ? 'PASSED' : 'FAILED'}`);
   }
 
+  // Add user-friendly explanation if available
   if (rule.explanation) {
     details.push(`${passed ? '✓' : '✗'} ${rule.explanation}`);
+  }
+
+  // Add user-friendly field status descriptions for required fields
+  if (rule.requiredFields && rule.requiredFields.length > 0) {
+    for (const field of rule.requiredFields) {
+      // eslint-disable-next-line security/detect-object-injection -- field from rule definition, not user input
+      const fieldValue = profile[field];
+      const fieldDescription = formatFieldName(field);
+      const hasValue = fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
+
+      // Debug logging to verify the mapping is working
+      if (import.meta.env.DEV) {
+        console.warn(`🔍 [DEBUG] Field mapping: "${field}" → "${fieldDescription}"`);
+      }
+
+      if (hasValue) {
+        details.push(`${fieldDescription}: Met`);
+      } else {
+        details.push(`${fieldDescription}: Not provided`);
+      }
+    }
   }
 
   return passed;
@@ -317,7 +413,7 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
         calculations.push(ruleCalculation);
       }
 
-      if (processRuleResult(rule, evaluationResult, details)) {
+      if (processRuleResult(rule, evaluationResult, details, profile)) {
         passedRules++;
       }
 

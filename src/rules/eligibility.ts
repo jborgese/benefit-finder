@@ -859,6 +859,80 @@ function generateReason(
 }
 
 /**
+ * Maps technical field names to user-friendly descriptions
+ */
+const FIELD_NAME_MAPPINGS: Record<string, string> = {
+  // Demographics
+  'age': 'Your age',
+  'isPregnant': 'Pregnancy status',
+  'hasChildren': 'Whether you have children',
+  'hasQualifyingDisability': 'Qualifying disability status',
+  'isCitizen': 'Citizenship status',
+  'isLegalResident': 'Legal residency status',
+  'ssn': 'Social Security number',
+
+  // Financial
+  'householdIncome': 'Your household\'s monthly income',
+  'householdSize': 'Your household size',
+  'income': 'Your income',
+  'grossIncome': 'your gross income',
+  'netIncome': 'your net income',
+  'monthlyIncome': 'your monthly income',
+  'annualIncome': 'your annual income',
+  'assets': 'your household assets',
+  'resources': 'your available resources',
+  'liquidAssets': 'your liquid assets',
+  'vehicleValue': 'your vehicle value',
+  'bankBalance': 'your bank account balance',
+
+  // Location & State
+  'state': 'your state of residence',
+  'stateHasExpanded': 'whether your state has expanded coverage',
+  'zipCode': 'your ZIP code',
+  'county': 'your county',
+  'jurisdiction': 'your location',
+
+  // Program-specific
+  'hasHealthInsurance': 'current health insurance coverage',
+  'employmentStatus': 'your employment status',
+  'isStudent': 'student status',
+  'isVeteran': 'veteran status',
+  'isSenior': 'senior status (65+)',
+  'hasMinorChildren': 'whether you have children under 18',
+
+  // Housing
+  'housingCosts': 'your housing costs',
+  'rentAmount': 'your monthly rent',
+  'mortgageAmount': 'your monthly mortgage',
+  'isHomeless': 'housing situation',
+
+  // Benefits
+  'receivesSSI': 'Supplemental Security Income (SSI)',
+  'receivesSNAP': 'SNAP benefits',
+  'receivesTANF': 'TANF benefits',
+  'receivesWIC': 'WIC benefits',
+  'receivesUnemployment': 'unemployment benefits',
+  'livesInState': 'state residency',
+};
+
+/**
+ * Format field name to human-readable description
+ */
+function formatFieldName(fieldName: string): string {
+  // Check if we have a specific mapping for this field
+  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
+    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+  }
+
+  // Fall back to converting camelCase or snake_case to Title Case
+  return fieldName
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .trim();
+}
+
+/**
  * Generate detailed criteria breakdown
  */
 function generateCriteriaBreakdown(
@@ -882,11 +956,29 @@ function generateCriteriaBreakdown(
     for (const field of rule.requiredFields) {
       // eslint-disable-next-line security/detect-object-injection
       const fieldValue = data[field];
+      const fieldDescription = formatFieldName(field);
+      const hasValue = fieldValue !== undefined && fieldValue !== null;
+
+      // Handle different field types appropriately
+      let criterionMet = hasValue;
+      let status = hasValue ? 'Met' : 'Not provided';
+
+      if (!hasValue) {
+        // Field not provided - skip showing in breakdown for optional fields
+        // This prevents showing "Not provided" for fields not asked in questionnaire
+        continue;
+      } else if (typeof fieldValue === 'boolean') {
+        // For boolean fields like isPregnant, the criterion is only met if the value is true
+        // (since rules typically check for positive conditions)
+        criterionMet = fieldValue === true;
+        status = fieldValue === true ? 'Met' : 'Not applicable';
+      }
+
       breakdown.push({
         criterion: field,
-        met: fieldValue !== undefined && fieldValue !== null,
+        met: criterionMet,
         value: fieldValue,
-        description: `${field} is ${fieldValue !== undefined ? 'provided' : 'missing'}`,
+        description: `${fieldDescription}: ${status}`,
       });
     }
   }

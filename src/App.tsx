@@ -16,6 +16,83 @@ import { evaluateAllPrograms, type EligibilityEvaluationResult } from './rules';
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
 
+// ============================================================================
+// FIELD NAME MAPPINGS
+// ============================================================================
+
+/**
+ * Maps technical field names to user-friendly descriptions
+ */
+const FIELD_NAME_MAPPINGS: Record<string, string> = {
+  // Demographics
+  'age': 'Your age',
+  'isPregnant': 'Pregnancy status',
+  'hasChildren': 'Whether you have children',
+  'hasQualifyingDisability': 'Qualifying disability status',
+  'isCitizen': 'Citizenship status',
+  'isLegalResident': 'Legal residency status',
+  'ssn': 'Social Security number',
+
+  // Financial
+  'householdIncome': 'Your household\'s monthly income',
+  'householdSize': 'Your household size',
+  'income': 'Your income',
+  'grossIncome': 'Your gross income',
+  'netIncome': 'Your net income',
+  'monthlyIncome': 'Your monthly income',
+  'annualIncome': 'Your annual income',
+  'assets': 'Your household assets',
+  'resources': 'Your available resources',
+  'liquidAssets': 'Your liquid assets',
+  'vehicleValue': 'Your vehicle value',
+  'bankBalance': 'Your bank account balance',
+
+  // Location & State
+  'state': 'Your state of residence',
+  'stateHasExpanded': 'Whether your state has expanded coverage',
+  'zipCode': 'Your ZIP code',
+  'county': 'Your county',
+  'jurisdiction': 'Your location',
+
+  // Program-specific
+  'hasHealthInsurance': 'Current health insurance coverage',
+  'employmentStatus': 'Your employment status',
+  'isStudent': 'Student status',
+  'isVeteran': 'Veteran status',
+  'isSenior': 'Senior status (65+)',
+  'hasMinorChildren': 'Whether you have children under 18',
+
+  // Housing
+  'housingCosts': 'Your housing costs',
+  'rentAmount': 'Your monthly rent',
+  'mortgageAmount': 'Your monthly mortgage',
+  'isHomeless': 'Housing situation',
+
+  // Benefits
+  'receivesSSI': 'Supplemental Security Income (SSI)',
+  'receivesSNAP': 'SNAP benefits',
+  'receivesTANF': 'TANF benefits',
+  'receivesWIC': 'WIC benefits',
+  'receivesUnemployment': 'Unemployment benefits',
+  'livesInState': 'State residency',
+};
+
+/**
+ * Format field name to human-readable description
+ */
+function formatFieldName(fieldName: string): string {
+  // Check if we have a specific mapping for this field
+  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
+    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+  }
+
+  // Fall back to converting camelCase or snake_case to Title Case
+  return fieldName
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .trim();
+}
 
 // Types for evaluation results
 // Removed local type definitions - using types from eligibility module instead
@@ -377,10 +454,8 @@ function App(): React.ReactElement {
         dateOfBirth: new Date(new Date().getFullYear() - age, 0, 1).toISOString().split('T')[0],
         citizenship: 'us_citizen' as const,
         employmentStatus: 'employed' as const,
-        hasChildren: false,
-        hasDisability: false,
-        isVeteran: false,
-        isPregnant: false,
+        // Only include fields that were actually collected from the user
+        // Don't set defaults for fields not asked in questionnaire
       };
 
       // Create user profile and evaluate eligibility
@@ -416,7 +491,7 @@ function App(): React.ReactElement {
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
-            details: result.criteriaResults?.map(cr => `${cr.criterion}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
+            details: result.criteriaResults?.map(cr => `${formatFieldName(cr.criterion)}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
             rulesCited: [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
@@ -459,7 +534,7 @@ function App(): React.ReactElement {
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
-            details: result.criteriaResults?.map(cr => `${cr.criterion}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
+            details: result.criteriaResults?.map(cr => `${formatFieldName(cr.criterion)}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
             rulesCited: [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
@@ -490,7 +565,7 @@ function App(): React.ReactElement {
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
-            details: result.criteriaResults?.map(cr => `${cr.criterion}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
+            details: result.criteriaResults?.map(cr => `${formatFieldName(cr.criterion)}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
             rulesCited: [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({

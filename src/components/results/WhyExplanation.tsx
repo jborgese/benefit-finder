@@ -136,6 +136,10 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
   explanation,
   onClose,
 }) => {
+  // Debug logging to see what details are being passed to the component
+  if (import.meta.env.DEV) {
+    console.warn(`🔍 [DEBUG] WhyExplanation received details:`, explanation.details);
+  }
   const getStatusColor = (): string => {
     switch (status) {
       case 'qualified':
