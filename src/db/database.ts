@@ -357,7 +357,12 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
 
   const db = await createRxDatabase<BenefitFinderCollections>({
     name: newDbName,
-    storage: getRxStorageDexie(),
+    storage: wrappedValidateAjvStorage({
+      storage: wrappedKeyEncryptionCryptoJsStorage({
+        storage: getRxStorageDexie()
+      })
+    }),
+    password: newEncryptionPassword,
     multiInstance: false,
     eventReduce: true,
     // ignoreDuplicate is only allowed in dev-mode (DB9 error prevention)
@@ -620,15 +625,36 @@ async function deleteIndexedDB(dbName: string): Promise<'success' | 'error' | 'b
 async function clearAllIndexedDBs(): Promise<void> {
   await logIndexedDBState('before');
 
+  // Get all existing databases
+  const existingDatabases = await indexedDB.databases();
+
+  // Find all databases that might be related to BenefitFinder or RxDB
   const databasesToDelete = [
     DB_NAME, 'DexieDB', 'rxdb-benefitfinder', 'benefitfinder',
     'benefitfinder_encrypted', 'rxdb', 'dexie'
   ];
 
+  // Add any databases that contain our app-specific patterns
+  existingDatabases.forEach(db => {
+    if (db.name && (
+      db.name.includes('benefitfinder') ||
+      db.name.includes('rxdb-dexie-benefitfinder') ||
+      db.name.startsWith('rxdb-dexie-')
+    )) {
+      if (!databasesToDelete.includes(db.name)) {
+        databasesToDelete.push(db.name);
+      }
+    }
+  });
+
+  if (import.meta.env.DEV) {
+    console.warn(`[DEBUG] clearDatabase: Will attempt to delete ${databasesToDelete.length} databases:`, databasesToDelete);
+  }
+
   const deletionResults: { [key: string]: 'success' | 'error' | 'blocked' } = {};
 
   for (const dbName of databasesToDelete) {
-    // eslint-disable-next-line security/detect-object-injection -- dbName is from predefined array
+    // eslint-disable-next-line security/detect-object-injection -- dbName is from existing database list or predefined array
     deletionResults[dbName] = await deleteIndexedDB(dbName);
   }
 
