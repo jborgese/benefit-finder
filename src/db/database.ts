@@ -123,10 +123,10 @@ function getDefaultEncryptionPassword(): string {
   let key = localStorage.getItem(storageKey);
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] getDefaultEncryptionPassword: Looking for key in localStorage with key "${storageKey}"`);
-    console.log(`[DEBUG] getDefaultEncryptionPassword: Found key: ${key ? 'YES' : 'NO'}`);
+    console.warn(`[DEBUG] getDefaultEncryptionPassword: Looking for key in localStorage with key "${storageKey}"`);
+    console.warn(`[DEBUG] getDefaultEncryptionPassword: Found key: ${key ? 'YES' : 'NO'}`);
     if (key) {
-      console.log(`[DEBUG] getDefaultEncryptionPassword: Key length: ${key.length}, first 8 chars: ${key.substring(0, 8)}...`);
+      console.warn(`[DEBUG] getDefaultEncryptionPassword: Key length: ${key.length}, first 8 chars: ${key.substring(0, 8)}...`);
     }
   }
 
@@ -140,7 +140,7 @@ function getDefaultEncryptionPassword(): string {
     localStorage.setItem(storageKey, key);
 
     if (import.meta.env.DEV) {
-      console.log(`[DEBUG] getDefaultEncryptionPassword: Generated new key with length ${key.length}, first 8 chars: ${key.substring(0, 8)}...`);
+      console.warn(`[DEBUG] getDefaultEncryptionPassword: Generated new key with length ${key.length}, first 8 chars: ${key.substring(0, 8)}...`);
     }
   }
 
@@ -171,33 +171,33 @@ function convertToRxDBPassword(passphrase: string): string {
 async function inspectStorageState(): Promise<void> {
   if (!import.meta.env.DEV) return;
 
-  console.log('=== STORAGE STATE INSPECTION ===');
+  console.warn('=== STORAGE STATE INSPECTION ===');
 
   // Check localStorage
-  console.log('localStorage contents:');
+  console.warn('localStorage contents:');
   const localStorageKeys = Object.keys(localStorage);
   localStorageKeys.forEach(key => {
     if (key.startsWith('bf_') || key.includes('benefitfinder')) {
       const value = localStorage.getItem(key);
-      console.log(`  ${key}: ${value ? `${value.substring(0, 50)}...` : 'null'}`);
+      console.warn(`  ${key}: ${value ? `${value.substring(0, 50)}...` : 'null'}`);
     }
   });
 
   // Check IndexedDB
-  console.log('IndexedDB databases:');
+  console.warn('IndexedDB databases:');
   try {
     const databases = await indexedDB.databases();
     databases.forEach(db => {
-      console.log(`  ${db.name} (version: ${db.version})`);
+      console.warn(`  ${db.name} (version: ${db.version})`);
     });
   } catch (error) {
-    console.log('  Could not list databases:', error);
+    console.warn('  Could not list databases:', error);
   }
 
   // Check current database instance
-  console.log(`Current dbInstance: ${dbInstance ? 'EXISTS' : 'NULL'}`);
+  console.warn(`Current dbInstance: ${dbInstance ? 'EXISTS' : 'NULL'}`);
 
-  console.log('=== END STORAGE STATE INSPECTION ===');
+  console.warn('=== END STORAGE STATE INSPECTION ===');
 }
 
 /**
@@ -210,9 +210,9 @@ function registerDevUtilities(): void {
     // Add inspection utility to window for debugging
     (window as WindowWithDevUtils).inspectBenefitFinderStorage = inspectStorageState;
 
-    console.log('[DEBUG] Development utilities registered:');
-    console.log('  - window.clearBenefitFinderDatabase() - Clear database');
-    console.log('  - window.inspectBenefitFinderStorage() - Inspect storage state');
+    console.warn('[DEBUG] Development utilities registered:');
+    console.warn('  - window.clearBenefitFinderDatabase() - Clear database');
+    console.warn('  - window.inspectBenefitFinderStorage() - Inspect storage state');
   }
 }
 
@@ -224,9 +224,9 @@ async function createDatabaseWithConfig(
   options: { closeDuplicates?: boolean } = {}
 ): Promise<BenefitFinderDatabase> {
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] createDatabaseWithConfig: Creating database with name "${DB_NAME}"`);
-    console.log(`[DEBUG] createDatabaseWithConfig: Password length: ${encryptionPassword.length}, first 8 chars: ${encryptionPassword.substring(0, 8)}...`);
-    console.log(`[DEBUG] createDatabaseWithConfig: Options:`, options);
+    console.warn(`[DEBUG] createDatabaseWithConfig: Creating database with name "${DB_NAME}"`);
+    console.warn(`[DEBUG] createDatabaseWithConfig: Password length: ${encryptionPassword.length}, first 8 chars: ${encryptionPassword.substring(0, 8)}...`);
+    console.warn(`[DEBUG] createDatabaseWithConfig: Options:`, options);
   }
 
   const db = await createRxDatabase<BenefitFinderCollections>({
@@ -251,13 +251,13 @@ async function createDatabaseWithConfig(
   });
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] createDatabaseWithConfig: Database created successfully, adding collections...`);
+    console.warn(`[DEBUG] createDatabaseWithConfig: Database created successfully, adding collections...`);
   }
 
   await db.addCollections(collections);
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] createDatabaseWithConfig: Collections added successfully`);
+    console.warn(`[DEBUG] createDatabaseWithConfig: Collections added successfully`);
   }
 
   return db;
@@ -291,23 +291,23 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   console.warn('Encryption key mismatch detected, clearing database and retrying...');
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] handleEncryptionKeyMismatch: Starting encryption key mismatch recovery`);
-    console.log(`[DEBUG] handleEncryptionKeyMismatch: Current dbInstance exists: ${dbInstance !== null}`);
+    console.warn(`[DEBUG] handleEncryptionKeyMismatch: Starting encryption key mismatch recovery`);
+    console.warn(`[DEBUG] handleEncryptionKeyMismatch: Current dbInstance exists: ${dbInstance !== null}`);
 
     // Log current localStorage state
     const storageKey = 'bf_encryption_key';
     const currentKey = localStorage.getItem(storageKey);
-    console.log(`[DEBUG] handleEncryptionKeyMismatch: Current key in localStorage: ${currentKey ? 'EXISTS' : 'NOT FOUND'}`);
+    console.warn(`[DEBUG] handleEncryptionKeyMismatch: Current key in localStorage: ${currentKey ? 'EXISTS' : 'NOT FOUND'}`);
     if (currentKey) {
-      console.log(`[DEBUG] handleEncryptionKeyMismatch: Current key length: ${currentKey.length}, first 8 chars: ${currentKey.substring(0, 8)}...`);
+      console.warn(`[DEBUG] handleEncryptionKeyMismatch: Current key length: ${currentKey.length}, first 8 chars: ${currentKey.substring(0, 8)}...`);
     }
 
     // Log IndexedDB state
     try {
       const databases = await indexedDB.databases();
-      console.log(`[DEBUG] handleEncryptionKeyMismatch: Current IndexedDB databases:`, databases.map(db => ({ name: db.name, version: db.version })));
+      console.warn(`[DEBUG] handleEncryptionKeyMismatch: Current IndexedDB databases:`, databases.map(db => ({ name: db.name, version: db.version })));
     } catch (error) {
-      console.log(`[DEBUG] handleEncryptionKeyMismatch: Could not list IndexedDB databases:`, error);
+      console.warn(`[DEBUG] handleEncryptionKeyMismatch: Could not list IndexedDB databases:`, error);
     }
   }
 
@@ -315,7 +315,7 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   if (dbInstance) {
     try {
       if (import.meta.env.DEV) {
-        console.log(`[DEBUG] handleEncryptionKeyMismatch: Destroying existing database instance`);
+        console.warn(`[DEBUG] handleEncryptionKeyMismatch: Destroying existing database instance`);
       }
       await dbInstance.remove();
     } catch (error) {
@@ -335,14 +335,14 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   localStorage.removeItem(storageKey);
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] handleEncryptionKeyMismatch: Cleared encryption key from localStorage`);
+    console.warn(`[DEBUG] handleEncryptionKeyMismatch: Cleared encryption key from localStorage`);
   }
 
   // Generate a completely new encryption key
   const newEncryptionPassword = getDefaultEncryptionPassword();
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] handleEncryptionKeyMismatch: Generated new encryption password, length: ${newEncryptionPassword.length}, first 8 chars: ${newEncryptionPassword.substring(0, 8)}...`);
+    console.warn(`[DEBUG] handleEncryptionKeyMismatch: Generated new encryption password, length: ${newEncryptionPassword.length}, first 8 chars: ${newEncryptionPassword.substring(0, 8)}...`);
   }
 
   // Create new database with fresh key and a new database name to force complete recreation
@@ -350,7 +350,7 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   const newDbName = `${DB_NAME}_${timestamp}`;
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] handleEncryptionKeyMismatch: Creating new database with name: ${newDbName}`);
+    console.warn(`[DEBUG] handleEncryptionKeyMismatch: Creating new database with name: ${newDbName}`);
   }
 
   const db = await createRxDatabase<BenefitFinderCollections>({
@@ -375,7 +375,7 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   });
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] handleEncryptionKeyMismatch: Database created successfully, adding collections...`);
+    console.warn(`[DEBUG] handleEncryptionKeyMismatch: Database created successfully, adding collections...`);
   }
 
   await db.addCollections(collections);
@@ -395,10 +395,10 @@ async function handleDatabaseError(
   encryptionPassword: string
 ): Promise<BenefitFinderDatabase> {
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] handleDatabaseError: Handling database error`);
-    console.log(`[DEBUG] handleDatabaseError: Error object:`, error);
+    console.warn(`[DEBUG] handleDatabaseError: Handling database error`);
+    console.warn(`[DEBUG] handleDatabaseError: Error object:`, error);
     if (error && typeof error === 'object' && 'code' in error) {
-      console.log(`[DEBUG] handleDatabaseError: Error code: ${error.code}`);
+      console.warn(`[DEBUG] handleDatabaseError: Error code: ${error.code}`);
     }
   }
 
@@ -407,7 +407,7 @@ async function handleDatabaseError(
 
     if (errorCode === 'DB8') {
       if (import.meta.env.DEV) {
-        console.log(`[DEBUG] handleDatabaseError: Handling DB8 error (duplicate database)`);
+        console.warn(`[DEBUG] handleDatabaseError: Handling DB8 error (duplicate database)`);
       }
       try {
         return await handleDuplicateDatabaseError(encryptionPassword);
@@ -417,7 +417,7 @@ async function handleDatabaseError(
       }
     } else if (errorCode === 'DB1') {
       if (import.meta.env.DEV) {
-        console.log(`[DEBUG] handleDatabaseError: Handling DB1 error (encryption key mismatch)`);
+        console.warn(`[DEBUG] handleDatabaseError: Handling DB1 error (encryption key mismatch)`);
       }
       try {
         return await handleEncryptionKeyMismatch();
@@ -429,7 +429,7 @@ async function handleDatabaseError(
   }
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] handleDatabaseError: Unhandled error, throwing`);
+    console.warn(`[DEBUG] handleDatabaseError: Unhandled error, throwing`);
   }
   throw new Error(`Database initialization failed: ${error}`);
 }
@@ -459,15 +459,15 @@ export async function initializeDatabase(
   forceReinit: boolean = false
 ): Promise<BenefitFinderDatabase> {
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] initializeDatabase: Starting initialization`);
-    console.log(`[DEBUG] initializeDatabase: Parameters - passphrase: ${passphrase ? 'PROVIDED' : 'NOT PROVIDED'}, forceReinit: ${forceReinit}`);
-    console.log(`[DEBUG] initializeDatabase: Current dbInstance exists: ${dbInstance !== null}`);
+    console.warn(`[DEBUG] initializeDatabase: Starting initialization`);
+    console.warn(`[DEBUG] initializeDatabase: Parameters - passphrase: ${passphrase ? 'PROVIDED' : 'NOT PROVIDED'}, forceReinit: ${forceReinit}`);
+    console.warn(`[DEBUG] initializeDatabase: Current dbInstance exists: ${dbInstance !== null}`);
   }
 
   // Return existing instance if already initialized and not forcing reinit
   if (dbInstance && !forceReinit) {
     if (import.meta.env.DEV) {
-      console.log(`[DEBUG] initializeDatabase: Returning existing database instance`);
+      console.warn(`[DEBUG] initializeDatabase: Returning existing database instance`);
     }
     return dbInstance;
   }
@@ -476,7 +476,7 @@ export async function initializeDatabase(
   if (forceReinit && dbInstance) {
     try {
       if (import.meta.env.DEV) {
-        console.log(`[DEBUG] initializeDatabase: Force reinit - destroying existing instance`);
+        console.warn(`[DEBUG] initializeDatabase: Force reinit - destroying existing instance`);
       }
       await dbInstance.remove();
     } catch (error) {
@@ -491,7 +491,7 @@ export async function initializeDatabase(
     : getDefaultEncryptionPassword();
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] initializeDatabase: Using encryption password, length: ${encryptionPassword.length}, first 8 chars: ${encryptionPassword.substring(0, 8)}...`);
+    console.warn(`[DEBUG] initializeDatabase: Using encryption password, length: ${encryptionPassword.length}, first 8 chars: ${encryptionPassword.substring(0, 8)}...`);
   }
 
   try {
@@ -583,15 +583,15 @@ export function isDatabaseInitialized(): boolean {
  */
 export async function clearDatabase(): Promise<void> {
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] clearDatabase: Starting database cleanup`);
-    console.log(`[DEBUG] clearDatabase: Current dbInstance exists: ${dbInstance !== null}`);
+    console.warn(`[DEBUG] clearDatabase: Starting database cleanup`);
+    console.warn(`[DEBUG] clearDatabase: Current dbInstance exists: ${dbInstance !== null}`);
   }
 
   // First, properly destroy the database instance if it exists
   if (dbInstance) {
     try {
       if (import.meta.env.DEV) {
-        console.log(`[DEBUG] clearDatabase: Destroying database instance`);
+        console.warn(`[DEBUG] clearDatabase: Destroying database instance`);
       }
       await dbInstance.remove();
     } catch (error) {
@@ -611,7 +611,7 @@ export async function clearDatabase(): Promise<void> {
   });
 
   if (import.meta.env.DEV) {
-    console.log(`[DEBUG] clearDatabase: Cleared localStorage keys:`, clearedKeys);
+    console.warn(`[DEBUG] clearDatabase: Cleared localStorage keys:`, clearedKeys);
   }
 
   // Clear IndexedDB completely - be more aggressive
@@ -620,9 +620,9 @@ export async function clearDatabase(): Promise<void> {
       // Log current IndexedDB state before clearing
       try {
         const databases = await indexedDB.databases();
-        console.log(`[DEBUG] clearDatabase: Current IndexedDB databases before clearing:`, databases.map(db => ({ name: db.name, version: db.version })));
+        console.warn(`[DEBUG] clearDatabase: Current IndexedDB databases before clearing:`, databases.map(db => ({ name: db.name, version: db.version })));
       } catch (error) {
-        console.log(`[DEBUG] clearDatabase: Could not list IndexedDB databases before clearing:`, error);
+        console.warn(`[DEBUG] clearDatabase: Could not list IndexedDB databases before clearing:`, error);
       }
     }
 
@@ -642,32 +642,36 @@ export async function clearDatabase(): Promise<void> {
     for (const dbName of databasesToDelete) {
       try {
         if (import.meta.env.DEV) {
-          console.log(`[DEBUG] clearDatabase: Attempting to delete database: ${dbName}`);
+          console.warn(`[DEBUG] clearDatabase: Attempting to delete database: ${dbName}`);
         }
 
         const req = indexedDB.deleteDatabase(dbName);
         await new Promise<void>((resolve, _reject) => {
           req.onsuccess = () => {
+            // eslint-disable-next-line security/detect-object-injection -- dbName is from predefined array
             deletionResults[dbName] = 'success';
             resolve();
           };
           req.onerror = () => {
+            // eslint-disable-next-line security/detect-object-injection -- dbName is from predefined array
             deletionResults[dbName] = 'error';
             resolve(); // Ignore errors
           };
           req.onblocked = () => {
+            // eslint-disable-next-line security/detect-object-injection -- dbName is from predefined array
             deletionResults[dbName] = 'blocked';
             resolve(); // Ignore blocked
           };
         });
       } catch {
+        // eslint-disable-next-line security/detect-object-injection -- dbName is from predefined array
         deletionResults[dbName] = 'error';
         // Ignore individual database deletion errors
       }
     }
 
     if (import.meta.env.DEV) {
-      console.log(`[DEBUG] clearDatabase: Database deletion results:`, deletionResults);
+      console.warn(`[DEBUG] clearDatabase: Database deletion results:`, deletionResults);
     }
 
     // Add a small delay to ensure deletions are processed
@@ -677,9 +681,9 @@ export async function clearDatabase(): Promise<void> {
       // Log IndexedDB state after clearing
       try {
         const databases = await indexedDB.databases();
-        console.log(`[DEBUG] clearDatabase: IndexedDB databases after clearing:`, databases.map(db => ({ name: db.name, version: db.version })));
+        console.warn(`[DEBUG] clearDatabase: IndexedDB databases after clearing:`, databases.map(db => ({ name: db.name, version: db.version })));
       } catch (error) {
-        console.log(`[DEBUG] clearDatabase: Could not list IndexedDB databases after clearing:`, error);
+        console.warn(`[DEBUG] clearDatabase: Could not list IndexedDB databases after clearing:`, error);
       }
     }
 

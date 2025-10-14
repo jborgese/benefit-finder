@@ -23,9 +23,10 @@ const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
 let isInitializing = false;
 
 // Initialize database and load sample data
+// eslint-disable-next-line sonarjs/cognitive-complexity -- Complex initialization logic needed for error handling
 async function initializeApp(): Promise<void> {
   if (import.meta.env.DEV) {
-    console.log('[DEBUG] initializeApp: Starting app initialization');
+    console.warn('[DEBUG] initializeApp: Starting app initialization');
   }
 
   // Prevent multiple simultaneous initializations
@@ -44,7 +45,7 @@ async function initializeApp(): Promise<void> {
   isInitializing = true;
   try {
     if (import.meta.env.DEV) {
-      console.log('[DEBUG] initializeApp: Initializing database...');
+      console.warn('[DEBUG] initializeApp: Initializing database...');
     }
     // Initialize database
     await initializeDatabase();
@@ -108,12 +109,12 @@ async function initializeApp(): Promise<void> {
       console.warn('[DEBUG] initializeApp: Attempting to clear database and retry initialization...');
       try {
         if (import.meta.env.DEV) {
-          console.log('[DEBUG] initializeApp: Clearing database...');
+          console.warn('[DEBUG] initializeApp: Clearing database...');
         }
         await clearDatabase();
 
         if (import.meta.env.DEV) {
-          console.log('[DEBUG] initializeApp: Re-initializing database...');
+          console.warn('[DEBUG] initializeApp: Re-initializing database...');
         }
         await initializeDatabase();
 
