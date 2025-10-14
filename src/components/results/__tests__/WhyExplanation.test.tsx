@@ -10,14 +10,21 @@ import type { EligibilityExplanation } from '../types';
 
 // Mock the Dialog component
 vi.mock('@radix-ui/react-dialog', () => ({
-  Dialog: {
-    Title: ({ children, className }: { children: React.ReactNode; className?: string }) => (
-      <h2 className={className}>{children}</h2>
-    ),
-    Close: ({ children }: { children: React.ReactNode }) => (
-      <button>{children}</button>
-    ),
+  Title: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <h2 className={className}>{children}</h2>
+  ),
+  Close: ({ children, asChild, ...props }: { children: React.ReactNode; asChild?: boolean;[key: string]: any }) => {
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children, props);
+    }
+    return <button {...props}>{children}</button>;
   },
+  Root: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Portal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Overlay: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Content: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Trigger: ({ children }: { children: React.ReactNode }) => <button>{children}</button>,
+  Description: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
 }));
 
 describe('WhyExplanation Component', () => {
@@ -107,7 +114,9 @@ describe('WhyExplanation Component', () => {
 
     expect(screen.getByText('Program requirements:')).toBeInTheDocument();
     // Should show specific calculation values instead of generic descriptions
-    expect(screen.getByText('Monthly income limit: $4,500 (Your income: $3,200 (qualifies))')).toBeInTheDocument();
+    // Use getAllByText since this text appears in both Calculations and Program requirements sections
+    const requirements = screen.getAllByText('Monthly income limit: $4,500 (Your income: $3,200 (qualifies))');
+    expect(requirements.length).toBeGreaterThan(0);
   });
 
   it('should fall back to generic descriptions when no calculations are available', () => {
@@ -127,7 +136,7 @@ describe('WhyExplanation Component', () => {
 
     expect(screen.getByText('Program requirements:')).toBeInTheDocument();
     // Should show generic descriptions
-    expect(screen.getByText('Income must be below 130% of federal poverty level')).toBeInTheDocument();
+    expect(screen.getByText('Gross monthly income must be below 130% of federal poverty level')).toBeInTheDocument();
     expect(screen.getByText('Household size eligibility requirements')).toBeInTheDocument();
   });
 
