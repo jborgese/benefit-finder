@@ -192,7 +192,100 @@ async function getEvaluationEntities(
   const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   const rule: EligibilityRuleDocument = sortedRules[0];
 
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] getEvaluationEntities: Retrieved entities:', {
+      profileId,
+      programId,
+      programName: program.name,
+      profileData: {
+        householdIncome: profile.householdIncome,
+        householdSize: profile.householdSize,
+        citizenship: profile.citizenship
+      },
+      rulesFound: rules.length,
+      selectedRule: {
+        id: rule.id,
+        name: rule.name,
+        priority: rule.priority,
+        ruleLogic: JSON.stringify(rule.ruleLogic, null, 2),
+        requiredFields: rule.requiredFields
+      },
+      allRules: rules.map(r => ({
+        id: r.id,
+        name: r.name,
+        priority: r.priority,
+        active: r.active
+      }))
+    });
+  }
+
   return { profile, rule };
+}
+
+/**
+ * Check if SNAP rules are using the correct logic and reload if needed
+ */
+export async function ensureSNAPRulesAreCorrect(): Promise<void> {
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] ensureSNAPRulesAreCorrect: Checking SNAP rules...');
+  }
+
+  const db = getDatabase();
+
+  try {
+    // Get SNAP rules from database
+    const snapRules = await db.eligibility_rules.findRulesByProgram('snap-federal');
+
+    if (snapRules.length === 0) {
+      if (import.meta.env.DEV) {
+        console.warn('🔍 [DEBUG] ensureSNAPRulesAreCorrect: No SNAP rules found in database');
+      }
+      return;
+    }
+
+    // Check if any rule is using the old incorrect logic
+    const hasIncorrectRule = snapRules.some(rule => {
+      const ruleLogic = rule.ruleLogic;
+      if (typeof ruleLogic === 'object' && ruleLogic !== null && !Array.isArray(ruleLogic)) {
+        // Check for the old logic pattern: {"<=": [{"var": "householdIncome"}, {"*": [{"var": "householdSize"}, 1500]}]}
+        if (ruleLogic['<='] && Array.isArray(ruleLogic['<='])) {
+          const [incomeVar, thresholdCalc] = ruleLogic['<='];
+          if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc['*']) {
+            const [sizeVar, multiplier] = thresholdCalc['*'];
+            if (multiplier === 1500) {
+              return true; // Found old incorrect logic
+            }
+          }
+        }
+      }
+      return false;
+    });
+
+    if (hasIncorrectRule) {
+      console.warn('🚨 [WARNING] ensureSNAPRulesAreCorrect: Found SNAP rules with incorrect logic! Rules need to be reloaded.');
+      console.warn('🔧 [INFO] To fix this, run: window.clearBenefitFinderDatabase() then refresh the page');
+      console.warn('🔧 [INFO] This will clear the database and reload rules from the updated JSON files.');
+    } else {
+      if (import.meta.env.DEV) {
+        console.warn('✅ [DEBUG] ensureSNAPRulesAreCorrect: SNAP rules appear to be correct');
+      }
+    }
+
+    // Log current rule logic for debugging
+    if (import.meta.env.DEV) {
+      snapRules.forEach(rule => {
+        console.warn(`🔍 [DEBUG] SNAP Rule ${rule.id}:`, {
+          name: rule.name,
+          ruleLogic: JSON.stringify(rule.ruleLogic, null, 2),
+          priority: rule.priority,
+          active: rule.active
+        });
+      });
+    }
+
+  } catch (error) {
+    console.error('🚨 [ERROR] ensureSNAPRulesAreCorrect: Failed to check SNAP rules:', error);
+  }
 }
 
 /**
@@ -309,6 +402,17 @@ export async function evaluateEligibility(
     const data = prepareDataContext(profile);
     const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
 
+    // Add debugging for rule evaluation
+    if (import.meta.env.DEV) {
+      console.warn(`🔍 [DEBUG] Database Rule Evaluation:`, {
+        profileId,
+        programId,
+        ruleId: rule.id,
+        ruleLogic: JSON.stringify(rule.ruleLogic, null, 2),
+        data: JSON.stringify(data, null, 2),
+      });
+    }
+
     // Evaluate rule with custom operators
     const evalResult = await evaluateRule(
       rule.ruleLogic as JsonLogicRule,
@@ -318,6 +422,15 @@ export async function evaluateEligibility(
         customOperators: BENEFIT_OPERATORS as Record<string, (...args: unknown[]) => unknown>
       }
     );
+
+    if (import.meta.env.DEV) {
+      console.warn(`🔍 [DEBUG] Database Rule Result:`, {
+        ruleId: rule.id,
+        success: evalResult.success,
+        result: evalResult.result,
+        error: evalResult.error,
+      });
+    }
 
     const executionTime = performance.now() - startTime;
 
@@ -330,6 +443,17 @@ export async function evaluateEligibility(
       missingFields,
       executionTime
     );
+
+    if (import.meta.env.DEV) {
+      console.warn(`🔍 [DEBUG] evaluateEligibility: Built result for ${programId}:`, {
+        eligible: result.eligible,
+        confidence: result.confidence,
+        reason: result.reason,
+        missingFields: result.missingFields,
+        ruleId: result.ruleId,
+        executionTime: result.executionTime
+      });
+    }
 
     // Add detailed breakdown if requested
     if (opts.includeBreakdown) {
@@ -372,13 +496,40 @@ export async function evaluateMultiplePrograms(
   programIds: string[],
   options: EligibilityEvaluationOptions = {}
 ): Promise<BatchEligibilityResult> {
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] evaluateMultiplePrograms: Starting batch evaluation:', {
+      profileId,
+      programIds,
+      options
+    });
+  }
+
   const startTime = performance.now();
   const programResults = new Map<string, EligibilityEvaluationResult>();
 
   // Evaluate each program
   for (const programId of programIds) {
-    const result = await evaluateEligibility(profileId, programId, options);
-    programResults.set(programId, result);
+    if (import.meta.env.DEV) {
+      console.warn(`🔍 [DEBUG] evaluateMultiplePrograms: Evaluating program ${programId}...`);
+    }
+
+    try {
+      const result = await evaluateEligibility(profileId, programId, options);
+      programResults.set(programId, result);
+
+      if (import.meta.env.DEV) {
+        console.warn(`🔍 [DEBUG] evaluateMultiplePrograms: Program ${programId} result:`, {
+          eligible: result.eligible,
+          confidence: result.confidence,
+          ruleId: result.ruleId,
+          reason: result.reason,
+          executionTime: result.executionTime
+        });
+      }
+    } catch (error) {
+      console.error(`🚨 [ERROR] evaluateMultiplePrograms: Failed to evaluate program ${programId}:`, error);
+      // Continue with other programs even if one fails
+    }
   }
 
   const endTime = performance.now();
@@ -392,6 +543,19 @@ export async function evaluateMultiplePrograms(
     incomplete: results.filter((r) => r.incomplete).length,
     needsReview: results.filter((r) => r.needsReview).length,
   };
+
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] evaluateMultiplePrograms: Batch evaluation complete:', {
+      totalTime: endTime - startTime,
+      summary,
+      programResults: Array.from(programResults.entries()).map(([id, result]) => ({
+        programId: id,
+        eligible: result.eligible,
+        confidence: result.confidence,
+        ruleId: result.ruleId
+      }))
+    });
+  }
 
   return {
     profileId,
@@ -412,13 +576,47 @@ export async function evaluateAllPrograms(
   profileId: string,
   options: EligibilityEvaluationOptions = {}
 ): Promise<BatchEligibilityResult> {
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] evaluateAllPrograms: Starting evaluation for profile:', profileId);
+  }
+
+  // Check if SNAP rules are correct (only in dev mode)
+  if (import.meta.env.DEV) {
+    await ensureSNAPRulesAreCorrect();
+  }
+
   const db = getDatabase();
 
   // Get all active programs
   const programs = await db.benefit_programs.findActivePrograms();
   const programIds = programs.map((p) => p.id);
 
-  return evaluateMultiplePrograms(profileId, programIds, options);
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] evaluateAllPrograms: Found programs:', {
+      total: programs.length,
+      programIds,
+      programNames: programs.map(p => ({ id: p.id, name: p.name }))
+    });
+  }
+
+  const result = await evaluateMultiplePrograms(profileId, programIds, options);
+
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] evaluateAllPrograms: Final result summary:', {
+      total: result.summary.total,
+      eligible: result.summary.eligible,
+      ineligible: result.summary.ineligible,
+      incomplete: result.summary.incomplete,
+      programResults: Array.from(result.programResults.entries()).map(([id, res]) => ({
+        programId: id,
+        eligible: res.eligible,
+        confidence: res.confidence,
+        ruleId: res.ruleId
+      }))
+    });
+  }
+
+  return result;
 }
 
 // ============================================================================
@@ -441,7 +639,28 @@ function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
   // Convert stored annual income to monthly income for rule evaluation
   // We always store income as annual in the profile, but eligibility rules expect monthly income
   if (processedData.householdIncome && typeof processedData.householdIncome === 'number') {
+    const originalAnnualIncome = processedData.householdIncome;
     processedData.householdIncome = Math.round(processedData.householdIncome / 12);
+
+    if (import.meta.env.DEV) {
+      console.warn('🔍 [DEBUG] prepareDataContext: Income conversion:', {
+        originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
+        convertedMonthlyIncome: `$${processedData.householdIncome.toLocaleString()}`,
+        householdSize: processedData.householdSize,
+        citizenship: processedData.citizenship
+      });
+    }
+  }
+
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] prepareDataContext: Final processed data:', {
+      householdIncome: processedData.householdIncome,
+      householdSize: processedData.householdSize,
+      citizenship: processedData.citizenship,
+      age: processedData.age,
+      state: processedData.state,
+      timestamp: new Date(processedData._timestamp).toISOString()
+    });
   }
 
   return processedData;

@@ -1,5 +1,100 @@
 # BenefitFinder - Cursor AI Rules
 
+## ⚠️ COMMAND EXECUTION - READ THIS FIRST ⚠️
+🚨 **STOP! Before running ANY command, you MUST read and follow this section** 🚨
+
+### THE FUNDAMENTAL RULE
+**NEVER execute npm, node, vite, vitest, playwright, or ANY project command without first navigating to:**
+```
+C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder
+```
+
+### CRITICAL: Auto-Ran Command Blocks
+🚨 **"Auto-Ran" commands create FRESH shell instances that start from the home directory!** 🚨
+
+**NEVER use "Auto-Ran" for project commands.** Instead, use the `run_terminal_cmd` tool which maintains shell state.
+
+❌ **WRONG - Auto-Ran creates fresh shell:**
+```
+Auto-Ran command: npm run dev
+```
+This will ALWAYS fail because it starts from `C:\Users\Nipply Nathan\` (no package.json).
+
+✅ **CORRECT - Use run_terminal_cmd:**
+```powershell
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm run dev
+```
+
+### MANDATORY Pre-Command Workflow
+Every single time you need to run a command, follow this exact sequence:
+
+**Step 1:** Navigate to project root (ALWAYS do this first)
+```powershell
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
+```
+
+**Step 2:** Verify you're in the correct location
+```powershell
+Test-Path package.json
+```
+This MUST return `True`. If it returns `False`, STOP - you're in the wrong directory.
+
+**Step 3:** Only NOW can you run your actual command
+```powershell
+npm run dev
+```
+
+### Why This Matters
+If you run `npm run dev` from `C:\Users\Nipply Nathan\` (the home directory), you will get:
+```
+npm error code ENOENT
+npm error path C:\Users\Nipply Nathan\package.json
+npm error Could not read package.json
+```
+This is the MOST COMMON FAILURE MODE for agents. Don't let this happen.
+
+### PowerShell Syntax (Windows Environment)
+- **Use semicolons (`;`) to chain commands, NEVER `&&`**
+
+  ❌ WRONG: `cd "path" && npm install`
+  ✅ CORRECT: `cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm install`
+
+- PowerShell uses `-and`, `-or`, `-not` for logic (not `&&`, `||`, `!`)
+- Use `Test-Path` instead of checking file existence with bash commands
+
+### Development Server Management
+Before running `npm run dev`, ALWAYS check if it's already running:
+```powershell
+Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+```
+If this returns any output, the server is already running. Don't start another one.
+
+### Complete Example: Starting Dev Server
+```powershell
+# Step 1: Navigate
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
+
+# Step 2: Verify location
+Test-Path package.json
+
+# Step 3: Check if already running
+Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+
+# Step 4: Start server (only if port check was empty)
+npm run dev
+```
+
+### Tool Usage Requirements
+- **ALWAYS use `run_terminal_cmd` tool for project commands** - it maintains shell state
+- **NEVER use "Auto-Ran" blocks for project commands** - they create fresh shells from home directory
+- **Chain navigation and verification in single commands** when possible:
+  ```powershell
+  cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; Test-Path package.json; npm run dev
+  ```
+- **If you must use separate commands, always include navigation in each one**
+
+---
+
 ## Project Overview
 BenefitFinder is a privacy-preserving, offline-first application for checking government benefits eligibility. All processing happens locally in the browser with no server dependencies.
 
@@ -125,115 +220,6 @@ src/
 - Types: feat, fix, docs, style, refactor, test, chore
 - Run `npm run lint` before committing
 - Ensure tests pass before pushing
-
-## Command Execution (CRITICAL - READ FIRST)
-🚨 **MANDATORY: You MUST verify and navigate to the project root BEFORE executing ANY command** 🚨
-
-### Pre-Command Checklist (REQUIRED FOR EVERY COMMAND)
-1. **ALWAYS start by checking the current working directory with `pwd` or `Get-Location`**
-2. **If the output is NOT exactly `C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder`, you MUST run:**
-   ```powershell
-   cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
-   ```
-3. **Only after step 2, execute your intended command**
-
-### Rules
-- **NEVER run npm, npx, node, vite, vitest, playwright, or any project command from the home directory or any other directory**
-- **The FIRST command of every conversation MUST be verifying/navigating to project root**
-- **Before EVERY command execution, explicitly state in your explanation: "Verifying we're in project root first"**
-- **Exception**: Only remain in/navigate to subdirectories when the command explicitly requires it (e.g., testing a specific module) - but this is RARE
-- The project root contains key files: `package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`
-- If these files are not present in your current directory, you are in the WRONG directory
-
-### PowerShell Syntax (Windows Environment)
-- **CRITICAL: Use semicolon (`;`) to chain commands, NEVER use `&&` (bash syntax that doesn't work in PowerShell)**
-
-  ❌ **WRONG** (bash syntax):
-  ```bash
-  cd "C:\path\to\project" && npm run build
-  ```
-
-  ✅ **CORRECT** (PowerShell syntax):
-  ```powershell
-  cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm run build
-  ```
-
-  ✅ **BETTER** (separate commands with explicit verification):
-  ```powershell
-  # First command: Navigate to project root
-  cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
-
-  # Second command (in next tool call): Verify location, then run build
-  pwd; npm run build
-  ```
-
-- Use PowerShell cmdlets and operators (e.g., `Get-ChildItem`, `Select-Object`, `-eq`, `-and`)
-- For cross-platform npm scripts, use npm/npx commands which work consistently across shells
-- When suggesting file operations, use PowerShell equivalents: `Remove-Item` instead of `rm`, `Copy-Item` instead of `cp`, etc.
-- PowerShell uses `-and`, `-or`, `-not` for logical operators (not `&&`, `||`, `!`)
-
-### Development Server Management
-- **ALWAYS check if the development server is already running before executing `npm run dev`**
-- Use PowerShell to check if a process is listening on port 5173 (Vite's default port):
-  ```powershell
-  # Check if port 5173 is in use
-  Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
-  ```
-- If the port is in use, inform the user that the dev server is already running
-- Only execute `npm run dev` if the check confirms no server is running on that port
-- **Example workflow:**
-  ```powershell
-  # First: Check if dev server is already running
-  $devServer = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
-
-  # If $devServer is null/empty, the port is free and we can start the server
-  # If $devServer has a value, inform user the server is already running
-  ```
-
-### Examples of Correct Command Sequences
-
-✅ **Starting a new conversation:**
-```powershell
-# First: Check where we are
-pwd
-```
-If output shows `C:\Users\Nipply Nathan\`, then:
-```powershell
-# Navigate to project root
-cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
-```
-Then in next command:
-```powershell
-# Now run the actual command
-npm install
-```
-
-✅ **Running tests:**
-```powershell
-# Verify location first, then run tests
-cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm test
-```
-
-✅ **Starting the development server:**
-```powershell
-# First: Check if dev server is already running
-Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
-```
-If output is empty, then:
-```powershell
-# Navigate to project root and start dev server
-cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm run dev
-```
-If output shows a connection, inform the user: "Development server is already running on port 5173."
-
-❌ **NEVER do this:**
-```powershell
-# Running project commands from home directory - WRONG!
-npm run dev  # This will fail or run the wrong project
-
-# Starting dev server without checking if it's already running - WRONG!
-npm run dev  # Might cause port conflict errors
-```
 
 ## When Suggesting Code
 1. Always consider privacy and security implications
