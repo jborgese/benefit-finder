@@ -13,6 +13,7 @@ import { join } from 'path';
 import { validateRulePackage } from '../src/rules/schema';
 import type { RulePackage, RuleDefinition } from '../src/rules/schema';
 import jsonLogic from 'json-logic-js';
+import { registerBenefitOperators } from '../src/rules/evaluator';
 
 // ============================================================================
 // TYPES
@@ -332,6 +333,9 @@ function printSummary(reports: ValidationReport[]): void {
  * Main function
  */
 function main(): void {
+  // Register custom benefit operators before running tests
+  registerBenefitOperators();
+
   const args = process.argv.slice(2);
 
   let filesToValidate: string[] = [];

@@ -83,7 +83,7 @@
           "id": "test-boundary-3-person",
           "description": "3-person household at exact limit",
           "input": {
-            "householdIncome": 4500,
+            "householdIncome": 2888,
             "householdSize": 3
           },
           "expected": true,

@@ -289,7 +289,10 @@ export function evaluateRuleSync<T = boolean>(
     const startTime = performance.now();
 
     // Add comprehensive debugging for JSON Logic evaluation
-    if (import.meta.env.DEV) {
+    const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
+                  (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
+
+    if (isDev) {
       console.warn('🔍 [DEBUG] JSON Logic Evaluation:', {
         rule: JSON.stringify(rule, null, 2),
         data: JSON.stringify(data, null, 2),
@@ -300,7 +303,7 @@ export function evaluateRuleSync<T = boolean>(
     const result = jsonLogic.apply(rule as unknown as ReturnType<typeof jsonLogic.apply>, data) as T;
     const endTime = performance.now();
 
-    if (import.meta.env.DEV) {
+    if (isDev) {
       console.warn('🔍 [DEBUG] JSON Logic Result:', {
         result,
         executionTime: endTime - startTime,
@@ -312,7 +315,7 @@ export function evaluateRuleSync<T = boolean>(
       const ruleKeys = Object.keys(rule);
       if (ruleKeys.includes('<=') && data.householdIncome !== undefined && data.householdSize !== undefined && data.householdSize !== null) {
         const threshold = Number(data.householdSize) * 1500;
-        if (import.meta.env.DEV) {
+        if (isDev) {
           console.warn('🔍 [DEBUG] SNAP Income Rule Debug:', {
             householdIncome: data.householdIncome,
             householdSize: data.householdSize,
@@ -547,7 +550,11 @@ export const BENEFIT_OPERATORS = {
    * @returns Monthly income threshold in dollars
    */
   snap_income_threshold_130_fpl: (householdSize: number): number => {
-    if (import.meta.env.DEV) {
+    // Debug logging - check for both browser and Node.js environments
+    const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
+                  (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
+
+    if (isDev) {
       console.warn(`🔍 [DEBUG] Calculating SNAP 130% FPL threshold for household size: ${householdSize}`);
     }
 
@@ -573,7 +580,7 @@ export const BENEFIT_OPERATORS = {
       threshold = thresholds[8] + (596 * (householdSize - 8));
     }
 
-    if (import.meta.env.DEV) {
+    if (isDev) {
       console.warn(`🔍 [DEBUG] SNAP 130% FPL threshold for ${householdSize} people: $${threshold}/month`);
     }
 
@@ -590,7 +597,11 @@ export const BENEFIT_OPERATORS = {
     const threshold = BENEFIT_OPERATORS.snap_income_threshold_130_fpl(householdSize);
     const isEligible = householdIncome <= threshold;
 
-    if (import.meta.env.DEV) {
+    // Debug logging - check for both browser and Node.js environments
+    const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
+                  (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
+
+    if (isDev) {
       console.warn(`🔍 [DEBUG] SNAP Income Eligibility Check:`);
       console.warn(`  - Household Income: $${householdIncome.toLocaleString()}/month`);
       console.warn(`  - Household Size: ${householdSize}`);
