@@ -379,6 +379,7 @@ function App(): React.ReactElement {
     return 'home';
   });
   const [hasResults, setHasResults] = useState(false);
+  const [currentResults, setCurrentResults] = useState<EligibilityResults | null>(null);
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -389,7 +390,12 @@ function App(): React.ReactElement {
     const checkExistingResults = async (): Promise<void> => {
       try {
         const results = await loadAllResults();
-        setHasResults(results.length > 0);
+        if (results.length > 0) {
+          setHasResults(true);
+          // Load the most recent results for display
+          const mostRecent = results[0]; // loadAllResults should return sorted by date
+          setCurrentResults(mostRecent.results);
+        }
       } catch (error) {
         console.error('Failed to check for existing results:', error);
       }
@@ -611,6 +617,7 @@ function App(): React.ReactElement {
       };
 
       await saveResults({ results });
+      setCurrentResults(results);
       setHasResults(true);
       setAnnouncementMessage('Results are ready.');
     } catch (error) {
@@ -655,6 +662,7 @@ function App(): React.ReactElement {
   const handleImportResults = async (results: EligibilityResults): Promise<void> => {
     try {
       await saveResults({ results });
+      setCurrentResults(results);
       setHasResults(true);
       setAnnouncementMessage('Results imported successfully.');
     } catch (error) {
@@ -820,19 +828,19 @@ function App(): React.ReactElement {
                     New Assessment
                   </Button>
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <ResultsExport results={sampleResults} />
+                    <ResultsExport results={currentResults || sampleResults} />
                     <ResultsImport onImport={(results) => void handleImportResults(results)} />
                   </div>
                 </div>
               </div>
             </div>
 
-            <ResultsSummary results={sampleResults} />
+            <ResultsSummary results={currentResults || sampleResults} />
 
             <QuestionnaireAnswersCard />
 
             <div className="mt-8 space-y-6">
-              {sampleResults.qualified.map((result) => (
+              {(currentResults || sampleResults).qualified.map((result) => (
                 <ProgramCard
                   key={result.programId}
                   result={result}
