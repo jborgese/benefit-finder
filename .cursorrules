@@ -185,7 +185,7 @@ src/
   ```powershell
   # First: Check if dev server is already running
   $devServer = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
-  
+
   # If $devServer is null/empty, the port is free and we can start the server
   # If $devServer has a value, inform user the server is already running
   ```
