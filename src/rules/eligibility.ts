@@ -7,7 +7,7 @@
 
 import { nanoid } from 'nanoid';
 import { getDatabase } from '../db/database';
-import { evaluateRule, registerBenefitOperators } from './evaluator';
+import { evaluateRule, registerBenefitOperators, BENEFIT_OPERATORS } from './evaluator';
 import type { EligibilityResult, EligibilityResultDocument, EligibilityRuleDocument, UserProfileDocument } from '../db/schemas';
 import type { JsonLogicData, JsonLogicRule, RuleEvaluationOptions, RuleEvaluationResult } from './types';
 
@@ -309,11 +309,14 @@ export async function evaluateEligibility(
     const data = prepareDataContext(profile);
     const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
 
-    // Evaluate rule
+    // Evaluate rule with custom operators
     const evalResult = await evaluateRule(
       rule.ruleLogic as JsonLogicRule,
       data,
-      opts.evaluationOptions
+      {
+        ...opts.evaluationOptions,
+        customOperators: BENEFIT_OPERATORS as Record<string, (...args: unknown[]) => unknown>
+      }
     );
 
     const executionTime = performance.now() - startTime;
