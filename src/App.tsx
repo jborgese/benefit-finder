@@ -62,8 +62,10 @@ async function initializeApp(): Promise<void> {
 
     // Load sample benefit programs
 
-    // Create SNAP program
-    await createBenefitProgram({
+    // Create SNAP program with explicit ID to match rules
+    const db = getDatabase();
+    await db.benefit_programs.insert({
+      id: 'snap-federal',
       name: 'Supplemental Nutrition Assistance Program (SNAP)',
       shortName: 'SNAP',
       description: 'SNAP helps low-income individuals and families buy food',
@@ -75,10 +77,13 @@ async function initializeApp(): Promise<void> {
       applicationUrl: 'https://www.benefits.gov/benefit/361',
       active: true,
       tags: ['food', 'nutrition', 'ebt'],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
     });
 
-    // Create Medicaid program
-    await createBenefitProgram({
+    // Create Medicaid program with explicit ID to match rules
+    await db.benefit_programs.insert({
+      id: 'medicaid-federal',
       name: 'Medicaid',
       shortName: 'Medicaid',
       description: 'Health coverage for low-income individuals and families',
@@ -90,6 +95,8 @@ async function initializeApp(): Promise<void> {
       applicationUrl: 'https://www.healthcare.gov',
       active: true,
       tags: ['healthcare', 'insurance', 'medical'],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
     });
 
     // Load sample rules
@@ -126,7 +133,9 @@ async function initializeApp(): Promise<void> {
         }
 
         // Load sample data after successful initialization
-        await createBenefitProgram({
+        const retryDb = getDatabase();
+        await retryDb.benefit_programs.insert({
+          id: 'snap-federal',
           name: 'Supplemental Nutrition Assistance Program (SNAP)',
           shortName: 'SNAP',
           description: 'SNAP helps low-income individuals and families buy food',
@@ -138,9 +147,12 @@ async function initializeApp(): Promise<void> {
           applicationUrl: 'https://www.benefits.gov/benefit/361',
           active: true,
           tags: ['food', 'nutrition', 'ebt'],
+          lastUpdated: Date.now(),
+          createdAt: Date.now(),
         });
 
-        await createBenefitProgram({
+        await retryDb.benefit_programs.insert({
+          id: 'medicaid-federal',
           name: 'Medicaid',
           shortName: 'Medicaid',
           description: 'Health coverage for low-income individuals and families',
@@ -152,6 +164,8 @@ async function initializeApp(): Promise<void> {
           applicationUrl: 'https://www.healthcare.gov',
           active: true,
           tags: ['healthcare', 'insurance', 'medical'],
+          lastUpdated: Date.now(),
+          createdAt: Date.now(),
         });
 
         // Load sample rules
