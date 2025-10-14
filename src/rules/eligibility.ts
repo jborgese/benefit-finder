@@ -166,7 +166,7 @@ async function getEvaluationEntities(
   programId: string
 ): Promise<{
   profile: UserProfileDocument;
-  rule: EligibilityRuleDocument;
+  rules: EligibilityRuleDocument[];
 }> {
   const db = getDatabase();
 
@@ -188,9 +188,8 @@ async function getEvaluationEntities(
     throw new Error(`No active rules found for program ${programId}`);
   }
 
-  // Use the highest priority rule
+  // Sort rules by priority (highest first) for consistent evaluation order
   const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-  const rule: EligibilityRuleDocument = sortedRules[0];
 
   if (import.meta.env.DEV) {
     console.warn('🔍 [DEBUG] getEvaluationEntities: Retrieved entities:', {
@@ -203,23 +202,17 @@ async function getEvaluationEntities(
         citizenship: profile.citizenship
       },
       rulesFound: rules.length,
-      selectedRule: {
-        id: rule.id,
-        name: rule.name,
-        priority: rule.priority,
-        ruleLogic: JSON.stringify(rule.ruleLogic, null, 2),
-        requiredFields: rule.requiredFields
-      },
-      allRules: rules.map(r => ({
+      allRules: sortedRules.map(r => ({
         id: r.id,
         name: r.name,
         priority: r.priority,
-        active: r.active
+        active: r.active,
+        ruleLogic: JSON.stringify(r.ruleLogic, null, 2).substring(0, 100) + '...'
       }))
     });
   }
 
-  return { profile, rule };
+  return { profile, rules: sortedRules };
 }
 
 /**
@@ -401,51 +394,97 @@ export async function evaluateEligibility(
     }
 
     // Get required entities
-    const { profile, rule } = await getEvaluationEntities(profileId, programId);
+    const { profile, rules } = await getEvaluationEntities(profileId, programId);
 
-    // Prepare data and check for missing fields
+    // Prepare data
     const data = prepareDataContext(profile);
-    const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
 
-    // Add debugging for rule evaluation
-    if (import.meta.env.DEV) {
-      console.warn(`🔍 [DEBUG] Database Rule Evaluation:`, {
-        profileId,
-        programId,
-        ruleId: rule.id,
-        ruleLogic: JSON.stringify(rule.ruleLogic, null, 2),
-        data: JSON.stringify(data, null, 2),
-      });
-    }
+    // Evaluate ALL rules - ALL must pass for eligibility
+    const ruleResults: Array<{
+      rule: EligibilityRuleDocument;
+      evalResult: RuleEvaluationResult;
+      missingFields: string[];
+    }> = [];
 
-    // Evaluate rule with custom operators
-    const evalResult = await evaluateRule(
-      rule.ruleLogic as JsonLogicRule,
-      data,
-      {
-        ...opts.evaluationOptions,
-        customOperators: BENEFIT_OPERATORS as Record<string, (...args: unknown[]) => unknown>
+    let overallEligible = true;
+    let firstFailedRule: EligibilityRuleDocument | null = null;
+    let firstFailedResult: RuleEvaluationResult | null = null;
+    const allMissingFields = new Set<string>();
+
+    for (const rule of rules) {
+      // Check for missing fields for this rule
+      const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
+      missingFields.forEach(field => allMissingFields.add(field));
+
+      // Add debugging for rule evaluation
+      if (import.meta.env.DEV) {
+        console.warn(`🔍 [DEBUG] Database Rule Evaluation:`, {
+          profileId,
+          programId,
+          ruleId: rule.id,
+          ruleLogic: JSON.stringify(rule.ruleLogic, null, 2),
+          data: JSON.stringify(data, null, 2),
+        });
       }
-    );
 
-    if (import.meta.env.DEV) {
-      console.warn(`🔍 [DEBUG] Database Rule Result:`, {
-        ruleId: rule.id,
-        success: evalResult.success,
-        result: evalResult.result,
-        error: evalResult.error,
-      });
+      // Evaluate rule with custom operators
+      const evalResult = await evaluateRule(
+        rule.ruleLogic as JsonLogicRule,
+        data,
+        {
+          ...opts.evaluationOptions,
+          customOperators: BENEFIT_OPERATORS as Record<string, (...args: unknown[]) => unknown>
+        }
+      );
+
+      if (import.meta.env.DEV) {
+        console.warn(`🔍 [DEBUG] Database Rule Result:`, {
+          ruleId: rule.id,
+          success: evalResult.success,
+          result: evalResult.result,
+          error: evalResult.error,
+        });
+      }
+
+      ruleResults.push({ rule, evalResult, missingFields });
+
+      // Check if this rule passed
+      const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
+      if (!rulePassedResult && overallEligible) {
+        // First rule that failed - we'll use this for the error message
+        overallEligible = false;
+        firstFailedRule = rule;
+        firstFailedResult = evalResult;
+      }
     }
 
     const executionTime = performance.now() - startTime;
+    const finalMissingFields = Array.from(allMissingFields);
+
+    // Choose which rule to use for the final result
+    // If eligible: use highest priority rule that passed (likely the first one)
+    // If not eligible: use the first rule that failed
+    const resultRule = overallEligible ? rules[0] : (firstFailedRule ?? rules[0]);
+    const resultEvalResult = overallEligible
+      ? ruleResults.find(r => r.rule.id === resultRule.id)?.evalResult ?? ruleResults[0].evalResult
+      : (firstFailedResult ?? ruleResults[0].evalResult);
+
+    // Create a combined evaluation result
+    const combinedEvalResult: RuleEvaluationResult = {
+      success: resultEvalResult.success,
+      result: overallEligible,
+      error: resultEvalResult.error,
+      executionTime: resultEvalResult.executionTime,
+      context: resultEvalResult.context
+    };
 
     // Build result
     const result = buildEvaluationResult(
       profileId,
       programId,
-      rule,
-      evalResult,
-      missingFields,
+      resultRule,
+      combinedEvalResult,
+      finalMissingFields,
       executionTime
     );
 
@@ -456,17 +495,24 @@ export async function evaluateEligibility(
         reason: result.reason,
         missingFields: result.missingFields,
         ruleId: result.ruleId,
-        executionTime: result.executionTime
+        executionTime: result.executionTime,
+        rulesEvaluated: ruleResults.length,
+        allRulesPassed: overallEligible,
+        ruleBreakdown: ruleResults.map(r => ({
+          ruleId: r.rule.id,
+          passed: r.evalResult.success ? Boolean(r.evalResult.result) : false,
+          priority: r.rule.priority
+        }))
       });
     }
 
     // Add detailed breakdown if requested
     if (opts.includeBreakdown) {
-      result.criteriaResults = generateCriteriaBreakdown(rule, data, evalResult);
+      result.criteriaResults = generateCriteriaBreakdown(resultRule, data, combinedEvalResult);
     }
 
     // Cache result if enabled
-    if (opts.cacheResult && evalResult.success) {
+    if (opts.cacheResult && combinedEvalResult.success) {
       await cacheResult(result, opts.expiresIn);
     }
 
