@@ -16,15 +16,28 @@ interface WhyExplanationProps {
 }
 
 /**
- * Convert technical rule codes to user-friendly descriptions
+ * Convert technical rule codes to user-friendly descriptions with specific values
  */
-function getUserFriendlyRuleDescription(ruleCode: string): string {
-  // Common rule patterns and their user-friendly descriptions
+function getUserFriendlyRuleDescription(ruleCode: string, calculations?: Array<{ label: string; value: string | number; comparison?: string }>): string {
+  // Try to find specific calculation for this rule
+  if (calculations && calculations.length > 0) {
+    const relevantCalc = calculations.find(calc =>
+      calc.label.toLowerCase().includes('income') ||
+      calc.label.toLowerCase().includes('threshold') ||
+      calc.label.toLowerCase().includes('limit')
+    );
+
+    if (relevantCalc) {
+      return `${relevantCalc.label}: ${relevantCalc.value}${relevantCalc.comparison ? ` (${relevantCalc.comparison})` : ''}`;
+    }
+  }
+
+  // Common rule patterns with more specific descriptions
   const ruleDescriptions: Record<string, string> = {
     // SNAP rules
-    'SNAP-INCOME-001': 'Income must be below the program threshold',
-    'SNAP-INCOME-002': 'Net income calculation requirements',
-    'SNAP-INCOME-003': 'Gross income limits',
+    'SNAP-INCOME-001': 'Gross monthly income must be below 130% of federal poverty level',
+    'SNAP-INCOME-002': 'Net monthly income must be below 100% of federal poverty level',
+    'SNAP-INCOME-003': 'Gross income limits (130% of poverty)',
     'SNAP-HOUSEHOLD-001': 'Household size eligibility requirements',
     'SNAP-HOUSEHOLD-002': 'Household composition rules',
     'SNAP-ASSETS-001': 'Asset limits for eligibility',
@@ -240,17 +253,17 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
         </div>
       )}
 
-      {/* Rules Cited */}
+      {/* Program Requirements */}
       {explanation.rulesCited.length > 0 && (
         <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-3">Based on these requirements:</h4>
+          <h4 className="font-semibold text-gray-900 mb-3">Program requirements:</h4>
           <div className="space-y-2">
             {explanation.rulesCited.map((rule, index) => (
               <div
                 key={index}
                 className="text-sm text-gray-700 bg-blue-50 px-3 py-2 rounded border border-blue-200"
               >
-                {getUserFriendlyRuleDescription(rule)}
+                {getUserFriendlyRuleDescription(rule, explanation.calculations)}
               </div>
             ))}
           </div>

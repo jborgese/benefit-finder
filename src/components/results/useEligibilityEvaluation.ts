@@ -190,6 +190,12 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
     try {
       const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
 
+      // Generate calculation details for specific rule types
+      const ruleCalculation = generateRuleCalculation(rule, profile);
+      if (ruleCalculation) {
+        calculations.push(ruleCalculation);
+      }
+
       if (evaluationResult.result === true) {
         passedRules++;
         if (rule.explanation) {
@@ -309,6 +315,94 @@ function deduplicateSteps(steps: NextStep[]): NextStep[] {
     seen.add(step.step);
     return true;
   });
+}
+
+/**
+ * Generate calculation details for specific rule types
+ */
+function generateRuleCalculation(rule: RuleDefinition, profile: UserProfile): { label: string; value: string | number; comparison?: string } | null {
+  const ruleLogic = rule.ruleLogic as JsonLogicRule;
+
+  // Handle SNAP income rules
+  if (rule.id.includes('snap') && rule.id.includes('income')) {
+    const householdIncome = profile.householdIncome;
+    const householdSize = profile.householdSize;
+
+    if (householdIncome !== undefined && householdSize !== undefined) {
+      // Use actual USDA 2026 SNAP income limits (130% of poverty level)
+      const snapIncomeLimits: Record<number, number> = {
+        1: 1696,
+        2: 2292,
+        3: 2888,
+        4: 3483,
+        5: 4079,
+        6: 4675,
+        7: 5271,
+        8: 5867
+      };
+
+      // For households larger than 8, add $596 per additional member
+      const threshold = householdSize <= 8
+        ? snapIncomeLimits[householdSize]
+        : snapIncomeLimits[8] + (596 * (householdSize - 8));
+
+      const meetsThreshold = householdIncome <= threshold;
+
+      return {
+        label: 'Monthly income limit (130% of poverty)',
+        value: `$${threshold.toLocaleString()}`,
+        comparison: `Your income: $${householdIncome.toLocaleString()} (${meetsThreshold ? 'qualifies' : 'exceeds limit'})`
+      };
+    }
+  }
+
+  // Handle household size requirements
+  if (rule.id.includes('household')) {
+    const householdSize = profile.householdSize;
+
+    if (householdSize !== undefined) {
+      return {
+        label: 'Household size',
+        value: householdSize,
+        comparison: `${householdSize} ${householdSize === 1 ? 'person' : 'people'}`
+      };
+    }
+  }
+
+  // Handle citizenship rules
+  if (rule.id.includes('citizenship')) {
+    const citizenship = profile.citizenship;
+
+    if (citizenship) {
+      const citizenshipMap: Record<string, string> = {
+        'us_citizen': 'U.S. Citizen',
+        'permanent_resident': 'Permanent Resident',
+        'refugee': 'Refugee',
+        'asylee': 'Asylee'
+      };
+
+      return {
+        label: 'Citizenship status',
+        value: citizenshipMap[citizenship] || citizenship,
+        comparison: 'Meets program requirements'
+      };
+    }
+  }
+
+  // Handle age-based rules
+  if (rule.id.includes('age')) {
+    const age = profile.age;
+
+    if (age !== undefined) {
+      return {
+        label: 'Age',
+        value: age,
+        comparison: `${age} years old`
+      };
+    }
+  }
+
+  return null;
 }
 
 export default useEligibilityEvaluation;
