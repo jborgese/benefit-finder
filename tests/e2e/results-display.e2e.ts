@@ -49,7 +49,7 @@ async function clickNext(page: Page): Promise<boolean> {
 }
 
 // Helper to fill household size step
-async function fillHouseholdStep(page: Page): Promise<boolean> {
+async function _fillHouseholdStep(page: Page): Promise<boolean> {
   const filled = await fillFormField(
     page,
     'input[name="householdSize"], input[type="number"]',
@@ -61,7 +61,7 @@ async function fillHouseholdStep(page: Page): Promise<boolean> {
 }
 
 // Helper to fill income period step (monthly vs annual)
-async function fillIncomePeriodStep(page: Page): Promise<boolean> {
+async function _fillIncomePeriodStep(page: Page): Promise<boolean> {
   // Try both dropdown select and radio options
   const selectOption = page.locator('select').first();
   const radioOption = page.locator('input[type="radio"][value="monthly"]').first();
@@ -84,7 +84,7 @@ async function fillIncomePeriodStep(page: Page): Promise<boolean> {
 }
 
 // Helper to fill income amount step
-async function fillIncomeStep(page: Page): Promise<boolean> {
+async function _fillIncomeStep(page: Page): Promise<boolean> {
   // Currency input uses type="text" with inputMode="decimal"
   const filled = await fillFormField(
     page,
@@ -97,7 +97,7 @@ async function fillIncomeStep(page: Page): Promise<boolean> {
 }
 
 // Helper to fill age step and submit
-async function fillAgeStepAndSubmit(page: Page): Promise<boolean> {
+async function _fillAgeStepAndSubmit(page: Page): Promise<boolean> {
   const filled = await fillFormField(
     page,
     'input[name="age"], input[type="number"]',

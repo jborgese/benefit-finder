@@ -357,7 +357,7 @@ type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 function App(): React.ReactElement {
   const [appState, setAppState] = useState<AppState>(() => {
     try {
-      if (typeof window !== 'undefined' && window.location && window.location.pathname.toLowerCase().includes('results')) {
+      if (typeof window !== 'undefined' && window.location?.pathname.toLowerCase().includes('results')) {
         return 'results';
       }
     } catch {
@@ -388,7 +388,7 @@ function App(): React.ReactElement {
   // Lightweight routing: if URL path includes "results", show results view immediately
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined' && window.location && window.location.pathname.toLowerCase().includes('results')) {
+      if (typeof window !== 'undefined' && window.location?.pathname.toLowerCase().includes('results')) {
         setAppState('results');
       }
     } catch {

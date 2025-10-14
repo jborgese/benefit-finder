@@ -50,9 +50,8 @@ const isE2ETest = typeof window !== 'undefined' && window.location.hostname === 
 
 if (import.meta.env.DEV && !isE2ETest) {
   addRxPlugin(RxDBDevModePlugin);
-  // Disable verbose dev-mode warnings to keep console clean
-  // The plugin will still perform validation checks
-  disableWarnings();
+  // Keep warnings enabled to get full error details for debugging
+  // disableWarnings();
 }
 addRxPlugin(RxDBQueryBuilderPlugin);
 addRxPlugin(RxDBUpdatePlugin);
@@ -236,10 +235,7 @@ async function createDatabaseWithConfig(
 
   const db = await createRxDatabase<BenefitFinderCollections>({
     name: DB_NAME,
-    storage: wrappedKeyEncryptionCryptoJsStorage({
-      storage: getRxStorageDexie(),
-    }),
-    password: encryptionPassword,
+    storage: getRxStorageDexie(),
     multiInstance: false,
     eventReduce: true,
     ignoreDuplicate: !options.closeDuplicates,
