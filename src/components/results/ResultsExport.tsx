@@ -115,36 +115,36 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
   };
 
   return (
-    <div className="flex gap-3 flex-wrap">
+    <>
       {/* PDF Export Button */}
       <button
         onClick={handlePDFExport}
         disabled={isExporting}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors w-full sm:w-auto min-h-[44px] touch-manipulation"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
         </svg>
-        <span>{isExporting ? 'Exporting...' : 'Export to PDF'}</span>
+        <span className="whitespace-nowrap">{isExporting ? 'Exporting...' : 'Export to PDF'}</span>
       </button>
 
       {/* Encrypted Export Button */}
       <button
         onClick={() => setShowEncryptDialog(true)}
         disabled={isExporting}
-        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors w-full sm:w-auto min-h-[44px] touch-manipulation"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
-        <span>Export Encrypted File</span>
+        <span className="whitespace-nowrap">Export Encrypted File</span>
       </button>
 
       {/* Encrypted Export Dialog */}
       <Dialog.Root open={showEncryptDialog} onOpenChange={setShowEncryptDialog}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-md w-full z-50 p-6">
+          <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto z-50 p-6 mx-4">
             <Dialog.Title className="text-xl font-bold mb-4">
               Export Encrypted Results
             </Dialog.Title>
@@ -202,11 +202,11 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
               </div>
             </div>
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
               <Dialog.Close asChild>
                 <button
                   disabled={isExporting}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100"
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 min-h-[44px] touch-manipulation"
                 >
                   Cancel
                 </button>
@@ -216,7 +216,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
                   void handleEncryptedExport();
                 }}
                 disabled={isExporting || !isPasswordValid}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed min-h-[44px] touch-manipulation"
               >
                 {isExporting ? 'Exporting...' : 'Export File'}
               </button>
@@ -230,7 +230,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-    </div>
+    </>
   );
 };
 

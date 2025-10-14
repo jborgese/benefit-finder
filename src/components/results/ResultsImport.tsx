@@ -70,18 +70,18 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
         {trigger ?? (
-          <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors w-full sm:w-auto min-h-[44px] touch-manipulation">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
-            <span>Import Results</span>
+            <span className="whitespace-nowrap">Import Results</span>
           </button>
         )}
       </Dialog.Trigger>
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-md w-full z-50 p-6">
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto z-50 p-6 mx-4">
           <Dialog.Title className="text-xl font-bold mb-4">
             Import Encrypted Results
           </Dialog.Title>
@@ -161,11 +161,11 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-3 justify-end">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <Dialog.Close asChild>
               <button
                 disabled={isImporting}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 min-h-[44px] touch-manipulation"
                 onClick={handleReset}
               >
                 Cancel
@@ -174,7 +174,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
             <button
               onClick={() => void handleImport()}
               disabled={isImporting || !selectedFile}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed min-h-[44px] touch-manipulation"
             >
               {isImporting ? 'Importing...' : 'Import'}
             </button>

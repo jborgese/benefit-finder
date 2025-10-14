@@ -794,18 +794,21 @@ function App(): React.ReactElement {
         {appState === 'results' && (
           <div>
             <div className="mb-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h2 className="text-2xl font-bold">Your Benefit Eligibility Results</h2>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                   <Button
                     variant="secondary"
                     onClick={handleNewAssessment}
                     aria-label="Start new assessment"
+                    className="w-full sm:w-auto"
                   >
                     New Assessment
                   </Button>
-                  <ResultsExport results={sampleResults} />
-                  <ResultsImport onImport={(results) => void handleImportResults(results)} />
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <ResultsExport results={sampleResults} />
+                    <ResultsImport onImport={(results) => void handleImportResults(results)} />
+                  </div>
                 </div>
               </div>
             </div>
