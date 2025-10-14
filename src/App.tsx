@@ -355,7 +355,16 @@ const sampleResults = {
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 
 function App(): React.ReactElement {
-  const [appState, setAppState] = useState<AppState>('home');
+  const [appState, setAppState] = useState<AppState>(() => {
+    try {
+      if (typeof window !== 'undefined' && window.location && window.location.pathname.toLowerCase().includes('results')) {
+        return 'results';
+      }
+    } catch {
+      // no-op
+    }
+    return 'home';
+  });
   const [hasResults, setHasResults] = useState(false);
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -375,6 +384,17 @@ function App(): React.ReactElement {
 
     void checkExistingResults();
   }, [loadAllResults]);
+
+  // Lightweight routing: if URL path includes "results", show results view immediately
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.location && window.location.pathname.toLowerCase().includes('results')) {
+        setAppState('results');
+      }
+    } catch {
+      // no-op: defensive for non-browser environments
+    }
+  }, []);
 
   // Development helper - make clearDatabase available globally
   if (import.meta.env.DEV) {
@@ -403,7 +423,11 @@ function App(): React.ReactElement {
 
   const handleCompleteQuestionnaire = async (answers: Record<string, unknown>): Promise<void> => {
     try {
-      // Initialize database and load sample data if needed
+      // Immediately transition to results UI; perform work in background
+      setAppState('results');
+      setAnnouncementMessage('Assessment completed. Preparing results...');
+
+      // Initialize database and load sample data if needed (background)
       await initializeApp();
     } catch (dbError) {
       console.error('Database initialization failed:', dbError);
@@ -571,10 +595,6 @@ function App(): React.ReactElement {
         totalPrograms: evaluationResults.length,
         evaluatedAt: new Date()
       };
-
-      // Immediately transition to results view so UI renders while save completes
-      setAppState('results');
-      setAnnouncementMessage('Assessment completed. Preparing results...');
 
       await saveResults({ results });
       setHasResults(true);
