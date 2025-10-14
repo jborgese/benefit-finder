@@ -12,7 +12,7 @@ import {
   RxCollection,
 } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
+import { RxDBDevModePlugin, disableWarnings } from 'rxdb/plugins/dev-mode';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration-schema';
@@ -44,6 +44,9 @@ interface WindowWithDevUtils extends Window {
 // which is configured when creating the database with a password
 if (import.meta.env.DEV) {
   addRxPlugin(RxDBDevModePlugin);
+  // Disable verbose dev-mode warnings to keep console clean
+  // The plugin will still perform validation checks
+  disableWarnings();
 }
 addRxPlugin(RxDBQueryBuilderPlugin);
 addRxPlugin(RxDBUpdatePlugin);
