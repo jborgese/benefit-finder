@@ -640,10 +640,8 @@ async function clearAllIndexedDBs(): Promise<void> {
       db.name.includes('benefitfinder') ||
       db.name.includes('rxdb-dexie-benefitfinder') ||
       db.name.startsWith('rxdb-dexie-')
-    )) {
-      if (!databasesToDelete.includes(db.name)) {
-        databasesToDelete.push(db.name);
-      }
+    ) && !databasesToDelete.includes(db.name)) {
+      databasesToDelete.push(db.name);
     }
   });
 
