@@ -20,7 +20,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [password, setPassword] = useState('');
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +34,8 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
   };
 
   const handleImport = async (): Promise<void> => {
+    const password = passwordRef.current?.value || '';
+
     if (!selectedFile || !password) return;
 
     setIsImporting(true);
@@ -47,7 +49,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
       // Reset and close
       setIsOpen(false);
       setSelectedFile(null);
-      setPassword('');
+      if (passwordRef.current) passwordRef.current.value = '';
       setIsImporting(false);
     } catch (err) {
       setImportError(err instanceof Error ? err.message : 'Failed to import file');
@@ -57,7 +59,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
 
   const handleReset = (): void => {
     setSelectedFile(null);
-    setPassword('');
+    if (passwordRef.current) passwordRef.current.value = '';
     setImportError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -144,8 +146,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
                 </label>
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  ref={passwordRef}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                   placeholder="Enter file password"
                   disabled={!selectedFile}
@@ -172,7 +173,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
             </Dialog.Close>
             <button
               onClick={() => void handleImport()}
-              disabled={isImporting || !selectedFile || !password}
+              disabled={isImporting || !selectedFile}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {isImporting ? 'Importing...' : 'Import'}
