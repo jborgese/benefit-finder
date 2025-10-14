@@ -353,10 +353,7 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
 
   const db = await createRxDatabase<BenefitFinderCollections>({
     name: newDbName,
-    storage: wrappedKeyEncryptionCryptoJsStorage({
-      storage: getRxStorageDexie(),
-    }),
-    password: newEncryptionPassword,
+    storage: getRxStorageDexie(),
     multiInstance: false,
     eventReduce: true,
     ignoreDuplicate: true,
