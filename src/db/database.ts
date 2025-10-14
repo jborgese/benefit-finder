@@ -43,13 +43,17 @@ interface WindowWithDevUtils extends Window {
 // Add RxDB plugins
 // Note: Encryption is handled by wrappedKeyEncryptionCryptoJsStorage wrapper
 // which is configured when creating the database with a password
-// Only enable dev-mode plugin when not running in E2E tests (to avoid external iframe requests)
+
+// Detect if running in E2E tests to avoid external iframe requests
 const isE2ETest = typeof window !== 'undefined' && window.location.hostname === 'localhost' &&
                   (window.navigator.userAgent.includes('HeadlessChrome') ||
                    window.navigator.userAgent.includes('Firefox') ||
                    window.navigator.webdriver === true);
 
-if (import.meta.env.DEV && !isE2ETest) {
+// Detect if we're in development mode (needed for ignoreDuplicate option)
+const isDevMode = import.meta.env.DEV && !isE2ETest;
+
+if (isDevMode) {
   addRxPlugin(RxDBDevModePlugin);
   // Keep warnings enabled to get full error details for debugging
   // disableWarnings();
@@ -244,7 +248,8 @@ async function createDatabaseWithConfig(
     password: encryptionPassword,
     multiInstance: false,
     eventReduce: true,
-    ignoreDuplicate: !options.closeDuplicates,
+    // ignoreDuplicate is only allowed in dev-mode (DB9 error prevention)
+    ignoreDuplicate: isDevMode ? !options.closeDuplicates : false,
     closeDuplicates: options.closeDuplicates,
   });
 
@@ -355,7 +360,8 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
     storage: getRxStorageDexie(),
     multiInstance: false,
     eventReduce: true,
-    ignoreDuplicate: true,
+    // ignoreDuplicate is only allowed in dev-mode (DB9 error prevention)
+    ignoreDuplicate: isDevMode,
     closeDuplicates: false,
   });
 
