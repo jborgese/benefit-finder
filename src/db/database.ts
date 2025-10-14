@@ -12,11 +12,10 @@ import {
   RxCollection,
 } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import { RxDBDevModePlugin, disableWarnings } from 'rxdb/plugins/dev-mode';
+import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration-schema';
-import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
 
 import { collections } from './collections';
 import type {
@@ -240,13 +239,6 @@ async function createDatabaseWithConfig(
     eventReduce: true,
     ignoreDuplicate: !options.closeDuplicates,
     closeDuplicates: options.closeDuplicates,
-    cleanupPolicy: {
-      minimumDeletedTime: 1000 * 60 * 60 * 24 * 7, // 7 days
-      minimumCollectionAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-      runEach: 1000 * 60 * 5, // Run every 5 minutes
-      awaitReplicationsInSync: false,
-      waitForLeadership: false,
-    },
   });
 
   if (import.meta.env.DEV) {
@@ -358,13 +350,6 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
     eventReduce: true,
     ignoreDuplicate: true,
     closeDuplicates: false,
-    cleanupPolicy: {
-      minimumDeletedTime: 1000 * 60 * 60 * 24 * 7, // 7 days
-      minimumCollectionAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-      runEach: 1000 * 60 * 5, // Run every 5 minutes
-      awaitReplicationsInSync: false,
-      waitForLeadership: false,
-    },
   });
 
   if (import.meta.env.DEV) {
