@@ -25,9 +25,9 @@
       "name": "SNAP Gross Income Test",
       "description": "Household gross income must be at or below 130% of the federal poverty line",
       "ruleLogic": {
-        "<=": [
+        "snap_income_eligible": [
           { "var": "householdIncome" },
-          { "*": [{ "var": "householdSize" }, 1500] }
+          { "var": "householdSize" }
         ]
       },
       "ruleType": "eligibility",

@@ -4,23 +4,24 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WhyExplanation } from '../WhyExplanation';
-import type { EligibilityStatus, EligibilityExplanation } from '../types';
+import type { EligibilityExplanation } from '../types';
 
 // Mock the Dialog component
-jest.mock('@radix-ui/react-dialog', () => ({
+vi.mock('@radix-ui/react-dialog', () => ({
   Dialog: {
     Title: ({ children, className }: { children: React.ReactNode; className?: string }) => (
       <h2 className={className}>{children}</h2>
     ),
-    Close: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => (
+    Close: ({ children }: { children: React.ReactNode }) => (
       <button>{children}</button>
     ),
   },
 }));
 
 describe('WhyExplanation Component', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
 
   const mockExplanation: EligibilityExplanation = {
     reason: 'You qualify based on your household size and income',
@@ -41,7 +42,7 @@ describe('WhyExplanation Component', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the modal with program name and status', () => {

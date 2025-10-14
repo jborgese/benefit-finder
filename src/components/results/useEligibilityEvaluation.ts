@@ -6,7 +6,7 @@
 
 import { useState, useMemo } from 'react';
 import type { RulePackage, RuleDefinition } from '../../rules/schema';
-import { evaluateRuleSync } from '../../rules/evaluator';
+import { evaluateRuleSync, registerBenefitOperators, unregisterBenefitOperators } from '../../rules/evaluator';
 import type { JsonLogicRule } from '../../rules/types';
 import type {
   EligibilityResults,
@@ -69,6 +69,10 @@ export function useEligibilityEvaluation(options: EvaluationOptions): {
       setIsEvaluating(true);
       setError(null);
 
+      // Register custom benefit operators for rule evaluation
+      console.log('🔍 [DEBUG] Registering benefit operators for rule evaluation');
+      registerBenefitOperators();
+
       const programResults: ProgramEligibilityResult[] = [];
       const evaluatedAt = new Date();
 
@@ -113,9 +117,14 @@ export function useEligibilityEvaluation(options: EvaluationOptions): {
         evaluatedAt,
       };
     } catch (err) {
+      console.error('🚨 [ERROR] Rule evaluation failed:', err);
       setError(err as Error);
       setIsEvaluating(false);
       return null;
+    } finally {
+      // Clean up custom operators
+      console.log('🔍 [DEBUG] Unregistering benefit operators');
+      unregisterBenefitOperators();
     }
   }, [rulePackages, profile, includeNotQualified]);
 
@@ -182,13 +191,71 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
   const details: string[] = [];
   const calculations: Array<{ label: string; value: string | number; comparison?: string }> = [];
 
+  console.log('🔍 [DEBUG] Starting rule evaluation with profile:', {
+    householdIncome: profile.householdIncome,
+    householdSize: profile.householdSize,
+    citizenship: profile.citizenship,
+    age: profile.age,
+  });
+
   for (const rule of rules) {
     if (rule.ruleType !== 'eligibility') continue;
 
     totalRules++;
+    console.log(`🔍 [DEBUG] Evaluating rule: ${rule.id}`);
+    console.log(`🔍 [DEBUG] Rule logic:`, JSON.stringify(rule.ruleLogic, null, 2));
 
     try {
       const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
+
+      console.log(`🔍 [DEBUG] Rule ${rule.id} evaluation result:`, {
+        success: evaluationResult.success,
+        result: evaluationResult.result,
+        error: evaluationResult.error,
+        executionTime: evaluationResult.executionTime,
+      });
+
+      // Add detailed debugging for SNAP income rules
+      if (rule.id.includes('snap') && rule.id.includes('income')) {
+        const householdIncome = profile.householdIncome;
+        const householdSize = profile.householdSize;
+
+        console.log(`🔍 [DEBUG] SNAP Income Rule Analysis:`);
+        console.log(`  - Household Income: $${householdIncome?.toLocaleString()}/month`);
+        console.log(`  - Household Size: ${householdSize}`);
+
+        // Calculate what the rule actually does
+        if (householdIncome !== undefined && householdSize !== undefined) {
+          // The current rule logic: householdSize * 1500
+          const currentThreshold = householdSize * 1500;
+          console.log(`  - Current Rule Threshold: $${currentThreshold.toLocaleString()}/month (householdSize * 1500)`);
+          console.log(`  - Current Rule Result: ${householdIncome} <= ${currentThreshold} = ${householdIncome <= currentThreshold}`);
+
+          // What the correct threshold should be (2024 130% FPL)
+          const correctThresholds: Record<number, number> = {
+            1: 1696,
+            2: 2292,
+            3: 2888,
+            4: 3483,
+            5: 4079,
+            6: 4675,
+            7: 5271,
+            8: 5867
+          };
+
+          const correctThreshold = householdSize <= 8
+            ? correctThresholds[householdSize]
+            : correctThresholds[8] + (596 * (householdSize - 8));
+
+          console.log(`  - Correct Threshold (130% FPL): $${correctThreshold.toLocaleString()}/month`);
+          console.log(`  - Correct Result: ${householdIncome} <= ${correctThreshold} = ${householdIncome <= correctThreshold}`);
+          console.log(`  - DIFFERENCE: Current rule allows ${currentThreshold - correctThreshold > 0 ? 'MORE' : 'LESS'} income by $${Math.abs(currentThreshold - correctThreshold).toLocaleString()}`);
+
+          if (householdIncome > correctThreshold && evaluationResult.result === true) {
+            console.error(`🚨 [ERROR] Rule is incorrectly passing! Income $${householdIncome} > Correct threshold $${correctThreshold}`);
+          }
+        }
+      }
 
       // Generate calculation details for specific rule types
       const ruleCalculation = generateRuleCalculation(rule, profile);
@@ -198,18 +265,29 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
 
       if (evaluationResult.result === true) {
         passedRules++;
+        console.log(`✅ [DEBUG] Rule ${rule.id} PASSED`);
         if (rule.explanation) {
           details.push(`✓ ${rule.explanation}`);
         }
-      } else if (rule.explanation) {
-        details.push(`✗ ${rule.explanation}`);
+      } else {
+        console.log(`❌ [DEBUG] Rule ${rule.id} FAILED`);
+        if (rule.explanation) {
+          details.push(`✗ ${rule.explanation}`);
+        }
       }
 
       rulesCited.push(rule.id);
     } catch (err) {
-      console.error(`Error evaluating rule ${rule.id}:`, err);
+      console.error(`🚨 [ERROR] Error evaluating rule ${rule.id}:`, err);
     }
   }
+
+  console.log(`🔍 [DEBUG] Rule evaluation summary:`, {
+    passedRules,
+    totalRules,
+    passRate: totalRules > 0 ? (passedRules / totalRules).toFixed(2) : '0',
+    rulesCited,
+  });
 
   return { passedRules, totalRules, rulesCited, details, calculations };
 }
@@ -321,7 +399,7 @@ function deduplicateSteps(steps: NextStep[]): NextStep[] {
  * Generate calculation details for specific rule types
  */
 function generateRuleCalculation(rule: RuleDefinition, profile: UserProfile): { label: string; value: string | number; comparison?: string } | null {
-  const ruleLogic = rule.ruleLogic as JsonLogicRule;
+  // Rule logic is available in rule.ruleLogic if needed for future enhancements
 
   // Handle SNAP income rules
   if (rule.id.includes('snap') && rule.id.includes('income')) {
@@ -329,7 +407,7 @@ function generateRuleCalculation(rule: RuleDefinition, profile: UserProfile): { 
     const householdSize = profile.householdSize;
 
     if (householdIncome !== undefined && householdSize !== undefined) {
-      // Use actual USDA 2026 SNAP income limits (130% of poverty level)
+      // Use actual USDA 2024 SNAP income limits (130% of poverty level)
       const snapIncomeLimits: Record<number, number> = {
         1: 1696,
         2: 2292,
@@ -348,10 +426,17 @@ function generateRuleCalculation(rule: RuleDefinition, profile: UserProfile): { 
 
       const meetsThreshold = householdIncome <= threshold;
 
+      console.log(`🔍 [DEBUG] SNAP Calculation Display:`, {
+        householdIncome,
+        householdSize,
+        threshold,
+        meetsThreshold,
+      });
+
       return {
         label: 'Monthly income limit (130% of poverty)',
         value: `$${threshold.toLocaleString()}`,
-        comparison: `Your income: $${householdIncome.toLocaleString()} (${meetsThreshold ? 'qualifies' : 'exceeds limit'})`
+        comparison: `Your income: $${householdIncome.toLocaleString()}/month (${meetsThreshold ? 'qualifies' : 'exceeds limit'})`
       };
     }
   }

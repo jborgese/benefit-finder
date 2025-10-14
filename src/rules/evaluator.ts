@@ -287,9 +287,37 @@ export function evaluateRuleSync<T = boolean>(
 ): RuleEvaluationResult<T> {
   try {
     const startTime = performance.now();
+
+    // Add comprehensive debugging for JSON Logic evaluation
+    console.log('🔍 [DEBUG] JSON Logic Evaluation:', {
+      rule: JSON.stringify(rule, null, 2),
+      data: JSON.stringify(data, null, 2),
+    });
+
     // json-logic-js types don't match our stricter types, but the library handles JsonLogicRule correctly
     const result = jsonLogic.apply(rule as unknown as ReturnType<typeof jsonLogic.apply>, data) as T;
     const endTime = performance.now();
+
+    console.log('🔍 [DEBUG] JSON Logic Result:', {
+      result,
+      executionTime: endTime - startTime,
+    });
+
+    // Add specific debugging for SNAP income rules
+    if (typeof rule === 'object' && rule !== null && !Array.isArray(rule)) {
+      const ruleKeys = Object.keys(rule);
+      if (ruleKeys.includes('<=') && data.householdIncome !== undefined && data.householdSize !== undefined && data.householdSize !== null) {
+        const threshold = Number(data.householdSize) * 1500;
+        console.log('🔍 [DEBUG] SNAP Income Rule Debug:', {
+          householdIncome: data.householdIncome,
+          householdSize: data.householdSize,
+          ruleStructure: rule,
+          calculatedThreshold: threshold,
+          comparison: `${data.householdIncome} <= ${threshold}`,
+          result: result,
+        });
+      }
+    }
 
     return {
       result,
@@ -297,6 +325,8 @@ export function evaluateRuleSync<T = boolean>(
       executionTime: endTime - startTime,
     };
   } catch (error) {
+    console.error('🚨 [ERROR] JSON Logic evaluation failed:', error);
+
     const errorDetails = error instanceof Error
       ? createEvaluationErrorFromException(error, rule, data)
       : createEvaluationError(
@@ -503,6 +533,59 @@ export const BENEFIT_OPERATORS = {
    */
   any_true: (array: unknown[]): boolean => {
     return array.some(Boolean);
+  },
+
+  /**
+   * Get SNAP income threshold for 130% of federal poverty level (2024)
+   * @param householdSize Number of people in household
+   * @returns Monthly income threshold in dollars
+   */
+  snap_income_threshold_130_fpl: (householdSize: number): number => {
+    console.log(`🔍 [DEBUG] Calculating SNAP 130% FPL threshold for household size: ${householdSize}`);
+
+    // 2024 Federal Poverty Level thresholds for 130% (SNAP gross income limits)
+    const thresholds: Record<number, number> = {
+      1: 1696,
+      2: 2292,
+      3: 2888,
+      4: 3483,
+      5: 4079,
+      6: 4675,
+      7: 5271,
+      8: 5867
+    };
+
+    let threshold: number;
+
+    if (householdSize <= 8) {
+      threshold = thresholds[householdSize];
+    } else {
+      // For households larger than 8, add $596 per additional member
+      threshold = thresholds[8] + (596 * (householdSize - 8));
+    }
+
+    console.log(`🔍 [DEBUG] SNAP 130% FPL threshold for ${householdSize} people: $${threshold}/month`);
+
+    return threshold;
+  },
+
+  /**
+   * Check if household income is below SNAP 130% FPL threshold
+   * @param householdIncome Monthly household income
+   * @param householdSize Number of people in household
+   * @returns True if income is below threshold
+   */
+  snap_income_eligible: (householdIncome: number, householdSize: number): boolean => {
+    const threshold = BENEFIT_OPERATORS.snap_income_threshold_130_fpl(householdSize);
+    const isEligible = householdIncome <= threshold;
+
+    console.log(`🔍 [DEBUG] SNAP Income Eligibility Check:`);
+    console.log(`  - Household Income: $${householdIncome.toLocaleString()}/month`);
+    console.log(`  - Household Size: ${householdSize}`);
+    console.log(`  - 130% FPL Threshold: $${threshold.toLocaleString()}/month`);
+    console.log(`  - Eligible: ${isEligible} (${householdIncome} <= ${threshold})`);
+
+    return isEligible;
   },
 };
 
