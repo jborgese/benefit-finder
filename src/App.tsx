@@ -274,6 +274,7 @@ function App(): React.ReactElement {
   });
   const [hasResults, setHasResults] = useState(false);
   const [currentResults, setCurrentResults] = useState<EligibilityResults | null>(null);
+  const [isProcessingResults, setIsProcessingResults] = useState(false);
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -333,6 +334,7 @@ function App(): React.ReactElement {
 
   const handleGoHome = (): void => {
     setAppState('home');
+    setIsProcessingResults(false);
     setErrorMessage('');
     setAnnouncementMessage('');
   };
@@ -341,6 +343,7 @@ function App(): React.ReactElement {
     try {
       // Immediately transition to results UI; perform work in background
       setAppState('results');
+      setIsProcessingResults(true);
       setAnnouncementMessage('Assessment completed. Preparing results...');
 
       // Initialize database and load sample data if needed (background)
@@ -350,6 +353,7 @@ function App(): React.ReactElement {
 
       // Show error message to user instead of continuing with broken state
       setErrorMessage('Unable to initialize the application database. Please try refreshing the page or contact support if the issue persists.');
+      setIsProcessingResults(false);
       setAppState('error');
       return;
     }
@@ -391,6 +395,7 @@ function App(): React.ReactElement {
 
         // Show error message to user instead of fallback results
         setErrorMessage('Unable to calculate eligibility results at this time. Please try refreshing the page or contact support if the issue persists.');
+        setIsProcessingResults(false);
         setAppState('error');
         return;
       }
@@ -516,9 +521,11 @@ function App(): React.ReactElement {
       await saveResults({ results });
       setCurrentResults(results);
       setHasResults(true);
+      setIsProcessingResults(false);
       setAnnouncementMessage('Results are ready.');
     } catch (error) {
       console.error('Error evaluating eligibility:', error);
+      setIsProcessingResults(false);
       setAnnouncementMessage('Error evaluating eligibility. Please try again.');
     }
   };
@@ -553,6 +560,7 @@ function App(): React.ReactElement {
 
   const handleNewAssessment = (): void => {
     setHasResults(false);
+    setIsProcessingResults(false);
     setAppState('questionnaire');
   };
 
@@ -712,7 +720,24 @@ function App(): React.ReactElement {
 
         {appState === 'results' && (
           <div>
-            {currentResults ? (
+            {isProcessingResults ? (
+              <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-100 mb-4">
+                  Processing Your Results
+                </h2>
+                <p className="text-slate-300 mb-6">
+                  We're analyzing your eligibility for government benefit programs. This will only take a moment...
+                </p>
+                <div className="flex items-center justify-center text-slate-400 text-sm">
+                  <div className="animate-pulse">•</div>
+                  <div className="animate-pulse mx-2" style={{ animationDelay: '0.2s' }}>•</div>
+                  <div className="animate-pulse" style={{ animationDelay: '0.4s' }}>•</div>
+                </div>
+              </div>
+            ) : currentResults ? (
               <div>
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -836,12 +861,12 @@ function App(): React.ReactElement {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm border p-8 text-center max-w-2xl mx-auto">
+              <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
                 <div className="text-6xl mb-4" aria-hidden="true">📝</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                <h2 className="text-2xl font-bold text-slate-100 mb-4">
                   No Results Available
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-slate-300 mb-6">
                   Complete the eligibility questionnaire to see which government benefit programs you may qualify for.
                 </p>
                 <Button

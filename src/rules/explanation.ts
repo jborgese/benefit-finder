@@ -171,7 +171,19 @@ function analyzeEligibilityResult(
 
   if (result.eligible) {
     reasoning.push('You meet all the eligibility requirements for this program.');
-    criteriaPassed.push(...criteriaChecked);
+    // Process individual criteria for eligible results too
+    if (result.criteriaResults) {
+      for (const criterion of result.criteriaResults) {
+        const fieldDescription = formatFieldName(criterion.criterion);
+        criteriaPassed.push(`✓ We verified ${fieldDescription} and you meet this requirement`);
+      }
+    } else {
+      // Fallback for when we don't have detailed criteria results
+      for (const criterion of criteriaChecked) {
+        const fieldDescription = formatFieldName(criterion);
+        criteriaPassed.push(`✓ We verified ${fieldDescription} and you meet this requirement`);
+      }
+    }
   } else if (result.incomplete) {
     processIncompleteResult(result, reasoning, criteriaFailed);
   } else {
@@ -193,9 +205,9 @@ function processIncompleteResult(
 
   if (result.missingFields) {
     for (const field of result.missingFields) {
-      const fieldName = formatFieldName(field);
-      reasoning.push(`Missing: ${fieldName}`);
-      criteriaFailed.push(`${fieldName} information not provided`);
+      const fieldDescription = formatFieldName(field);
+      reasoning.push(`Please provide information about ${fieldDescription}`);
+      criteriaFailed.push(`? We need information about ${fieldDescription} to continue`);
     }
   }
 }
@@ -213,13 +225,14 @@ function processIneligibleResult(
 
   if (result.criteriaResults) {
     for (const criterion of result.criteriaResults) {
-      const desc = criterion.description ?? formatFieldName(criterion.criterion);
+      const fieldDescription = formatFieldName(criterion.criterion);
+      const criterionDescription = criterion.description ?? fieldDescription;
 
       if (criterion.met) {
-        criteriaPassed.push(desc);
+        criteriaPassed.push(`✓ We verified ${fieldDescription} and you meet this requirement`);
       } else {
-        criteriaFailed.push(desc);
-        reasoning.push(`• ${desc}`);
+        criteriaFailed.push(`✗ ${criterionDescription} does not meet the program requirements`);
+        reasoning.push(`• ${criterionDescription} does not meet the program requirements`);
       }
     }
   }
@@ -232,16 +245,25 @@ function generateChangeSuggestions(result: EligibilityEvaluationResult): string[
   const suggestions: string[] = [];
 
   if (result.missingFields && result.missingFields.length > 0) {
-    suggestions.push('Provide the missing information to get a complete evaluation');
+    suggestions.push('Complete your profile by providing the missing information');
   }
 
   if (result.criteriaResults) {
     for (const criterion of result.criteriaResults) {
       if (!criterion.met && criterion.threshold !== undefined) {
-        const fieldName = formatFieldName(criterion.criterion);
-        suggestions.push(
-          `${fieldName}: Change from ${formatValue(criterion.value)} to meet threshold of ${formatValue(criterion.threshold)}`
-        );
+        const fieldDescription = formatFieldName(criterion.criterion);
+        const currentValue = formatValue(criterion.value);
+        const requiredValue = formatValue(criterion.threshold);
+
+        // Make suggestions more specific based on field type
+        if (criterion.criterion.toLowerCase().includes('income')) {
+          suggestions.push(`If ${fieldDescription} changes from ${currentValue} to ${requiredValue} or below, you may qualify`);
+        } else if (criterion.criterion.toLowerCase().includes('age')) {
+          // Age can't be changed, so provide different guidance
+          suggestions.push(`This program requires a different age range than your current age of ${currentValue}`);
+        } else {
+          suggestions.push(`If ${fieldDescription} changes from ${currentValue} to meet the requirement of ${requiredValue}, you may qualify`);
+        }
       }
     }
   }
@@ -741,14 +763,79 @@ function getComparisonSuggestion(
 }
 
 // ============================================================================
+// FIELD NAME MAPPINGS
+// ============================================================================
+
+/**
+ * Maps technical field names to user-friendly descriptions
+ */
+const FIELD_NAME_MAPPINGS: Record<string, string> = {
+  // Demographics
+  'age': 'your age',
+  'isPregnant': 'pregnancy status',
+  'hasChildren': 'whether you have children',
+  'hasQualifyingDisability': 'qualifying disability status',
+  'isCitizen': 'citizenship status',
+  'isLegalResident': 'legal residency status',
+  'ssn': 'Social Security number',
+
+  // Financial
+  'householdIncome': 'your household\'s monthly income',
+  'householdSize': 'your household size',
+  'income': 'your income',
+  'grossIncome': 'your gross income',
+  'netIncome': 'your net income',
+  'monthlyIncome': 'your monthly income',
+  'annualIncome': 'your annual income',
+  'assets': 'your household assets',
+  'resources': 'your available resources',
+  'liquidAssets': 'your liquid assets',
+  'vehicleValue': 'your vehicle value',
+  'bankBalance': 'your bank account balance',
+
+  // Location & State
+  'state': 'your state of residence',
+  'stateHasExpanded': 'whether your state has expanded coverage',
+  'zipCode': 'your ZIP code',
+  'county': 'your county',
+  'jurisdiction': 'your location',
+
+  // Program-specific
+  'hasHealthInsurance': 'current health insurance coverage',
+  'employmentStatus': 'your employment status',
+  'isStudent': 'student status',
+  'isVeteran': 'veteran status',
+  'isSenior': 'senior status (65+)',
+  'hasMinorChildren': 'whether you have children under 18',
+
+  // Housing
+  'housingCosts': 'your housing costs',
+  'rentAmount': 'your monthly rent',
+  'mortgageAmount': 'your monthly mortgage',
+  'isHomeless': 'housing situation',
+
+  // Benefits
+  'receivesSSI': 'Supplemental Security Income (SSI)',
+  'receivesSNAP': 'SNAP benefits',
+  'receivesTANF': 'TANF benefits',
+  'receivesWIC': 'WIC benefits',
+  'receivesUnemployment': 'unemployment benefits',
+};
+
+// ============================================================================
 // FORMATTING UTILITIES
 // ============================================================================
 
 /**
- * Format field name to human-readable
+ * Format field name to human-readable description
  */
 function formatFieldName(fieldName: string): string {
-  // Convert camelCase or snake_case to Title Case
+  // Check if we have a specific mapping for this field
+  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
+    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+  }
+
+  // Fall back to converting camelCase or snake_case to Title Case
   return fieldName
     .replace(/([A-Z])/g, ' $1')
     .replace(/_/g, ' ')
