@@ -354,7 +354,7 @@ test.describe('PDF Export', () => {
       });
 
       // Click print button
-      await printButton.click();
+      await pdfButton.click();
 
       // Check if print was called
       printCalled = await page.evaluate(() => (window as any).printCalled);

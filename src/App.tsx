@@ -364,7 +364,7 @@ function App(): React.ReactElement {
 
   // Check for existing results on app startup
   useEffect(() => {
-    const checkExistingResults = async () => {
+    const checkExistingResults = async (): Promise<void> => {
       try {
         const results = await loadAllResults();
         setHasResults(results.length > 0);
@@ -373,7 +373,7 @@ function App(): React.ReactElement {
       }
     };
 
-    checkExistingResults();
+    void checkExistingResults();
   }, [loadAllResults]);
 
   // Development helper - make clearDatabase available globally
