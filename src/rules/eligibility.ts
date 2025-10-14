@@ -249,9 +249,9 @@ export async function ensureSNAPRulesAreCorrect(): Promise<void> {
       if (typeof ruleLogic === 'object' && ruleLogic !== null && !Array.isArray(ruleLogic)) {
         // Check for the old logic pattern: {"<=": [{"var": "householdIncome"}, {"*": [{"var": "householdSize"}, 1500]}]}
         if (ruleLogic['<='] && Array.isArray(ruleLogic['<='])) {
-          const [incomeVar, thresholdCalc] = ruleLogic['<='];
+          const [_incomeVar, thresholdCalc] = ruleLogic['<='];
           if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc['*']) {
-            const [sizeVar, multiplier] = thresholdCalc['*'];
+            const [_sizeVar, multiplier] = thresholdCalc['*'];
             if (multiplier === 1500) {
               return true; // Found old incorrect logic
             }
@@ -657,7 +657,7 @@ function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
       householdIncome: processedData.householdIncome,
       householdSize: processedData.householdSize,
       citizenship: processedData.citizenship,
-      age: processedData.age,
+      dateOfBirth: processedData.dateOfBirth,
       state: processedData.state,
       timestamp: new Date(processedData._timestamp).toISOString()
     });
