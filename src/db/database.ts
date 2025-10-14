@@ -16,7 +16,6 @@ import { RxDBDevModePlugin, disableWarnings } from 'rxdb/plugins/dev-mode';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration-schema';
-import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
 
 import { collections } from './collections';
@@ -237,10 +236,8 @@ async function createDatabaseWithConfig(
 
   const db = await createRxDatabase<BenefitFinderCollections>({
     name: DB_NAME,
-    storage: wrappedValidateAjvStorage({
-      storage: wrappedKeyEncryptionCryptoJsStorage({
-        storage: getRxStorageDexie(),
-      }),
+    storage: wrappedKeyEncryptionCryptoJsStorage({
+      storage: getRxStorageDexie(),
     }),
     password: encryptionPassword,
     multiInstance: false,
@@ -360,10 +357,8 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
 
   const db = await createRxDatabase<BenefitFinderCollections>({
     name: newDbName,
-    storage: wrappedValidateAjvStorage({
-      storage: wrappedKeyEncryptionCryptoJsStorage({
-        storage: getRxStorageDexie(),
-      }),
+    storage: wrappedKeyEncryptionCryptoJsStorage({
+      storage: getRxStorageDexie(),
     }),
     password: newEncryptionPassword,
     multiInstance: false,
