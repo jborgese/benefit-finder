@@ -12,6 +12,7 @@ import {
   RxCollection,
 } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
+import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
@@ -232,9 +233,14 @@ async function createDatabaseWithConfig(
     console.warn(`[DEBUG] createDatabaseWithConfig: Options:`, options);
   }
 
+  // Use validation-wrapped storage in dev mode, plain storage in production
+  const storage = import.meta.env.DEV && !isE2ETest
+    ? wrappedValidateAjvStorage({ storage: getRxStorageDexie() })
+    : getRxStorageDexie();
+
   const db = await createRxDatabase<BenefitFinderCollections>({
     name: DB_NAME,
-    storage: getRxStorageDexie(),
+    storage,
     multiInstance: false,
     eventReduce: true,
     ignoreDuplicate: !options.closeDuplicates,
@@ -343,9 +349,14 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
     console.warn(`[DEBUG] handleEncryptionKeyMismatch: Creating new database with name: ${newDbName}`);
   }
 
+  // Use validation-wrapped storage in dev mode, plain storage in production
+  const storage = import.meta.env.DEV && !isE2ETest
+    ? wrappedValidateAjvStorage({ storage: getRxStorageDexie() })
+    : getRxStorageDexie();
+
   const db = await createRxDatabase<BenefitFinderCollections>({
     name: newDbName,
-    storage: getRxStorageDexie(),
+    storage,
     multiInstance: false,
     eventReduce: true,
     ignoreDuplicate: true,
