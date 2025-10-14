@@ -19,8 +19,22 @@ const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
 // Types for evaluation results
 // Removed local type definitions - using types from eligibility module instead
 
+// Flag to prevent multiple simultaneous initializations
+let isInitializing = false;
+
 // Initialize database and load sample data
 async function initializeApp(): Promise<void> {
+  // Prevent multiple simultaneous initializations
+  if (isInitializing) {
+    console.warn('App initialization already in progress, waiting...');
+    // Wait for the current initialization to complete
+    while (isInitializing) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return;
+  }
+
+  isInitializing = true;
   try {
     // Initialize database
     await initializeDatabase();
@@ -30,6 +44,7 @@ async function initializeApp(): Promise<void> {
     // Check if we already have programs loaded
     const existingPrograms = await db.benefit_programs.find().exec();
     if (existingPrograms.length > 0) {
+      isInitializing = false;
       return; // Already initialized
     }
 
@@ -128,14 +143,19 @@ async function initializeApp(): Promise<void> {
         await importRulePackage(medicaidRules.default);
 
         console.warn('Database initialized successfully after clearing');
+        isInitializing = false;
         return;
       } catch (retryError) {
         console.error('Failed to initialize database after clearing:', retryError);
+        isInitializing = false;
         throw retryError;
       }
     }
 
     throw error;
+  } finally {
+    // Always reset the initialization flag
+    isInitializing = false;
   }
 }
 

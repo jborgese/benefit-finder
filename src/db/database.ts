@@ -220,8 +220,21 @@ async function handleDuplicateDatabaseError(
 async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   console.warn('Encryption key mismatch detected, clearing database and retrying...');
 
+  // First, destroy any existing database instance completely
+  if (dbInstance) {
+    try {
+      await dbInstance.destroy();
+    } catch (error) {
+      console.warn('Error destroying existing database instance:', error);
+    }
+    dbInstance = null;
+  }
+
   // Clear all database data completely
   await clearDatabase();
+
+  // Add a small delay to ensure all cleanup is complete
+  await new Promise(resolve => setTimeout(resolve, 100));
 
   // Use a fresh encryption key by clearing the stored key first
   const storageKey = 'bf_encryption_key';
@@ -230,6 +243,7 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   // Generate a completely new encryption key
   const newEncryptionPassword = getDefaultEncryptionPassword();
 
+  // Create new database with fresh key
   const db = await createDatabaseWithConfig(newEncryptionPassword);
 
   if (import.meta.env.DEV) {
@@ -274,6 +288,7 @@ async function handleDatabaseError(
  *
  * @param passphrase Optional user passphrase for encryption
  *                   If not provided, uses a randomly generated key
+ * @param forceReinit Force reinitialization even if instance exists
  * @returns Initialized database instance
  *
  * @example
@@ -283,14 +298,28 @@ async function handleDatabaseError(
  *
  * // With auto-generated key
  * const db = await initializeDatabase();
+ *
+ * // Force reinitialization
+ * const db = await initializeDatabase(undefined, true);
  * ```
  */
 export async function initializeDatabase(
-  passphrase?: string
+  passphrase?: string,
+  forceReinit: boolean = false
 ): Promise<BenefitFinderDatabase> {
-  // Return existing instance if already initialized
-  if (dbInstance) {
+  // Return existing instance if already initialized and not forcing reinit
+  if (dbInstance && !forceReinit) {
     return dbInstance;
+  }
+
+  // If forcing reinit, clear existing instance first
+  if (forceReinit && dbInstance) {
+    try {
+      await dbInstance.destroy();
+    } catch (error) {
+      console.warn('Error destroying existing instance during force reinit:', error);
+    }
+    dbInstance = null;
   }
 
   // Use provided passphrase or generate a default key
@@ -386,8 +415,14 @@ export function isDatabaseInitialized(): boolean {
  * @returns Promise that resolves when database is cleared
  */
 export async function clearDatabase(): Promise<void> {
+  // First, properly destroy the database instance if it exists
   if (dbInstance) {
-    await destroyDatabase(true);
+    try {
+      await dbInstance.destroy();
+    } catch (error) {
+      console.warn('Error destroying database instance during clear:', error);
+    }
+    dbInstance = null;
   }
 
   // Clear any remaining localStorage data
@@ -426,7 +461,7 @@ export async function clearDatabase(): Promise<void> {
     console.warn('Error clearing IndexedDB:', error);
   }
 
-  // Reset instance
+  // Reset instance (should already be null, but ensure it)
   dbInstance = null;
 
   if (import.meta.env.DEV) {

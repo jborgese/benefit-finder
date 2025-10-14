@@ -172,6 +172,24 @@ src/
 - When suggesting file operations, use PowerShell equivalents: `Remove-Item` instead of `rm`, `Copy-Item` instead of `cp`, etc.
 - PowerShell uses `-and`, `-or`, `-not` for logical operators (not `&&`, `||`, `!`)
 
+### Development Server Management
+- **ALWAYS check if the development server is already running before executing `npm run dev`**
+- Use PowerShell to check if a process is listening on port 5173 (Vite's default port):
+  ```powershell
+  # Check if port 5173 is in use
+  Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+  ```
+- If the port is in use, inform the user that the dev server is already running
+- Only execute `npm run dev` if the check confirms no server is running on that port
+- **Example workflow:**
+  ```powershell
+  # First: Check if dev server is already running
+  $devServer = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+  
+  # If $devServer is null/empty, the port is free and we can start the server
+  # If $devServer has a value, inform user the server is already running
+  ```
+
 ### Examples of Correct Command Sequences
 
 ✅ **Starting a new conversation:**
@@ -196,10 +214,25 @@ npm install
 cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm test
 ```
 
+✅ **Starting the development server:**
+```powershell
+# First: Check if dev server is already running
+Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+```
+If output is empty, then:
+```powershell
+# Navigate to project root and start dev server
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"; npm run dev
+```
+If output shows a connection, inform the user: "Development server is already running on port 5173."
+
 ❌ **NEVER do this:**
 ```powershell
 # Running project commands from home directory - WRONG!
 npm run dev  # This will fail or run the wrong project
+
+# Starting dev server without checking if it's already running - WRONG!
+npm run dev  # Might cause port conflict errors
 ```
 
 ## When Suggesting Code
