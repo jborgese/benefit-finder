@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { EnhancedQuestionnaire } from './questionnaire/ui';
-import { ResultsSummary, ProgramCard, ResultsExport, ResultsImport, QuestionnaireAnswersCard } from './components/results';
+import { ResultsSummary, ProgramCard, ResultsExport, ResultsImport, QuestionnaireAnswersCard, type EligibilityResults } from './components/results';
 import { useResultsManagement } from './components/results/useResultsManagement';
 import { useEffect } from 'react';
 import { Button } from './components/Button';
@@ -360,7 +360,7 @@ function App(): React.ReactElement {
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const { saveResults, savedResults, loadAllResults } = useResultsManagement();
+  const { saveResults, loadAllResults } = useResultsManagement();
 
   // Check for existing results on app startup
   useEffect(() => {
@@ -615,6 +615,17 @@ function App(): React.ReactElement {
     setAppState('questionnaire');
   };
 
+  const handleImportResults = async (results: EligibilityResults): Promise<void> => {
+    try {
+      await saveResults({ results });
+      setHasResults(true);
+      setAnnouncementMessage('Results imported successfully.');
+    } catch (error) {
+      console.error('Failed to import results:', error);
+      setAnnouncementMessage('Failed to import results. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Screen reader announcements */}
@@ -771,7 +782,7 @@ function App(): React.ReactElement {
                     New Assessment
                   </Button>
                   <ResultsExport results={sampleResults} />
-                  <ResultsImport onImport={(results) => setSampleResults(results)} />
+                  <ResultsImport onImport={(results) => void handleImportResults(results)} />
                 </div>
               </div>
             </div>
