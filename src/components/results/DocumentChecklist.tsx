@@ -4,7 +4,7 @@
  * Displays and manages required documents checklist
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RequiredDocument } from './types';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Accordion from '@radix-ui/react-accordion';
@@ -18,8 +18,12 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
   documents,
   onToggle,
 }) => {
-  const requiredDocs = documents.filter(d => d.required);
-  const optionalDocs = documents.filter(d => !d.required);
+  const { requiredDocs, optionalDocs } = useMemo(() => {
+    return {
+      requiredDocs: documents.filter(d => d.required),
+      optionalDocs: documents.filter(d => !d.required)
+    };
+  }, [documents]);
 
   const handleCheckboxChange = (documentId: string, checked: boolean): void => {
     if (onToggle) {

@@ -4,7 +4,7 @@
  * Displays detailed eligibility information for a single program
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ProgramEligibilityResult } from './types';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -20,7 +20,7 @@ interface ProgramCardProps {
   className?: string;
 }
 
-export const ProgramCard: React.FC<ProgramCardProps> = ({
+export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
   result,
   onDocumentToggle,
   onStepToggle,
@@ -76,7 +76,12 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
     );
   };
 
-  const getJurisdictionLabel = (): string => {
+
+  const { shouldShowDocuments, shouldShowNextSteps, jurisdictionLabel, formattedBenefit } = useMemo(() => {
+    const showDocs = result.status === 'qualified' || result.status === 'likely';
+    const showSteps = result.status !== 'not-qualified';
+
+    // Memoize jurisdiction label computation
     const jurisdictionMap: Record<string, string> = {
       'US-FEDERAL': '🇺🇸 Federal Program',
       'US-GA': '🍑 Georgia',
@@ -85,12 +90,21 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
       'US-TX': '⭐ Texas',
       'US-FL': '🌴 Florida',
     };
+    const jurisdiction = jurisdictionMap[result.jurisdiction] ?? result.jurisdiction;
 
-    return jurisdictionMap[result.jurisdiction] ?? result.jurisdiction;
-  };
+    // Memoize benefit formatting
+    let benefit = null;
+    if (result.estimatedBenefit) {
+      benefit = `$${result.estimatedBenefit.amount.toLocaleString()}/${result.estimatedBenefit.frequency}`;
+    }
 
-  const shouldShowDocuments = result.status === 'qualified' || result.status === 'likely';
-  const shouldShowNextSteps = result.status !== 'not-qualified';
+    return {
+      shouldShowDocuments: showDocs,
+      shouldShowNextSteps: showSteps,
+      jurisdictionLabel: jurisdiction,
+      formattedBenefit: benefit
+    };
+  }, [result.status, result.jurisdiction, result.estimatedBenefit]);
 
   return (
     <div
@@ -110,7 +124,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
               </h3>
               {getStatusBadge()}
             </div>
-            <p className="text-sm text-gray-600">{getJurisdictionLabel()}</p>
+            <p className="text-sm text-gray-600">{jurisdictionLabel}</p>
           </div>
 
           <ConfidenceScore
@@ -129,7 +143,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
                 Estimated Benefit:
               </span>
               <span className="text-lg font-bold text-blue-700">
-                ${result.estimatedBenefit.amount.toLocaleString()}/{result.estimatedBenefit.frequency}
+                {formattedBenefit}
               </span>
             </div>
             {result.estimatedBenefit.description && (
@@ -252,7 +266,9 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
       </Dialog.Root>
     </div>
   );
-};
+});
+
+ProgramCard.displayName = 'ProgramCard';
 
 export default ProgramCard;
 

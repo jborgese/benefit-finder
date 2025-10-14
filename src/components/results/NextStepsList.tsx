@@ -4,7 +4,7 @@
  * Displays actionable next steps for program application
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NextStep } from './types';
 import * as Checkbox from '@radix-ui/react-checkbox';
 
@@ -28,9 +28,17 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
     }
   };
 
-  const sortedSteps = [...steps].sort((a, b) => {
-    return getPriorityOrder(a.priority) - getPriorityOrder(b.priority);
-  });
+  const sortedSteps = useMemo(() => {
+    return [...steps].sort((a, b) => {
+      return getPriorityOrder(a.priority) - getPriorityOrder(b.priority);
+    });
+  }, [steps]);
+
+  const { completedCount, completionPercentage } = useMemo(() => {
+    const completed = steps.filter(s => s.completed).length;
+    const percentage = steps.length > 0 ? Math.round((completed / steps.length) * 100) : 0;
+    return { completedCount: completed, completionPercentage: percentage };
+  }, [steps]);
 
   const getPriorityBadge = (priority: NextStep['priority']): React.ReactElement | null => {
     if (!priority) {
@@ -203,19 +211,19 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
       <div className="pt-3 border-t border-gray-200">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-600">
-            Progress: {steps.filter(s => s.completed).length} of {steps.length} completed
+            Progress: {completedCount} of {steps.length} completed
           </span>
           <div className="flex items-center gap-2">
             <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-green-500 transition-all duration-300"
                 style={{
-                  width: `${(steps.filter(s => s.completed).length / steps.length) * 100}%`
+                  width: `${completionPercentage}%`
                 }}
               />
             </div>
             <span className="font-semibold text-gray-700">
-              {Math.round((steps.filter(s => s.completed).length / steps.length) * 100)}%
+              {completionPercentage}%
             </span>
           </div>
         </div>

@@ -4,7 +4,7 @@
  * Displays the entered questionnaire values for reference on the results page
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuestionFlowStore } from '../../questionnaire/store';
 import type { QuestionDefinition } from '../../questionnaire/types';
 
@@ -17,14 +17,19 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
 }) => {
   const { answers, flow } = useQuestionFlowStore();
 
-  // Get all questions from the flow to display them in order
-  const questions = flow ? Array.from(flow.nodes.values()) : [];
+  // Memoize the expensive filtering operations
+  const answeredQuestions = useMemo(() => {
+    if (!flow) return [];
 
-  // Filter to only show questions that have answers
-  const answeredQuestions = questions.filter((node: { question: QuestionDefinition }) => {
-    const answer = answers.get(node.question.id);
-    return answer && answer.value !== null && answer.value !== undefined && answer.value !== '';
-  });
+    // Get all questions from the flow to display them in order
+    const questions = Array.from(flow.nodes.values());
+
+    // Filter to only show questions that have answers
+    return questions.filter((node: { question: QuestionDefinition }) => {
+      const answer = answers.get(node.question.id);
+      return answer && answer.value !== null && answer.value !== undefined && answer.value !== '';
+    });
+  }, [answers, flow]);
 
   if (answeredQuestions.length === 0) {
     return null;

@@ -4,7 +4,7 @@
  * Displays overview of eligibility results across all programs
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EligibilityResults, EligibilityStatus } from './types';
 import * as Progress from '@radix-ui/react-progress';
 
@@ -27,16 +27,20 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
   const DEFAULT_BUTTON_STYLE = 'bg-white border-gray-200 hover:border-gray-300 text-gray-700';
   const NOT_QUALIFIED_STATUS = 'not-qualified' as const;
 
-  const statusCounts = {
-    qualified: qualified.length,
-    likely: likely.length,
-    maybe: maybe.length,
-    [NOT_QUALIFIED_STATUS]: notQualified.length,
-  };
+  const { statusCounts, qualifiedPercentage } = useMemo(() => {
+    const counts = {
+      qualified: qualified.length,
+      likely: likely.length,
+      maybe: maybe.length,
+      [NOT_QUALIFIED_STATUS]: notQualified.length,
+    };
 
-  const qualifiedPercentage = totalPrograms > 0
-    ? Math.round((qualified.length / totalPrograms) * 100)
-    : 0;
+    const percentage = totalPrograms > 0
+      ? Math.round((qualified.length / totalPrograms) * 100)
+      : 0;
+
+    return { statusCounts: counts, qualifiedPercentage: percentage };
+  }, [qualified.length, likely.length, maybe.length, notQualified.length, totalPrograms]);
 
   const getStatusColor = (status: EligibilityStatus | 'all'): string => {
     switch (status) {
