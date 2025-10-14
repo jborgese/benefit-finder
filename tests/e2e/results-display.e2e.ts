@@ -406,7 +406,7 @@ test.describe('Results Display - Edge Cases', () => {
     await page.goto('/results?scenario=incomplete-data');
 
     // Should not crash, should show results
-    await expect(page.locator('h2')).toBeVisible();
+    await expect(page.locator('h2:has-text("Your Benefit Eligibility Results")')).toBeVisible();
 
     // Check for error messages or warnings
     const errors = page.locator('text=/error|failed/i');

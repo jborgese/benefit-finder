@@ -80,9 +80,6 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
     <div className="bg-white rounded-lg shadow-md p-6 mb-6 print:shadow-none">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Your Benefit Eligibility Results
-        </h2>
         <p className="text-gray-600 text-sm">
           Evaluated on {evaluatedAt.toLocaleDateString()} at {evaluatedAt.toLocaleTimeString()}
         </p>
@@ -182,7 +179,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           aria-label={`Show ${
             // eslint-disable-next-line security/detect-object-injection
             statusCounts[NOT_QUALIFIED_STATUS]
-          } not qualified programs`}
+            } not qualified programs`}
         >
           <span className={`text-2xl mb-1 ${activeFilter === NOT_QUALIFIED_STATUS ? 'text-gray-800' : 'text-gray-600'}`}>{getStatusIcon(NOT_QUALIFIED_STATUS)}</span>
           <span className="text-sm font-medium">Not Qualified</span>
