@@ -86,6 +86,29 @@ async function fillAgeStepAndSubmit(page: Page): Promise<boolean> {
   return clickNext(page);
 }
 
+// Helper to fill income period step (monthly vs annual)
+async function fillIncomePeriodStep(page: Page): Promise<boolean> {
+  // Try both dropdown select and radio options
+  const selectOption = page.locator('select').first();
+  const radioOption = page.locator('input[type="radio"][value="monthly"]').first();
+
+  // Check if we have a select dropdown
+  if (await selectOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await selectOption.selectOption('monthly');
+    await page.waitForTimeout(300);
+    return clickNext(page);
+  }
+
+  // Check if we have radio buttons
+  if (await radioOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await radioOption.click();
+    await page.waitForTimeout(300);
+    return clickNext(page);
+  }
+
+  return false;
+}
+
 // Helper to navigate to results through the app flow
 async function navigateToResults(page: Page): Promise<void> {
   await page.goto('/');
@@ -101,16 +124,23 @@ async function navigateToResults(page: Page): Promise<void> {
   }
 
   // Fill questionnaire steps sequentially
+  // Step 1: Household size
   const householdFilled = await fillHouseholdStep(page);
   if (!householdFilled) return;
 
+  // Step 2: Income period (monthly vs annual)
+  const incomePeriodFilled = await fillIncomePeriodStep(page);
+  if (!incomePeriodFilled) return;
+
+  // Step 3: Income amount
   const incomeFilled = await fillIncomeStep(page);
   if (!incomeFilled) return;
 
+  // Step 4: Age
   await fillAgeStepAndSubmit(page);
 
   // Wait for results page to load
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(1500);
 }
 
 test.describe('Results Export', () => {
@@ -304,16 +334,16 @@ test.describe('PDF Export', () => {
     await navigateToResults(page);
   });
 
-  test('should show print button', async ({ page }) => {
-    const printButton = page.locator('button:has-text("Print"), button:has-text("PDF")').first();
-    await expect(printButton).toBeVisible();
+  test('should show PDF export button', async ({ page }) => {
+    const pdfButton = page.locator('button:has-text("Export to PDF")').first();
+    await expect(pdfButton).toBeVisible();
   });
 
-  test('should trigger print when clicked', async ({ page }) => {
+  test('should trigger print when PDF export clicked', async ({ page }) => {
 
-    const printButton = page.locator('button:has-text("Print"), button:has-text("PDF")').first();
+    const pdfButton = page.locator('button:has-text("Export to PDF")').first();
 
-    if (await printButton.isVisible()) {
+    if (await pdfButton.isVisible()) {
       // Set up print event listener
       let printCalled = false;
       await page.evaluate(() => {

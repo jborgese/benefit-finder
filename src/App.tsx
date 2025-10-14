@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { EnhancedQuestionnaire } from './questionnaire/ui';
-import { ResultsSummary, ProgramCard, ResultsExport, QuestionnaireAnswersCard } from './components/results';
+import { ResultsSummary, ProgramCard, ResultsExport, ResultsImport, QuestionnaireAnswersCard } from './components/results';
 import { useResultsManagement } from './components/results/useResultsManagement';
+import { useEffect } from 'react';
 import { Button } from './components/Button';
 import { LiveRegion } from './questionnaire/accessibility';
 import type { QuestionFlow, FlowNode } from './questionnaire/types';
@@ -359,7 +360,21 @@ function App(): React.ReactElement {
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const { saveResults } = useResultsManagement();
+  const { saveResults, savedResults, loadAllResults } = useResultsManagement();
+
+  // Check for existing results on app startup
+  useEffect(() => {
+    const checkExistingResults = async () => {
+      try {
+        const results = await loadAllResults();
+        setHasResults(results.length > 0);
+      } catch (error) {
+        console.error('Failed to check for existing results:', error);
+      }
+    };
+
+    checkExistingResults();
+  }, [loadAllResults]);
 
   // Development helper - make clearDatabase available globally
   if (import.meta.env.DEV) {
@@ -756,6 +771,7 @@ function App(): React.ReactElement {
                     New Assessment
                   </Button>
                   <ResultsExport results={sampleResults} />
+                  <ResultsImport onImport={(results) => setSampleResults(results)} />
                 </div>
               </div>
             </div>

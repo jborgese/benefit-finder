@@ -41,37 +41,38 @@
     "build": "tsc && vite build",
     "build:analyze": "vite build --config vite.config.performance.ts",
     "preview": "vite preview",
-        "test": "vitest",
-        "test:ui": "vitest --ui",
-        "test:run": "vitest run",
-        "test:related": "vitest related --run",
-        "test:smart": "node scripts/test-related.js",
-        "test:coverage": "vitest run --coverage",
-        "test:watch": "vitest watch",
-        "test:e2e": "playwright test",
-        "test:e2e:ui": "playwright test --ui",
-        "test:e2e:headed": "playwright test --headed",
-        "test:e2e:debug": "playwright test --debug",
-        "test:e2e:report": "playwright show-report",
-        "test:e2e:core": "playwright test --project=chromium --grep=\"should load successfully|should display main content\"",
-        "test:e2e:changed": "playwright test",
-        "test:a11y": "playwright test --project=a11y",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:related": "vitest related --run",
+    "test:smart": "node scripts/test-related.js",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:core": "playwright test --grep=\"@smoke\" --project=chromium --project=firefox --project=webkit",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "test:e2e:changed": "playwright test",
+    "test:a11y": "playwright test --project=a11y",
     "test:perf": "tsx scripts/performance-tests.ts",
     "lint": "eslint . --no-cache",
     "lint:fix": "eslint . --fix",
     "validate-rules": "tsx scripts/validate-rules.ts"
   },
-    "lint-staged": {
-        "*.{ts,tsx}": [
-            "eslint --fix --max-warnings=0"
-        ],
-        "src/rules/**/*.json": [
-            "npm run validate-rules"
-        ],
-        "tests/e2e/**/*.e2e.{ts,tsx}": [
-            "echo 'E2E tests will run in CI/CD pipeline'"
-        ]
-    },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings=0"
+    ],
+    "src/rules/**/*.json": [
+      "npm run validate-rules"
+    ],
+    "tests/e2e/**/*.e2e.{ts,tsx}": [
+      "echo 'E2E tests will run in CI/CD pipeline'"
+    ]
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@eslint/js": "^9.36.0",

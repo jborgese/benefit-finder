@@ -33,31 +33,33 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
       className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors print:break-inside-avoid"
     >
       <div className="flex items-start gap-3">
-        {/* Checkbox */}
+        {/* Checkbox - with minimum 44px touch target */}
         <div className="flex-shrink-0 mt-1 print:hidden">
-          <Checkbox.Root
-            id={doc.id}
-            checked={doc.obtained ?? false}
-            onCheckedChange={(checked) => handleCheckboxChange(doc.id, checked === true)}
-            className="w-6 h-6 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 transition-colors"
-            aria-label={`Mark ${doc.name} as obtained`}
-          >
-            <Checkbox.Indicator>
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={3}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </Checkbox.Indicator>
-          </Checkbox.Root>
+          <div className="relative">
+            <Checkbox.Root
+              id={doc.id}
+              checked={doc.obtained ?? false}
+              onCheckedChange={(checked) => handleCheckboxChange(doc.id, checked === true)}
+              className="w-6 h-6 rounded border-2 border-gray-300 flex items-center justify-center bg-white hover:border-blue-500 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 transition-colors min-w-[44px] min-h-[44px]"
+              aria-label={`Mark ${doc.name} as obtained`}
+            >
+              <Checkbox.Indicator>
+                <svg
+                  className="w-4 h-4 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </Checkbox.Indicator>
+            </Checkbox.Root>
+          </div>
         </div>
 
         {/* Document Info */}

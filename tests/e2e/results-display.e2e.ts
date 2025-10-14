@@ -319,8 +319,8 @@ test.describe('Results Display', () => {
     if (await benefitDisplay.isVisible()) {
       await expect(benefitDisplay).toBeVisible();
 
-      // Check amount format
-      await expect(page.locator('text=/\\$\\d+.*\\/month|\\$\\d+.*\\/year/')).toBeVisible();
+      // Check amount format (exclude example text with "e.g.")
+      await expect(page.locator('text=/\\$\\d+\\/monthly|\\$\\d+\\/year/').first()).toBeVisible();
     }
   });
 

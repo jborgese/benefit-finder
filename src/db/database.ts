@@ -43,7 +43,13 @@ interface WindowWithDevUtils extends Window {
 // Add RxDB plugins
 // Note: Encryption is handled by wrappedKeyEncryptionCryptoJsStorage wrapper
 // which is configured when creating the database with a password
-if (import.meta.env.DEV) {
+// Only enable dev-mode plugin when not running in E2E tests (to avoid external iframe requests)
+const isE2ETest = typeof window !== 'undefined' && window.location.hostname === 'localhost' &&
+                  (window.navigator.userAgent.includes('HeadlessChrome') ||
+                   window.navigator.userAgent.includes('Firefox') ||
+                   window.navigator.webdriver === true);
+
+if (import.meta.env.DEV && !isE2ETest) {
   addRxPlugin(RxDBDevModePlugin);
   // Disable verbose dev-mode warnings to keep console clean
   // The plugin will still perform validation checks
