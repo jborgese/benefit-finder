@@ -9,7 +9,7 @@ import type { QuestionFlow, FlowNode } from './questionnaire/types';
 
 // Import database functions statically to avoid dynamic import issues
 import { initializeDatabase, getDatabase, clearDatabase } from './db';
-import { createBenefitProgram, createUserProfile } from './db/utils';
+import { createUserProfile } from './db/utils';
 import { importRulePackage } from './rules/import-export';
 import { evaluateAllPrograms, type EligibilityEvaluationResult } from './rules';
 
@@ -63,7 +63,6 @@ async function initializeApp(): Promise<void> {
     // Load sample benefit programs
 
     // Create SNAP program with explicit ID to match rules
-    const db = getDatabase();
     await db.benefit_programs.insert({
       id: 'snap-federal',
       name: 'Supplemental Nutrition Assistance Program (SNAP)',
