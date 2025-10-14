@@ -714,98 +714,98 @@ function App(): React.ReactElement {
           <div>
             {currentResults ? (
               <div>
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h2 className="text-2xl font-bold">Your Benefit Eligibility Results</h2>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={handleNewAssessment}
-                    aria-label="Start new assessment"
-                    className="w-full sm:w-auto"
-                  >
-                    New Assessment
-                  </Button>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <ResultsExport results={currentResults!} />
-                    <ResultsImport onImport={(results) => void handleImportResults(results)} />
+                <div className="mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h2 className="text-2xl font-bold">Your Benefit Eligibility Results</h2>
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+                      <Button
+                        variant="secondary"
+                        onClick={handleNewAssessment}
+                        aria-label="Start new assessment"
+                        className="w-full sm:w-auto"
+                      >
+                        New Assessment
+                      </Button>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <ResultsExport results={currentResults} />
+                        <ResultsImport onImport={(results) => void handleImportResults(results)} />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <ResultsSummary results={currentResults!} />
+                <ResultsSummary results={currentResults} />
 
-            <QuestionnaireAnswersCard />
+                <QuestionnaireAnswersCard />
 
-            <div className="mt-8 space-y-6">
-              {currentResults!.qualified.map((result) => (
-                <ProgramCard
-                  key={result.programId}
-                  result={result}
-                  className="max-w-4xl mx-auto"
-                />
-              ))}
-            </div>
-
-            {/* Helpful links for accessibility */}
-            <div className="mt-8 bg-slate-800 rounded-lg p-6 max-w-4xl mx-auto">
-              <h3 className="text-lg font-semibold mb-4">Additional Resources</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium mb-2">Government Resources</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li>
-                      <a
-                        href="https://www.benefits.gov"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 underline"
-                        aria-label="Visit Benefits.gov to learn about federal benefits"
-                      >
-                        Benefits.gov - Federal Benefits Information
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="https://www.usa.gov/benefits"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 underline"
-                        aria-label="Visit USA.gov benefits page for comprehensive benefit information"
-                      >
-                        USA.gov - Government Benefits Guide
-                      </a>
-                    </li>
-                  </ul>
+                <div className="mt-8 space-y-6">
+                  {currentResults.qualified.map((result) => (
+                    <ProgramCard
+                      key={result.programId}
+                      result={result}
+                      className="max-w-4xl mx-auto"
+                    />
+                  ))}
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">Support & Assistance</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li>
-                      <a
-                        href="tel:211"
-                        className="text-blue-400 hover:text-blue-300 underline"
-                        aria-label="Call 211 for local assistance with benefits and services"
-                      >
-                        211 - Local Assistance Hotline
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="https://www.healthcare.gov"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 underline"
-                        aria-label="Visit Healthcare.gov for health insurance information"
-                      >
-                        Healthcare.gov - Health Insurance
-                      </a>
-                    </li>
-                  </ul>
+
+                {/* Helpful links for accessibility */}
+                <div className="mt-8 bg-slate-800 rounded-lg p-6 max-w-4xl mx-auto">
+                  <h3 className="text-lg font-semibold mb-4">Additional Resources</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Government Resources</h4>
+                      <ul className="space-y-2 text-sm">
+                        <li>
+                          <a
+                            href="https://www.benefits.gov"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 underline"
+                            aria-label="Visit Benefits.gov to learn about federal benefits"
+                          >
+                            Benefits.gov - Federal Benefits Information
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="https://www.usa.gov/benefits"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 underline"
+                            aria-label="Visit USA.gov benefits page for comprehensive benefit information"
+                          >
+                            USA.gov - Government Benefits Guide
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Support & Assistance</h4>
+                      <ul className="space-y-2 text-sm">
+                        <li>
+                          <a
+                            href="tel:211"
+                            className="text-blue-400 hover:text-blue-300 underline"
+                            aria-label="Call 211 for local assistance with benefits and services"
+                          >
+                            211 - Local Assistance Hotline
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="https://www.healthcare.gov"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 underline"
+                            aria-label="Visit Healthcare.gov for health insurance information"
+                          >
+                            Healthcare.gov - Health Insurance
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm border p-8 text-center max-w-2xl mx-auto">
