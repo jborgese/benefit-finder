@@ -32,6 +32,31 @@ function getUserFriendlyRuleDescription(ruleCode: string, calculations?: Array<{
     }
   }
 
+  // Handle program identifiers (like "medicaid federal", "snap federal")
+  const programIdentifierMappings: Record<string, string> = {
+    'medicaid federal': 'Federal Medicaid eligibility requirements including income limits, household size requirements, and citizenship status',
+    'snap federal': 'Federal SNAP (Food Stamps) eligibility requirements including income limits, asset limits, work requirements, and household composition',
+    'medicaid': 'Medicaid eligibility requirements including income limits, household size requirements, and citizenship status',
+    'snap': 'SNAP (Food Stamps) eligibility requirements including income limits, asset limits, work requirements, and household composition',
+    'wic federal': 'Federal WIC eligibility requirements including income limits, nutritional risk assessment, and participant category requirements',
+    'wic': 'WIC eligibility requirements including income limits, nutritional risk assessment, and participant category requirements',
+    'tanf federal': 'Federal TANF eligibility requirements including income limits, asset limits, work participation requirements, and time limits',
+    'tanf': 'TANF eligibility requirements including income limits, asset limits, work participation requirements, and time limits',
+    'housing federal': 'Federal housing assistance eligibility requirements including income limits, household size requirements, and citizenship status',
+    'housing': 'Housing assistance eligibility requirements including income limits, household size requirements, and citizenship status',
+    'liheap federal': 'Federal LIHEAP eligibility requirements including income limits and household composition',
+    'liheap': 'LIHEAP eligibility requirements including income limits and household composition',
+    'childcare federal': 'Federal childcare assistance eligibility requirements including income limits and work/education requirements',
+    'childcare': 'Childcare assistance eligibility requirements including income limits and work/education requirements',
+  };
+
+  // Check for program identifier match (case insensitive)
+  const lowerRuleCode = ruleCode.toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(programIdentifierMappings, lowerRuleCode)) {
+    // eslint-disable-next-line security/detect-object-injection -- lowerRuleCode is validated via hasOwnProperty check
+    return programIdentifierMappings[lowerRuleCode];
+  }
+
   // Common rule patterns with more specific descriptions
   const ruleDescriptions: Record<string, string> = {
     // SNAP rules
