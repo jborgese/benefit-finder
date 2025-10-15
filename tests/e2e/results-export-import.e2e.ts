@@ -10,7 +10,7 @@ import type { Page } from '@playwright/test';
 
 // Helper to navigate to results page directly
 async function navigateToResults(page: Page): Promise<void> {
-  await page.goto('/results');
+  await page.goto('/results?test=true&playwright=true');
   await page.waitForLoadState('networkidle');
   // Ensure results header is present
   await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")', { timeout: 10000 }).catch(() => {});

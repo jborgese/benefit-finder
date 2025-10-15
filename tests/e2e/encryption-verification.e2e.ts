@@ -12,7 +12,7 @@ import fs from 'fs';
 
 test.describe('Encryption Verification', () => {
   test('should encrypt sensitive data when saving', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Save results
     const saveButton = page.locator('button:has-text("Save")').first();
@@ -45,7 +45,7 @@ test.describe('Encryption Verification', () => {
   });
 
   test('should create encrypted export file', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     const exportButton = page.locator('button:has-text("Export Encrypted File")');
 
@@ -104,7 +104,7 @@ test.describe('Encryption Verification', () => {
   });
 
   test('should require file and password for import', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     const importButton = page.locator('button:has-text("Import Results")');
 
@@ -133,7 +133,7 @@ test.describe('Encryption Verification', () => {
     // E2E can verify UI flow works
 
     // Go directly to results page to test encryption features
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
 
@@ -153,7 +153,7 @@ test.describe('Encryption Verification', () => {
 
 test.describe('Encryption - Security Checks', () => {
   test('should not expose password in DOM or console', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Set up console monitoring
     const consoleMessages: string[] = [];
@@ -192,7 +192,7 @@ test.describe('Encryption - Security Checks', () => {
   });
 
   test('should use Web Crypto API for encryption', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Verify Web Crypto API is available
     const hasCryptoAPI = await page.evaluate(() => {
@@ -219,7 +219,7 @@ test.describe('Encryption - Security Checks', () => {
     const encryptedOutputs: string[] = [];
 
     for (let i = 0; i < 2; i++) {
-      await page.goto('/results');
+      await page.goto('/results?test=true&playwright=true');
 
       const exportButton = page.locator('button:has-text("Export Encrypted File")');
 
@@ -255,7 +255,7 @@ test.describe('Encryption - Security Checks', () => {
   });
 
   test('should not store decryption keys in localStorage', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Check localStorage doesn't contain encryption keys after normal operations
     const localStorageContents = await page.evaluate(() => {
@@ -288,7 +288,7 @@ test.describe('Encryption - Data Protection', () => {
       requests.push(request.url());
     });
 
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Perform various operations
     const saveButton = page.locator('button:has-text("Save")').first();
@@ -343,7 +343,7 @@ test.describe('Encryption - Data Protection', () => {
       }
     });
 
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Perform all operations
     const buttons = await page.locator('button').all();
@@ -364,7 +364,7 @@ test.describe('Encryption - Data Protection', () => {
   });
 
   test('should clear sensitive data on logout/clear', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Save some data
     const saveButton = page.locator('button:has-text("Save")').first();

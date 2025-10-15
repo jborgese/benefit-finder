@@ -110,7 +110,7 @@ async function _fillAgeStepAndSubmit(page: Page): Promise<boolean> {
 
 // Helper to navigate to results page directly (faster, avoids flakiness in FF)
 async function navigateToResults(page: Page): Promise<void> {
-  await page.goto('/results');
+  await page.goto('/results?test=true&playwright=true');
   await page.waitForLoadState('networkidle');
   // Ensure results header is present
   await page.waitForSelector('h2:has-text("Your Benefit Eligibility Results")', { timeout: 10000 }).catch(() => {});
@@ -366,7 +366,7 @@ test.describe('Results Display', () => {
 
 test.describe('Results Display - Edge Cases', () => {
   test('should handle very long program names', async ({ page }) => {
-    await page.goto('/results?scenario=long-names');
+    await page.goto('/results?test=true&playwright=true&scenario=long-names');
 
     // Program names should be visible and not overflow
     const programName = page.locator('h3').first();
@@ -403,7 +403,7 @@ test.describe('Results Display - Edge Cases', () => {
   });
 
   test('should handle missing data fields gracefully', async ({ page }) => {
-    await page.goto('/results?scenario=incomplete-data');
+    await page.goto('/results?test=true&playwright=true&scenario=incomplete-data');
 
     // Should not crash, should show results
     await expect(page.locator('h2:has-text("Your Benefit Eligibility Results")')).toBeVisible();
@@ -419,7 +419,7 @@ test.describe('Results Display - Edge Cases', () => {
 
 test.describe('Results Display - Print Functionality', () => {
   test('should trigger print dialog', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Look for print button
     const printButton = page.locator('button:has-text("Print"), button:has-text("PDF")').first();
@@ -444,7 +444,7 @@ test.describe('Results Display - Print Functionality', () => {
   });
 
   test('should apply print styles', async ({ page }) => {
-    await page.goto('/results');
+    await page.goto('/results?test=true&playwright=true');
 
     // Emulate print media
     await page.emulateMedia({ media: 'print' });

@@ -7,7 +7,8 @@
 
 import { nanoid } from 'nanoid';
 import { getDatabase } from '../db/database';
-import { evaluateRule, registerBenefitOperators, BENEFIT_OPERATORS } from './evaluator';
+import { registerBenefitOperators } from './evaluator';
+import { evaluateRuleWithDetails, type DetailedEvaluationResult } from './detailedEvaluator';
 import type { EligibilityResult, EligibilityResultDocument, EligibilityRuleDocument, UserProfileDocument } from '../db/schemas';
 import type { JsonLogicData, JsonLogicRule, RuleEvaluationOptions, RuleEvaluationResult } from './types';
 
@@ -315,10 +316,21 @@ function buildEvaluationResult(
   programId: string,
   rule: EligibilityRuleDocument,
   evalResult: RuleEvaluationResult,
+  detailedResult: DetailedEvaluationResult,
   missingFields: string[],
   executionTime: number
 ): EligibilityEvaluationResult {
   const incomplete = missingFields.length > 0;
+
+  // Convert detailed criteria results to the expected format
+  const criteriaResults = detailedResult.criteriaResults?.map(cr => ({
+    criterion: cr.criterion,
+    met: cr.met,
+    value: cr.value,
+    threshold: cr.threshold,
+    comparison: cr.comparison,
+    message: cr.message
+  }));
 
   return {
     profileId,
@@ -327,6 +339,7 @@ function buildEvaluationResult(
     eligible: evalResult.success ? Boolean(evalResult.result) : false,
     confidence: calculateConfidence(evalResult, incomplete),
     reason: generateReason(evalResult, rule, incomplete),
+    criteriaResults,
     missingFields: incomplete ? missingFields : undefined,
     requiredDocuments: rule.requiredDocuments?.map((doc: string) => ({
       document: doc,
@@ -412,10 +425,9 @@ async function evaluateAllRules(
   rules: EligibilityRuleDocument[],
   data: JsonLogicData,
   profileId: string,
-  programId: string,
-  evaluationOptions: Record<string, unknown>
+  programId: string
 ): Promise<{
-  ruleResults: Array<{ rule: EligibilityRuleDocument; evalResult: RuleEvaluationResult; missingFields: string[] }>;
+  ruleResults: Array<{ rule: EligibilityRuleDocument; evalResult: RuleEvaluationResult; missingFields: string[]; detailedResult: DetailedEvaluationResult }>;
   overallEligible: boolean;
   firstFailedRule: EligibilityRuleDocument | null;
   firstFailedResult: RuleEvaluationResult | null;
@@ -425,6 +437,7 @@ async function evaluateAllRules(
     rule: EligibilityRuleDocument;
     evalResult: RuleEvaluationResult;
     missingFields: string[];
+    detailedResult: DetailedEvaluationResult;
   }> = [];
 
   let overallEligible = true;
@@ -440,19 +453,24 @@ async function evaluateAllRules(
     // Add debugging for rule evaluation
     logRuleEvaluation(profileId, programId, rule.id, rule.ruleLogic, data);
 
-    // Evaluate rule with custom operators
-    const evalResult = await evaluateRule(
+    // Use detailed evaluator to capture comparison values
+    const detailedResult = await evaluateRuleWithDetails(
       rule.ruleLogic as JsonLogicRule,
-      data,
-      {
-        ...evaluationOptions,
-        customOperators: BENEFIT_OPERATORS as Record<string, (...args: unknown[]) => unknown>
-      }
+      data
     );
+
+    // Convert to standard evaluation result format
+    const evalResult: RuleEvaluationResult = {
+      result: detailedResult.result,
+      success: detailedResult.success,
+      executionTime: detailedResult.executionTime,
+      error: detailedResult.error,
+      context: detailedResult.context
+    };
 
     logRuleResult(rule.id, evalResult.success, evalResult.result, evalResult.error);
 
-    ruleResults.push({ rule, evalResult, missingFields });
+    ruleResults.push({ rule, evalResult, missingFields, detailedResult });
 
     // Check if this rule passed
     const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
@@ -568,7 +586,7 @@ export async function evaluateEligibility(
       firstFailedRule,
       firstFailedResult,
       allMissingFields
-    } = await evaluateAllRules(rules, data, profileId, programId, opts.evaluationOptions);
+    } = await evaluateAllRules(rules, data, profileId, programId);
 
     const executionTime = performance.now() - startTime;
     const finalMissingFields = Array.from(allMissingFields);
@@ -583,11 +601,13 @@ export async function evaluateEligibility(
     );
 
     // Build result
+    const resultRuleDetails = ruleResults.find(r => r.rule.id === resultRule.id)?.detailedResult;
     const result = buildEvaluationResult(
       profileId,
       programId,
       resultRule,
       combinedEvalResult,
+      resultRuleDetails || { result: combinedEvalResult.result, success: combinedEvalResult.success, executionTime: combinedEvalResult.executionTime },
       finalMissingFields,
       executionTime
     );

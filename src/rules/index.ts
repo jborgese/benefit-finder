@@ -125,6 +125,13 @@ export {
   type BatchEligibilityResult,
 } from './eligibility';
 
+// Detailed Evaluator
+export {
+  evaluateRuleWithDetails,
+  type DetailedEvaluationResult,
+  type DetailedCriterionResult,
+} from './detailedEvaluator';
+
 // Explanation
 export {
   explainResult,
