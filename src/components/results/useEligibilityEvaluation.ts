@@ -296,6 +296,36 @@ function formatFieldName(fieldName: string): string {
 }
 
 /**
+ * Helper to process required fields for rule result
+ */
+function processRequiredFields(rule: RuleDefinition, profile: UserProfile, details: string[]): void {
+  if (!rule.requiredFields?.length) return;
+
+  for (const field of rule.requiredFields) {
+    // eslint-disable-next-line security/detect-object-injection -- field from rule definition, not user input
+    const fieldValue = profile[field];
+    const fieldDescription = formatFieldName(field);
+    const hasValue = fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
+
+    // Debug logging to verify the mapping is working
+    if (import.meta.env.DEV) {
+      console.warn(`🔍 [DEBUG] Field mapping: "${field}" → "${fieldDescription}"`);
+    }
+
+    details.push(`${fieldDescription}: ${hasValue ? 'Met' : 'Not provided'}`);
+  }
+}
+
+/**
+ * Helper to add rule explanation to details
+ */
+function addRuleExplanation(rule: RuleDefinition, passed: boolean, details: string[]): void {
+  if (rule.explanation) {
+    details.push(`${passed ? '✓' : '✗'} ${rule.explanation}`);
+  }
+}
+
+/**
  * Process a single rule evaluation result
  */
 function processRuleResult(
@@ -311,30 +341,10 @@ function processRuleResult(
   }
 
   // Add user-friendly explanation if available
-  if (rule.explanation) {
-    details.push(`${passed ? '✓' : '✗'} ${rule.explanation}`);
-  }
+  addRuleExplanation(rule, passed, details);
 
   // Add user-friendly field status descriptions for required fields
-  if (rule.requiredFields && rule.requiredFields.length > 0) {
-    for (const field of rule.requiredFields) {
-      // eslint-disable-next-line security/detect-object-injection -- field from rule definition, not user input
-      const fieldValue = profile[field];
-      const fieldDescription = formatFieldName(field);
-      const hasValue = fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
-
-      // Debug logging to verify the mapping is working
-      if (import.meta.env.DEV) {
-        console.warn(`🔍 [DEBUG] Field mapping: "${field}" → "${fieldDescription}"`);
-      }
-
-      if (hasValue) {
-        details.push(`${fieldDescription}: Met`);
-      } else {
-        details.push(`${fieldDescription}: Not provided`);
-      }
-    }
-  }
+  processRequiredFields(rule, profile, details);
 
   return passed;
 }

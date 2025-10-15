@@ -15,7 +15,6 @@ let isInitializing = false;
  * Initialize database and load sample data
  * @throws {Error} If database initialization fails after retry
  */
-// eslint-disable-next-line sonarjs/cognitive-complexity -- Complex initialization logic needed for error handling
 export async function initializeApp(): Promise<void> {
   if (import.meta.env.DEV) {
     console.warn('[DEBUG] initializeApp: Starting app initialization');
@@ -161,3 +160,4 @@ async function retryInitialization(): Promise<void> {
   await loadSamplePrograms(retryDb);
   await loadSampleRules();
 }
+

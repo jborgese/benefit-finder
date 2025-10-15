@@ -5,23 +5,335 @@ import { useResultsManagement } from './components/results/useResultsManagement'
 import { useEffect } from 'react';
 import { Button } from './components/Button';
 import { LiveRegion } from './questionnaire/accessibility';
+import type { QuestionFlow, FlowNode } from './questionnaire/types';
 
 // Import database functions statically to avoid dynamic import issues
-import { clearDatabase } from './db';
+import { initializeDatabase, getDatabase, clearDatabase } from './db';
 import { createUserProfile } from './db/utils';
+import { importRulePackage } from './rules/import-export';
 import { evaluateAllPrograms, type EligibilityEvaluationResult } from './rules';
-
-// Import helper functions
-import { formatFieldName } from './utils/fieldMappings';
-import { sampleFlow } from './utils/sampleFlow';
-import { initializeApp } from './utils/appInitialization';
-import { getProgramName, getProgramDescription } from './utils/programHelpers';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
 
+// ============================================================================
+// FIELD NAME MAPPINGS
+// ============================================================================
+
+/**
+ * Maps technical field names to user-friendly descriptions
+ */
+const FIELD_NAME_MAPPINGS: Record<string, string> = {
+  // Demographics
+  'age': 'Your age',
+  'isPregnant': 'Pregnancy status',
+  'hasChildren': 'Whether you have children',
+  'hasQualifyingDisability': 'Qualifying disability status',
+  'isCitizen': 'Citizenship status',
+  'isLegalResident': 'Legal residency status',
+  'ssn': 'Social Security number',
+
+  // Financial
+  'householdIncome': 'Your household\'s monthly income',
+  'householdSize': 'Your household size',
+  'income': 'Your income',
+  'grossIncome': 'Your gross income',
+  'netIncome': 'Your net income',
+  'monthlyIncome': 'Your monthly income',
+  'annualIncome': 'Your annual income',
+  'assets': 'Your household assets',
+  'resources': 'Your available resources',
+  'liquidAssets': 'Your liquid assets',
+  'vehicleValue': 'Your vehicle value',
+  'bankBalance': 'Your bank account balance',
+
+  // Location & State
+  'state': 'Your state of residence',
+  'stateHasExpanded': 'Whether your state has expanded coverage',
+  'zipCode': 'Your ZIP code',
+  'county': 'Your county',
+  'jurisdiction': 'Your location',
+
+  // Program-specific
+  'hasHealthInsurance': 'Current health insurance coverage',
+  'employmentStatus': 'Your employment status',
+  'isStudent': 'Student status',
+  'isVeteran': 'Veteran status',
+  'isSenior': 'Senior status (65+)',
+  'hasMinorChildren': 'Whether you have children under 18',
+
+  // Housing
+  'housingCosts': 'Your housing costs',
+  'rentAmount': 'Your monthly rent',
+  'mortgageAmount': 'Your monthly mortgage',
+  'isHomeless': 'Housing situation',
+
+  // Benefits
+  'receivesSSI': 'Supplemental Security Income (SSI)',
+  'receivesSNAP': 'SNAP benefits',
+  'receivesTANF': 'TANF benefits',
+  'receivesWIC': 'WIC benefits',
+  'receivesUnemployment': 'Unemployment benefits',
+  'livesInState': 'State residency',
+};
+
+/**
+ * Format field name to human-readable description
+ */
+function formatFieldName(fieldName: string): string {
+  // Check if we have a specific mapping for this field
+  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
+    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+  }
+
+  // Fall back to converting camelCase or snake_case to Title Case
+  return fieldName
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .trim();
+}
+
 // Types for evaluation results
 // Removed local type definitions - using types from eligibility module instead
+
+// Flag to prevent multiple simultaneous initializations
+let isInitializing = false;
+
+// Initialize database and load sample data
+// eslint-disable-next-line sonarjs/cognitive-complexity -- Complex initialization logic needed for error handling
+async function initializeApp(): Promise<void> {
+  if (import.meta.env.DEV) {
+    console.warn('[DEBUG] initializeApp: Starting app initialization');
+  }
+
+  // Prevent multiple simultaneous initializations
+  if (isInitializing) {
+    console.warn('[DEBUG] initializeApp: App initialization already in progress, waiting...');
+    // Wait for the current initialization to complete
+    // Poll until the flag is cleared by the other initialization
+    const maxAttempts = 100; // 10 seconds max wait (100ms * 100)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isInitializing is modified asynchronously
+    for (let attempt = 0; attempt < maxAttempts && isInitializing; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return;
+  }
+
+  isInitializing = true;
+  try {
+    if (import.meta.env.DEV) {
+      console.warn('[DEBUG] initializeApp: Initializing database...');
+    }
+    // Initialize database
+    await initializeDatabase();
+
+    const db = getDatabase();
+
+    // Check if we already have programs loaded
+    const existingPrograms = await db.benefit_programs.find().exec();
+    if (existingPrograms.length > 0) {
+      isInitializing = false;
+      return; // Already initialized
+    }
+
+    // Load sample benefit programs
+
+    // Create SNAP program with explicit ID to match rules
+    await db.benefit_programs.insert({
+      id: 'snap-federal',
+      name: 'Supplemental Nutrition Assistance Program (SNAP)',
+      shortName: 'SNAP',
+      description: 'SNAP helps low-income individuals and families buy food',
+      category: 'food',
+      jurisdiction: US_FEDERAL_JURISDICTION,
+      jurisdictionLevel: 'federal',
+      website: 'https://www.fns.usda.gov/snap',
+      phoneNumber: '1-800-221-5689',
+      applicationUrl: 'https://www.benefits.gov/benefit/361',
+      active: true,
+      tags: ['food', 'nutrition', 'ebt'],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
+    });
+
+    // Create Medicaid program with explicit ID to match rules
+    await db.benefit_programs.insert({
+      id: 'medicaid-federal',
+      name: 'Medicaid',
+      shortName: 'Medicaid',
+      description: 'Health coverage for low-income individuals and families',
+      category: 'healthcare',
+      jurisdiction: US_FEDERAL_JURISDICTION,
+      jurisdictionLevel: 'federal',
+      website: 'https://www.medicaid.gov',
+      phoneNumber: '1-800-318-2596',
+      applicationUrl: 'https://www.healthcare.gov',
+      active: true,
+      tags: ['healthcare', 'insurance', 'medical'],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
+    });
+
+    // Load sample rules
+
+    // Import SNAP rules
+    const snapRules = await import('./rules/examples/snap-rules.json');
+    await importRulePackage(snapRules.default);
+
+    // Import Medicaid rules
+    const medicaidRules = await import('./rules/examples/medicaid-federal-rules.json');
+    await importRulePackage(medicaidRules.default);
+
+  } catch (error) {
+    console.error('[DEBUG] initializeApp: Error initializing app:', error);
+
+    // If it's a database initialization error, try clearing and retrying once
+    if (error instanceof Error && error.message.includes('Database initialization failed')) {
+      console.warn('[DEBUG] initializeApp: Attempting to clear database and retry initialization...');
+      try {
+        if (import.meta.env.DEV) {
+          console.warn('[DEBUG] initializeApp: Clearing database...');
+        }
+        await clearDatabase();
+
+        if (import.meta.env.DEV) {
+          console.warn('[DEBUG] initializeApp: Re-initializing database...');
+        }
+        await initializeDatabase();
+
+        const db = getDatabase();
+        const existingPrograms = await db.benefit_programs.find().exec();
+        if (existingPrograms.length > 0) {
+          return; // Already initialized
+        }
+
+        // Load sample data after successful initialization
+        const retryDb = getDatabase();
+        await retryDb.benefit_programs.insert({
+          id: 'snap-federal',
+          name: 'Supplemental Nutrition Assistance Program (SNAP)',
+          shortName: 'SNAP',
+          description: 'SNAP helps low-income individuals and families buy food',
+          category: 'food',
+          jurisdiction: US_FEDERAL_JURISDICTION,
+          jurisdictionLevel: 'federal',
+          website: 'https://www.fns.usda.gov/snap',
+          phoneNumber: '1-800-221-5689',
+          applicationUrl: 'https://www.benefits.gov/benefit/361',
+          active: true,
+          tags: ['food', 'nutrition', 'ebt'],
+          lastUpdated: Date.now(),
+          createdAt: Date.now(),
+        });
+
+        await retryDb.benefit_programs.insert({
+          id: 'medicaid-federal',
+          name: 'Medicaid',
+          shortName: 'Medicaid',
+          description: 'Health coverage for low-income individuals and families',
+          category: 'healthcare',
+          jurisdiction: US_FEDERAL_JURISDICTION,
+          jurisdictionLevel: 'federal',
+          website: 'https://www.medicaid.gov',
+          phoneNumber: '1-800-318-2596',
+          applicationUrl: 'https://www.healthcare.gov',
+          active: true,
+          tags: ['healthcare', 'insurance', 'medical'],
+          lastUpdated: Date.now(),
+          createdAt: Date.now(),
+        });
+
+        // Load sample rules
+        const snapRules = await import('./rules/examples/snap-rules.json');
+        await importRulePackage(snapRules.default);
+
+        const medicaidRules = await import('./rules/examples/medicaid-federal-rules.json');
+        await importRulePackage(medicaidRules.default);
+
+        console.warn('Database initialized successfully after clearing');
+        isInitializing = false;
+        return;
+      } catch (retryError) {
+        console.error('Failed to initialize database after clearing:', retryError);
+        isInitializing = false;
+        throw retryError;
+      }
+    }
+
+    throw error;
+  } finally {
+    // Always reset the initialization flag
+    isInitializing = false;
+  }
+}
+
+// Sample questionnaire flow for testing - helper nodes
+const nodes: FlowNode[] = [
+  {
+    id: 'household-size',
+    question: {
+      id: 'household-size',
+      text: 'How many people are in your household?',
+      inputType: 'number',
+      fieldName: 'householdSize',
+      required: true,
+      min: 1,
+      max: 20
+    },
+    nextId: 'income-period'
+  },
+  {
+    id: 'income-period',
+    question: {
+      id: 'income-period',
+      text: 'How would you like to enter your household income?',
+      description: 'You can enter your income either monthly or annually - whichever is easier for you.',
+      inputType: 'select',
+      fieldName: 'incomePeriod',
+      required: true,
+      options: [
+        { value: 'monthly', label: 'Monthly income (e.g., $3,000/month)' },
+        { value: 'annual', label: 'Annual income (e.g., $36,000/year)' }
+      ]
+    },
+    nextId: 'income'
+  },
+  {
+    id: 'income',
+    question: {
+      id: 'income',
+      text: 'What is your total household income?',
+      inputType: 'currency',
+      fieldName: 'householdIncome',
+      required: true,
+      min: 0
+    },
+    nextId: 'age'
+  },
+  {
+    id: 'age',
+    question: {
+      id: 'age',
+      text: 'What is your age?',
+      inputType: 'number',
+      fieldName: 'age',
+      required: true,
+      min: 0,
+      max: 120
+    },
+    isTerminal: true
+  }
+];
+
+const sampleFlow: QuestionFlow = {
+  id: 'benefit-eligibility',
+  name: 'Benefit Eligibility Assessment',
+  version: '1.0.0',
+  description: 'Complete assessment to check eligibility for government benefits',
+  startNodeId: 'household-size',
+  nodes: new Map(nodes.map(node => [node.id, node]))
+};
 
 
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
@@ -129,35 +441,21 @@ function App(): React.ReactElement {
       const incomePeriod = answers.incomePeriod as string;
       const householdSize = answers.householdSize as number;
       const age = answers.age as number;
-      const state = answers.state as string;
-      const citizenship = answers.citizenship as string;
-      const categories = answers.categories as string[] || [];
 
       // Convert income to annual amount based on user's selection
       const annualIncome = incomePeriod === 'monthly' ? householdIncome * 12 : householdIncome;
 
-      // Parse categorical eligibility selections
-      const isPregnant = categories.includes('pregnant');
-      const hasChildren = categories.includes('has_children');
-      const hasDisability = categories.includes('has_disability');
-      const isVeteran = categories.includes('is_veteran');
-      // Note: needsLongTermCare would need to be added to user profile schema
-
-      // Create user profile from answers - only include fields that were actually collected
+      // Create user profile from answers
       const profileData = {
         householdSize,
         householdIncome: annualIncome,
         incomePeriod: incomePeriod as 'monthly' | 'annual',
         // Set age from date of birth (approximate)
         dateOfBirth: new Date(new Date().getFullYear() - age, 0, 1).toISOString().split('T')[0],
-        state,
-        citizenship: citizenship as 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other',
-        employmentStatus: 'employed' as const, // TODO: Add employment question
-        // Categorical eligibility - only set if user selected them
-        ...(isPregnant && { isPregnant: true }),
-        ...(hasChildren && { hasChildren: true }),
-        ...(hasDisability && { hasDisability: true }),
-        ...(isVeteran && { isVeteran: true }),
+        citizenship: 'us_citizen' as const,
+        employmentStatus: 'employed' as const,
+        // Only include fields that were actually collected from the user
+        // Don't set defaults for fields not asked in questionnaire
       };
 
       // Create user profile and evaluate eligibility
@@ -307,6 +605,24 @@ function App(): React.ReactElement {
     }
   };
 
+  // Helper functions to get program names and descriptions
+  const getProgramName = (programId: string): string => {
+    const names = new Map<string, string>([
+      ['snap-federal', 'Supplemental Nutrition Assistance Program (SNAP)'],
+      ['medicaid-federal', 'Medicaid'],
+      ['wic-federal', 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)'],
+    ]);
+    return names.get(programId) ?? programId;
+  };
+
+  const getProgramDescription = (programId: string): string => {
+    const descriptions = new Map<string, string>([
+      ['snap-federal', 'SNAP helps low-income individuals and families buy food'],
+      ['medicaid-federal', 'Health coverage for low-income individuals and families'],
+      ['wic-federal', 'Provides nutrition assistance to pregnant women, new mothers, and young children'],
+    ]);
+    return descriptions.get(programId) ?? 'Government benefit program';
+  };
 
   const handleViewResults = (): void => {
     setAppState('results');
@@ -479,7 +795,8 @@ function App(): React.ReactElement {
 
         {appState === 'results' && (
           <div>
-            {isProcessingResults ? (
+            {/* Avoid nested ternary by early return pattern */}
+            {isProcessingResults && (
               <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
                 <div className="flex items-center justify-center mb-4">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400" />
@@ -488,7 +805,7 @@ function App(): React.ReactElement {
                   Processing Your Results
                 </h2>
                 <p className="text-slate-300 mb-6">
-                  We're analyzing your eligibility for government benefit programs. This will only take a moment...
+                  We&apos;re analyzing your eligibility for government benefit programs. This will only take a moment...
                 </p>
                 <div className="flex items-center justify-center text-slate-400 text-sm">
                   <div className="animate-pulse">•</div>
@@ -496,7 +813,8 @@ function App(): React.ReactElement {
                   <div className="animate-pulse" style={{ animationDelay: '0.4s' }}>•</div>
                 </div>
               </div>
-            ) : currentResults ? (
+            )}
+            {!isProcessingResults && currentResults ? (
               <div>
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

@@ -73,6 +73,7 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (status === 'unlikely') {
       switch (level) {
         case 'high':
@@ -103,6 +104,7 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
       return 'text-orange-700 bg-orange-100 border-orange-300';
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (status === 'not-qualified') {
       return 'text-gray-700 bg-gray-100 border-gray-300';
     }
@@ -149,6 +151,7 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
       return 'Your eligibility is uncertain. Consider contacting the program for clarification or provide more information.';
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (status === 'unlikely') {
       return 'You probably do not qualify, but there may be special circumstances or additional programs to consider.';
     }

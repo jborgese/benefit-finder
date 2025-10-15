@@ -75,3 +75,4 @@ export function formatFieldName(fieldName: string): string {
     .replace(/\b\w/g, (l) => l.toUpperCase())
     .trim();
 }
+
