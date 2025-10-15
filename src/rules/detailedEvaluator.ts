@@ -6,6 +6,7 @@
  */
 
 import jsonLogic from 'json-logic-js';
+import { getSNAPGrossIncomeLimit } from '../utils/benefitThresholds';
 import type { JsonLogicRule, JsonLogicData, RuleEvaluationResult } from './types';
 
 /**
@@ -102,6 +103,10 @@ function analyzeRule(rule: JsonLogicRule, context: EvaluationContext): void {
   context.depth++;
 
   for (const [operator, operands] of Object.entries(rule)) {
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] Analyzing operator:', operator, 'operands:', operands);
+    }
+
     if (Array.isArray(operands)) {
       analyzeComparison(operator, operands, context);
 
@@ -200,8 +205,8 @@ function analyzeComparison(operator: string, operands: unknown[], context: Evalu
     }
 
     if (typeof income === 'number' && typeof householdSize === 'number') {
-      // SNAP income limit calculation: 130% of FPL
-      const incomeLimit = householdSize * 1696; // Updated to match actual SNAP evaluator
+      // SNAP income limit calculation: 130% of FPL using correct thresholds
+      const incomeLimit = getSNAPGrossIncomeLimit(householdSize);
       const isEligible = income <= incomeLimit;
 
       if (import.meta.env.DEV) {

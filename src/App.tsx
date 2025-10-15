@@ -195,7 +195,7 @@ function App(): React.ReactElement {
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
-            details: formatCriteriaDetails(result.criteriaResults, result.eligible),
+            details: formatCriteriaDetails(result.criteriaResults, result.eligible, result.programId),
             rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
@@ -238,7 +238,7 @@ function App(): React.ReactElement {
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
-            details: formatCriteriaDetails(result.criteriaResults, result.eligible),
+            details: formatCriteriaDetails(result.criteriaResults, result.eligible, result.programId),
             rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
@@ -269,7 +269,7 @@ function App(): React.ReactElement {
           confidenceScore: result.confidence,
           explanation: {
             reason: result.reason,
-            details: formatCriteriaDetails(result.criteriaResults, result.eligible),
+            details: formatCriteriaDetails(result.criteriaResults, result.eligible, result.programId),
             rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
