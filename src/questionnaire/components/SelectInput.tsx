@@ -217,7 +217,7 @@ export const SelectInput: React.FC<SelectProps> = ({
           ${isFocused ? 'ring-2 ring-blue-400/20' : ''}
         `}
       >
-        <option value="" disabled className="text-gray-500">
+        <option value="" disabled>
           {placeholder}
         </option>
 
@@ -226,7 +226,6 @@ export const SelectInput: React.FC<SelectProps> = ({
             key={option.value}
             value={option.value}
             disabled={option.disabled}
-            className={option.disabled ? 'text-gray-400' : 'text-gray-900'}
           >
             {option.icon ? `${option.icon} ${option.label}` : option.label}
           </option>

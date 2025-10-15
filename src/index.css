@@ -94,4 +94,24 @@
   .theme-light .question-input:focus {
     @apply border-blue-500 ring-2 ring-blue-500/20;
   }
+
+  /* Select dropdown option styling for better readability */
+  .question-input option {
+    @apply bg-slate-800 text-slate-100;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .question-input option:disabled {
+    @apply text-slate-500;
+  }
+
+  /* Light theme select options */
+  .theme-light .question-input option {
+    @apply bg-white text-slate-900;
+  }
+
+  .theme-light .question-input option:disabled {
+    @apply text-slate-500;
+  }
 }
