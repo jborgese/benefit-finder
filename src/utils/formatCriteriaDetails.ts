@@ -1,3 +1,4 @@
+import { getSNAPGrossIncomeLimit } from './benefitThresholds';
 import { formatFieldName } from './fieldNameMappings';
 import { formatComparison } from './formatCriteriaValues';
 
@@ -32,10 +33,14 @@ export function formatCriteriaDetails(
     const value = cr.value;
     console.log('[DEBUG] value', value);
 
-    const threshold = cr.threshold;
-    console.log('[DEBUG] threshold', threshold);
-
-    // If we have value and threshold information, show meaningful comparison
+    if (fieldName.includes('household') && fieldName.includes('size')) {
+      // Only use householdSize as a number for SNAP income limit lookup, fallback to 1 if invalid
+      const householdSize = typeof value === 'number' ? value : Number(value);
+      const grossIncomeLimit = getSNAPGrossIncomeLimit(
+        Number.isFinite(householdSize) && householdSize > 0 ? householdSize : 1
+      );
+      console.log('[DEBUG] grossIncomeLimit', grossIncomeLimit);
+    }
     if (cr.value !== undefined && cr.threshold !== undefined) {
       console.log('[DEBUG] cr.value', cr.value);
       console.log('[DEBUG] cr.threshold', cr.threshold);
