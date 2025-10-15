@@ -306,5 +306,20 @@ export default [
       'no-console': 'off',
       'sonarjs/no-duplicate-string': 'off',
     }
+  },
+
+  // Browser JavaScript files (like clear-db.js)
+  {
+    files: ['*.js', '!*.config.js', '!*.config.cjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'script',
+      globals: {
+        ...globals.browser,
+      }
+    },
+    rules: {
+      'no-console': 'off', // Allow console usage for utility scripts
+    }
   }
 ];
