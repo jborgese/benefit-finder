@@ -1,4 +1,5 @@
 import { formatFieldName } from './fieldNameMappings';
+import { formatComparison } from './formatCriteriaValues';
 
 /**
  * Format criteria results into user-friendly explanations
@@ -18,34 +19,31 @@ export function formatCriteriaDetails(
   if (!criteriaResults || criteriaResults.length === 0) {
     return [];
   }
+  console.log('[DEBUG] criteriaResults', criteriaResults);
 
   return criteriaResults.map(cr => {
     const fieldName = formatFieldName(cr.criterion);
+    console.log('[DEBUG] fieldName', fieldName);
 
     // If we have specific comparison details, use them
     if (cr.comparison) {
       return `${fieldName}: ${cr.comparison}`;
     }
+    console.log('[DEBUG] cr.comparison', cr.comparison);
 
     // If we have value and threshold information, show meaningful comparison
     if (cr.value !== undefined && cr.threshold !== undefined) {
-      const valueStr = typeof cr.value === 'number'
-        ? cr.value.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 })
-        : String(cr.value);
-      const thresholdStr = typeof cr.threshold === 'number'
-        ? cr.threshold.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 })
-        : String(cr.threshold);
-
-      if (cr.met && isEligible) {
-        return `${fieldName}: ${valueStr} (within limit of ${thresholdStr})`;
-      } else if (!cr.met && !isEligible) {
-        // Show why they failed
-        if (cr.criterion.toLowerCase().includes('income')) {
-          return `${fieldName}: ${valueStr} exceeds limit of ${thresholdStr}`;
-        } else {
-          return `${fieldName}: ${valueStr} does not meet requirement of ${thresholdStr}`;
-        }
-      }
+      console.log('[DEBUG] cr.value', cr.value);
+      console.log('[DEBUG] cr.threshold', cr.threshold);
+      const comparisonStr = formatComparison(
+        cr.value,
+        cr.threshold,
+        cr.criterion,
+        cr.met,
+        isEligible
+      );
+      console.log('[DEBUG] comparisonStr', comparisonStr);
+      return `${fieldName}: ${comparisonStr}`;
     }
 
     // If we have a specific message, use it

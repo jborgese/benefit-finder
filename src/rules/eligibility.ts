@@ -335,9 +335,6 @@ function buildEvaluationResult(
   }));
 
   if (import.meta.env.DEV) {
-    console.log('🔍 [DEBUG] buildEvaluationResult - Input detailedResult.criteriaResults:', detailedResult.criteriaResults);
-    console.log('🔍 [DEBUG] buildEvaluationResult - Mapped criteriaResults:', criteriaResults);
-    console.log('🔍 [DEBUG] buildEvaluationResult - Individual mapping check:');
     detailedResult.criteriaResults?.forEach((cr, i) => {
       console.log(`  [${i}] Input:`, {
         criterion: cr.criterion,
