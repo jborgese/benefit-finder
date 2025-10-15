@@ -185,23 +185,42 @@ function analyzeComparison(operator: string, operands: unknown[], context: Evalu
 
   // Handle special SNAP income eligibility operator
   if (operator === 'snap_income_eligible' && operands.length >= 2) {
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] SNAP operator detected! Processing snap_income_eligible...');
+    }
+
     const incomeOperand = operands[0];
     const sizeOperand = operands[1];
 
     const income = evaluateOperand(incomeOperand, context.data);
     const householdSize = evaluateOperand(sizeOperand, context.data);
 
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] SNAP operands evaluated:', { income, householdSize });
+    }
+
     if (typeof income === 'number' && typeof householdSize === 'number') {
       // SNAP income limit calculation: 130% of FPL
-      const incomeLimit = householdSize * 1923; // 2024 FPL at 130%
+      const incomeLimit = householdSize * 1696; // Updated to match actual SNAP evaluator
       const isEligible = income <= incomeLimit;
+
+      if (import.meta.env.DEV) {
+        console.log('🔍 [DEBUG] SNAP calculation:', { income, householdSize, incomeLimit, isEligible });
+      }
+
+      const incomeComparison = formatCurrency(income) + (isEligible ? ' is within' : ' exceeds') + ' the limit of ' + formatCurrency(incomeLimit);
+      const sizeComparison = `${householdSize} ${householdSize === 1 ? 'person' : 'people'} (determines income limit)`;
+
+      if (import.meta.env.DEV) {
+        console.log('🔍 [DEBUG] SNAP adding comparisons:', { incomeComparison, sizeComparison });
+      }
 
       context.comparisons.push({
         criterion: 'householdIncome',
         met: isEligible,
         value: income,
         threshold: incomeLimit,
-        comparison: formatCurrency(income) + (isEligible ? ' is within' : ' exceeds') + ' the limit of ' + formatCurrency(incomeLimit),
+        comparison: incomeComparison,
         operator: 'snap_income_eligible'
       });
 
@@ -210,9 +229,26 @@ function analyzeComparison(operator: string, operands: unknown[], context: Evalu
         met: true, // Size itself doesn't fail, it affects the calculation
         value: householdSize,
         threshold: householdSize,
-        comparison: `${householdSize} ${householdSize === 1 ? 'person' : 'people'} (determines income limit)`,
+        comparison: sizeComparison,
         operator: 'household_size'
       });
+
+      if (import.meta.env.DEV) {
+        console.log('🔍 [DEBUG] SNAP comparisons added. Total comparisons now:', context.comparisons.length);
+        console.log('🔍 [DEBUG] SNAP - All comparisons in context:', context.comparisons.map((c, i) => ({
+          index: i,
+          criterion: c.criterion,
+          met: c.met,
+          value: c.value,
+          threshold: c.threshold,
+          comparison: c.comparison,
+          operator: c.operator
+        })));
+      }
+    } else {
+      if (import.meta.env.DEV) {
+        console.log('🔍 [DEBUG] SNAP operands not numbers:', { income: typeof income, householdSize: typeof householdSize });
+      }
     }
   }
 }

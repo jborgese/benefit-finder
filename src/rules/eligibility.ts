@@ -38,6 +38,8 @@ export interface EligibilityEvaluationResult {
     met: boolean;
     value?: unknown;
     threshold?: unknown;
+    comparison?: string;
+    message?: string;
     description?: string;
   }>;
   /** Missing information */
@@ -332,6 +334,28 @@ function buildEvaluationResult(
     message: cr.message
   }));
 
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] buildEvaluationResult - Input detailedResult.criteriaResults:', detailedResult.criteriaResults);
+    console.log('🔍 [DEBUG] buildEvaluationResult - Mapped criteriaResults:', criteriaResults);
+    console.log('🔍 [DEBUG] buildEvaluationResult - Individual mapping check:');
+    detailedResult.criteriaResults?.forEach((cr, i) => {
+      console.log(`  [${i}] Input:`, {
+        criterion: cr.criterion,
+        comparison: cr.comparison,
+        threshold: cr.threshold,
+        value: cr.value,
+        met: cr.met
+      });
+      console.log(`  [${i}] Output:`, {
+        criterion: criteriaResults?.[i]?.criterion,
+        comparison: criteriaResults?.[i]?.comparison,
+        threshold: criteriaResults?.[i]?.threshold,
+        value: criteriaResults?.[i]?.value,
+        met: criteriaResults?.[i]?.met
+      });
+    });
+  }
+
   return {
     profileId,
     programId,
@@ -602,15 +626,40 @@ export async function evaluateEligibility(
 
     // Build result
     const resultRuleDetails = ruleResults.find(r => r.rule.id === resultRule.id)?.detailedResult;
+
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] Building final result for rule:', resultRule.id);
+      console.log('🔍 [DEBUG] Result rule details found:', !!resultRuleDetails);
+      console.log('🔍 [DEBUG] Result rule details:', resultRuleDetails);
+      if (resultRuleDetails?.criteriaResults) {
+        console.log('🔍 [DEBUG] Criteria results count:', resultRuleDetails.criteriaResults.length);
+        console.log('🔍 [DEBUG] Criteria results:', resultRuleDetails.criteriaResults);
+      }
+    }
+
     const result = buildEvaluationResult(
       profileId,
       programId,
       resultRule,
       combinedEvalResult,
-      resultRuleDetails || { result: combinedEvalResult.result, success: combinedEvalResult.success, executionTime: combinedEvalResult.executionTime },
+      resultRuleDetails || {
+        result: combinedEvalResult.result,
+        success: combinedEvalResult.success,
+        executionTime: combinedEvalResult.executionTime,
+        criteriaResults: []
+      },
       finalMissingFields,
       executionTime
     );
+
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] Final built result:', {
+        ruleId: result.ruleId,
+        eligible: result.eligible,
+        criteriaResults: result.criteriaResults,
+        criteriaResultsCount: result.criteriaResults?.length || 0
+      });
+    }
 
     if (import.meta.env.DEV) {
       console.warn(`🔍 [DEBUG] evaluateEligibility: Built result for ${programId}:`, {
