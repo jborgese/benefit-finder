@@ -5,585 +5,75 @@
  * Integrates rule evaluation, result caching, and result generation.
  */
 
-import { nanoid } from 'nanoid';
 import { getDatabase } from '../db/database';
-import { registerBenefitOperators } from './evaluator';
-import { evaluateRuleWithDetails, type DetailedEvaluationResult } from './detailedEvaluator';
-import type { EligibilityResult, EligibilityResultDocument, EligibilityRuleDocument, UserProfileDocument } from '../db/schemas';
-import type { JsonLogicData, JsonLogicRule, RuleEvaluationOptions, RuleEvaluationResult } from './types';
+import type { DetailedEvaluationResult } from './detailedEvaluator';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+// Import types
+import type {
+  EligibilityEvaluationResult,
+  EligibilityEvaluationOptions,
+  BatchEligibilityResult,
+} from './eligibility/types';
 
-/**
- * Eligibility evaluation result (extended)
- */
-export interface EligibilityEvaluationResult {
-  /** Profile ID */
-  profileId: string;
-  /** Program ID */
-  programId: string;
-  /** Rule ID used */
-  ruleId: string;
-  /** Is user eligible */
-  eligible: boolean;
-  /** Confidence score (0-100) */
-  confidence: number;
-  /** Human-readable reason */
-  reason: string;
-  /** Detailed criteria breakdown */
-  criteriaResults?: Array<{
-    criterion: string;
-    met: boolean;
-    value?: unknown;
-    threshold?: unknown;
-    comparison?: string;
-    message?: string;
-    description?: string;
-  }>;
-  /** Missing information */
-  missingFields?: string[];
-  /** Required documents */
-  requiredDocuments?: Array<{
-    document: string;
-    description?: string;
-    where?: string;
-  }>;
-  /** Next steps */
-  nextSteps?: Array<{
-    step: string;
-    url?: string;
-    priority?: 'high' | 'medium' | 'low';
-  }>;
-  /** Benefit estimate */
-  estimatedBenefit?: {
-    amount?: number;
-    frequency?: 'one_time' | 'monthly' | 'quarterly' | 'annual';
-    description?: string;
-  };
-  /** Evaluation metadata */
-  evaluatedAt: number;
-  executionTime?: number;
-  ruleVersion?: string;
-  /** Needs manual review */
-  needsReview?: boolean;
-  /** Incomplete data */
-  incomplete?: boolean;
-}
+// Import helper functions
+import { checkCache, cacheResult } from './eligibility/cache';
+import {
+  getEvaluationEntities,
+  getAllProgramRuleIds,
+  evaluateAllRules,
+  selectResultRule,
+  buildEvaluationResult,
+  buildErrorResult,
+  prepareDataContext,
+  ensureOperatorsRegistered
+} from './eligibility/evaluation';
+import { generateCriteriaBreakdown } from './eligibility/utils';
+import { ensureSNAPRulesAreCorrect } from './eligibility/snap';
 
-/**
- * Eligibility evaluation options
- */
-export interface EligibilityEvaluationOptions {
-  /** Cache result in database */
-  cacheResult?: boolean;
-  /** Include detailed breakdown */
-  includeBreakdown?: boolean;
-  /** Force re-evaluation (ignore cache) */
-  forceReEvaluation?: boolean;
-  /** Result expiration time (milliseconds) */
-  expiresIn?: number;
-  /** Custom evaluation options */
-  evaluationOptions?: Partial<RuleEvaluationOptions>;
-}
+// Re-export types
+export type {
+  EligibilityEvaluationResult,
+  EligibilityEvaluationOptions,
+  BatchEligibilityResult,
+};
 
-/**
- * Batch eligibility result
- */
-export interface BatchEligibilityResult {
-  /** Profile ID */
-  profileId: string;
-  /** Results by program */
-  programResults: Map<string, EligibilityEvaluationResult>;
-  /** Summary statistics */
-  summary: {
-    total: number;
-    eligible: number;
-    ineligible: number;
-    incomplete: number;
-    needsReview: number;
-  };
-  /** Total execution time */
-  totalTime: number;
-}
+// Re-export helper functions
+export { getAllProgramRuleIds, ensureSNAPRulesAreCorrect };
 
-// ============================================================================
-// INITIALIZATION
-// ============================================================================
-
-let operatorsRegistered = false;
-
-/**
- * Ensure custom operators are registered
- */
-function ensureOperatorsRegistered(): void {
-  if (!operatorsRegistered) {
-    registerBenefitOperators();
-    operatorsRegistered = true;
-  }
-}
-
-// ============================================================================
-// ELIGIBILITY EVALUATION
-// ============================================================================
-
-/**
- * Check cache and return valid cached result if available
- */
-async function checkCache(
-  profileId: string,
-  programId: string,
-  startTime: number,
-  forceReEvaluation: boolean
-): Promise<EligibilityEvaluationResult | null> {
-  if (forceReEvaluation) {
-    return null;
-  }
-
-  const cached = await getCachedResult(profileId, programId);
-  if (!cached) {
-    return null;
-  }
-
-  const isExpired = cached.expiresAt ? Date.now() > cached.expiresAt : false;
-  if (isExpired) {
-    return null;
-  }
-
-  const endTime = performance.now();
-  const cachedData = cached.toJSON();
-  return {
-    ...cachedData,
-    profileId: cachedData.userProfileId,
-    missingFields: cachedData.missingFields ? Array.from(cachedData.missingFields) : [],
-    executionTime: endTime - startTime,
-  } as EligibilityEvaluationResult;
-}
-
-/**
- * Retrieve and validate required entities from database
- */
-async function getEvaluationEntities(
-  profileId: string,
-  programId: string
-): Promise<{
-  profile: UserProfileDocument;
-  rules: EligibilityRuleDocument[];
-}> {
-  const db = getDatabase();
-
-  // Get user profile
-  const profile = await db.user_profiles.findOne(profileId).exec();
-  if (!profile) {
-    throw new Error(`Profile ${profileId} not found`);
-  }
-
-  // Get program
-  const program = await db.benefit_programs.findOne(programId).exec();
-  if (!program) {
-    throw new Error(`Program ${programId} not found`);
-  }
-
-  // Get active rules for program
-  const rules: EligibilityRuleDocument[] = await db.eligibility_rules.findRulesByProgram(programId);
-  if (rules.length === 0) {
-    throw new Error(`No active rules found for program ${programId}`);
-  }
-
-  // Sort rules by priority (highest first) for consistent evaluation order
-  const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
+// Global debug log utility
+function debugLog(...args: unknown[]): void {
   if (import.meta.env.DEV) {
-    console.warn('🔍 [DEBUG] getEvaluationEntities: Retrieved entities:', {
-      profileId,
-      programId,
-      programName: program.name,
-      profileData: {
-        householdIncome: profile.householdIncome,
-        householdSize: profile.householdSize,
-        citizenship: profile.citizenship
-      },
-      rulesFound: rules.length,
-      allRules: sortedRules.map(r => ({
-        id: r.id,
-        name: r.name,
-        priority: r.priority,
-        active: r.active,
-        ruleLogic: `${JSON.stringify(r.ruleLogic, null, 2).substring(0, 100)}...`
-      }))
-    });
-  }
-
-  return { profile, rules: sortedRules };
-}
-
-/**
- * Check if SNAP rules are using the correct logic and reload if needed
- */
-/**
- * Get all active rules for a program (for displaying program requirements)
- *
- * @param programId Program ID
- * @returns Array of rule IDs for the program
- */
-export async function getAllProgramRuleIds(programId: string): Promise<string[]> {
-  try {
-    const db = getDatabase();
-    const rules: EligibilityRuleDocument[] = await db.eligibility_rules.findRulesByProgram(programId);
-
-    // Sort by priority (highest first) for consistent order
-    const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
-    return sortedRules.map(rule => rule.id);
-  } catch (error) {
-    console.warn(`Failed to get program rules for ${programId}:`, error);
-    return [];
+    // eslint-disable-next-line no-console
+    console.debug('[Eligibility Debug]', ...args);
   }
 }
 
-export async function ensureSNAPRulesAreCorrect(): Promise<void> {
-  if (import.meta.env.DEV) {
-    console.warn('🔍 [DEBUG] ensureSNAPRulesAreCorrect: Checking SNAP rules...');
-  }
+// ============================================================================
+// MAIN EVALUATION FUNCTIONS
+// ============================================================================
 
-  const db = getDatabase();
 
-  try {
-    // Get SNAP rules from database
-    const snapRules = await db.eligibility_rules.findRulesByProgram('snap-federal');
 
-    if (snapRules.length === 0) {
-      if (import.meta.env.DEV) {
-        console.warn('🔍 [DEBUG] ensureSNAPRulesAreCorrect: No SNAP rules found in database');
-      }
-      return;
-    }
 
-    // Check if any rule is using the old incorrect logic
-    const hasIncorrectRule = snapRules.some(rule => {
-      const { ruleLogic } = rule;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Array check is necessary for runtime safety
-      if (typeof ruleLogic !== 'object' || ruleLogic === null || Array.isArray(ruleLogic)) {
-        return false;
-      }
-
-      const lessOrEqual = ruleLogic['<='];
-      if (!Array.isArray(lessOrEqual)) {
-        return false;
-      }
-
-      // Check for the old logic pattern: {"<=": [{"var": "householdIncome"}, {"*": [{"var": "householdSize"}, 1500]}]}
-      const [_incomeVar, thresholdCalc] = lessOrEqual;
-      if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc['*']) {
-        const [_sizeVar, multiplier] = thresholdCalc['*'];
-        if (multiplier === 1500) {
-          return true; // Found old incorrect logic
-        }
-      }
-
-      return false;
-    });
-
-    if (hasIncorrectRule) {
-      console.warn('🚨 [WARNING] ensureSNAPRulesAreCorrect: Found SNAP rules with incorrect logic! Rules need to be reloaded.');
-      console.warn('🔧 [INFO] To fix this, run: window.clearBenefitFinderDatabase() then refresh the page');
-      console.warn('🔧 [INFO] This will clear the database and reload rules from the updated JSON files.');
-    } else if (import.meta.env.DEV) {
-      console.warn('✅ [DEBUG] ensureSNAPRulesAreCorrect: SNAP rules appear to be correct');
-    }
-
-    // Log current rule logic for debugging
-    if (import.meta.env.DEV) {
-      snapRules.forEach(rule => {
-        console.warn(`🔍 [DEBUG] SNAP Rule ${rule.id}:`, {
-          name: rule.name,
-          ruleLogic: JSON.stringify(rule.ruleLogic, null, 2),
-          priority: rule.priority,
-          active: rule.active
-        });
-      });
-    }
-
-  } catch (error) {
-    console.error('🚨 [ERROR] ensureSNAPRulesAreCorrect: Failed to check SNAP rules:', error);
-  }
-}
-
-/**
- * Build eligibility evaluation result from rule evaluation
- */
-function buildEvaluationResult(
-  profileId: string,
-  programId: string,
-  rule: EligibilityRuleDocument,
-  evalResult: RuleEvaluationResult,
-  detailedResult: DetailedEvaluationResult,
-  missingFields: string[],
-  executionTime: number
-): EligibilityEvaluationResult {
-  const incomplete = missingFields.length > 0;
-
-  // Convert detailed criteria results to the expected format
-  const criteriaResults = detailedResult.criteriaResults?.map(cr => ({
-    criterion: cr.criterion,
-    met: cr.met,
-    value: cr.value,
-    threshold: cr.threshold,
-    comparison: cr.comparison,
-    message: cr.message
-  }));
-
-  if (import.meta.env.DEV) {
-    detailedResult.criteriaResults?.forEach((cr, i) => {
-      console.log(`  [${i}] Input:`, {
-        criterion: cr.criterion,
-        comparison: cr.comparison,
-        threshold: cr.threshold,
-        value: cr.value,
-        met: cr.met
-      });
-      console.log(`  [${i}] Output:`, {
-        criterion: criteriaResults?.[i]?.criterion,
-        comparison: criteriaResults?.[i]?.comparison,
-        threshold: criteriaResults?.[i]?.threshold,
-        value: criteriaResults?.[i]?.value,
-        met: criteriaResults?.[i]?.met
-      });
-    });
-  }
-
-  return {
-    profileId,
-    programId,
-    ruleId: rule.id,
-    eligible: evalResult.success ? Boolean(evalResult.result) : false,
-    confidence: calculateConfidence(evalResult, incomplete),
-    reason: generateReason(evalResult, rule, incomplete),
-    criteriaResults,
-    missingFields: incomplete ? missingFields : undefined,
-    requiredDocuments: rule.requiredDocuments?.map((doc: string) => ({
-      document: doc,
-      description: undefined,
-      where: undefined,
-      required: true,
-    })),
-    evaluatedAt: Date.now(),
-    executionTime,
-    ruleVersion: rule.version,
-    needsReview: !evalResult.success || incomplete,
-    incomplete,
-  };
-}
-
-/**
- * Create error result
- */
-function buildErrorResult(
-  profileId: string,
-  programId: string,
-  error: unknown,
-  executionTime: number
-): EligibilityEvaluationResult {
-  return {
-    profileId,
-    programId,
-    ruleId: 'error',
-    eligible: false,
-    confidence: 0,
-    reason: error instanceof Error ? error.message : 'Unknown error occurred',
-    evaluatedAt: Date.now(),
-    executionTime,
-    needsReview: true,
-    incomplete: true,
-  };
-}
-
-/**
- * Debug logger for rule evaluation
- */
-function logRuleEvaluation(
-  profileId: string,
-  programId: string,
-  ruleId: string,
-  ruleLogic: unknown,
-  data: JsonLogicData
-): void {
-  if (import.meta.env.DEV) {
-    console.warn(`🔍 [DEBUG] Database Rule Evaluation:`, {
-      profileId,
-      programId,
-      ruleId,
-      ruleLogic: JSON.stringify(ruleLogic, null, 2),
-      data: JSON.stringify(data, null, 2),
-    });
-  }
-}
-
-/**
- * Debug logger for rule evaluation result
- */
-function logRuleResult(
-  ruleId: string,
-  success: boolean,
-  result: unknown,
-  error?: string
-): void {
-  if (import.meta.env.DEV) {
-    console.warn(`🔍 [DEBUG] Database Rule Result:`, {
-      ruleId,
-      success,
-      result,
-      error,
-    });
-  }
-}
-
-/**
- * Evaluate all rules for eligibility
- */
-async function evaluateAllRules(
-  rules: EligibilityRuleDocument[],
-  data: JsonLogicData,
-  profileId: string,
-  programId: string
-): Promise<{
-  ruleResults: Array<{ rule: EligibilityRuleDocument; evalResult: RuleEvaluationResult; missingFields: string[]; detailedResult: DetailedEvaluationResult }>;
-  overallEligible: boolean;
-  firstFailedRule: EligibilityRuleDocument | null;
-  firstFailedResult: RuleEvaluationResult | null;
-  allMissingFields: Set<string>;
-}> {
-  const ruleResults: Array<{
-    rule: EligibilityRuleDocument;
-    evalResult: RuleEvaluationResult;
-    missingFields: string[];
-    detailedResult: DetailedEvaluationResult;
-  }> = [];
-
-  let overallEligible = true;
-  let firstFailedRule: EligibilityRuleDocument | null = null;
-  let firstFailedResult: RuleEvaluationResult | null = null;
-  const allMissingFields = new Set<string>();
-
-  for (const rule of rules) {
-    // Check for missing fields for this rule
-    const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
-    missingFields.forEach(field => allMissingFields.add(field));
-
-    // Add debugging for rule evaluation
-    logRuleEvaluation(profileId, programId, rule.id, rule.ruleLogic, data);
-
-    // Use detailed evaluator to capture comparison values
-    const detailedResult = await evaluateRuleWithDetails(
-      rule.ruleLogic as JsonLogicRule,
-      data
-    );
-
-    // Convert to standard evaluation result format
-    const evalResult: RuleEvaluationResult = {
-      result: detailedResult.result,
-      success: detailedResult.success,
-      executionTime: detailedResult.executionTime,
-      error: detailedResult.error,
-      context: detailedResult.context
-    };
-
-    logRuleResult(rule.id, evalResult.success, evalResult.result, evalResult.error);
-
-    ruleResults.push({ rule, evalResult, missingFields, detailedResult });
-
-    // Check if this rule passed
-    const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
-    if (!rulePassedResult && overallEligible) {
-      // First rule that failed - we'll use this for the error message
-      overallEligible = false;
-      firstFailedRule = rule;
-      firstFailedResult = evalResult;
-    }
-  }
-
-  return {
-    ruleResults,
-    overallEligible,
-    firstFailedRule,
-    firstFailedResult,
-    allMissingFields
-  };
-}
-
-/**
- * Select the result rule and evaluation result for final output
- */
-function selectResultRule(
-  rules: EligibilityRuleDocument[],
-  ruleResults: Array<{ rule: EligibilityRuleDocument; evalResult: RuleEvaluationResult; missingFields: string[] }>,
-  overallEligible: boolean,
-  firstFailedRule: EligibilityRuleDocument | null,
-  firstFailedResult: RuleEvaluationResult | null
-): {
-  resultRule: EligibilityRuleDocument;
-  combinedEvalResult: RuleEvaluationResult;
-} {
-  // Choose which rule to use for the final result
-  // If eligible: use highest priority rule that passed (likely the first one)
-  // If not eligible: use the first rule that failed
-  const resultRule = overallEligible ? rules[0] : (firstFailedRule ?? rules[0]);
-  const resultEvalResult = overallEligible
-    ? ruleResults.find(r => r.rule.id === resultRule.id)?.evalResult ?? ruleResults[0].evalResult
-    : (firstFailedResult ?? ruleResults[0].evalResult);
-
-  // Create a combined evaluation result
-  const combinedEvalResult: RuleEvaluationResult = {
-    success: resultEvalResult.success,
-    result: overallEligible,
-    error: resultEvalResult.error,
-    executionTime: resultEvalResult.executionTime,
-    context: resultEvalResult.context
-  };
-
-  return { resultRule, combinedEvalResult };
-}
 
 /**
  * Evaluate eligibility for a single program
- *
- * High-level function that handles:
- * - Rule retrieval from database
- * - Data preparation
- * - Rule evaluation
- * - Result caching
- * - Result formatting
- *
- * @param profileId User profile ID
- * @param programId Benefit program ID
- * @param options Evaluation options
- * @returns Eligibility evaluation result
- *
- * @example
- * ```typescript
- * const result = await evaluateEligibility('user-123', 'snap-federal');
- *
- * if (result.eligible) {
- *   console.log('Eligible! Next steps:', result.nextSteps);
- * }
- * ```
  */
 export async function evaluateEligibility(
   profileId: string,
   programId: string,
   options: EligibilityEvaluationOptions = {}
 ): Promise<EligibilityEvaluationResult> {
+  debugLog('Evaluating eligibility', { profileId, programId, options });
   ensureOperatorsRegistered();
 
   const startTime = performance.now();
 
-  // Default options
   const opts = {
     cacheResult: options.cacheResult !== false,
     includeBreakdown: options.includeBreakdown !== false,
     forceReEvaluation: options.forceReEvaluation ?? false,
-    expiresIn: options.expiresIn ?? 1000 * 60 * 60 * 24 * 30, // 30 days
+    expiresIn: options.expiresIn ?? 1000 * 60 * 60 * 24 * 30,
     evaluationOptions: options.evaluationOptions ?? {},
   };
 
@@ -591,6 +81,7 @@ export async function evaluateEligibility(
     // Check cache first
     const cachedResult = await checkCache(profileId, programId, startTime, opts.forceReEvaluation);
     if (cachedResult) {
+      debugLog('Returning cached eligibility result', cachedResult);
       return cachedResult;
     }
 
@@ -612,6 +103,10 @@ export async function evaluateEligibility(
     const executionTime = performance.now() - startTime;
     const finalMissingFields = Array.from(allMissingFields);
 
+    debugLog('Summary after rule evaluation', {
+      ruleResults, overallEligible, firstFailedRule, firstFailedResult, allMissingFields: finalMissingFields, executionTime
+    });
+
     // Select result rule and create combined result
     const { resultRule, combinedEvalResult } = selectResultRule(
       rules,
@@ -621,45 +116,49 @@ export async function evaluateEligibility(
       firstFailedResult
     );
 
-    // Build result
+    debugLog('Result rule selected', { resultRule, combinedEvalResult });
+
     const resultRuleDetails = ruleResults.find(r => r.rule.id === resultRule.id)?.detailedResult;
 
     if (import.meta.env.DEV) {
-      console.log('🔍 [DEBUG] Building final result for rule:', resultRule.id);
-      console.log('🔍 [DEBUG] Result rule details found:', !!resultRuleDetails);
-      console.log('🔍 [DEBUG] Result rule details:', resultRuleDetails);
-      if (resultRuleDetails?.criteriaResults) {
-        console.log('🔍 [DEBUG] Criteria results count:', resultRuleDetails.criteriaResults.length);
-        console.log('🔍 [DEBUG] Criteria results:', resultRuleDetails.criteriaResults);
+      debugLog('DEV: Building final result for rule:', resultRule.id);
+      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Building final result for rule:', resultRule.id);
+      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details found:', !!resultRuleDetails);
+      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details:', resultRuleDetails);
+      if (resultRuleDetails && typeof resultRuleDetails === 'object' && 'criteriaResults' in resultRuleDetails) {
+        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results count:', (resultRuleDetails as any).criteriaResults.length);
+        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results:', (resultRuleDetails as any).criteriaResults);
       }
     }
+
+    // Create fallback detailed result if none found
+    const fallbackDetailedResult: DetailedEvaluationResult = {
+      result: combinedEvalResult.result,
+      success: combinedEvalResult.success,
+      executionTime: combinedEvalResult.executionTime,
+      criteriaResults: []
+    };
 
     const result = buildEvaluationResult(
       profileId,
       programId,
       resultRule,
       combinedEvalResult,
-      resultRuleDetails || {
-        result: combinedEvalResult.result,
-        success: combinedEvalResult.success,
-        executionTime: combinedEvalResult.executionTime,
-        criteriaResults: []
-      },
+      resultRuleDetails as DetailedEvaluationResult || fallbackDetailedResult,
       finalMissingFields,
       executionTime
     );
 
+    debugLog('Final built result', result);
+
     if (import.meta.env.DEV) {
-      console.log('🔍 [DEBUG] Final built result:', {
+      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Final built result:', {
         ruleId: result.ruleId,
         eligible: result.eligible,
         criteriaResults: result.criteriaResults,
         criteriaResultsCount: result.criteriaResults?.length || 0
       });
-    }
-
-    if (import.meta.env.DEV) {
-      console.warn(`🔍 [DEBUG] evaluateEligibility: Built result for ${programId}:`, {
+      console.warn(`eligibility.ts - evaluateEligibility - 🔍 [DEBUG] evaluateEligibility: Built result for ${programId}:`, {
         eligible: result.eligible,
         confidence: result.confidence,
         reason: result.reason,
@@ -676,19 +175,24 @@ export async function evaluateEligibility(
       });
     }
 
-    // Add detailed breakdown if requested
-    if (opts.includeBreakdown) {
+    // Add detailed breakdown if requested and no detailed results are available
+    if (opts.includeBreakdown && (!result.criteriaResults || result.criteriaResults.length === 0)) {
+      debugLog('Generating detailed criteria breakdown...');
       result.criteriaResults = generateCriteriaBreakdown(resultRule, data, combinedEvalResult);
     }
 
     // Cache result if enabled
     if (opts.cacheResult && combinedEvalResult.success) {
+      debugLog('Caching eligibility result...');
       await cacheResult(result, opts.expiresIn);
     }
+
+    debugLog('Returning eligibility result', result);
 
     return result;
 
   } catch (error) {
+    debugLog('Error caught during eligibility evaluation', error);
     const executionTime = performance.now() - startTime;
     return buildErrorResult(profileId, programId, error, executionTime);
   }
@@ -701,22 +205,13 @@ export async function evaluateEligibility(
  * @param programIds Array of program IDs
  * @param options Evaluation options
  * @returns Batch eligibility result
- *
- * @example
- * ```typescript
- * const results = await evaluateMultiplePrograms(
- *   'user-123',
- *   ['snap-federal', 'medicaid-ga', 'wic-ga']
- * );
- *
- * console.log(`Eligible for ${results.summary.eligible} programs`);
- * ```
  */
 export async function evaluateMultiplePrograms(
   profileId: string,
   programIds: string[],
   options: EligibilityEvaluationOptions = {}
 ): Promise<BatchEligibilityResult> {
+  debugLog('Batch eligibility evaluation started', { profileId, programIds, options });
   if (import.meta.env.DEV) {
     console.warn('🔍 [DEBUG] evaluateMultiplePrograms: Starting batch evaluation:', {
       profileId,
@@ -730,6 +225,7 @@ export async function evaluateMultiplePrograms(
 
   // Evaluate each program
   for (const programId of programIds) {
+    debugLog('Evaluating next program in batch', programId);
     if (import.meta.env.DEV) {
       console.warn(`🔍 [DEBUG] evaluateMultiplePrograms: Evaluating program ${programId}...`);
     }
@@ -737,7 +233,7 @@ export async function evaluateMultiplePrograms(
     try {
       const result = await evaluateEligibility(profileId, programId, options);
       programResults.set(programId, result);
-
+      debugLog('Program eligibility result', { programId, result });
       if (import.meta.env.DEV) {
         console.warn(`🔍 [DEBUG] evaluateMultiplePrograms: Program ${programId} result:`, {
           eligible: result.eligible,
@@ -748,8 +244,8 @@ export async function evaluateMultiplePrograms(
         });
       }
     } catch (error) {
+      debugLog('Error evaluating program in batch', { programId, error });
       console.error(`🚨 [ERROR] evaluateMultiplePrograms: Failed to evaluate program ${programId}:`, error);
-      // Continue with other programs even if one fails
     }
   }
 
@@ -764,6 +260,8 @@ export async function evaluateMultiplePrograms(
     incomplete: results.filter((r) => r.incomplete).length,
     needsReview: results.filter((r) => r.needsReview).length,
   };
+
+  debugLog('Batch evaluation complete', { totalTime: endTime - startTime, summary, rawResults: programResults });
 
   if (import.meta.env.DEV) {
     console.warn('🔍 [DEBUG] evaluateMultiplePrograms: Batch evaluation complete:', {
@@ -797,11 +295,11 @@ export async function evaluateAllPrograms(
   profileId: string,
   options: EligibilityEvaluationOptions = {}
 ): Promise<BatchEligibilityResult> {
+  debugLog('Evaluating all programs for profile', { profileId, options });
   if (import.meta.env.DEV) {
     console.warn('🔍 [DEBUG] evaluateAllPrograms: Starting evaluation for profile:', profileId);
   }
 
-  // Check if SNAP rules are correct (only in dev mode)
   if (import.meta.env.DEV) {
     await ensureSNAPRulesAreCorrect();
   }
@@ -810,6 +308,7 @@ export async function evaluateAllPrograms(
 
   // Get all active programs
   const programs = await db.benefit_programs.findActivePrograms();
+  debugLog('Active programs retrieved.', { programsFound: programs.length, programIds: programs.map(p => p.id) });
   const programIds = programs.map((p) => p.id);
 
   if (import.meta.env.DEV) {
@@ -821,6 +320,8 @@ export async function evaluateAllPrograms(
   }
 
   const result = await evaluateMultiplePrograms(profileId, programIds, options);
+
+  debugLog('All programs evaluation complete', { summary: result.summary });
 
   if (import.meta.env.DEV) {
     console.warn('🔍 [DEBUG] evaluateAllPrograms: Final result summary:', {
@@ -840,361 +341,5 @@ export async function evaluateAllPrograms(
   return result;
 }
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Prepare data context from user profile
- */
-function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
-  const data = profile.toJSON();
-
-  // Add computed fields
-  const processedData = {
-    ...data,
-    // Add any derived fields here
-    _timestamp: Date.now(),
-  };
-
-  // Convert stored annual income to monthly income for rule evaluation
-  // We always store income as annual in the profile, but eligibility rules expect monthly income
-  if (processedData.householdIncome && typeof processedData.householdIncome === 'number') {
-    const originalAnnualIncome = processedData.householdIncome;
-    processedData.householdIncome = Math.round(processedData.householdIncome / 12);
-
-    if (import.meta.env.DEV) {
-      console.warn('🔍 [DEBUG] prepareDataContext: Income conversion:', {
-        originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
-        convertedMonthlyIncome: `$${processedData.householdIncome.toLocaleString()}`,
-        householdSize: processedData.householdSize,
-        citizenship: processedData.citizenship
-      });
-    }
-  }
-
-  if (import.meta.env.DEV) {
-    console.warn('🔍 [DEBUG] prepareDataContext: Final processed data:', {
-      householdIncome: processedData.householdIncome,
-      householdSize: processedData.householdSize,
-      citizenship: processedData.citizenship,
-      dateOfBirth: processedData.dateOfBirth,
-      state: processedData.state,
-      timestamp: new Date(processedData._timestamp).toISOString()
-    });
-  }
-
-  return processedData;
-}
-
-/**
- * Check for missing required fields
- */
-function checkMissingFields(data: JsonLogicData, requiredFields: string[]): string[] {
-  const missing: string[] = [];
-
-  for (const field of requiredFields) {
-    // eslint-disable-next-line security/detect-object-injection
-    if (data[field] === undefined || data[field] === null || data[field] === '') {
-      missing.push(field);
-    }
-  }
-
-  return missing;
-}
-
-/**
- * Calculate confidence score
- */
-function calculateConfidence(
-  evalResult: RuleEvaluationResult,
-  incomplete: boolean
-): number {
-  if (!evalResult.success) {
-    return 0;
-  }
-
-  if (incomplete) {
-    return 50; // Lower confidence when data is incomplete
-  }
-
-  // Full confidence when all data present and evaluation successful
-  return 95;
-}
-
-/**
- * Generate human-readable reason
- */
-function generateReason(
-  evalResult: RuleEvaluationResult,
-  rule: EligibilityRuleDocument | { explanation?: string },
-  incomplete: boolean
-): string {
-  if (!evalResult.success) {
-    return 'Unable to evaluate eligibility due to an error';
-  }
-
-  if (incomplete) {
-    return 'Cannot fully determine eligibility - missing required information';
-  }
-
-  if (evalResult.result) {
-    return rule.explanation ?? 'You meet the eligibility criteria for this program';
-  }
-
-  return 'You do not meet the eligibility criteria for this program';
-}
-
-/**
- * Maps technical field names to user-friendly descriptions
- */
-const FIELD_NAME_MAPPINGS: Record<string, string> = {
-  // Demographics
-  'age': 'Your age',
-  'isPregnant': 'Pregnancy status',
-  'hasChildren': 'Whether you have children',
-  'hasQualifyingDisability': 'Qualifying disability status',
-  'isCitizen': 'Citizenship status',
-  'isLegalResident': 'Legal residency status',
-  'ssn': 'Social Security number',
-
-  // Financial
-  'householdIncome': 'Your household\'s monthly income',
-  'householdSize': 'Your household size',
-  'income': 'Your income',
-  'grossIncome': 'your gross income',
-  'netIncome': 'your net income',
-  'monthlyIncome': 'your monthly income',
-  'annualIncome': 'your annual income',
-  'assets': 'your household assets',
-  'resources': 'your available resources',
-  'liquidAssets': 'your liquid assets',
-  'vehicleValue': 'your vehicle value',
-  'bankBalance': 'your bank account balance',
-
-  // Location & State
-  'state': 'your state of residence',
-  'stateHasExpanded': 'whether your state has expanded coverage',
-  'zipCode': 'your ZIP code',
-  'county': 'your county',
-  'jurisdiction': 'your location',
-
-  // Program-specific
-  'hasHealthInsurance': 'current health insurance coverage',
-  'employmentStatus': 'your employment status',
-  'isStudent': 'student status',
-  'isVeteran': 'veteran status',
-  'isSenior': 'senior status (65+)',
-  'hasMinorChildren': 'whether you have children under 18',
-
-  // Housing
-  'housingCosts': 'your housing costs',
-  'rentAmount': 'your monthly rent',
-  'mortgageAmount': 'your monthly mortgage',
-  'isHomeless': 'housing situation',
-
-  // Benefits
-  'receivesSSI': 'Supplemental Security Income (SSI)',
-  'receivesSNAP': 'SNAP benefits',
-  'receivesTANF': 'TANF benefits',
-  'receivesWIC': 'WIC benefits',
-  'receivesUnemployment': 'unemployment benefits',
-  'livesInState': 'state residency',
-};
-
-/**
- * Format field name to human-readable description
- */
-function formatFieldName(fieldName: string): string {
-  // Check if we have a specific mapping for this field
-  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
-    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
-  }
-
-  // Fall back to converting camelCase or snake_case to Title Case
-  return fieldName
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (l) => l.toUpperCase())
-    .trim();
-}
-
-/**
- * Generate detailed criteria breakdown
- */
-function generateCriteriaBreakdown(
-  rule: EligibilityRuleDocument | { requiredFields?: string[] },
-  data: JsonLogicData,
-  _evalResult: RuleEvaluationResult
-): Array<{ criterion: string; met: boolean; value?: unknown; threshold?: unknown; description?: string }> {
-  // This is a simplified implementation
-  // In production, you'd want more sophisticated logic analysis
-
-  const breakdown: Array<{
-    criterion: string;
-    met: boolean;
-    value?: unknown;
-    threshold?: unknown;
-    description?: string;
-  }> = [];
-
-  // Extract criteria from rule logic (simplified)
-  if (rule.requiredFields) {
-    for (const field of rule.requiredFields) {
-      // eslint-disable-next-line security/detect-object-injection
-      const fieldValue = data[field];
-      const fieldDescription = formatFieldName(field);
-      const hasValue = fieldValue !== undefined && fieldValue !== null;
-
-      // Handle different field types appropriately
-      let criterionMet = hasValue;
-      let status = hasValue ? 'Met' : 'Not provided';
-
-      if (!hasValue) {
-        // Field not provided - skip showing in breakdown for optional fields
-        // This prevents showing "Not provided" for fields not asked in questionnaire
-        continue;
-      } else if (typeof fieldValue === 'boolean') {
-        // For boolean fields like isPregnant, the criterion is only met if the value is true
-        // (since rules typically check for positive conditions)
-        criterionMet = fieldValue === true;
-        status = fieldValue === true ? 'Met' : 'Not applicable';
-      }
-
-      breakdown.push({
-        criterion: field,
-        met: criterionMet,
-        value: fieldValue,
-        description: `${fieldDescription}: ${status}`,
-      });
-    }
-  }
-
-  return breakdown;
-}
-
-/**
- * Get cached result from database
- */
-async function getCachedResult(
-  profileId: string,
-  programId: string
-): Promise<EligibilityResultDocument | null> {
-  const db = getDatabase();
-
-  const results = await db.eligibility_results
-    .find({
-      selector: {
-        userProfileId: profileId,
-        programId,
-      },
-      sort: [{ evaluatedAt: 'desc' }],
-      limit: 1,
-    })
-    .exec();
-
-  return results[0] ?? null;
-}
-
-/**
- * Cache evaluation result in database
- */
-async function cacheResult(
-  result: EligibilityEvaluationResult,
-  expiresIn: number
-): Promise<void> {
-  const db = getDatabase();
-
-  const dbResult: Partial<EligibilityResult> = {
-    id: nanoid(),
-    userProfileId: result.profileId,
-    programId: result.programId,
-    ruleId: result.ruleId,
-    eligible: result.eligible,
-    confidence: result.confidence,
-    reason: result.reason,
-    criteriaResults: result.criteriaResults,
-    missingFields: result.missingFields,
-    nextSteps: result.nextSteps?.map(step => ({
-      ...step,
-      priority: step.priority ?? 'medium',
-    })),
-    requiredDocuments: result.requiredDocuments?.map(doc => ({
-      document: doc.document,
-      description: doc.description,
-      where: doc.where,
-      required: true,
-    })),
-    estimatedBenefit: result.estimatedBenefit ? {
-      ...result.estimatedBenefit,
-      frequency: result.estimatedBenefit.frequency ?? 'monthly',
-      currency: 'USD' as const,
-    } : undefined,
-    ruleVersion: result.ruleVersion,
-    evaluatedAt: result.evaluatedAt,
-    expiresAt: Date.now() + expiresIn,
-    needsReview: result.needsReview,
-    incomplete: result.incomplete,
-  };
-
-  await db.eligibility_results.insert(dbResult as EligibilityResult);
-}
-
-/**
- * Clear cached results for a profile
- *
- * @param profileId Profile ID
- * @param programId Optional program ID (clears all if not specified)
- */
-export async function clearCachedResults(
-  profileId: string,
-  programId?: string
-): Promise<number> {
-  const db = getDatabase();
-
-  const selector: { userProfileId: string; programId?: string } = {
-    userProfileId: profileId
-  };
-  if (programId) {
-    selector.programId = programId;
-  }
-
-  const results = await db.eligibility_results
-    .find({ selector })
-    .exec();
-
-  for (const result of results) {
-    await result.remove();
-  }
-
-  return results.length;
-}
-
-/**
- * Get cached results for a profile
- *
- * @param profileId Profile ID
- * @returns Array of cached results
- */
-export async function getCachedResults(
-  profileId: string
-): Promise<EligibilityEvaluationResult[]> {
-  const db = getDatabase();
-
-  const results = await db.eligibility_results
-    .find({
-      selector: { userProfileId: profileId },
-      sort: [{ evaluatedAt: 'desc' }],
-    })
-    .exec();
-
-  return results.map((r) => {
-    const data = r.toJSON();
-    return {
-      ...data,
-      profileId: data.userProfileId,
-      missingFields: data.missingFields ?? [],
-    } as unknown as EligibilityEvaluationResult;
-  });
-}
-
+// Re-export cache functions
+export { clearCachedResults, getCachedResults } from './eligibility/cache';

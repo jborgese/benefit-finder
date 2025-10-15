@@ -181,6 +181,11 @@ export function formatComparison(
     return `${valueStr} does not meet requirement of ${thresholdStr}`;
   }
 
+  // Special handling for household size
+  if (fieldName.toLowerCase().includes('household') && fieldName.toLowerCase().includes('size')) {
+    return `${valueStr} (determines income limit)`;
+  }
+
   // Default case
   return `${valueStr} vs ${thresholdStr}`;
 }

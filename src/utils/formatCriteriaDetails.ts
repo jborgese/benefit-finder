@@ -1,3 +1,4 @@
+import { CriterionResult } from '@/types/eligibility';
 import { getSNAPGrossIncomeLimit, formatIncomeThreshold } from './benefitThresholds';
 import { formatFieldName } from './fieldNameMappings';
 import { formatComparison, formatCriteriaValue } from './formatCriteriaValues';
@@ -6,30 +7,23 @@ import { formatComparison, formatCriteriaValue } from './formatCriteriaValues';
  * Format criteria results into user-friendly explanations
  * Shows meaningful details for both passing and failing criteria
  *
- * @param criteriaResults Array of criteria evaluation results
+ * @param _criteriaResults Array of criteria evaluation results
  * @param isEligible Overall eligibility status
  * @param programId Optional program identifier to show program-specific thresholds
  */
 export function formatCriteriaDetails(
-  criteriaResults: Array<{
-    criterion: string;
-    met: boolean;
-    value?: unknown;
-    threshold?: unknown;
-    comparison?: string;
-    message?: string;
-  }> | undefined,
+  _criteriaResults: Array<CriterionResult> | undefined,
   isEligible: boolean,
   programId?: string
 ): string[] {
-  if (!criteriaResults || criteriaResults.length === 0) {
+  if (!_criteriaResults || _criteriaResults.length === 0) {
     return [];
   }
-  console.log('[DEBUG] criteriaResults', criteriaResults);
-  console.log('[DEBUG] programId', programId);
+  console.log('[DEBUG] formatCriteriaDetails - criteriaResults', _criteriaResults);
+  console.log('[DEBUG] formatCriteriaDetails - programId', programId);
 
   // Extract household size for benefit threshold calculations
-  const householdSizeCriteria = criteriaResults.find(cr =>
+  const householdSizeCriteria = _criteriaResults.find(cr =>
     cr.criterion.toLowerCase().includes('household') &&
     cr.criterion.toLowerCase().includes('size')
   );
@@ -40,7 +34,7 @@ export function formatCriteriaDetails(
     : 1;
 
   // Extract SNAP income eligibility status for SNAP evaluations
-  const householdIncomeCriteria = criteriaResults.find(cr =>
+  const householdIncomeCriteria = _criteriaResults.find(cr =>
     cr.criterion.toLowerCase().includes('income') &&
     !cr.criterion.toLowerCase().includes('size')
   );
@@ -49,7 +43,7 @@ export function formatCriteriaDetails(
   // Determine if this is a SNAP evaluation
   const isSNAPProgram = programId?.toLowerCase().includes('snap');
 
-  return criteriaResults.map(cr => {
+  return _criteriaResults.map(cr => {
     const fieldName = formatFieldName(cr.criterion);
     const value = cr.value;
 
@@ -65,7 +59,7 @@ export function formatCriteriaDetails(
       const formattedIncome = formatCriteriaValue(value, cr.criterion);
       const formattedLimit = formatIncomeThreshold(snapLimit, 'monthly');
 
-      console.log('[DEBUG] SNAP income - metSNAPIncome:', metSNAPIncome, 'formattedIncome:', formattedIncome, 'formattedLimit:', formattedLimit);
+      console.log('[DEBUG] formatCriteriaDetails - SNAP income - metSNAPIncome:', metSNAPIncome, 'formattedIncome:', formattedIncome, 'formattedLimit:', formattedLimit);
 
       if (metSNAPIncome) {
         return `${fieldName}: ${formattedIncome} (within SNAP limit of ${formattedLimit} for ${householdSize} ${householdSize === 1 ? 'person' : 'people'})`;

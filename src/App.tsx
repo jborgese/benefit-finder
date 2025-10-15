@@ -170,8 +170,12 @@ function App(): React.ReactElement {
         return;
       }
 
+      console.log('[DEBUG] App.tsx - batchResult', batchResult);
+
       // Convert batch results to array for easier processing
       const evaluationResults = Array.from(batchResult.programResults.values());
+
+      console.log('[DEBUG] App.tsx - evaluationResults', evaluationResults);
 
       // Get all program rules for each program (for comprehensive requirements display)
       const programRulesMap = new Map<string, string[]>();
@@ -181,6 +185,8 @@ function App(): React.ReactElement {
           programRulesMap.set(result.programId, allRules);
         }
       }
+
+      console.log('[DEBUG] App.tsx - programRulesMap', programRulesMap);
 
       // Convert evaluation results to the expected format
       const qualifiedResults = evaluationResults
