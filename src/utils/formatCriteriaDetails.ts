@@ -26,10 +26,14 @@ export function formatCriteriaDetails(
     console.log('[DEBUG] fieldName', fieldName);
 
     // If we have specific comparison details, use them
-    if (cr.comparison) {
-      return `${fieldName}: ${cr.comparison}`;
-    }
-    console.log('[DEBUG] cr.comparison', cr.comparison);
+    const comparison = cr.comparison;
+    console.log('[DEBUG] comparison', comparison);
+
+    const value = cr.value;
+    console.log('[DEBUG] value', value);
+
+    const threshold = cr.threshold;
+    console.log('[DEBUG] threshold', threshold);
 
     // If we have value and threshold information, show meaningful comparison
     if (cr.value !== undefined && cr.threshold !== undefined) {
