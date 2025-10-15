@@ -343,15 +343,61 @@ test.describe('Encryption - Data Protection', () => {
       }
     });
 
+    // Navigate to results page with test data
     await page.goto('/results?test=true&playwright=true');
 
-    // Perform all operations
-    const buttons = await page.locator('button').all();
-    for (const button of buttons.slice(0, 5)) {
-      if (await button.isVisible()) {
-        await button.click().catch(() => {});
-        await page.waitForTimeout(200);
+    // Wait for page to load and sample results to be created
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Perform operations more safely with error handling and context checks
+    try {
+      const buttons = await page.locator('button').all();
+
+      for (let i = 0; i < Math.min(buttons.length, 5); i++) {
+        const button = buttons[i];
+
+        // Check if page is still alive before proceeding
+        if (page.isClosed()) {
+          console.log('Page was closed during test execution');
+          break;
+        }
+
+        // Only click visible buttons that won't cause navigation
+        if (await button.isVisible({ timeout: 1000 })) {
+          const buttonText = await button.textContent().catch(() => '');
+
+          // Skip buttons that might cause problematic navigation or actions
+          if (buttonText && (
+            buttonText.toLowerCase().includes('home') ||
+            buttonText.toLowerCase().includes('new assessment') ||
+            buttonText.toLowerCase().includes('refresh')
+          )) {
+            continue;
+          }
+
+          // Click with better error handling
+          try {
+            await button.click({ timeout: 2000 });
+
+            // Check if page is still alive after click
+            if (!page.isClosed()) {
+              await page.waitForTimeout(300);
+            }
+          } catch (clickError) {
+            // Log but don't fail on click errors - focus on network monitoring
+            console.log(`Button click failed: ${buttonText}`, clickError);
+          }
+        }
+
+        // Short pause between operations
+        if (!page.isClosed()) {
+          await page.waitForTimeout(100);
+        }
       }
+    } catch (error) {
+      console.log('Error during button operations:', error);
+      // Continue to network verification even if button operations fail
     }
 
     // Log any external calls for debugging

@@ -53,12 +53,23 @@ export async function evaluateRuleWithDetails(
   };
 
   try {
+    // Add debugging to see what we're actually getting
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] DetailedEvaluator - Rule:', JSON.stringify(rule, null, 2));
+      console.log('🔍 [DEBUG] DetailedEvaluator - Data:', JSON.stringify(data, null, 2));
+    }
+
     // Intercept and analyze the rule structure before evaluation
     analyzeRule(rule, context);
 
     // Perform standard evaluation
     const result = jsonLogic.apply(rule as any, data) as boolean;
     const endTime = performance.now();
+
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] DetailedEvaluator - Result:', result);
+      console.log('🔍 [DEBUG] DetailedEvaluator - Comparisons found:', context.comparisons);
+    }
 
     return {
       result,
@@ -110,10 +121,19 @@ function analyzeRule(rule: JsonLogicRule, context: EvaluationContext): void {
  * Analyze comparison operations to extract detailed information
  */
 function analyzeComparison(operator: string, operands: unknown[], context: EvaluationContext): void {
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] Analyzing comparison:', operator, operands);
+  }
+
   // Handle comparison operators
   if (['<', '>', '<=', '>=', '==', '!=', 'in'].includes(operator) && operands.length >= 2) {
     const leftOperand = operands[0];
     const rightOperand = operands[1];
+
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] Left operand:', leftOperand);
+      console.log('🔍 [DEBUG] Right operand:', rightOperand);
+    }
 
     // Extract variable name and value
     let criterion = '';
@@ -130,12 +150,27 @@ function analyzeComparison(operator: string, operands: unknown[], context: Evalu
       threshold = evaluateOperand(leftOperand, context.data);
     }
 
+    if (import.meta.env.DEV) {
+      console.log('🔍 [DEBUG] Extracted - criterion:', criterion, 'actualValue:', actualValue, 'threshold:', threshold);
+    }
+
     if (criterion && actualValue !== undefined && threshold !== undefined) {
       // Evaluate the comparison to determine if it passed
       const comparisonResult = evaluateComparison(operator, actualValue, threshold);
 
       // Generate human-readable comparison
       const comparison = formatComparison(operator, actualValue, threshold, comparisonResult);
+
+      if (import.meta.env.DEV) {
+        console.log('🔍 [DEBUG] Adding comparison result:', {
+          criterion,
+          met: comparisonResult,
+          value: actualValue,
+          threshold,
+          comparison,
+          operator
+        });
+      }
 
       context.comparisons.push({
         criterion,
