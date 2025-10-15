@@ -11,7 +11,7 @@ import type { QuestionFlow, FlowNode } from './questionnaire/types';
 import { initializeDatabase, getDatabase, clearDatabase } from './db';
 import { createUserProfile } from './db/utils';
 import { importRulePackage } from './rules/import-export';
-import { evaluateAllPrograms, type EligibilityEvaluationResult } from './rules';
+import { evaluateAllPrograms, getAllProgramRuleIds, type EligibilityEvaluationResult } from './rules';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
@@ -478,6 +478,15 @@ function App(): React.ReactElement {
       // Convert batch results to array for easier processing
       const evaluationResults = Array.from(batchResult.programResults.values());
 
+      // Get all program rules for each program (for comprehensive requirements display)
+      const programRulesMap = new Map<string, string[]>();
+      for (const result of evaluationResults) {
+        if (!programRulesMap.has(result.programId)) {
+          const allRules = await getAllProgramRuleIds(result.programId);
+          programRulesMap.set(result.programId, allRules);
+        }
+      }
+
       // Convert evaluation results to the expected format
       const qualifiedResults = evaluationResults
         .filter((result: EligibilityEvaluationResult) => result.eligible)
@@ -492,7 +501,7 @@ function App(): React.ReactElement {
           explanation: {
             reason: result.reason,
             details: result.criteriaResults?.map(cr => `${formatFieldName(cr.criterion)}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
-            rulesCited: [result.ruleId]
+            rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
             id: `doc-${Math.random().toString(36).substr(2, 9)}`,
@@ -535,7 +544,7 @@ function App(): React.ReactElement {
           explanation: {
             reason: result.reason,
             details: result.criteriaResults?.map(cr => `${formatFieldName(cr.criterion)}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
-            rulesCited: [result.ruleId]
+            rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
             id: `doc-${Math.random().toString(36).substr(2, 9)}`,
@@ -566,7 +575,7 @@ function App(): React.ReactElement {
           explanation: {
             reason: result.reason,
             details: result.criteriaResults?.map(cr => `${formatFieldName(cr.criterion)}: ${cr.met ? 'Met' : 'Not met'}`) ?? [],
-            rulesCited: [result.ruleId]
+            rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
           },
           requiredDocuments: result.requiredDocuments?.map(doc => ({
             id: `doc-${Math.random().toString(36).substr(2, 9)}`,

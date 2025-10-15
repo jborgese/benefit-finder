@@ -48,13 +48,41 @@ function getUserFriendlyRuleDescription(ruleCode: string, calculations?: Array<{
     'liheap': 'LIHEAP eligibility requirements including income limits and household composition',
     'childcare federal': 'Federal childcare assistance eligibility requirements including income limits and work/education requirements',
     'childcare': 'Childcare assistance eligibility requirements including income limits and work/education requirements',
+
+    // Handle actual Medicaid rule IDs from the JSON file
+    'medicaid-federal-expansion-income': 'Federal Medicaid expansion income eligibility (138% of federal poverty level for adults under 65 in expansion states)',
+    'medicaid-federal-children': 'Federal Medicaid eligibility for children (up to 200% FPL for children under 19)',
+    'medicaid-federal-pregnant-women': 'Federal Medicaid eligibility for pregnant women (up to 200% FPL minimum)',
+    'medicaid-federal-disability': 'Federal Medicaid eligibility for people with disabilities (SSI recipients and others meeting disability criteria)',
+    'medicaid-federal-citizenship': 'Federal Medicaid citizenship and immigration status requirements',
+    'medicaid-federal-residence-requirement': 'Federal Medicaid state residence requirements',
+
+    // Handle actual SNAP rule IDs from the JSON file
+    'snap-federal-gross-income': 'Federal SNAP gross income eligibility (130% of federal poverty level for most households)',
+    'snap-federal-net-income': 'Federal SNAP net income eligibility (100% of federal poverty level after deductions)',
+    'snap-federal-citizenship': 'Federal SNAP citizenship and immigration status requirements',
+    'snap-federal-asset-limit': 'Federal SNAP asset limits ($2,750 for most households, $4,250 for elderly/disabled)',
+    'snap-federal-work-requirement': 'Federal SNAP work requirements for able-bodied adults without dependents (ABAWD)',
+    'snap-federal-social-security': 'Federal SNAP Social Security Number requirements for all household members',
+    'snap-federal-residence': 'Federal SNAP state residence requirements',
   };
 
   // Check for program identifier match (case insensitive)
-  const lowerRuleCode = ruleCode.toLowerCase();
+  const lowerRuleCode = ruleCode.toLowerCase().trim();
+
+  // Direct match first
   if (Object.prototype.hasOwnProperty.call(programIdentifierMappings, lowerRuleCode)) {
     // eslint-disable-next-line security/detect-object-injection -- lowerRuleCode is validated via hasOwnProperty check
     return programIdentifierMappings[lowerRuleCode];
+  }
+
+  // Partial matching only for simple program names (not rule codes with dashes)
+  if (!lowerRuleCode.includes('-') && !lowerRuleCode.includes('_')) {
+    for (const [key, value] of Object.entries(programIdentifierMappings)) {
+      if (lowerRuleCode.includes(key) || key.includes(lowerRuleCode)) {
+        return value;
+      }
+    }
   }
 
   // Common rule patterns with more specific descriptions
@@ -161,9 +189,9 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
   explanation,
   onClose,
 }) => {
-  // Debug logging to see what details are being passed to the component
+  // Debug logging to see what rulesCited are being passed to the component
   if (import.meta.env.DEV) {
-    console.warn(`🔍 [DEBUG] WhyExplanation received details:`, explanation.details);
+    console.log(`🔍 [DEBUG] WhyExplanation rulesCited:`, explanation.rulesCited);
   }
   const getStatusColor = (): string => {
     switch (status) {

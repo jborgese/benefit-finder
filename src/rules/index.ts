@@ -117,6 +117,7 @@ export {
   evaluateEligibility,
   evaluateMultiplePrograms,
   evaluateAllPrograms,
+  getAllProgramRuleIds,
   clearCachedResults,
   getCachedResults,
   type EligibilityEvaluationResult,

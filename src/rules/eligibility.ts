@@ -218,6 +218,27 @@ async function getEvaluationEntities(
 /**
  * Check if SNAP rules are using the correct logic and reload if needed
  */
+/**
+ * Get all active rules for a program (for displaying program requirements)
+ *
+ * @param programId Program ID
+ * @returns Array of rule IDs for the program
+ */
+export async function getAllProgramRuleIds(programId: string): Promise<string[]> {
+  try {
+    const db = getDatabase();
+    const rules: EligibilityRuleDocument[] = await db.eligibility_rules.findRulesByProgram(programId);
+
+    // Sort by priority (highest first) for consistent order
+    const sortedRules = rules.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+    return sortedRules.map(rule => rule.id);
+  } catch (error) {
+    console.warn(`Failed to get program rules for ${programId}:`, error);
+    return [];
+  }
+}
+
 export async function ensureSNAPRulesAreCorrect(): Promise<void> {
   if (import.meta.env.DEV) {
     console.warn('🔍 [DEBUG] ensureSNAPRulesAreCorrect: Checking SNAP rules...');
