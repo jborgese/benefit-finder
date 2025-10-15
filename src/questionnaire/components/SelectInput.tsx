@@ -168,11 +168,11 @@ export const SelectInput: React.FC<SelectProps> = ({
     <div className={`question-select-dropdown ${className}`}>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-gray-700 mb-1"
+        className="question-label block"
       >
         {question.text}
         {question.required && (
-          <span className="text-red-500 ml-1" aria-label="required">
+          <span className="required-indicator" aria-label="required">
             *
           </span>
         )}
@@ -181,7 +181,7 @@ export const SelectInput: React.FC<SelectProps> = ({
       {question.description && (
         <p
           id={descId}
-          className="text-sm text-gray-600 mb-2"
+          className="question-description"
         >
           {question.description}
         </p>
@@ -193,7 +193,7 @@ export const SelectInput: React.FC<SelectProps> = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search..."
-          className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md text-sm"
+          className="question-input w-full px-3 py-2 mb-2 border rounded-md"
         />
       )}
 
@@ -211,12 +211,10 @@ export const SelectInput: React.FC<SelectProps> = ({
         aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
         aria-label={question.ariaLabel ?? question.text}
         className={`
-          w-full px-3 py-2 border rounded-md shadow-sm
-          bg-white text-gray-900
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-          disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500
-          ${showError ? 'border-red-500' : 'border-gray-300'}
-          ${isFocused ? 'ring-2 ring-blue-500' : ''}
+          question-input w-full px-3 py-2 border rounded-md shadow-sm
+          focus:outline-none
+          ${showError ? 'border-red-400' : ''}
+          ${isFocused ? 'ring-2 ring-blue-400/20' : ''}
         `}
       >
         <option value="" disabled className="text-gray-500">
@@ -236,7 +234,7 @@ export const SelectInput: React.FC<SelectProps> = ({
       </select>
 
       {question.helpText && !showError && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="question-help-text">
           {question.helpText}
         </p>
       )}
@@ -246,10 +244,10 @@ export const SelectInput: React.FC<SelectProps> = ({
           id={errorId}
           role="alert"
           aria-live="polite"
-          className="mt-1"
+          className="question-error-text"
         >
           {errors.map((err, idx) => (
-            <p key={idx} className="text-sm text-red-600">
+            <p key={idx} className="question-error-text">
               {err}
             </p>
           ))}
