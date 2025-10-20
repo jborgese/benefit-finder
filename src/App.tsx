@@ -437,9 +437,9 @@ function App(): React.ReactElement {
                 </p>
               </div>
               <div className="bg-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2">{t('accessibility.contentLoaded')}</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('app.encryption')}</h3>
                 <p className="text-slate-300 text-sm">
-                  {t('accessibility.loadingContent')}
+                  {t('privacy.encryption')}
                 </p>
               </div>
             </div>
