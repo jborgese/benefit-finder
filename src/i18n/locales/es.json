@@ -156,10 +156,10 @@
   "privacy": {
     "title": "Privacidad y Seguridad",
     "description": "Tu privacidad es nuestra prioridad. Todo el procesamiento de datos ocurre localmente en tu dispositivo.",
-    "encryption": "Cifrado de Datos",
+    "encryption": "Tus datos están protegidos con cifrado fuerte para mantener tu información segura.",
     "offline": "Procesamiento Sin Conexión",
     "noTracking": "Sin Seguimiento",
-    "localStorage": "Solo Almacenamiento Local",
+    "localStorage": "Funciona completamente sin conexión - no se requiere internet para tu evaluación.",
     "encryptionStatus": "Estado del Cifrado",
     "encrypted": "Cifrado",
     "notEncrypted": "No Cifrado"
