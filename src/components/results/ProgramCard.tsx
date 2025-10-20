@@ -12,6 +12,8 @@ import { WhyExplanation } from './WhyExplanation';
 import { ConfidenceScore } from './ConfidenceScore';
 import { DocumentChecklist } from './DocumentChecklist';
 import { NextStepsList } from './NextStepsList';
+import { useI18n } from '../../i18n/hooks';
+import { getProgramNameKey, getProgramDescriptionKey } from '../../utils/programHelpers';
 
 interface ProgramCardProps {
   result: ProgramEligibilityResult;
@@ -26,6 +28,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
   onStepToggle,
   className = '',
 }) => {
+  const { t } = useI18n();
   const [showExplanation, setShowExplanation] = useState(false);
 
   const getStatusBadge = (): React.ReactElement => {
@@ -40,11 +43,11 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
     };
 
     const badgeText: Record<typeof status, string> = {
-      'qualified': 'You Qualify',
-      'likely': 'Likely Qualify',
-      'maybe': 'May Qualify',
-      'unlikely': 'Unlikely to Qualify',
-      'not-qualified': 'Not Qualified',
+      'qualified': t('results.status.qualified'),
+      'likely': t('results.status.likely'),
+      'maybe': t('results.status.maybe'),
+      'unlikely': t('results.status.unlikely'),
+      'not-qualified': t('results.status.notQualified'),
     };
 
     const badgeIcons: Record<typeof status, string> = {
@@ -120,7 +123,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <h3 className="text-xl font-bold text-gray-900">
-                {result.programName}
+                {t(getProgramNameKey(result.programId))}
               </h3>
               {getStatusBadge()}
             </div>
@@ -134,7 +137,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
           />
         </div>
 
-        <p className="text-gray-700 leading-relaxed">{result.programDescription}</p>
+        <p className="text-gray-700 leading-relaxed">{t(getProgramDescriptionKey(result.programId))}</p>
 
         {/* Estimated Benefit */}
         {result.estimatedBenefit && (
@@ -162,7 +165,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
             className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center transition-colors"
           >
             <span className="mr-1">❓</span>
-            Why this result?
+            {t('results.actions.whyThisResult')}
           </button>
         </div>
       </div>

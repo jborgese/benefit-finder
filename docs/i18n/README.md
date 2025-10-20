@@ -222,14 +222,77 @@ Integration tests should verify:
 - No external API calls for translations
 - Minimal bundle size impact
 
+## Advanced Features
+
+### RTL (Right-to-Left) Support ✅
+
+The application now includes comprehensive RTL support:
+
+- **Automatic Direction Detection** - Detects RTL languages and applies appropriate styling
+- **CSS RTL Classes** - Complete set of RTL-specific CSS classes in `src/i18n/rtl.css`
+- **Dynamic Direction Switching** - Updates document direction when language changes
+- **Component RTL Support** - All UI components adapt to RTL layout
+
+```typescript
+const { isRightToLeft, getDirection } = useI18n();
+
+// Check if current language is RTL
+const isRTL = isRightToLeft('ar'); // true
+
+// Get current direction
+const direction = getDirection(); // 'rtl' or 'ltr'
+```
+
+### Locale-Specific Formatting ✅
+
+Built-in formatting for numbers, dates, and currency:
+
+```typescript
+const { formatCurrency, formatDate, formatNumber } = useI18n();
+
+// Currency formatting
+formatCurrency(2500); // "$2,500.00" (EN) or "$2.500,00" (ES)
+
+// Date formatting
+formatDate(new Date()); // "12/25/2024" (EN) or "25/12/2024" (ES)
+
+// Number formatting
+formatNumber(1234567.89); // "1,234,567.89" (EN) or "1.234.567,89" (ES)
+```
+
+### Community Feedback System ✅
+
+Privacy-preserving translation feedback framework:
+
+- **Local Storage** - All feedback stored locally, no external servers
+- **Export Functionality** - Export feedback for community review
+- **Issue Reporting** - Report translation issues with severity levels
+- **Suggestion System** - Suggest improvements to translations
+- **Statistics Tracking** - Track community engagement
+
+```typescript
+import { useTranslationFeedback } from '../i18n/feedback';
+
+const { submitFeedback, reportIssue, exportFeedback } = useTranslationFeedback();
+
+// Submit translation suggestion
+await submitFeedback({
+  language: 'es',
+  translationKey: 'common.save',
+  currentText: 'Guardar',
+  suggestedText: 'Ahorrar',
+  reason: 'More appropriate for this context'
+});
+```
+
 ## Future Enhancements
 
 Potential future improvements:
 
 1. **Dynamic Translation Loading** - Load translations on demand
 2. **Pluralization Support** - Handle plural forms properly
-3. **Date/Number Formatting** - Locale-specific formatting
-4. **RTL Support** - Right-to-left language support
-5. **Translation Management** - External translation management system
-6. **Auto-translation** - Automatic translation for new keys
-7. **Translation Validation** - Ensure all keys are translated
+3. **Translation Management** - External translation management system
+4. **Auto-translation** - Automatic translation for new keys
+5. **Translation Validation** - Ensure all keys are translated
+6. **Voice Synthesis** - Text-to-speech in multiple languages
+7. **Cultural Context** - Region-specific translations (ES-ES vs ES-MX)

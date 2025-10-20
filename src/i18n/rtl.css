@@ -1,0 +1,212 @@
+/* RTL (Right-to-Left) Support Styles */
+
+/* Base RTL styles */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Flexbox RTL adjustments */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .space-x-1 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 0.25rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 0.75rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 1rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .space-x-6 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 1.5rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .space-x-8 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 2rem;
+  margin-left: 0;
+}
+
+/* Gap adjustments */
+[dir="rtl"] .gap-1 {
+  gap: 0.25rem;
+}
+
+[dir="rtl"] .gap-2 {
+  gap: 0.5rem;
+}
+
+[dir="rtl"] .gap-3 {
+  gap: 0.75rem;
+}
+
+[dir="rtl"] .gap-4 {
+  gap: 1rem;
+}
+
+/* Margin adjustments */
+[dir="rtl"] .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+[dir="rtl"] .ml-4 {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+[dir="rtl"] .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+[dir="rtl"] .mr-4 {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+/* Padding adjustments */
+[dir="rtl"] .pl-2 {
+  padding-left: 0;
+  padding-right: 0.5rem;
+}
+
+[dir="rtl"] .pl-4 {
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+[dir="rtl"] .pr-2 {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+[dir="rtl"] .pr-4 {
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+/* Border radius adjustments */
+[dir="rtl"] .rounded-l {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+}
+
+[dir="rtl"] .rounded-r {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+}
+
+/* Language switcher specific RTL styles */
+[dir="rtl"] .language-switcher-trigger {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .language-switcher-trigger .chevron {
+  transform: scaleX(-1);
+}
+
+/* Form elements RTL support */
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="number"],
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+/* Navigation RTL support */
+[dir="rtl"] nav .flex {
+  flex-direction: row-reverse;
+}
+
+/* Card layouts RTL support */
+[dir="rtl"] .grid {
+  direction: rtl;
+}
+
+/* Button groups RTL support */
+[dir="rtl"] .btn-group {
+  flex-direction: row-reverse;
+}
+
+/* Icon positioning */
+[dir="rtl"] .icon-left {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+[dir="rtl"] .icon-right {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+/* Dropdown menus RTL support */
+[dir="rtl"] .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .dropdown-menu.dropdown-menu-right {
+  left: 0;
+  right: auto;
+}
+
+/* Modal and dialog RTL support */
+[dir="rtl"] .modal-content {
+  text-align: right;
+}
+
+/* Progress bars RTL support */
+[dir="rtl"] .progress-bar {
+  transform: scaleX(-1);
+}
+
+/* Tooltip positioning RTL support */
+[dir="rtl"] .tooltip {
+  direction: rtl;
+}
+
+/* Responsive RTL support */
+@media (max-width: 768px) {
+  [dir="rtl"] .mobile-nav {
+    flex-direction: column-reverse;
+  }
+}
+
+/* Print styles RTL support */
+@media print {
+  [dir="rtl"] {
+    direction: rtl;
+  }
+
+  [dir="rtl"] * {
+    text-align: right;
+  }
+}

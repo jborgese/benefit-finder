@@ -8,6 +8,7 @@ import React, { useState, useRef } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { importEncrypted } from './exportUtils';
 import type { EligibilityResults } from './types';
+import { useI18n } from '../../i18n/hooks';
 
 interface ResultsImportProps {
   onImport: (results: EligibilityResults, metadata?: Record<string, unknown>) => void;
@@ -18,6 +19,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
   onImport,
   trigger,
 }) => {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -74,7 +76,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
-            <span className="whitespace-nowrap">Import Results</span>
+            <span className="whitespace-nowrap">{t('results.import.importResults')}</span>
           </button>
         )}
       </Dialog.Trigger>

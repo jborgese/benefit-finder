@@ -39,6 +39,29 @@ i18n
 
     interpolation: {
       escapeValue: false, // React already does escaping
+      format: (value, format, lng) => {
+        // Handle locale-specific formatting
+        if (format === 'number' && typeof value === 'number') {
+          return new Intl.NumberFormat(lng).format(value);
+        }
+        if (format === 'currency' && typeof value === 'number') {
+          // Default to USD for now, can be made configurable
+          return new Intl.NumberFormat(lng, {
+            style: 'currency',
+            currency: 'USD',
+          }).format(value);
+        }
+        if (format === 'date' && value instanceof Date) {
+          return new Intl.DateTimeFormat(lng).format(value);
+        }
+        if (format === 'dateTime' && value instanceof Date) {
+          return new Intl.DateTimeFormat(lng, {
+            dateStyle: 'short',
+            timeStyle: 'short',
+          }).format(value);
+        }
+        return value;
+      },
     },
 
     // Namespace configuration

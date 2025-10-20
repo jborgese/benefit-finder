@@ -1,6 +1,40 @@
 import { useTranslation } from 'react-i18next';
 
 /**
+ * RTL (Right-to-Left) language codes
+ */
+const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur', 'ku', 'dv'];
+
+/**
+ * Language metadata for display and formatting
+ */
+const LANGUAGE_METADATA: Record<string, {
+  name: string;
+  nativeName: string;
+  flag: string;
+  isRTL: boolean;
+  currency: string;
+  dateFormat: string;
+}> = {
+  en: {
+    name: 'English',
+    nativeName: 'English',
+    flag: '🇺🇸',
+    isRTL: false,
+    currency: 'USD',
+    dateFormat: 'MM/DD/YYYY',
+  },
+  es: {
+    name: 'Spanish',
+    nativeName: 'Español',
+    flag: '🇪🇸',
+    isRTL: false,
+    currency: 'USD',
+    dateFormat: 'DD/MM/YYYY',
+  },
+};
+
+/**
  * Custom hook for accessing translations with type safety
  * Provides access to the t function and i18n instance
  */
@@ -13,6 +47,11 @@ export const useI18n = () => {
    */
   const changeLanguage = async (lng: string): Promise<void> => {
     await i18n.changeLanguage(lng);
+
+    // Update document direction for RTL support
+    const isRTL = isRightToLeft(lng);
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = lng;
   };
 
   /**
@@ -23,17 +62,66 @@ export const useI18n = () => {
   /**
    * Get all available languages
    */
-  const availableLanguages = ['en', 'es'];
+  const availableLanguages = Object.keys(LANGUAGE_METADATA);
 
   /**
    * Get language display name
    */
   const getLanguageDisplayName = (lng: string): string => {
-    const names: Record<string, string> = {
-      en: 'English',
-      es: 'Español',
-    };
-    return names[lng] || lng;
+    return LANGUAGE_METADATA[lng]?.name || lng;
+  };
+
+  /**
+   * Get language native name
+   */
+  const getLanguageNativeName = (lng: string): string => {
+    return LANGUAGE_METADATA[lng]?.nativeName || lng;
+  };
+
+  /**
+   * Get language flag emoji
+   */
+  const getLanguageFlag = (lng: string): string => {
+    return LANGUAGE_METADATA[lng]?.flag || '🌐';
+  };
+
+  /**
+   * Check if a language is right-to-left
+   */
+  const isRightToLeft = (lng: string): boolean => {
+    return RTL_LANGUAGES.includes(lng) || LANGUAGE_METADATA[lng]?.isRTL || false;
+  };
+
+  /**
+   * Get current language direction
+   */
+  const getDirection = (): 'ltr' | 'rtl' => {
+    return isRightToLeft(currentLanguage) ? 'rtl' : 'ltr';
+  };
+
+  /**
+   * Format currency for current locale
+   */
+  const formatCurrency = (amount: number, currency?: string): string => {
+    const localeCurrency = currency || LANGUAGE_METADATA[currentLanguage]?.currency || 'USD';
+    return new Intl.NumberFormat(currentLanguage, {
+      style: 'currency',
+      currency: localeCurrency,
+    }).format(amount);
+  };
+
+  /**
+   * Format date for current locale
+   */
+  const formatDate = (date: Date, options?: Intl.DateTimeFormatOptions): string => {
+    return new Intl.DateTimeFormat(currentLanguage, options).format(date);
+  };
+
+  /**
+   * Format number for current locale
+   */
+  const formatNumber = (number: number, options?: Intl.NumberFormatOptions): string => {
+    return new Intl.NumberFormat(currentLanguage, options).format(number);
   };
 
   return {
@@ -42,6 +130,13 @@ export const useI18n = () => {
     currentLanguage,
     availableLanguages,
     getLanguageDisplayName,
+    getLanguageNativeName,
+    getLanguageFlag,
+    isRightToLeft,
+    getDirection,
+    formatCurrency,
+    formatDate,
+    formatNumber,
     i18n,
   };
 };

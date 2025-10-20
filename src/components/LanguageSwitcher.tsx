@@ -22,6 +22,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     currentLanguage,
     availableLanguages,
     getLanguageDisplayName,
+    getLanguageFlag,
     changeLanguage,
   } = useI18n();
 
@@ -72,7 +73,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <Select.Value>
           <span className={`flex items-center gap-2 ${variant === 'minimal' ? 'text-white' : 'text-gray-900'}`}>
             <span className="text-lg" role="img" aria-hidden="true">
-              {currentLanguage === 'es' ? '🇪🇸' : '🇺🇸'}
+              {getLanguageFlag(currentLanguage)}
             </span>
             <span className="font-medium">
               {getLanguageDisplayName(currentLanguage)}
@@ -112,7 +113,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                   <CheckIcon className="w-4 h-4" />
                 </Select.ItemIndicator>
                 <span className="text-lg" role="img" aria-hidden="true">
-                  {language === 'es' ? '🇪🇸' : '🇺🇸'}
+                  {getLanguageFlag(language)}
                 </span>
                 <Select.ItemText className="font-medium text-gray-900">
                   {getLanguageDisplayName(language)}

@@ -8,6 +8,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { EligibilityResults } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { exportToPDF, exportEncrypted, downloadBlob, generateExportFilename } from './exportUtils';
+import { useI18n } from '../../i18n/hooks';
 
 interface ResultsExportProps {
   results: EligibilityResults;
@@ -23,6 +24,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
   profileSnapshot,
   userInfo,
 }) => {
+  const { t } = useI18n();
   const [showEncryptDialog, setShowEncryptDialog] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
@@ -125,7 +127,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
         <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
         </svg>
-        <span className="whitespace-nowrap">{isExporting ? 'Exporting...' : 'Export to PDF'}</span>
+        <span className="whitespace-nowrap">{isExporting ? t('results.export.exporting') : t('results.export.exportToPdf')}</span>
       </button>
 
       {/* Encrypted Export Button */}
@@ -137,7 +139,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
         <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
-        <span className="whitespace-nowrap">Export Encrypted File</span>
+        <span className="whitespace-nowrap">{t('results.export.exportEncrypted')}</span>
       </button>
 
       {/* Encrypted Export Dialog */}
@@ -146,7 +148,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
           <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto z-50 p-6 mx-4">
             <Dialog.Title className="text-xl font-bold mb-4">
-              Export Encrypted Results
+              {t('results.export.exportEncryptedResults')}
             </Dialog.Title>
 
             <div className="mb-6">

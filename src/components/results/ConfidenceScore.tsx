@@ -7,6 +7,7 @@
 import React from 'react';
 import { ConfidenceLevel, EligibilityStatus } from './types';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { useI18n } from '../../i18n/hooks';
 
 interface ConfidenceScoreProps {
   level: ConfidenceLevel;
@@ -23,6 +24,7 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
   showLabel = true,
   size = 'md',
 }) => {
+  const { t } = useI18n();
   /**
    * Get context-aware label based on eligibility status and confidence
    */
@@ -31,11 +33,11 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
     if (status === 'qualified') {
       switch (level) {
         case 'high':
-          return { text: 'Strong Match', icon: '👍' };
+          return { text: t('results.confidence.strongMatch'), icon: '👍' };
         case 'medium':
-          return { text: 'Good Match', icon: '✓' };
+          return { text: t('results.confidence.goodMatch'), icon: '✓' };
         case 'low':
-          return { text: 'Possible Match', icon: '?' };
+          return { text: t('results.confidence.possibleMatch'), icon: '?' };
       }
     }
 
@@ -43,11 +45,11 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
     if (status === 'not-qualified') {
       switch (level) {
         case 'high':
-          return { text: 'Clear Mismatch', icon: '' };
+          return { text: t('results.confidence.clearMismatch'), icon: '' };
         case 'medium':
-          return { text: 'Likely Ineligible', icon: '' };
+          return { text: t('results.confidence.likelyIneligible'), icon: '' };
         case 'low':
-          return { text: 'Insufficient Data', icon: '?' };
+          return { text: t('results.confidence.insufficientData'), icon: '?' };
       }
     }
 
@@ -55,11 +57,11 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
     if (status === 'likely') {
       switch (level) {
         case 'high':
-          return { text: 'Strong Match', icon: '👍' };
+          return { text: t('results.confidence.strongMatch'), icon: '👍' };
         case 'medium':
-          return { text: 'Good Match', icon: '✓' };
+          return { text: t('results.confidence.goodMatch'), icon: '✓' };
         case 'low':
-          return { text: 'Needs Verification', icon: '?' };
+          return { text: t('results.confidence.needsVerification'), icon: '?' };
       }
     }
 
@@ -67,9 +69,9 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
       switch (level) {
         case 'high':
         case 'medium':
-          return { text: 'Needs Verification', icon: '?' };
+          return { text: t('results.confidence.needsVerification'), icon: '?' };
         case 'low':
-          return { text: 'More Info Required', icon: '❓' };
+          return { text: t('results.confidence.moreInfoRequired'), icon: '❓' };
       }
     }
 
@@ -78,9 +80,9 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
       switch (level) {
         case 'high':
         case 'medium':
-          return { text: 'Likely Ineligible', icon: '' };
+          return { text: t('results.confidence.likelyIneligible'), icon: '' };
         case 'low':
-          return { text: 'Insufficient Data', icon: '?' };
+          return { text: t('results.confidence.insufficientData'), icon: '?' };
         default:
           return { text: 'Uncertain', icon: '?' };
       }

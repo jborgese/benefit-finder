@@ -72,7 +72,75 @@
     "learnMore": "Aprender Más",
     "applyNow": "Aplicar Ahora",
     "noResults": "No se encontraron beneficios que coincidan con tus criterios",
-    "tryAgain": "Intenta ajustar tus respuestas o revisa más tarde"
+    "tryAgain": "Intenta ajustar tus respuestas o revisa más tarde",
+    "summary": {
+      "title": "Tus Resultados de Elegibilidad de Beneficios",
+      "qualified": "Calificado",
+      "likely": "Probable",
+      "maybe": "Posible",
+      "notQualified": "No Calificado",
+      "all": "Todos",
+      "qualifiedFor": "Calificado para {{count}} de {{total}} programas",
+      "evaluatedOn": "Evaluado el {{date}}"
+    },
+    "status": {
+      "qualified": "Calificas",
+      "likely": "Probablemente Calificas",
+      "maybe": "Podrías Calificar",
+      "unlikely": "Poco Probable que Califiques",
+      "notQualified": "No Calificas"
+    },
+    "actions": {
+      "newAssessment": "Nueva Evaluación",
+      "exportPdf": "Exportar a PDF",
+      "exportEncrypted": "Exportar Archivo Cifrado",
+      "importResults": "Importar Resultados",
+      "whyThisResult": "¿Por qué este resultado?",
+      "needsVerification": "Necesita Verificación",
+      "clearMismatch": "Despejar Incompatibilidad"
+    },
+    "additionalInfo": {
+      "title": "Información Adicional Necesaria",
+      "message": "Podrías calificar para algunos programas, pero necesitamos más información para determinar la elegibilidad. Revisa los detalles del programa a continuación y contacta la oficina del programa para obtener asistencia."
+    },
+    "resources": {
+      "title": "Recursos Adicionales",
+      "government": "Recursos Gubernamentales",
+      "support": "Apoyo y Asistencia",
+      "benefitsGov": "Benefits.gov - Información de Beneficios Federales",
+      "usaGov": "USA.gov - Guía de Beneficios Gubernamentales",
+      "localAssistance": "211 - Línea de Asistencia Local",
+      "healthcareGov": "Healthcare.gov - Seguro de Salud"
+    },
+    "processing": {
+      "title": "Procesando Sus Resultados",
+      "description": "Estamos analizando su elegibilidad para programas de beneficios gubernamentales. Esto solo tomará un momento...",
+      "dots": "•"
+    },
+    "noResults": {
+      "title": "No Hay Resultados Disponibles",
+      "description": "Complete el cuestionario de elegibilidad para ver qué programas de beneficios gubernamentales podría calificar.",
+      "startAssessment": "Iniciar Evaluación"
+    },
+    "confidence": {
+      "strongMatch": "Coincidencia Fuerte",
+      "goodMatch": "Buena Coincidencia",
+      "possibleMatch": "Coincidencia Posible",
+      "clearMismatch": "Incompatibilidad Clara",
+      "likelyIneligible": "Probablemente Inelegible",
+      "insufficientData": "Datos Insuficientes",
+      "needsVerification": "Necesita Verificación",
+      "moreInfoRequired": "Se Requiere Más Información"
+    },
+    "export": {
+      "exportToPdf": "Exportar a PDF",
+      "exportEncrypted": "Exportar Archivo Cifrado",
+      "exporting": "Exportando...",
+      "exportEncryptedResults": "Exportar Resultados Cifrados"
+    },
+    "import": {
+      "importResults": "Importar Resultados"
+    }
   },
   "settings": {
     "title": "Configuración",
@@ -134,6 +202,41 @@
     "legal": "Asistencia Legal",
     "senior": "Servicios para Adultos Mayores",
     "veteran": "Beneficios de Veteranos",
-    "disability": "Servicios de Discapacidad"
+    "disability": "Servicios de Discapacidad",
+    "descriptions": {
+      "medicaid": "Cobertura de salud para personas y familias de bajos ingresos",
+      "snap": "SNAP ayuda a personas y familias de bajos ingresos a comprar alimentos",
+      "wic": "Proporciona asistencia nutricional a mujeres embarazadas, madres nuevas y niños pequeños",
+      "default": "Programa de beneficios gubernamentales"
+    }
+  },
+  "formatting": {
+    "currency": "{{amount, currency}}",
+    "number": "{{value, number}}",
+    "date": "{{date, date}}",
+    "dateTime": "{{date, dateTime}}",
+    "percent": "{{value, percent}}",
+    "examples": {
+      "currency": "Ingreso mensual: $2,500.00",
+      "number": "Tamaño del hogar: 4",
+      "date": "Fecha de aplicación: 25/12/2024",
+      "dateTime": "Última actualización: 25/12/2024 a las 3:30 PM",
+      "percent": "Tasa de impuestos: 15%"
+    }
+  },
+  "feedback": {
+    "title": "Comentarios sobre Traducción",
+    "suggestImprovement": "Sugerir Mejora",
+    "reportIssue": "Reportar Problema",
+    "suggestedTranslation": "Traducción Sugerida",
+    "reason": "Razón",
+    "issueDescription": "Descripción del Problema",
+    "severity": "Gravedad",
+    "submit": "Enviar",
+    "export": "Exportar Comentarios",
+    "cancel": "Cancelar",
+    "submitting": "Enviando...",
+    "communityStats": "Comentarios de la comunidad: {{suggestions}} sugerencias, {{issues}} problemas",
+    "recentActivity": "({{count}} esta semana)"
   }
 }
