@@ -156,10 +156,10 @@
   "privacy": {
     "title": "Privacy & Security",
     "description": "Your privacy is our priority. All data processing happens locally on your device.",
-    "encryption": "Data Encryption",
+    "encryption": "Your data is protected with strong encryption to keep your information secure.",
     "offline": "Offline Processing",
     "noTracking": "No Tracking",
-    "localStorage": "Local Storage Only",
+    "localStorage": "Works completely offline - no internet required for your assessment.",
     "encryptionStatus": "Encryption Status",
     "encrypted": "Encrypted",
     "notEncrypted": "Not Encrypted"
