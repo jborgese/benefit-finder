@@ -128,10 +128,13 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
 
   if (!store.started || !currentQuestion) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" />
-          <p className="text-gray-600">Loading questionnaire...</p>
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center animate-fade-in-up">
+          <div className="relative mx-auto mb-6">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200" />
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 border-t-transparent absolute top-0 left-0" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+          </div>
+          <p className="text-secondary-600 text-lg">Loading questionnaire...</p>
         </div>
       </div>
     );
@@ -139,11 +142,11 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
 
   if (store.completed) {
     return (
-      <div className={`questionnaire-complete ${className}`}>
-        <div className="text-center p-8">
-          <div className="mb-4">
+      <div className={`questionnaire-complete ${className} animate-fade-in-up`}>
+        <div className="text-center p-12">
+          <div className="mb-6 animate-bounce-gentle">
             <svg
-              className="w-16 h-16 text-green-500 mx-auto"
+              className="w-20 h-20 text-success-500 mx-auto"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -157,12 +160,12 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
             </svg>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-display font-bold text-secondary-900 mb-4">
             Questionnaire Complete!
           </h2>
 
-          <p className="text-gray-600 mb-6">
-            Thank you for completing the questionnaire.
+          <p className="text-secondary-600 mb-8 text-lg">
+            Thank you for completing the questionnaire. Your results are being processed.
           </p>
 
           {footer}
@@ -174,53 +177,57 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
   const currentAnswer = store.answers.get(currentQuestion.id)?.value;
 
   return (
-    <div className={`question-flow-ui ${className}`}>
+    <div className={`question-flow-ui ${className} animate-fade-in`}>
       {enableSaveResume && <ResumeDialog storageKey="bf-questionnaire-autosave" />}
 
-      {header && <div className="questionnaire-header mb-6">{header}</div>}
+      {header && <div className="questionnaire-header mb-8 animate-fade-in-up">{header}</div>}
 
       {showBreadcrumb && (
         <QuestionBreadcrumb
           onJumpTo={(nodeId) => store.jumpTo(nodeId)}
-          className="mb-4"
+          className="mb-6 animate-slide-in-left"
         />
       )}
 
       <div className="questionnaire-content mb-8">
-        <Question
-          question={currentQuestion}
-          value={currentAnswer}
-          onChange={handleAnswerChange}
-          onValidationChange={handleValidationChange}
-          onEnterKey={handleEnterKey}
-          autoFocus
-        />
+        <div className="card p-8 animate-scale-in">
+          <Question
+            question={currentQuestion}
+            value={currentAnswer}
+            onChange={handleAnswerChange}
+            onValidationChange={handleValidationChange}
+            onEnterKey={handleEnterKey}
+            autoFocus
+          />
+        </div>
       </div>
 
       {showNavigation && (
-        <NavigationControls
-          showBack
-          showForward
-          showProgress={showProgress}
-          forwardDisabled={!isCurrentQuestionValid}
-          isCurrentQuestionValid={isCurrentQuestionValid}
-          onBeforeNavigate={(direction) => {
-            // Only allow forward navigation if current question is valid
-            if (direction === 'forward') {
-              return isCurrentQuestionValid;
-            }
-            return true;
-          }}
-        />
+        <div className="animate-fade-in-up">
+          <NavigationControls
+            showBack
+            showForward
+            showProgress={showProgress}
+            forwardDisabled={!isCurrentQuestionValid}
+            isCurrentQuestionValid={isCurrentQuestionValid}
+            onBeforeNavigate={(direction) => {
+              // Only allow forward navigation if current question is valid
+              if (direction === 'forward') {
+                return isCurrentQuestionValid;
+              }
+              return true;
+            }}
+          />
+        </div>
       )}
 
       {enableSaveResume && (
-        <div className="mt-4 flex justify-end">
+        <div className="mt-6 flex justify-end animate-slide-in-right">
           <SaveProgressButton />
         </div>
       )}
 
-      {footer && <div className="questionnaire-footer mt-6">{footer}</div>}
+      {footer && <div className="questionnaire-footer mt-8 animate-fade-in">{footer}</div>}
     </div>
   );
 };

@@ -357,7 +357,7 @@ function App(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 text-secondary-900">
       {/* Screen reader announcements */}
       <LiveRegion
         message={announcementMessage}
@@ -365,24 +365,30 @@ function App(): React.ReactElement {
         clearAfter={3000}
       />
 
-      <nav className="bg-slate-900 border-b border-slate-800 px-4 py-3">
+      <nav className="bg-white/80 backdrop-blur-md border-b border-secondary-200 px-4 py-4 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-semibold">{t('app.title')}</h1>
+          <h1 className="text-xl font-display font-semibold text-secondary-900">
+            {t('app.title')}
+          </h1>
           <div className="flex items-center space-x-4">
             {appState !== 'home' && (
               <Button
-                variant="secondary"
+                variant="ghost"
+                size="sm"
                 onClick={handleBackToHome}
                 aria-label={t('navigation.home')}
+                className="animate-slide-in-right"
               >
                 {t('navigation.home')}
               </Button>
             )}
             {hasResults && appState !== 'results' && (
               <Button
-                variant="secondary"
+                variant="primary"
+                size="sm"
                 onClick={handleViewResults}
                 aria-label={t('navigation.results')}
+                className="animate-slide-in-right"
               >
                 {t('navigation.results')}
               </Button>
@@ -392,20 +398,21 @@ function App(): React.ReactElement {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {appState === 'home' && (
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">
+          <div className="text-center animate-fade-in-up">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-secondary-900 px-4">
               {t('app.subtitle')}
             </h2>
-            <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-secondary-600 mb-8 sm:mb-12 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed px-4">
               {t('app.description')}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
               <Button
                 onClick={handleStartQuestionnaire}
-                className="px-8 py-3"
+                size="lg"
+                className="animate-bounce-gentle"
                 aria-label={t('questionnaire.title')}
               >
                 {hasResults ? t('common.continue') : t('questionnaire.title')}
@@ -414,8 +421,9 @@ function App(): React.ReactElement {
               {hasResults && (
                 <Button
                   variant="secondary"
+                  size="lg"
                   onClick={handleViewResults}
-                  className="px-8 py-3"
+                  className="animate-slide-in-right"
                   aria-label={t('navigation.results')}
                 >
                   {t('navigation.results')}
@@ -423,22 +431,31 @@ function App(): React.ReactElement {
               )}
             </div>
 
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2">{t('privacy.title')}</h3>
-                <p className="text-slate-300 text-sm">
+            <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🔒</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.title')}</h3>
+                <p className="text-secondary-600 text-sm leading-relaxed">
                   {t('privacy.description')}
                 </p>
               </div>
-              <div className="bg-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2">{t('privacy.offline')}</h3>
-                <p className="text-slate-300 text-sm">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📱</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.offline')}</h3>
+                <p className="text-secondary-600 text-sm leading-relaxed">
                   {t('privacy.localStorage')}
                 </p>
               </div>
-              <div className="bg-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2">{t('app.encryption')}</h3>
-                <p className="text-slate-300 text-sm">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 sm:col-span-2 lg:col-span-1">
+                <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🛡️</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('app.encryption')}</h3>
+                <p className="text-secondary-600 text-sm leading-relaxed">
                   {t('privacy.encryption')}
                 </p>
               </div>
@@ -447,17 +464,24 @@ function App(): React.ReactElement {
         )}
 
         {appState === 'questionnaire' && (
-          <div>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold">Benefit Eligibility Assessment</h2>
+          <div className="animate-fade-in">
+            <div className="mb-6 sm:mb-8 text-center px-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
+                Benefit Eligibility Assessment
+              </h2>
+              <p className="text-secondary-600 text-sm sm:text-base">
+                Complete this questionnaire to check your eligibility for government benefits
+              </p>
             </div>
 
-            <EnhancedQuestionnaire
-              flow={sampleFlow}
-              onComplete={(answers): void => {
-                void handleCompleteQuestionnaire(answers);
-              }}
-            />
+            <div className="max-w-4xl mx-auto px-4 sm:px-0">
+              <EnhancedQuestionnaire
+                flow={sampleFlow}
+                onComplete={(answers): void => {
+                  void handleCompleteQuestionnaire(answers);
+                }}
+              />
+            </div>
           </div>
         )}
 
@@ -502,38 +526,49 @@ function App(): React.ReactElement {
           <div>
             {/* Avoid nested ternary by early return pattern */}
             {isProcessingResults && (
-              <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400" />
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-secondary-200 p-12 text-center max-w-2xl mx-auto animate-scale-in">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="relative">
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200" />
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 border-t-transparent absolute top-0 left-0" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-slate-100 mb-4">
+                <h2 className="text-3xl font-display font-bold text-secondary-900 mb-4">
                   {t('results.processing.title')}
                 </h2>
-                <p className="text-slate-300 mb-6">
+                <p className="text-secondary-600 mb-8 text-lg">
                   {t('results.processing.description')}
                 </p>
-                <div className="flex items-center justify-center text-slate-400 text-sm">
-                  <div className="animate-pulse">•</div>
-                  <div className="animate-pulse mx-2" style={{ animationDelay: '0.2s' }}>•</div>
-                  <div className="animate-pulse" style={{ animationDelay: '0.4s' }}>•</div>
+                <div className="flex items-center justify-center text-primary-600 text-lg">
+                  <div className="animate-pulse-soft">•</div>
+                  <div className="animate-pulse-soft mx-3" style={{ animationDelay: '0.2s' }}>•</div>
+                  <div className="animate-pulse-soft" style={{ animationDelay: '0.4s' }}>•</div>
                 </div>
               </div>
             )}
             {!isProcessingResults && currentResults ? (
               <div>
-                <div className="mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <h2 className="text-2xl font-bold">{t('results.summary.title')}</h2>
+                <div className="mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+                    <div className="text-center sm:text-left">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
+                        {t('results.summary.title')}
+                      </h2>
+                      <p className="text-secondary-600 text-sm sm:text-base">
+                        Your personalized benefit eligibility results
+                      </p>
+                    </div>
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                       <Button
-                        variant="secondary"
+                        variant="ghost"
+                        size="sm"
                         onClick={handleNewAssessment}
                         aria-label="Start new assessment"
-                        className="w-full sm:w-auto"
+                        className="w-full sm:w-auto order-2 sm:order-1"
                       >
                         {t('results.actions.newAssessment')}
                       </Button>
-                      <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2 order-1 sm:order-2">
                         <ResultsExport results={currentResults} />
                         <ResultsImport onImport={(results) => void handleImportResults(results)} />
                       </div>
@@ -545,13 +580,13 @@ function App(): React.ReactElement {
 
                 <QuestionnaireAnswersCard />
 
-                <div className="mt-8 space-y-6">
+                <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6 px-4 sm:px-0">
                   {/* Qualified Programs */}
                   {currentResults.qualified.map((result) => (
                     <ProgramCard
                       key={result.programId}
                       result={result}
-                      className="max-w-4xl mx-auto"
+                      className="max-w-4xl mx-auto animate-fade-in-up"
                     />
                   ))}
 
@@ -560,7 +595,7 @@ function App(): React.ReactElement {
                     <ProgramCard
                       key={result.programId}
                       result={result}
-                      className="max-w-4xl mx-auto"
+                      className="max-w-4xl mx-auto animate-fade-in-up"
                     />
                   ))}
 
@@ -569,7 +604,7 @@ function App(): React.ReactElement {
                     <ProgramCard
                       key={result.programId}
                       result={result}
-                      className="max-w-4xl mx-auto"
+                      className="max-w-4xl mx-auto animate-fade-in-up"
                     />
                   ))}
 
@@ -578,15 +613,15 @@ function App(): React.ReactElement {
                     <ProgramCard
                       key={result.programId}
                       result={result}
-                      className="max-w-4xl mx-auto"
+                      className="max-w-4xl mx-auto animate-fade-in-up"
                     />
                   ))}
                 </div>
 
                 {/* Helpful links for accessibility */}
-                <div className="mt-8 bg-slate-800 rounded-lg p-6 max-w-4xl mx-auto">
-                  <h3 className="text-lg font-semibold mb-4">{t('results.resources.title')}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-6 sm:mt-8 bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 max-w-4xl mx-auto mx-4 sm:mx-auto">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-secondary-900">{t('results.resources.title')}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <h4 className="font-medium mb-2">{t('results.resources.government')}</h4>
                       <ul className="space-y-2 text-sm">

@@ -94,9 +94,9 @@ export const SelectInput: React.FC<SelectProps> = ({
                   key={option.value}
                   htmlFor={optionId}
                   className={`
-                    flex items-start p-3 border rounded-md cursor-pointer
-                    transition-colors
-                    ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+                    flex items-start p-4 border rounded-lg cursor-pointer
+                    transition-all duration-200 ease-smooth
+                    ${isSelected ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-200' : 'border-secondary-300 hover:border-secondary-400 hover:shadow-sm'}
                     ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
                 >
@@ -112,7 +112,7 @@ export const SelectInput: React.FC<SelectProps> = ({
                     disabled={isDisabled}
                     required={question.required}
                     aria-describedby={question.description ? descId : undefined}
-                    className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    className="mt-0.5 h-5 w-5 text-primary-600 border-secondary-300 focus:ring-primary-500"
                   />
 
                   <div className="ml-3 flex-1">
@@ -122,13 +122,13 @@ export const SelectInput: React.FC<SelectProps> = ({
                           {option.icon}
                         </span>
                       )}
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-secondary-900">
                         {option.label}
                       </span>
                     </div>
 
                     {option.description && (
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-secondary-600">
                         {option.description}
                       </p>
                     )}
@@ -211,10 +211,11 @@ export const SelectInput: React.FC<SelectProps> = ({
         aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
         aria-label={question.ariaLabel ?? question.text}
         className={`
-          question-input w-full px-3 py-2 border rounded-md shadow-sm
-          focus:outline-none
-          ${showError ? 'border-red-400' : ''}
-          ${isFocused ? 'ring-2 ring-blue-400/20' : ''}
+          question-input w-full px-4 py-3 border rounded-lg shadow-sm
+          focus:outline-none transition-all duration-200 ease-smooth
+          ${showError ? 'border-error-400 ring-2 ring-error-400/20' : ''}
+          ${isFocused ? 'ring-2 ring-primary-400/20 border-primary-400' : ''}
+          ${!showError && !isFocused ? 'hover:border-secondary-400' : ''}
         `}
       >
         <option value="" disabled>

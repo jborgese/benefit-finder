@@ -105,7 +105,7 @@ export default {
           950: '#0c0a09',
         },
       },
-      
+
       // Typography scale for readability and accessibility
       fontFamily: {
         sans: [
@@ -128,8 +128,19 @@ export default {
           'Menlo',
           'monospace',
         ],
+        display: [
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
       },
-      
+
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],        // 12px
         'sm': ['0.875rem', { lineHeight: '1.25rem' }],    // 14px
@@ -142,14 +153,17 @@ export default {
         '5xl': ['3rem', { lineHeight: '1' }],             // 48px
         '6xl': ['3.75rem', { lineHeight: '1' }],          // 60px
       },
-      
+
       // Spacing scale for consistent layout
       spacing: {
         '18': '4.5rem',   // 72px
         '88': '22rem',    // 352px
         '128': '32rem',   // 512px
+        // Mobile-optimized spacing
+        'touch': '3rem',  // 48px - comfortable touch spacing
+        'safe': '1rem',   // 16px - safe area spacing
       },
-      
+
       // Border radius for modern, friendly UI
       borderRadius: {
         'none': '0',
@@ -161,7 +175,7 @@ export default {
         '2xl': '1.5rem',   // 24px
         'full': '9999px',
       },
-      
+
       // Box shadows for depth and elevation
       boxShadow: {
         'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -172,7 +186,7 @@ export default {
         '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         'inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
       },
-      
+
       // Screen sizes (mobile-first)
       screens: {
         'xs': '375px',   // Small phones
@@ -181,8 +195,9 @@ export default {
         'lg': '1024px',  // Small desktops
         'xl': '1280px',  // Large desktops
         '2xl': '1536px', // Very large screens
+        '3xl': '1920px', // Ultra-wide screens
       },
-      
+
       // Minimum touch target sizes for accessibility
       minWidth: {
         'touch': '44px', // WCAG minimum touch target
@@ -190,12 +205,69 @@ export default {
       minHeight: {
         'touch': '44px', // WCAG minimum touch target
       },
-      
+
       // Animation and transitions
       transitionDuration: {
+        '150': '150ms',
+        '200': '200ms',
+        '250': '250ms',
+        '300': '300ms',
         '400': '400ms',
+        '500': '500ms',
+        '700': '700ms',
       },
-      
+      transitionTimingFunction: {
+        'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'snappy': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'fade-in-up': 'fadeInUp 0.4s ease-out',
+        'slide-in-right': 'slideInRight 0.3s ease-out',
+        'slide-in-left': 'slideInLeft 0.3s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        'bounce-gentle': 'bounceGentle 0.6s ease-out',
+        'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
+        'shimmer': 'shimmer 2s linear infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideInRight: {
+          '0%': { opacity: '0', transform: 'translateX(20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideInLeft: {
+          '0%': { opacity: '0', transform: 'translateX(-20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        bounceGentle: {
+          '0%, 20%, 53%, 80%, 100%': { transform: 'translate3d(0,0,0)' },
+          '40%, 43%': { transform: 'translate3d(0, -8px, 0)' },
+          '70%': { transform: 'translate3d(0, -4px, 0)' },
+          '90%': { transform: 'translate3d(0, -2px, 0)' },
+        },
+        pulseSoft: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.8' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
+
       // Z-index scale for layering
       zIndex: {
         '1': '1',
