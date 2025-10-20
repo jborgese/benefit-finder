@@ -30,7 +30,10 @@
     "results": "Resultados",
     "settings": "Configuración",
     "help": "Ayuda",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "tour": "Recorrido",
+    "privacy": "Privacidad",
+    "guide": "Guía"
   },
   "app": {
     "title": "BenefitFinder",

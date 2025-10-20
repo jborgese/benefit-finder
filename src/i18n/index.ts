@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import type { InitOptions } from 'i18next';
 
 // Import translation files
 import en from './locales/en.json';
@@ -15,67 +16,65 @@ const resources = {
   },
 };
 
+const initOptions: InitOptions = {
+  resources,
+  fallbackLng: 'en',
+
+  detection: {
+    // Order of detection methods
+    order: ['localStorage', 'navigator', 'htmlTag'],
+
+    // Keys to look for in localStorage
+    lookupLocalStorage: 'benefit-finder-language',
+
+    // Cache user language detection
+    caches: ['localStorage'],
+  },
+
+  interpolation: {
+    escapeValue: false, // React already does escaping
+    format: (value: any, format: any, lng: any) => {
+      // Handle locale-specific formatting
+      if (format === 'number' && typeof value === 'number') {
+        return new Intl.NumberFormat(lng).format(value);
+      }
+      if (format === 'currency' && typeof value === 'number') {
+        // Default to USD for now, can be made configurable
+        return new Intl.NumberFormat(lng, {
+          style: 'currency',
+          currency: 'USD',
+        }).format(value);
+      }
+      if (format === 'date' && value instanceof Date) {
+        return new Intl.DateTimeFormat(lng).format(value);
+      }
+      if (format === 'dateTime' && value instanceof Date) {
+        return new Intl.DateTimeFormat(lng, {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        }).format(value);
+      }
+      return value;
+    },
+  },
+
+  // Namespace configuration
+  defaultNS: 'translation',
+  ns: ['translation'],
+
+  // Language codes
+  supportedLngs: ['en', 'es'],
+
+  // Don't load unsupported languages
+  load: 'languageOnly',
+
+  // Clean code (en instead of en-US)
+  cleanCode: true,
+};
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'en',
-    debug: import.meta.env.DEV,
-
-    detection: {
-      // Order of detection methods
-      order: ['localStorage', 'navigator', 'htmlTag'],
-
-      // Keys to look for in localStorage
-      lookupLocalStorage: 'benefit-finder-language',
-
-      // Cache user language detection
-      caches: ['localStorage'],
-
-      // Don't cache language detection in sessionStorage
-      lookupSessionStorage: false,
-    },
-
-    interpolation: {
-      escapeValue: false, // React already does escaping
-      format: (value, format, lng) => {
-        // Handle locale-specific formatting
-        if (format === 'number' && typeof value === 'number') {
-          return new Intl.NumberFormat(lng).format(value);
-        }
-        if (format === 'currency' && typeof value === 'number') {
-          // Default to USD for now, can be made configurable
-          return new Intl.NumberFormat(lng, {
-            style: 'currency',
-            currency: 'USD',
-          }).format(value);
-        }
-        if (format === 'date' && value instanceof Date) {
-          return new Intl.DateTimeFormat(lng).format(value);
-        }
-        if (format === 'dateTime' && value instanceof Date) {
-          return new Intl.DateTimeFormat(lng, {
-            dateStyle: 'short',
-            timeStyle: 'short',
-          }).format(value);
-        }
-        return value;
-      },
-    },
-
-    // Namespace configuration
-    defaultNS: 'translation',
-    ns: ['translation'],
-
-    // Language codes
-    supportedLngs: ['en', 'es'],
-
-    // Don't load unsupported languages
-    load: 'languageOnly',
-
-    // Clean code (en instead of en-US)
-    cleanCode: true,
-  });
+  .init(initOptions);
 
 export default i18n;

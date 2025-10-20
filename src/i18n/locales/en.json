@@ -30,7 +30,10 @@
     "results": "Results",
     "settings": "Settings",
     "help": "Help",
-    "about": "About"
+    "about": "About",
+    "tour": "Tour",
+    "privacy": "Privacy",
+    "guide": "Guide"
   },
   "app": {
     "title": "BenefitFinder",
@@ -238,5 +241,152 @@
     "submitting": "Submitting...",
     "communityStats": "Community feedback: {{suggestions}} suggestions, {{issues}} issues",
     "recentActivity": "({{count}} this week)"
+  },
+  "onboarding": {
+    "tour": {
+      "progress": "Step {{current}} of {{total}}",
+      "welcome": {
+        "title": "Welcome to BenefitFinder!",
+        "content": "Let's take a quick tour to help you get started. This tool helps you discover government benefits you may be eligible for, all while keeping your information private and secure."
+      },
+      "privacy": {
+        "title": "Your Privacy is Protected",
+        "content": "All your information stays on your device. We don't collect, store, or share your personal data with anyone. Your privacy is our top priority."
+      },
+      "offline": {
+        "title": "Works Offline",
+        "content": "BenefitFinder works completely offline. No internet connection needed after the initial load. Your data never leaves your device."
+      },
+      "encryption": {
+        "title": "Encrypted Storage",
+        "content": "Your information is encrypted using military-grade AES-256 encryption. Even if someone accesses your device, your data remains secure."
+      },
+      "startButton": {
+        "title": "Ready to Start?",
+        "content": "Click the 'Start Assessment' button to begin the questionnaire. It takes about 5-10 minutes to complete and will help us determine which benefits you may qualify for.",
+        "action": "Start Assessment"
+      }
+    }
+  },
+  "privacyExplainer": {
+    "title": "Privacy & Security",
+    "tabs": {
+      "overview": "Overview",
+      "data": "Your Data",
+      "security": "Security",
+      "rights": "Your Rights"
+    },
+    "overview": {
+      "title": "Your Privacy is Protected",
+      "description": "BenefitFinder is designed with privacy-first principles. Your personal information never leaves your device and is encrypted at all times.",
+      "localProcessing": "Local Processing",
+      "localProcessingDesc": "All eligibility calculations happen on your device",
+      "noTracking": "No Tracking",
+      "noTrackingDesc": "We don't track your browsing or collect analytics",
+      "encryptedStorage": "Encrypted Storage",
+      "encryptedStorageDesc": "Your data is encrypted with AES-256-GCM",
+      "offlineFirst": "Offline First",
+      "offlineFirstDesc": "Works completely offline after initial load"
+    },
+    "data": {
+      "title": "What Data We Handle",
+      "description": "We only process the information you provide to determine your benefit eligibility. No personal identifiers are collected or stored.",
+      "whatWeCollect": "Information We Process",
+      "householdInfo": "Household size, income, and basic demographics",
+      "eligibilityResults": "Eligibility results and benefit recommendations",
+      "appPreferences": "App settings and preferences (language, theme)",
+      "whatWeDontCollect": "What We Don't Collect",
+      "personalIdentifiers": "Names, addresses, SSNs, or other personal identifiers",
+      "browsingHistory": "Your browsing history or other websites you visit",
+      "analytics": "Usage analytics, tracking pixels, or behavioral data"
+    },
+    "security": {
+      "title": "How We Protect Your Data",
+      "description": "Multiple layers of security protect your information from unauthorized access.",
+      "encryption": "Encryption",
+      "encryptionDesc": "Your data is encrypted using AES-256-GCM, the same encryption standard used by banks and government agencies.",
+      "localStorage": "Local Storage",
+      "localStorageDesc": "All data is stored locally on your device using IndexedDB with RxDB for secure, encrypted storage.",
+      "noServers": "No Server Dependencies",
+      "noServersDesc": "No data is sent to external servers. Everything happens on your device."
+    },
+    "rights": {
+      "title": "Your Rights",
+      "description": "You have complete control over your data and can access, export, or delete it at any time.",
+      "deleteData": "Delete Your Data",
+      "deleteDataDesc": "You can delete all your stored data at any time. This action cannot be undone.",
+      "deleteButton": "Delete All Data",
+      "exportData": "Export Your Data",
+      "exportDataDesc": "Export your eligibility results and data for your own records.",
+      "exportButton": "Export Data",
+      "viewData": "View Your Data",
+      "viewDataDesc": "All your data is stored locally and accessible through the app interface."
+    }
+  },
+  "quickstart": {
+    "title": "Quick Start Guide",
+    "subtitle": "Get started in just a few minutes",
+    "progress": "Step {{current}} of {{total}}",
+    "startAssessment": "Start Assessment",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to BenefitFinder!",
+        "content": "This tool helps you discover government benefits you may be eligible for. We'll guide you through a simple questionnaire to find the best benefits for your situation.",
+        "action": "Let's get started!"
+      },
+      "privacy": {
+        "title": "Your Privacy is Protected",
+        "content": "All your information stays on your device. We don't collect, store, or share your personal data. Your privacy is our top priority.",
+        "action": "That's reassuring!"
+      },
+      "questionnaire": {
+        "title": "The Questionnaire",
+        "content": "We'll ask you about your household size, income, and other factors that determine benefit eligibility. This takes about 5-10 minutes.",
+        "action": "Sounds good!"
+      },
+      "results": {
+        "title": "Your Results",
+        "content": "You'll get personalized results showing which benefits you qualify for, required documents, and next steps to apply.",
+        "action": "Perfect!"
+      },
+      "nextSteps": {
+        "title": "Ready to Start?",
+        "content": "You're all set! The assessment is quick, private, and will help you discover benefits you may not know you're eligible for.",
+        "action": "Start Now!"
+      }
+    },
+    "welcome": {
+      "whatYouGet": "What you'll get:",
+      "eligibilityCheck": "Personalized eligibility check",
+      "personalizedResults": "Detailed results for each benefit program",
+      "nextSteps": "Clear next steps and required documents",
+      "privacyFirst": "Complete privacy protection"
+    },
+    "privacy": {
+      "keyPoints": "Key privacy features:",
+      "encrypted": "Encrypted data storage",
+      "local": "Local processing only",
+      "noTracking": "No tracking or analytics",
+      "offline": "Works completely offline"
+    },
+    "questionnaire": {
+      "whatToExpect": "What to expect:",
+      "step1": "Basic household information",
+      "step2": "Income and financial details",
+      "step3": "Demographic information",
+      "step4": "Review and submit your answers"
+    },
+    "results": {
+      "whatYouGet": "Your results will include:",
+      "eligibilityStatus": "Clear eligibility status for each program",
+      "requiredDocuments": "List of required documents",
+      "nextSteps": "Step-by-step application guidance",
+      "estimatedBenefits": "Estimated benefit amounts"
+    },
+    "nextSteps": {
+      "readyToStart": "Ready to get started?",
+      "description": "The assessment is designed to be quick and easy. You can save your progress and return later if needed.",
+      "timeEstimate": "Estimated time: 5-10 minutes"
+    }
   }
 }
