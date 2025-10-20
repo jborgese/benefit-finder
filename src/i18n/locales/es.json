@@ -22,7 +22,8 @@
     "all": "Todos",
     "none": "Ninguno",
     "required": "Requerido",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "skip": "Omitir"
   },
   "navigation": {
     "home": "Inicio",
@@ -241,5 +242,31 @@
     "submitting": "Enviando...",
     "communityStats": "Comentarios de la comunidad: {{suggestions}} sugerencias, {{issues}} problemas",
     "recentActivity": "({{count}} esta semana)"
+  },
+  "onboarding": {
+    "tour": {
+      "progress": "Paso {{current}} de {{total}}",
+      "welcome": {
+        "title": "¡Bienvenido a BenefitFinder!",
+        "content": "Tomemos un recorrido rápido para ayudarte a comenzar. Esta herramienta te ayuda a descubrir beneficios gubernamentales para los que podrías ser elegible, todo mientras mantiene tu información privada y segura."
+      },
+      "privacy": {
+        "title": "Tu Privacidad Está Protegida",
+        "content": "Toda tu información permanece en tu dispositivo. No recopilamos, almacenamos o compartimos tus datos personales con nadie. Tu privacidad es nuestra máxima prioridad."
+      },
+      "offline": {
+        "title": "Funciona Sin Conexión",
+        "content": "BenefitFinder funciona completamente sin conexión a internet. No se necesita conexión a internet después de la carga inicial. Tus datos nunca salen de tu dispositivo."
+      },
+      "encryption": {
+        "title": "Almacenamiento Encriptado",
+        "content": "Tu información está encriptada usando encriptación AES-256 de grado militar. Incluso si alguien accede a tu dispositivo, tus datos permanecen seguros."
+      },
+      "startButton": {
+        "title": "¿Listo para Comenzar?",
+        "content": "Haz clic en el botón 'Comenzar Evaluación' para iniciar el cuestionario. Toma aproximadamente 5-10 minutos completar y nos ayudará a determinar qué beneficios podrías calificar.",
+        "action": "Comenzar Evaluación"
+      }
+    }
   }
 }

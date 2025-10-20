@@ -24,12 +24,14 @@ interface WelcomeTourProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
+  onStartAssessment?: () => void;
 }
 
 export const WelcomeTour: React.FC<WelcomeTourProps> = ({
   isOpen,
   onClose,
   onComplete,
+  onStartAssessment,
 }) => {
   const { t } = useI18n();
   const [currentStep, setCurrentStep] = useState(0);
@@ -74,7 +76,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
       action: {
         text: t('onboarding.tour.startButton.action'),
         onClick: () => {
-          // This will be handled by the parent component
+          onStartAssessment?.();
         },
       },
     },
@@ -87,7 +89,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
     const step = tourSteps[currentStep];
     const element = document.querySelector(step.target) as HTMLElement;
 
-    if (element) {
+    if (element && element.offsetParent !== null) {
       setHighlightedElement(element);
 
       // Scroll element into view
@@ -96,6 +98,9 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
         block: 'center',
         inline: 'center',
       });
+    } else {
+      // If target element doesn't exist or is not visible, don't highlight
+      setHighlightedElement(null);
     }
 
     return () => {
@@ -179,14 +184,9 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
       )}
 
       {/* Tour card */}
-      <div className="fixed z-50 animate-fade-in-up">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
         <div
-          className="bg-white rounded-xl shadow-2xl border border-secondary-200 p-6 max-w-md mx-4"
-          style={{
-            top: highlightedElement ? highlightedElement.offsetTop + highlightedElement.offsetHeight + 20 : '50%',
-            left: highlightedElement ? highlightedElement.offsetLeft : '50%',
-            transform: highlightedElement ? 'none' : 'translate(-50%, -50%)',
-          }}
+          className="bg-white rounded-xl shadow-2xl border border-secondary-200 p-6 w-full max-w-md animate-fade-in-up"
         >
           {/* Progress bar */}
           <div className="mb-4">

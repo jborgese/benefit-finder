@@ -22,7 +22,8 @@
     "all": "All",
     "none": "None",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "skip": "Skip"
   },
   "navigation": {
     "home": "Home",

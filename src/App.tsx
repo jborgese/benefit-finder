@@ -791,6 +791,7 @@ function App(): React.ReactElement {
         isOpen={showWelcomeTour}
         onClose={() => setShowWelcomeTour(false)}
         onComplete={handleCompleteWelcomeTour}
+        onStartAssessment={handleStartQuestionnaire}
       />
 
       <PrivacyExplainer
