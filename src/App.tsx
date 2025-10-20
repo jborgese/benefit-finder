@@ -4,6 +4,8 @@ import { ResultsSummary, ProgramCard, ResultsExport, ResultsImport, Questionnair
 import { useResultsManagement } from './components/results/useResultsManagement';
 import { Button } from './components/Button';
 import { LiveRegion } from './questionnaire/accessibility';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
+import { useI18n } from './i18n/hooks';
 
 // Import database functions
 import { clearDatabase } from './db';
@@ -23,6 +25,8 @@ const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 
 function App(): React.ReactElement {
+  const { t } = useI18n();
+
   const [appState, setAppState] = useState<AppState>(() => {
     try {
       if (typeof window !== 'undefined' && window.location.pathname.toLowerCase().includes('results')) {
@@ -363,26 +367,27 @@ function App(): React.ReactElement {
 
       <nav className="bg-slate-900 border-b border-slate-800 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-semibold">BenefitFinder</h1>
+          <h1 className="text-xl font-semibold">{t('app.title')}</h1>
           <div className="flex items-center space-x-4">
             {appState !== 'home' && (
               <Button
                 variant="secondary"
                 onClick={handleBackToHome}
-                aria-label="Back to home"
+                aria-label={t('navigation.home')}
               >
-                Home
+                {t('navigation.home')}
               </Button>
             )}
             {hasResults && appState !== 'results' && (
               <Button
                 variant="secondary"
                 onClick={handleViewResults}
-                aria-label="View results"
+                aria-label={t('navigation.results')}
               >
-                View Results
+                {t('navigation.results')}
               </Button>
             )}
+            <LanguageSwitcher size="sm" variant="minimal" />
           </div>
         </div>
       </nav>
@@ -391,20 +396,19 @@ function App(): React.ReactElement {
         {appState === 'home' && (
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-4">
-              {hasResults ? 'Your Benefit Eligibility Results' : 'Benefit Eligibility Assessment'}
+              {t('app.subtitle')}
             </h2>
             <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
-              Check your eligibility for government benefits with our privacy-preserving assessment tool.
-              All processing happens locally in your browser.
+              {t('app.description')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 onClick={handleStartQuestionnaire}
                 className="px-8 py-3"
-                aria-label="Start new benefit assessment"
+                aria-label={t('questionnaire.title')}
               >
-                {hasResults ? 'New Assessment' : 'Start Assessment'}
+                {hasResults ? t('common.continue') : t('questionnaire.title')}
               </Button>
 
               {hasResults && (
@@ -412,30 +416,30 @@ function App(): React.ReactElement {
                   variant="secondary"
                   onClick={handleViewResults}
                   className="px-8 py-3"
-                  aria-label="View previous results"
+                  aria-label={t('navigation.results')}
                 >
-                  View Previous Results
+                  {t('navigation.results')}
                 </Button>
               )}
             </div>
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2">Privacy First</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('privacy.title')}</h3>
                 <p className="text-slate-300 text-sm">
-                  All data processing happens locally in your browser. No data is sent to external servers.
+                  {t('privacy.description')}
                 </p>
               </div>
               <div className="bg-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2">Offline Ready</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('privacy.offline')}</h3>
                 <p className="text-slate-300 text-sm">
-                  Works completely offline. No internet connection required for assessments.
+                  {t('privacy.localStorage')}
                 </p>
               </div>
               <div className="bg-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-2">Accessible</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('accessibility.contentLoaded')}</h3>
                 <p className="text-slate-300 text-sm">
-                  Built with accessibility in mind, supporting screen readers and keyboard navigation.
+                  {t('accessibility.loadingContent')}
                 </p>
               </div>
             </div>
