@@ -85,6 +85,7 @@ function App(): React.ReactElement {
   });
   const [hasResults, setHasResults] = useState(false);
   const [currentResults, setCurrentResults] = useState<EligibilityResults | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<{ state?: string;[key: string]: unknown } | null>(null);
   const [isProcessingResults, setIsProcessingResults] = useState(false);
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -246,6 +247,18 @@ function App(): React.ReactElement {
 
       try {
         profile = await createUserProfile(profileData);
+
+        // Store current user profile for passing to components
+        setCurrentUserProfile({
+          state: state,
+          householdSize,
+          householdIncome: annualIncome,
+          citizenship,
+          employmentStatus,
+          hasDisability: hasQualifyingDisability,
+          isPregnant,
+          hasChildren
+        });
 
         // Import state-specific rules if state is provided
         if (state) {
@@ -775,6 +788,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
+                            userProfile={currentUserProfile || undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}
@@ -784,6 +798,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
+                            userProfile={currentUserProfile || undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}
@@ -793,6 +808,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
+                            userProfile={currentUserProfile || undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}
@@ -802,6 +818,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
+                            userProfile={currentUserProfile || undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}

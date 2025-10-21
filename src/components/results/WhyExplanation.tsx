@@ -8,17 +8,42 @@ import React from 'react';
 import { EligibilityStatus, EligibilityExplanation } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 
+/**
+ * Medicaid expansion status by state code (as of 2024)
+ * Source: https://www.kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/
+ */
+const MEDICAID_EXPANSION_STATE_CODES = new Set([
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'HI', 'ID', 'IL', 'IN', 'IA',
+  'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MO', 'MT', 'NV', 'NH', 'NJ', 'NM', 'NY',
+  'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SD', 'UT', 'VT', 'VA', 'WA', 'WV'
+]);
+
+/**
+ * Determine if a state has expanded Medicaid under the ACA
+ */
+function isMedicaidExpansionState(stateCode: string): boolean {
+  return MEDICAID_EXPANSION_STATE_CODES.has(stateCode);
+}
+
 interface WhyExplanationProps {
   programName: string;
   status: EligibilityStatus;
   explanation: EligibilityExplanation;
+  userProfile?: {
+    state?: string;
+    [key: string]: unknown;
+  };
   onClose: () => void;
 }
 
 /**
  * Convert technical rule codes to user-friendly descriptions with specific values
  */
-function getUserFriendlyRuleDescription(ruleCode: string, calculations?: Array<{ label: string; value: string | number; comparison?: string }>): string {
+function getUserFriendlyRuleDescription(
+  ruleCode: string,
+  calculations?: Array<{ label: string; value: string | number; comparison?: string }>,
+  userProfile?: { state?: string;[key: string]: unknown }
+): string {
   // Try to find specific calculation for this rule
   if (calculations && calculations.length > 0) {
     const relevantCalc = calculations.find(calc =>
@@ -69,6 +94,18 @@ function getUserFriendlyRuleDescription(ruleCode: string, calculations?: Array<{
 
   // Check for program identifier match (case insensitive)
   const lowerRuleCode = ruleCode.toLowerCase().trim();
+
+  // Handle state-specific Medicaid expansion messaging
+  if (lowerRuleCode === 'medicaid-federal-residence-requirement' && userProfile?.state) {
+    const stateName = userProfile.state;
+    const isExpansionState = isMedicaidExpansionState(stateName);
+
+    if (isExpansionState) {
+      return `Federal Medicaid state residence requirements (${stateName} has expanded Medicaid under the ACA)`;
+    } else {
+      return `Federal Medicaid state residence requirements (${stateName} has NOT expanded Medicaid under the ACA - this limits adult eligibility)`;
+    }
+  }
 
   // Direct match first
   if (Object.prototype.hasOwnProperty.call(programIdentifierMappings, lowerRuleCode)) {
@@ -187,6 +224,7 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
   programName,
   status,
   explanation,
+  userProfile,
   onClose,
 }) => {
   // Debug logging to see what rulesCited are being passed to the component
@@ -320,7 +358,7 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
                 key={index}
                 className="text-sm text-gray-700 bg-blue-50 px-3 py-2 rounded border border-blue-200"
               >
-                {getUserFriendlyRuleDescription(rule, explanation.calculations)}
+                {getUserFriendlyRuleDescription(rule, explanation.calculations, userProfile)}
               </div>
             ))}
           </div>

@@ -17,6 +17,10 @@ import { getProgramNameKey, getProgramDescriptionKey } from '../../utils/program
 
 interface ProgramCardProps {
   result: ProgramEligibilityResult;
+  userProfile?: {
+    state?: string;
+    [key: string]: unknown;
+  };
   onDocumentToggle?: (documentId: string, obtained: boolean) => void;
   onStepToggle?: (stepIndex: number, completed: boolean) => void;
   className?: string;
@@ -24,6 +28,7 @@ interface ProgramCardProps {
 
 export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
   result,
+  userProfile,
   onDocumentToggle,
   onStepToggle,
   className = '',
@@ -263,6 +268,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
               programName={result.programName}
               status={result.status}
               explanation={result.explanation}
+              userProfile={userProfile}
               onClose={() => setShowExplanation(false)}
             />
           </Dialog.Content>
