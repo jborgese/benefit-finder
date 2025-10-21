@@ -104,16 +104,16 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
       {showProgress && progress && (
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-secondary-200">
               Question {currentQuestionNumber} of {totalQuestions}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-secondary-400">
               {progressPercent}% Complete
             </span>
           </div>
 
           <Progress.Root
-            className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200"
+            className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-secondary-700"
             value={progressPercent}
           >
             <Progress.Indicator
@@ -123,7 +123,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
           </Progress.Root>
 
           {progress.requiredQuestions > 0 && (
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-secondary-400">
               {progress.answeredQuestions} of {progress.requiredQuestions} required questions answered
             </p>
           )}
@@ -140,8 +140,8 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
             aria-label="Go to previous question"
             className="
               flex items-center gap-2 px-4 py-2
-              border border-gray-300 bg-white text-gray-700 rounded-md
-              hover:bg-gray-50 hover:border-gray-400
+              border border-gray-300 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-gray-700 dark:text-secondary-200 rounded-md
+              hover:bg-gray-50 dark:hover:bg-secondary-600 hover:border-gray-400 dark:hover:border-secondary-500
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
               disabled:opacity-50 disabled:cursor-not-allowed
               transition-colors
@@ -249,7 +249,7 @@ export const QuestionBreadcrumb: React.FC<{
             <li key={nodeId} className="flex items-center">
               {index > 0 && (
                 <svg
-                  className="w-4 h-4 mx-2 text-gray-400"
+                  className="w-4 h-4 mx-2 text-gray-400 dark:text-secondary-500"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -262,14 +262,14 @@ export const QuestionBreadcrumb: React.FC<{
               )}
 
               {isCurrentQuestion ? (
-                <span className="text-gray-700 font-medium">
+                <span className="text-gray-700 dark:text-secondary-200 font-medium">
                   Question {questionNumber}
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={() => onJumpTo?.(nodeId)}
-                  className="text-blue-600 hover:text-blue-800 hover:underline"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline"
                 >
                   Question {questionNumber}
                 </button>

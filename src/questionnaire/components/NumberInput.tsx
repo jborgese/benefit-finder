@@ -165,8 +165,10 @@ export const NumberInput: React.FC<NumberInputProps> = ({
               aria-label="Decrease value"
               className="
                 w-8 h-8 flex items-center justify-center
-                bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50
-                border border-gray-300 rounded
+                bg-gray-100 dark:bg-secondary-700 hover:bg-gray-200 dark:hover:bg-secondary-600
+                disabled:bg-gray-50 dark:disabled:bg-secondary-800
+                border border-gray-300 dark:border-secondary-600 rounded
+                text-gray-700 dark:text-secondary-200
                 disabled:cursor-not-allowed disabled:opacity-50
                 focus:outline-none focus:ring-2 focus:ring-blue-500
               "
@@ -193,8 +195,10 @@ export const NumberInput: React.FC<NumberInputProps> = ({
               aria-label="Increase value"
               className="
                 w-8 h-8 flex items-center justify-center
-                bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50
-                border border-gray-300 rounded
+                bg-gray-100 dark:bg-secondary-700 hover:bg-gray-200 dark:hover:bg-secondary-600
+                disabled:bg-gray-50 dark:disabled:bg-secondary-800
+                border border-gray-300 dark:border-secondary-600 rounded
+                text-gray-700 dark:text-secondary-200
                 disabled:cursor-not-allowed disabled:opacity-50
                 focus:outline-none focus:ring-2 focus:ring-blue-500
               "

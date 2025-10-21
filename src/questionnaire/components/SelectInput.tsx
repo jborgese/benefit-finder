@@ -65,10 +65,10 @@ export const SelectInput: React.FC<SelectProps> = ({
     return (
       <div className={`question-select-radio ${className}`}>
         <fieldset onKeyDown={handleKeyDown}>
-          <legend className="block text-sm font-medium text-gray-700 mb-2">
+          <legend className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
             {question.text}
             {question.required && (
-              <span className="text-red-500 ml-1" aria-label="required">
+              <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
                 *
               </span>
             )}
@@ -77,7 +77,7 @@ export const SelectInput: React.FC<SelectProps> = ({
           {question.description && (
             <p
               id={descId}
-              className="text-sm text-gray-600 mb-3"
+              className="text-sm text-gray-600 dark:text-secondary-300 mb-3"
             >
               {question.description}
             </p>
@@ -96,7 +96,7 @@ export const SelectInput: React.FC<SelectProps> = ({
                   className={`
                     flex items-start p-4 border rounded-lg cursor-pointer
                     transition-all duration-200 ease-smooth
-                    ${isSelected ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-200' : 'border-secondary-300 hover:border-secondary-400 hover:shadow-sm'}
+                    ${isSelected ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 ring-2 ring-primary-200 dark:ring-primary-800' : 'border-secondary-300 dark:border-secondary-600 hover:border-secondary-400 dark:hover:border-secondary-500 hover:shadow-sm'}
                     ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
                 >
