@@ -122,7 +122,7 @@ export const selectSchema = <T extends readonly [string, ...string[]]>(
     errorMap: () => ({ message: 'Please select a valid option' }),
   });
 
-export const booleanSchema = z.boolean({
+export const booleanSchema = z.union([z.boolean(), z.enum(['true', 'false'])], {
   errorMap: () => ({ message: 'Please select an option' }),
 });
 
@@ -212,6 +212,13 @@ function getBaseSchema(
       return dateSchema;
     case 'boolean':
       return booleanSchema;
+    case 'radio':
+    case 'select':
+      // For radio and select, we need to validate that a value is selected
+      // The actual options validation will be handled by the component
+      return z.union([z.string(), z.number()], {
+        errorMap: () => ({ message: 'Please select an option' }),
+      });
     case 'multiselect':
       return multiSelectSchema();
     case 'text':

@@ -238,15 +238,41 @@ export const QuestionBreadcrumb: React.FC<{
   const currentQuestionNumber = progress?.currentQuestionPosition ?? 1;
   const startQuestionNumber = currentQuestionNumber - history.length + 1;
 
+  // For mobile screens, show only the last few questions to prevent overflow
+  const shouldShowTruncated = history.length > 5;
+  const visibleHistory = shouldShowTruncated
+    ? history.slice(-4) // Show last 4 questions on mobile
+    : history;
+
   return (
     <nav aria-label="Question breadcrumb" className={`mb-4 ${className}`}>
-      <ol className="flex items-center space-x-2 text-sm">
-        {history.map((nodeId, index) => {
-          const isCurrentQuestion = index === history.length - 1;
-          const questionNumber = startQuestionNumber + index;
+      <ol className="flex items-center space-x-2 text-sm overflow-x-auto scrollbar-hide pb-1">
+        {shouldShowTruncated && (
+          <>
+            <li className="flex items-center flex-shrink-0">
+              <span className="text-gray-500 dark:text-secondary-400">...</span>
+              <svg
+                className="w-4 h-4 mx-2 text-gray-400 dark:text-secondary-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </li>
+          </>
+        )}
+        {visibleHistory.map((nodeId, index) => {
+          const isCurrentQuestion = index === visibleHistory.length - 1;
+          const questionNumber = shouldShowTruncated
+            ? startQuestionNumber + (history.length - visibleHistory.length) + index
+            : startQuestionNumber + index;
 
           return (
-            <li key={nodeId} className="flex items-center">
+            <li key={nodeId} className="flex items-center flex-shrink-0">
               {index > 0 && (
                 <svg
                   className="w-4 h-4 mx-2 text-gray-400 dark:text-secondary-500"

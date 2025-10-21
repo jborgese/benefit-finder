@@ -283,5 +283,20 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }: { addUtilities: (utilities: Record<string, Record<string, string>>) => void }) {
+      const newUtilities = {
+        '.scrollbar-hide': {
+          /* Hide scrollbar for IE, Edge and Firefox */
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+          /* Hide scrollbar for Chrome, Safari and Opera */
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          }
+        }
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 } satisfies Config;

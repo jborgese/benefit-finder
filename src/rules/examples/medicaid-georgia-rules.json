@@ -28,6 +28,7 @@
         "if": [
           {
             "and": [
+              { "var": "livesInGeorgia" },
               { ">=": [{ "var": "age" }, 19] },
               { "<": [{ "var": "age" }, 65] },
               { "!": { "var": "isPregnant" } },
@@ -41,7 +42,7 @@
       },
       "ruleType": "eligibility",
       "explanation": "IMPORTANT: Georgia has NOT expanded Medicaid. This means most non-disabled, non-pregnant adults age 19-64 without children do NOT qualify for Medicaid in Georgia, even with very low income. The coverage gap affects approximately 350,000 Georgians. If you fall into this gap, explore options at HealthCare.gov for marketplace plans with subsidies, or contact a Community Health Center for care on a sliding fee scale.",
-      "requiredFields": ["age", "isPregnant", "hasQualifyingDisability", "hasChildren"],
+      "requiredFields": ["age", "isPregnant", "hasQualifyingDisability", "hasChildren", "livesInGeorgia"],
       "nextSteps": [
         {
           "step": "If you're in the coverage gap, check HealthCare.gov for marketplace plan subsidies",
@@ -83,7 +84,8 @@
             "age": 35,
             "isPregnant": false,
             "hasQualifyingDisability": false,
-            "hasChildren": false
+            "hasChildren": false,
+            "livesInGeorgia": true
           },
           "expected": false,
           "tags": ["ineligible", "coverage-gap", "non-expansion"]
@@ -95,7 +97,8 @@
             "age": 30,
             "isPregnant": true,
             "hasQualifyingDisability": false,
-            "hasChildren": false
+            "hasChildren": false,
+            "livesInGeorgia": true
           },
           "expected": true,
           "tags": ["eligible", "use-pregnancy-rules"]
@@ -107,7 +110,8 @@
             "age": 40,
             "isPregnant": false,
             "hasQualifyingDisability": true,
-            "hasChildren": false
+            "hasChildren": false,
+            "livesInGeorgia": true
           },
           "expected": true,
           "tags": ["eligible", "use-disability-rules"]
@@ -126,6 +130,7 @@
       "description": "Pregnant women with income up to 220% FPL qualify for Medicaid in Georgia",
       "ruleLogic": {
         "and": [
+          { "var": "livesInGeorgia" },
           { "var": "isPregnant" },
           {
             "<=": [
@@ -142,7 +147,7 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia covers pregnant women through Medicaid if household income is at or below 220% of the federal poverty level. This is higher than the federal minimum (200% FPL). For 2024, this means: 1 person = $3,256/month, 2 people = $4,408/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
-      "requiredFields": ["isPregnant", "householdIncome", "householdSize"],
+      "requiredFields": ["isPregnant", "householdIncome", "householdSize", "livesInGeorgia"],
       "requiredDocuments": [
         {
           "id": "proof-pregnancy-ga",
@@ -237,6 +242,7 @@
       "description": "Children under 19 qualify for Medicaid (up to 209% FPL) or PeachCare (209-247% FPL)",
       "ruleLogic": {
         "and": [
+          { "var": "livesInGeorgia" },
           { "<": [{ "var": "age" }, 19] },
           {
             "<=": [
@@ -253,7 +259,7 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia children have two programs: 1) **Medicaid**: Free for children in families with income up to 209% FPL ($3,096/month for a family of 3). 2) **PeachCare for Kids**: Low-cost coverage ($20-35/month) for families with income 209-247% FPL ($3,659/month for a family of 3). Both programs cover doctor visits, immunizations, dental, vision, and hospital care. Children can enroll year-round.",
-      "requiredFields": ["age", "householdIncome", "householdSize"],
+      "requiredFields": ["age", "householdIncome", "householdSize", "livesInGeorgia"],
       "requiredDocuments": [
         {
           "id": "proof-child-age-ga",
@@ -363,6 +369,7 @@
       "description": "Parents and caretaker relatives with very low income may qualify for Medicaid",
       "ruleLogic": {
         "and": [
+          { "var": "livesInGeorgia" },
           {
             "or": [
               { "var": "isParentOfDependentChild" },
@@ -384,7 +391,7 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia Medicaid covers parents and caretaker relatives, but only with VERY low income - about 30% of the federal poverty level. For 2024, this means: 1 person = $444/month, 2 people = $600/month, 3 people = $756/month. This is one of the lowest income limits in the nation. If you're a parent with slightly higher income, you likely fall into Georgia's coverage gap and should explore marketplace plans at HealthCare.gov.",
-      "requiredFields": ["isParentOfDependentChild", "isCaretakerOfRelativeChild", "householdIncome", "householdSize"],
+      "requiredFields": ["isParentOfDependentChild", "isCaretakerOfRelativeChild", "householdIncome", "householdSize", "livesInGeorgia"],
       "requiredDocuments": [
         {
           "id": "proof-caretaker-status",
@@ -482,6 +489,7 @@
       "description": "Aged (65+), blind, or disabled individuals may qualify if receiving SSI or meeting income/asset limits",
       "ruleLogic": {
         "and": [
+          { "var": "livesInGeorgia" },
           {
             "or": [
               { ">=": [{ "var": "age" }, 65] },
@@ -511,7 +519,7 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia Medicaid covers aged (65+), blind, or disabled individuals if they: 1) Receive SSI (automatic eligibility), OR 2) Have income below approximately 74% FPL ($1,133/month for individual in 2024) AND countable assets under $2,000 ($3,000 for couples). Home, one vehicle, and certain other assets don't count. Many people in this category also qualify for Medicare.",
-      "requiredFields": ["age", "isBlind", "hasQualifyingDisability", "receivesSSI", "householdIncome", "householdSize", "countableAssets"],
+      "requiredFields": ["age", "isBlind", "hasQualifyingDisability", "receivesSSI", "householdIncome", "householdSize", "countableAssets", "livesInGeorgia"],
       "requiredDocuments": [
         {
           "id": "proof-ssi-ga",

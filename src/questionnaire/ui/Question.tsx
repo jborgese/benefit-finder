@@ -66,20 +66,20 @@ export const Question: React.FC<QuestionProps> = ({
 
   // Validate initial value and notify parent
   React.useEffect(() => {
-    // Always validate for required questions, even if not touched
-    if (question.required || touched) {
+    // Only validate if the field has been touched by the user
+    // This prevents showing "Required" errors immediately when the question loads
+    if (touched) {
       validateValue(value);
     }
-  }, [question.required, value, touched, validateValue]);
+  }, [value, touched, validateValue]);
 
   // Validate on change
   const handleChange = (newValue: unknown): void => {
     onChange(newValue);
 
-    // Validate if touched OR if question is required (immediate validation for required fields)
-    if (touched || question.required) {
-      validateValue(newValue);
-    }
+    // Validate when user changes the value (even if not touched yet)
+    // This provides immediate feedback when user makes a selection
+    validateValue(newValue);
   };
 
   // Mark as touched on blur

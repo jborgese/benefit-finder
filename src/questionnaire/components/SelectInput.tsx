@@ -122,13 +122,13 @@ export const SelectInput: React.FC<SelectProps> = ({
                           {option.icon}
                         </span>
                       )}
-                      <span className="font-medium text-secondary-900">
+                      <span className="font-medium text-secondary-900 dark:text-secondary-100">
                         {option.label}
                       </span>
                     </div>
 
                     {option.description && (
-                      <p className="mt-1 text-sm text-secondary-600">
+                      <p className="mt-1 text-sm text-secondary-600 dark:text-secondary-300">
                         {option.description}
                       </p>
                     )}
@@ -140,7 +140,7 @@ export const SelectInput: React.FC<SelectProps> = ({
         </fieldset>
 
         {question.helpText && !showError && (
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
             {question.helpText}
           </p>
         )}
@@ -153,7 +153,7 @@ export const SelectInput: React.FC<SelectProps> = ({
             className="mt-2"
           >
             {errors.map((err, idx) => (
-              <p key={idx} className="text-sm text-red-600">
+              <p key={idx} className="text-sm text-red-600 dark:text-red-400">
                 {err}
               </p>
             ))}

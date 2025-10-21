@@ -43,7 +43,7 @@
       },
       "ruleType": "eligibility",
       "explanation": "Under the Affordable Care Act, states that expanded Medicaid cover adults under age 65 with household income up to 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. Currently, 40 states plus DC have expanded Medicaid.",
-      "requiredFields": ["stateHasExpanded", "age", "householdIncome", "householdSize"],
+      "requiredFields": ["stateHasExpanded", "age", "householdIncome", "householdSize", "livesInState"],
       "requiredDocuments": [
         {
           "id": "proof-income",

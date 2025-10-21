@@ -411,6 +411,23 @@ function generateReason(
 }
 
 /**
+ * Medicaid expansion status by state code (as of 2024)
+ * Source: https://www.kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/
+ */
+const MEDICAID_EXPANSION_STATE_CODES = new Set([
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'HI', 'ID', 'IL', 'IN', 'IA',
+  'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MO', 'MT', 'NV', 'NH', 'NJ', 'NM', 'NY',
+  'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SD', 'UT', 'VT', 'VA', 'WA', 'WV'
+]);
+
+/**
+ * Determine if a state has expanded Medicaid under the ACA
+ */
+function isMedicaidExpansionState(stateCode: string): boolean {
+  return MEDICAID_EXPANSION_STATE_CODES.has(stateCode);
+}
+
+/**
  * Prepare data context from user profile
  */
 export function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
@@ -446,6 +463,39 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
     }
   }
 
+  // Add state-specific variables for benefit eligibility
+  const stateCode = processedData.state as string;
+  if (stateCode) {
+    // Medicaid expansion status
+    processedData.stateHasExpanded = isMedicaidExpansionState(stateCode);
+
+    // State residence (always true if state is provided)
+    processedData.livesInState = true;
+
+    // State-specific residence checks
+    processedData.livesInGeorgia = stateCode === 'GA';
+    processedData.livesInCalifornia = stateCode === 'CA';
+    processedData.livesInTexas = stateCode === 'TX';
+    processedData.livesInFlorida = stateCode === 'FL';
+
+    debugLog('Added state-specific variables', {
+      stateCode,
+      stateHasExpanded: processedData.stateHasExpanded,
+      livesInState: processedData.livesInState,
+      livesInGeorgia: processedData.livesInGeorgia
+    });
+
+    if (import.meta.env.DEV) {
+      console.warn('🔍 [DEBUG] prepareDataContext: State-specific variables:', {
+        stateCode,
+        stateHasExpanded: processedData.stateHasExpanded,
+        livesInState: processedData.livesInState,
+        livesInGeorgia: processedData.livesInGeorgia,
+        isExpansionState: isMedicaidExpansionState(stateCode)
+      });
+    }
+  }
+
   debugLog('Final processed data context', processedData);
 
   if (import.meta.env.DEV) {
@@ -455,6 +505,9 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
       citizenship: processedData.citizenship,
       dateOfBirth: processedData.dateOfBirth,
       state: processedData.state,
+      stateHasExpanded: processedData.stateHasExpanded,
+      livesInState: processedData.livesInState,
+      livesInGeorgia: processedData.livesInGeorgia,
       timestamp: new Date(processedData._timestamp).toISOString()
     });
   }

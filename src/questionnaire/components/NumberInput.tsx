@@ -5,7 +5,7 @@
  * for age, household size, counts, etc.
  */
 
-import React, { useState, useId } from 'react';
+import React, { useState, useId, useEffect } from 'react';
 import type { NumberInputProps } from './types';
 
 export const NumberInput: React.FC<NumberInputProps> = ({
@@ -29,6 +29,17 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
   const [inputValue, setInputValue] = useState(value?.toString() ?? '');
+  const [isIncrementing, setIsIncrementing] = useState(false);
+  const [isDecrementing, setIsDecrementing] = useState(false);
+
+  // Sync inputValue with value prop to prevent glitches
+  useEffect(() => {
+    if (value !== undefined) {
+      setInputValue(value.toFixed(decimals));
+    } else {
+      setInputValue('');
+    }
+  }, [value, decimals]);
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
@@ -87,8 +98,11 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     const newValue = currentValue + stepValue;
 
     if (maxValue === undefined || newValue <= maxValue) {
+      setIsIncrementing(true);
+      setIsTouched(true); // Mark as touched when using stepper buttons
       onChange(decimals === 0 ? Math.round(newValue) : newValue);
-      setInputValue(newValue.toFixed(decimals));
+      // Reset the incrementing state after a brief delay
+      setTimeout(() => setIsIncrementing(false), 200);
     }
   };
 
@@ -97,8 +111,11 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     const newValue = currentValue - stepValue;
 
     if (minValue === undefined || newValue >= minValue) {
+      setIsDecrementing(true);
+      setIsTouched(true); // Mark as touched when using stepper buttons
       onChange(decimals === 0 ? Math.round(newValue) : newValue);
-      setInputValue(newValue.toFixed(decimals));
+      // Reset the decrementing state after a brief delay
+      setTimeout(() => setIsDecrementing(false), 200);
     }
   };
 
@@ -156,6 +173,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
             ${isFocused ? 'ring-2 ring-blue-400/20 border-blue-400 dark:border-blue-400' : ''}
             ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
             ${showSteppers ? 'pr-20' : ''}
+            ${(isIncrementing || isDecrementing) ? 'ring-2 ring-blue-400/30 border-blue-400 dark:border-blue-400' : ''}
           `}
         />
 
@@ -166,15 +184,23 @@ export const NumberInput: React.FC<NumberInputProps> = ({
               onClick={handleDecrement}
               disabled={disabled || !canDecrement}
               aria-label="Decrease value"
-              className="
+              className={`
                 w-8 h-8 flex items-center justify-center
-                bg-gray-100 dark:bg-secondary-700 hover:bg-gray-200 dark:hover:bg-secondary-600
+                ${isDecrementing
+                  ? 'bg-blue-200 dark:bg-blue-600 border-blue-400 dark:border-blue-400'
+                  : 'bg-gray-100 dark:bg-secondary-700 border-gray-300 dark:border-secondary-600'
+                }
+                hover:bg-gray-200 dark:hover:bg-secondary-600
+                active:bg-gray-300 dark:active:bg-secondary-500
                 disabled:bg-gray-50 dark:disabled:bg-secondary-800
-                border border-gray-300 dark:border-secondary-600 rounded
+                rounded
                 text-gray-700 dark:text-secondary-200
                 disabled:cursor-not-allowed disabled:opacity-50
                 focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+                transition-all duration-150 ease-in-out
+                active:scale-95
+                ${isDecrementing ? 'ring-2 ring-blue-400/50' : ''}
+              `}
             >
               <svg
                 className="w-4 h-4"
@@ -196,15 +222,23 @@ export const NumberInput: React.FC<NumberInputProps> = ({
               onClick={handleIncrement}
               disabled={disabled || !canIncrement}
               aria-label="Increase value"
-              className="
+              className={`
                 w-8 h-8 flex items-center justify-center
-                bg-gray-100 dark:bg-secondary-700 hover:bg-gray-200 dark:hover:bg-secondary-600
+                ${isIncrementing
+                  ? 'bg-blue-200 dark:bg-blue-600 border-blue-400 dark:border-blue-400'
+                  : 'bg-gray-100 dark:bg-secondary-700 border-gray-300 dark:border-secondary-600'
+                }
+                hover:bg-gray-200 dark:hover:bg-secondary-600
+                active:bg-gray-300 dark:active:bg-secondary-500
                 disabled:bg-gray-50 dark:disabled:bg-secondary-800
-                border border-gray-300 dark:border-secondary-600 rounded
+                rounded
                 text-gray-700 dark:text-secondary-200
                 disabled:cursor-not-allowed disabled:opacity-50
                 focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+                transition-all duration-150 ease-in-out
+                active:scale-95
+                ${isIncrementing ? 'ring-2 ring-blue-400/50' : ''}
+              `}
             >
               <svg
                 className="w-4 h-4"
