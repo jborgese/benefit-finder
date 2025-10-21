@@ -5,7 +5,7 @@
  * versioning, and error handling.
  */
 
-import { getDatabase } from '../db/database';
+import { getDatabase } from '../../db/database';
 import { validateRule } from './validator';
 import { runTestSuite, createTestSuite } from './tester';
 import {
@@ -21,7 +21,7 @@ import {
   type RuleExportOptions,
   type RuleSchemaValidationResult,
 } from './schema';
-import type { EligibilityRule } from '../db/schemas';
+import type { EligibilityRule } from '../../db/schemas';
 import type { JsonLogicRule } from './types';
 
 // ============================================================================

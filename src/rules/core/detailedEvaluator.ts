@@ -6,7 +6,7 @@
  */
 
 import jsonLogic from 'json-logic-js';
-import { getSNAPGrossIncomeLimit } from '../utils/benefitThresholds';
+import { getSNAPGrossIncomeLimit } from '../../utils/benefitThresholds';
 import type { JsonLogicRule, JsonLogicData, RuleEvaluationResult } from './types';
 
 /**

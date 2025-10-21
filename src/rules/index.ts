@@ -7,7 +7,7 @@
  */
 
 // Types
-export type * from './types';
+export type * from './core/types';
 
 // Evaluator
 export {
@@ -20,7 +20,7 @@ export {
   BENEFIT_OPERATORS,
   registerBenefitOperators,
   unregisterBenefitOperators,
-} from './evaluator';
+} from './core/evaluator';
 
 // Validator
 export {
@@ -32,7 +32,7 @@ export {
   STANDARD_OPERATORS,
   VALIDATION_ERROR_CODES,
   JsonLogicRuleSchema,
-} from './validator';
+} from './core/validator';
 
 // Tester
 export {
@@ -46,7 +46,7 @@ export {
   generateCoverageReport,
   createTestSuite,
   TestSuiteBuilder,
-} from './tester';
+} from './core/tester';
 
 // Schema
 export {
@@ -76,7 +76,7 @@ export {
   type RuleImportResult,
   type RuleExportOptions,
   type RuleSchemaValidationResult,
-} from './schema';
+} from './core/schema';
 
 // Import/Export
 export {
@@ -91,7 +91,7 @@ export {
   exportToJSON,
   exportPackageToJSON,
   IMPORT_ERROR_CODES,
-} from './import-export';
+} from './core/import-export';
 
 // Versioning
 export {
@@ -110,7 +110,7 @@ export {
   registerExampleMigrations,
   type RuleMigration,
   type VersionMigration,
-} from './versioning';
+} from './core/versioning';
 
 // Eligibility
 export {
@@ -123,14 +123,14 @@ export {
   type EligibilityEvaluationResult,
   type EligibilityEvaluationOptions,
   type BatchEligibilityResult,
-} from './eligibility';
+} from './core/eligibility';
 
 // Detailed Evaluator
 export {
   evaluateRuleWithDetails,
   type DetailedEvaluationResult,
   type DetailedCriterionResult,
-} from './detailedEvaluator';
+} from './core/detailedEvaluator';
 
 // Explanation
 export {
@@ -141,7 +141,7 @@ export {
   formatRuleExplanation,
   type ResultExplanation,
   type ExplanationOptions,
-} from './explanation';
+} from './core/explanation';
 
 // Debug
 export {
@@ -155,7 +155,7 @@ export {
   type DebugTraceStep,
   type VariableInspection,
   type RuleInspection,
-} from './debug';
+} from './core/debug';
 
 // Performance
 export {
@@ -174,5 +174,5 @@ export {
   type PerformanceStats,
   type RulePerformanceProfile,
   type PerformanceWarning,
-} from './performance';
+} from './core/performance';
 

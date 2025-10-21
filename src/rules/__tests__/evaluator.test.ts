@@ -9,8 +9,8 @@ import {
   batchEvaluateRules,
   registerBenefitOperators,
   unregisterBenefitOperators,
-} from '../evaluator';
-import type { JsonLogicRule, JsonLogicData } from '../types';
+} from '../core/evaluator';
+import type { JsonLogicRule, JsonLogicData } from '../core/types';
 
 describe('Rule Evaluator', () => {
   describe('evaluateRule', () => {

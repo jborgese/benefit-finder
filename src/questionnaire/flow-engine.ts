@@ -5,8 +5,8 @@
  * branching, and skip logic.
  */
 
-import { evaluateRuleSync } from '../rules/evaluator';
-import type { JsonLogicRule } from '../rules/types';
+import { evaluateRuleSync } from '../rules/core/evaluator';
+import type { JsonLogicRule } from '../rules/core/types';
 import type {
   QuestionFlow,
   FlowNode,

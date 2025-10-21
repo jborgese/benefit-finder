@@ -13,8 +13,8 @@ import {
   profileRule,
   analyzePerformance,
   type PerformanceMetrics,
-} from '../performance';
-import type { JsonLogicRule, JsonLogicData } from '../types';
+} from '../core/performance';
+import type { JsonLogicRule, JsonLogicData } from '../core/types';
 
 describe('Performance Monitoring', () => {
   beforeEach(() => {

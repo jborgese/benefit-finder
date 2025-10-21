@@ -5,8 +5,8 @@
  */
 
 import { nanoid } from 'nanoid';
-import { getDatabase } from '../../db/database';
-import type { EligibilityResult, EligibilityResultDocument } from '../../db/schemas';
+import { getDatabase } from '../../../db/database';
+import type { EligibilityResult, EligibilityResultDocument } from '../../../db/schemas';
 import type { EligibilityEvaluationResult } from './types';
 
 // Global debug log utility

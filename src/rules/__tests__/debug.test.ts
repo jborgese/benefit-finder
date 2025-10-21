@@ -10,8 +10,8 @@ import {
   inspectRule,
   formatDebugTrace,
   compareEvaluations,
-} from '../debug';
-import type { JsonLogicRule, JsonLogicData } from '../types';
+} from '../core/debug';
+import type { JsonLogicRule, JsonLogicData } from '../core/types';
 
 describe('Debug Utilities', () => {
   describe('debugRule', () => {

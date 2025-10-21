@@ -16,7 +16,7 @@ import {
   RuleDefinitionSchema,
   type RuleDefinition,
   type RuleVersion,
-} from '../schema';
+} from '../core/schema';
 
 describe('Rule Schema', () => {
   describe('RuleVersion', () => {

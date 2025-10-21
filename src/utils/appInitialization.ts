@@ -3,7 +3,7 @@
  */
 
 import { initializeDatabase, getDatabase, clearDatabase } from '../db';
-import { importRulePackage } from '../rules/import-export';
+import { importRulePackage } from '../rules/core/import-export';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
@@ -127,11 +127,11 @@ async function loadSamplePrograms(db: ReturnType<typeof getDatabase>): Promise<v
  */
 async function loadSampleRules(): Promise<void> {
   // Import SNAP rules
-  const snapRules = await import('../rules/packages/snap-rules.json');
+  const snapRules = await import('../rules/federal/snap/snap-rules.json');
   await importRulePackage(snapRules.default);
 
   // Import Medicaid rules
-  const medicaidRules = await import('../rules/packages/medicaid-federal-rules.json');
+  const medicaidRules = await import('../rules/federal/medicaid/medicaid-federal-rules.json');
   await importRulePackage(medicaidRules.default);
 }
 

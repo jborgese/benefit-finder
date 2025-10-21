@@ -5,7 +5,7 @@
  * Integrates rule evaluation, result caching, and result generation.
  */
 
-import { getDatabase } from '../db/database';
+import { getDatabase } from '../../db/database';
 import type { DetailedEvaluationResult } from './detailedEvaluator';
 
 // Import types

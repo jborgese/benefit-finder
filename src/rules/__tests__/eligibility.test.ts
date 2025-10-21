@@ -9,7 +9,7 @@ import {
   evaluateMultiplePrograms,
   clearCachedResults,
   getCachedResults,
-} from '../eligibility';
+} from '../core/eligibility';
 import {
   createUserProfile,
   createBenefitProgram,

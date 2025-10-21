@@ -5,7 +5,7 @@
  * and progress tracking.
  */
 
-import type { JsonLogicRule } from '../rules/types';
+import type { JsonLogicRule } from '../rules/core/types';
 
 // ============================================================================
 // QUESTION TYPES

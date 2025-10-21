@@ -4,7 +4,7 @@
  * Functions for verifying SNAP rule consistency and correctness.
  */
 
-import { getDatabase } from '../../db/database';
+import { getDatabase } from '../../../db/database';
 
 // Global debug log utility
 function debugLog(...args: unknown[]): void {

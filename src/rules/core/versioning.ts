@@ -4,7 +4,7 @@
  * Manages rule versions, migrations, and version history.
  */
 
-import { getDatabase } from '../db/database';
+import { getDatabase } from '../../db/database';
 import {
   formatVersion,
   compareVersions,

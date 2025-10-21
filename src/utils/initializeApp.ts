@@ -1,5 +1,5 @@
 import { initializeDatabase, getDatabase, clearDatabase } from '../db';
-import { importRulePackage } from '../rules/import-export';
+import { importRulePackage } from '../rules/core/import-export';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
@@ -105,15 +105,15 @@ export async function initializeApp(): Promise<void> {
     // Load sample rules
 
     // Import SNAP rules
-    const snapRules = await import('../rules/packages/snap-rules.json');
+    const snapRules = await import('../rules/federal/snap/snap-rules.json');
     await importRulePackage(snapRules.default);
 
     // Import Medicaid rules
-    const medicaidRules = await import('../rules/packages/medicaid-federal-rules.json');
+    const medicaidRules = await import('../rules/federal/medicaid/medicaid-federal-rules.json');
     await importRulePackage(medicaidRules.default);
 
     // Import WIC rules
-    const wicRules = await import('../rules/packages/wic-federal-rules.json');
+    const wicRules = await import('../rules/federal/wic/wic-federal-rules.json');
     await importRulePackage(wicRules.default);
 
   } catch (error) {
@@ -193,13 +193,13 @@ export async function initializeApp(): Promise<void> {
         });
 
         // Load sample rules
-        const snapRules = await import('../rules/packages/snap-rules.json');
+        const snapRules = await import('../rules/federal/snap/snap-rules.json');
         await importRulePackage(snapRules.default);
 
-        const medicaidRules = await import('../rules/packages/medicaid-federal-rules.json');
+        const medicaidRules = await import('../rules/federal/medicaid/medicaid-federal-rules.json');
         await importRulePackage(medicaidRules.default);
 
-        const wicRules = await import('../rules/packages/wic-federal-rules.json');
+        const wicRules = await import('../rules/federal/wic/wic-federal-rules.json');
         await importRulePackage(wicRules.default);
 
         console.warn('Database initialized successfully after clearing');

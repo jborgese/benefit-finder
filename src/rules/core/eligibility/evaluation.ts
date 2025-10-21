@@ -4,10 +4,10 @@
  * Core evaluation logic and helper functions for eligibility determination.
  */
 
-import { getDatabase } from '../../db/database';
+import { getDatabase } from '../../../db/database';
 import { registerBenefitOperators } from '../evaluator';
 import { evaluateRuleWithDetails, type DetailedEvaluationResult } from '../detailedEvaluator';
-import type { EligibilityRuleDocument, UserProfileDocument } from '../../db/schemas';
+import type { EligibilityRuleDocument, UserProfileDocument } from '../../../db/schemas';
 import type { JsonLogicData, JsonLogicRule, RuleEvaluationResult } from '../types';
 import type {
   EvaluationEntities,

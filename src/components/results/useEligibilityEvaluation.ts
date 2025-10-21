@@ -5,9 +5,9 @@
  */
 
 import { useState, useMemo } from 'react';
-import type { RulePackage, RuleDefinition } from '../../rules/schema';
-import { evaluateRuleSync, registerBenefitOperators, unregisterBenefitOperators } from '../../rules/evaluator';
-import type { JsonLogicRule } from '../../rules/types';
+import type { RulePackage, RuleDefinition } from '../../rules/core/schema';
+import { evaluateRuleSync, registerBenefitOperators, unregisterBenefitOperators } from '../../rules/core/evaluator';
+import type { JsonLogicRule } from '../../rules/core/types';
 import type {
   EligibilityResults,
   ProgramEligibilityResult,

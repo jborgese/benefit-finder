@@ -9,12 +9,12 @@ import {
   generateBoundaryTests,
   formatTestSuiteResult,
   createTestSuite,
-} from '../tester';
+} from '../core/tester';
 import type {
   JsonLogicRule,
   RuleTestCase,
   RuleTestSuite,
-} from '../types';
+} from '../core/types';
 
 describe('Rule Tester', () => {
   describe('testRule', () => {

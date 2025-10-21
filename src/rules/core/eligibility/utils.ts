@@ -5,7 +5,7 @@
  * formatting, and criteria breakdown generation.
  */
 
-import type { EligibilityRuleDocument } from '../../db/schemas';
+import type { EligibilityRuleDocument } from '../../../db/schemas';
 import type { JsonLogicData, RuleEvaluationResult } from '../types';
 import type { CriteriaBreakdownItem, FieldNameMapping } from './types';
 

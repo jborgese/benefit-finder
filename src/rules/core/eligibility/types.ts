@@ -5,7 +5,7 @@
  */
 
 import type { RuleEvaluationOptions, RuleEvaluationResult } from '../types';
-import type { EligibilityRuleDocument, UserProfileDocument } from '../../db/schemas';
+import type { EligibilityRuleDocument, UserProfileDocument } from '../../../db/schemas';
 
 /**
  * Eligibility evaluation result (extended)

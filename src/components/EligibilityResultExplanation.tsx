@@ -7,10 +7,10 @@
 
 import React, { useState } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
-import { explainResult } from '../rules/explanation';
+import { explainResult } from '../rules/core/explanation';
 import { getContextualLabelFromBasicData } from './results/confidenceUtils';
-import type { EligibilityEvaluationResult } from '../rules/eligibility';
-import type { JsonLogicRule, JsonLogicData } from '../rules/types';
+import type { EligibilityEvaluationResult } from '../rules/core/eligibility';
+import type { JsonLogicRule, JsonLogicData } from '../rules/core/types';
 
 // ============================================================================
 // TYPES

@@ -38,6 +38,17 @@ The Rule Engine module provides a comprehensive JSON Logic integration for evalu
 - Coverage reporting
 - Fluent API for test building
 
+## Directory Structure
+
+The rules directory has been reorganized for better clarity and maintainability:
+
+- **`core/`**: Contains all rule engine functionality (evaluator, validator, tester, etc.)
+- **`federal/`**: Federal-level rules organized by benefit program (SNAP, Medicaid, TANF, WIC)
+- **`state/`**: State-specific rules organized by state and program
+- **`__tests__/`**: Test files for the rule engine
+
+See [STRUCTURE.md](./STRUCTURE.md) for detailed organization information.
+
 ## Installation
 
 The module is built-in. To use:

@@ -1,6 +1,6 @@
-import { evaluateRuleWithDetails } from '../rules/detailedEvaluator';
-import { registerBenefitOperators } from '../rules/evaluator';
-import type { JsonLogicRule, JsonLogicData } from '../rules/types';
+import { evaluateRuleWithDetails } from '../rules/core/detailedEvaluator';
+import { registerBenefitOperators } from '../rules/core/evaluator';
+import type { JsonLogicRule, JsonLogicData } from '../rules/core/types';
 
 // Register custom operators before tests
 beforeAll(() => {

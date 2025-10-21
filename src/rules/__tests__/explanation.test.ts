@@ -8,9 +8,9 @@ import {
   explainRule,
   explainWhatWouldPass,
   formatRuleExplanation,
-} from '../explanation';
-import type { JsonLogicRule, JsonLogicData } from '../types';
-import type { EligibilityEvaluationResult } from '../eligibility';
+} from '../core/explanation';
+import type { JsonLogicRule, JsonLogicData } from '../core/types';
+import type { EligibilityEvaluationResult } from '../core/eligibility';
 
 describe('Rule Explanation', () => {
   describe('explainRule', () => {

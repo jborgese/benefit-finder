@@ -8,8 +8,8 @@ import {
   isValidRule,
   sanitizeRule,
   STANDARD_OPERATORS,
-} from '../validator';
-import type { JsonLogicRule } from '../types';
+} from '../core/validator';
+import type { JsonLogicRule } from '../core/types';
 
 describe('Rule Validator', () => {
   describe('validateRule', () => {
