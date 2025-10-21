@@ -221,6 +221,24 @@ export default [
   // Unit test files have relaxed rules
   {
     files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', 'src/test/**'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.es2020,
+        ...globals.node,
+        // Vitest globals
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+        afterAll: 'readonly',
+        afterEach: 'readonly',
+        vi: 'readonly',
+        vitest: 'readonly',
+      }
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -270,21 +288,6 @@ export default [
     }
   },
 
-  // JavaScript scripts use basic JS parser
-  {
-    files: ['scripts/**/*.js'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: {
-        ...globals.node,
-      }
-    },
-    rules: {
-      'no-console': 'off',
-      'sonarjs/no-duplicate-string': 'off',
-    }
-  },
 
   // E2E test files use separate TypeScript config
   {
@@ -308,9 +311,9 @@ export default [
     }
   },
 
-  // Browser JavaScript files (like clear-db.js)
+  // Browser JavaScript files (like clear-db.js) - exclude scripts directory
   {
-    files: ['*.js', '!*.config.js', '!*.config.cjs'],
+    files: ['*.js', '!*.config.js', '!*.config.cjs', '!scripts/**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'script',
@@ -320,6 +323,22 @@ export default [
     },
     rules: {
       'no-console': 'off', // Allow console usage for utility scripts
+    }
+  },
+
+  // Scripts JavaScript files - must come after general JS rule
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+      }
+    },
+    rules: {
+      'no-console': 'off',
+      'sonarjs/no-duplicate-string': 'off',
     }
   }
 ];

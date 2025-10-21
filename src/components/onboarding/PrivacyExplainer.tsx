@@ -9,6 +9,7 @@ import { Button } from '../Button';
 import { useI18n } from '../../i18n/hooks';
 import { useDatabase } from '../../db/hooks';
 import { isDatabaseInitialized } from '../../db/database';
+import type { RxDocument } from 'rxdb';
 
 interface PrivacyExplainerProps {
   isOpen: boolean;
@@ -24,16 +25,9 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Get database instance safely
-  let database: ReturnType<typeof useDatabase> | null = null;
-  try {
-    if (isDatabaseInitialized()) {
-      database = useDatabase();
-    }
-  } catch (error) {
-    console.warn('Database not available in PrivacyExplainer:', error);
-    database = null;
-  }
+  // Always call the hook, but handle the case where database is not initialized
+  const database = useDatabase();
+  const isDbInitialized = isDatabaseInitialized();
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
@@ -41,7 +35,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
       onClose();
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();
-      const tabIds = ['overview', 'data', 'security', 'your-rights'] as const;
+      const tabIds: readonly ('overview' | 'data' | 'security' | 'your-rights')[] = ['overview', 'data', 'security', 'your-rights'];
       const currentIndex = tabIds.indexOf(activeTab);
       const nextIndex = event.key === 'ArrowLeft'
         ? (currentIndex - 1 + tabIds.length) % tabIds.length
@@ -52,7 +46,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
 
   // Handle data export
   const handleExportData = useCallback(async () => {
-    if (!database) {
+    if (!isDbInitialized || !database) {
       console.warn('Database not available for export');
       return;
     }
@@ -67,9 +61,9 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
       const exportData = {
         timestamp: new Date().toISOString(),
         version: '1.0',
-        userProfiles: userData.map((doc: any) => doc.toJSON()),
-        eligibilityResults: resultsData.map((doc: any) => doc.toJSON()),
-        appSettings: settingsData.map((doc: any) => doc.toJSON()),
+        userProfiles: userData.map((doc: RxDocument) => doc.toJSON()),
+        eligibilityResults: resultsData.map((doc: RxDocument) => doc.toJSON()),
+        appSettings: settingsData.map((doc: RxDocument) => doc.toJSON()),
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -90,7 +84,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
 
   // Handle data deletion
   const handleDeleteData = useCallback(async () => {
-    if (!database) {
+    if (!isDbInitialized || !database) {
       console.warn('Database not available for deletion');
       return;
     }
@@ -113,7 +107,9 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
   useEffect(() => {
     if (isOpen) {
       const modal = document.querySelector('[role="dialog"]') as HTMLElement;
-      modal?.focus();
+      if (modal) {
+        modal.focus();
+      }
     }
   }, [isOpen]);
 
@@ -343,7 +339,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                   variant="secondary"
                   size="sm"
                   onClick={() => setShowDeleteConfirm(true)}
-                  disabled={isLoading || !database}
+                  disabled={isLoading || !isDbInitialized}
                   className="hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                 >
                   {isLoading ? 'Deleting...' : t('privacyExplainer.rights.deleteButton')}
@@ -361,8 +357,10 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={handleExportData}
-                  disabled={isLoading || !database}
+                  onClick={() => {
+                    void handleExportData();
+                  }}
+                  disabled={isLoading || !isDbInitialized}
                   className="hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                 >
                   {isLoading ? 'Exporting...' : t('privacyExplainer.rights.exportButton')}
@@ -425,7 +423,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'overview' | 'data' | 'security' | 'your-rights')}
                   role="tab"
                   aria-selected={activeTab === tab.id}
                   aria-controls={`tabpanel-${tab.id}`}
@@ -498,7 +496,9 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
               </Button>
               <Button
                 variant="secondary"
-                onClick={handleDeleteData}
+                onClick={() => {
+                  void handleDeleteData();
+                }}
                 disabled={isLoading}
                 className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white border-red-600 hover:border-red-700 dark:border-red-500 dark:hover:border-red-600"
               >

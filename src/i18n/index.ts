@@ -50,7 +50,10 @@ const normalizeLanguageCode = (language: string): string => {
   };
 
   // Return mapped language or just the first part (before hyphen)
-  return languageMap[language] || language.split('-')[0];
+  // Use Object.prototype.hasOwnProperty.call for safe property access
+  return Object.prototype.hasOwnProperty.call(languageMap, language)
+    ? languageMap[language]
+    : language.split('-')[0];
 };
 
 const initOptions: InitOptions = {
@@ -73,7 +76,7 @@ const initOptions: InitOptions = {
 
   interpolation: {
     escapeValue: false, // React already does escaping
-    format: (value: any, format: any, lng: any) => {
+    format: (value: unknown, format: string, lng: string) => {
       // Handle locale-specific formatting
       if (format === 'number' && typeof value === 'number') {
         return new Intl.NumberFormat(lng).format(value);
@@ -115,6 +118,9 @@ const initOptions: InitOptions = {
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
-  .init(initOptions);
+  .init(initOptions)
+  .catch((error) => {
+    console.error('Failed to initialize i18n:', error);
+  });
 
 export default i18n;

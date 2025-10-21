@@ -10,6 +10,80 @@
 import { test, expect } from '@playwright/test';
 import fs from 'fs';
 
+/**
+ * Check if a URL is an external request that should be tracked
+ */
+function isExternalRequest(url: string): boolean {
+  return (
+    url.match(/^https?:\/\/(?!localhost|127\.0\.0\.1)/) &&
+    !url.includes('apple.com') &&
+    !url.includes('safari') &&
+    !url.includes('webkit') &&
+    !url.includes('fonts.googleapis.com') &&
+    !url.includes('fonts.gstatic.com') &&
+    !url.includes('rxdb.info')
+  );
+}
+
+/**
+ * Perform button operations safely with error handling
+ */
+async function performButtonOperations(page: any): Promise<void> {
+  try {
+    const buttons = await page.locator('button').all();
+    const maxButtons = Math.min(buttons.length, 5);
+
+    for (let i = 0; i < maxButtons; i++) {
+      // Check if page is still alive before proceeding
+      if (page.isClosed()) {
+        console.log('Page was closed during test execution');
+        break;
+      }
+
+      // Safely access button by index
+      const button = buttons.at(i);
+      if (!button) {
+        continue;
+      }
+
+      // Only click visible buttons that won't cause navigation
+      if (await button.isVisible({ timeout: 1000 })) {
+        const buttonText = await button.textContent().catch(() => '');
+
+        // Skip buttons that might cause problematic navigation or actions
+        if (buttonText && (
+          buttonText.toLowerCase().includes('home') ||
+          buttonText.toLowerCase().includes('new assessment') ||
+          buttonText.toLowerCase().includes('refresh')
+        )) {
+          continue;
+        }
+
+        // Click with better error handling
+        try {
+          await button.click({ timeout: 2000 });
+
+          // Check if page is still alive after click
+          if (!page.isClosed()) {
+            await page.waitForTimeout(300);
+          }
+        } catch (clickError) {
+          // Log but don't fail on click errors - focus on network monitoring
+          console.log(`Button click failed: ${buttonText}`, clickError);
+        }
+      }
+
+      // Short pause between operations
+      if (!page.isClosed()) {
+        await page.waitForTimeout(100);
+      }
+    }
+  } catch (error) {
+    console.log('Error during button operations:', error);
+    // Continue to network verification even if button operations fail
+  }
+}
+
 test.describe('Encryption Verification', () => {
   test('should encrypt sensitive data when saving', async ({ page }) => {
     await page.goto('/results?test=true&playwright=true');
@@ -330,15 +404,7 @@ test.describe('Encryption - Data Protection', () => {
     page.on('request', request => {
       const url = request.url();
       // Track any external domain requests (exclude localhost and common dev resources)
-      if (
-        url.match(/^https?:\/\/(?!localhost|127\.0\.0\.1)/) &&
-        !url.includes('apple.com') &&
-        !url.includes('safari') &&
-        !url.includes('webkit') &&
-        !url.includes('fonts.googleapis.com') &&
-        !url.includes('fonts.gstatic.com') &&
-        !url.includes('rxdb.info')
-      ) {
+      if (isExternalRequest(url)) {
         externalCalls.push(url);
       }
     });
@@ -351,54 +417,7 @@ test.describe('Encryption - Data Protection', () => {
     await page.waitForTimeout(2000);
 
     // Perform operations more safely with error handling and context checks
-    try {
-      const buttons = await page.locator('button').all();
-
-      for (let i = 0; i < Math.min(buttons.length, 5); i++) {
-        const button = buttons[i];
-
-        // Check if page is still alive before proceeding
-        if (page.isClosed()) {
-          console.log('Page was closed during test execution');
-          break;
-        }
-
-        // Only click visible buttons that won't cause navigation
-        if (await button.isVisible({ timeout: 1000 })) {
-          const buttonText = await button.textContent().catch(() => '');
-
-          // Skip buttons that might cause problematic navigation or actions
-          if (buttonText && (
-            buttonText.toLowerCase().includes('home') ||
-            buttonText.toLowerCase().includes('new assessment') ||
-            buttonText.toLowerCase().includes('refresh')
-          )) {
-            continue;
-          }
-
-          // Click with better error handling
-          try {
-            await button.click({ timeout: 2000 });
-
-            // Check if page is still alive after click
-            if (!page.isClosed()) {
-              await page.waitForTimeout(300);
-            }
-          } catch (clickError) {
-            // Log but don't fail on click errors - focus on network monitoring
-            console.log(`Button click failed: ${buttonText}`, clickError);
-          }
-        }
-
-        // Short pause between operations
-        if (!page.isClosed()) {
-          await page.waitForTimeout(100);
-        }
-      }
-    } catch (error) {
-      console.log('Error during button operations:', error);
-      // Continue to network verification even if button operations fail
-    }
+    await performButtonOperations(page);
 
     // Log any external calls for debugging
     if (externalCalls.length > 0) {

@@ -42,10 +42,10 @@ interface EvaluationContext {
 /**
  * Evaluate a rule with detailed comparison tracking
  */
-export async function evaluateRuleWithDetails(
+export function evaluateRuleWithDetails(
   rule: JsonLogicRule,
   data: JsonLogicData
-): Promise<DetailedEvaluationResult> {
+): DetailedEvaluationResult {
   const startTime = performance.now();
   const context: EvaluationContext = {
     data,
@@ -64,7 +64,7 @@ export async function evaluateRuleWithDetails(
     analyzeRule(rule, context);
 
     // Perform standard evaluation
-    const result = jsonLogic.apply(rule as any, data) as boolean;
+    const result = jsonLogic.apply(rule as JsonLogicRule, data) as boolean;
     const endTime = performance.now();
 
     if (import.meta.env.DEV) {
@@ -100,7 +100,7 @@ function analyzeRule(rule: JsonLogicRule, context: EvaluationContext): void {
     return;
   }
 
-  context.depth++;
+  const newContext = { ...context, depth: context.depth + 1 };
 
   for (const [operator, operands] of Object.entries(rule)) {
     if (import.meta.env.DEV) {
@@ -108,18 +108,16 @@ function analyzeRule(rule: JsonLogicRule, context: EvaluationContext): void {
     }
 
     if (Array.isArray(operands)) {
-      analyzeComparison(operator, operands, context);
+      analyzeComparison(operator, operands, newContext);
 
       // Recursively analyze nested rules
       for (const operand of operands) {
         if (typeof operand === 'object' && operand !== null) {
-          analyzeRule(operand as JsonLogicRule, context);
+          analyzeRule(operand as JsonLogicRule, newContext);
         }
       }
     }
   }
-
-  context.depth--;
 }
 
 /**
@@ -130,131 +128,178 @@ function analyzeComparison(operator: string, operands: unknown[], context: Evalu
     console.log('🔍 [DEBUG] Analyzing comparison:', operator, operands);
   }
 
-  // Handle comparison operators
-  if (['<', '>', '<=', '>=', '==', '!=', 'in'].includes(operator) && operands.length >= 2) {
-    const leftOperand = operands[0];
-    const rightOperand = operands[1];
+  if (isStandardComparison(operator)) {
+    handleStandardComparison(operator, operands, context);
+  } else if (isSNAPOperator(operator)) {
+    handleSNAPComparison(operands, context);
+  }
+}
 
-    if (import.meta.env.DEV) {
-      console.log('🔍 [DEBUG] Left operand:', leftOperand);
-      console.log('🔍 [DEBUG] Right operand:', rightOperand);
-    }
+/**
+ * Check if operator is a standard comparison operator
+ */
+function isStandardComparison(operator: string): boolean {
+  return ['<', '>', '<=', '>=', '==', '!=', 'in'].includes(operator);
+}
 
-    // Extract variable name and value
-    let criterion = '';
-    let actualValue: unknown;
-    let threshold: unknown;
+/**
+ * Check if operator is SNAP-specific
+ */
+function isSNAPOperator(operator: string): boolean {
+  return operator === 'snap_income_eligible';
+}
 
-    if (isVariableReference(leftOperand)) {
-      criterion = (leftOperand as { var: string }).var;
-      actualValue = getVariableValue(criterion, context.data);
-      threshold = evaluateOperand(rightOperand, context.data);
-    } else if (isVariableReference(rightOperand)) {
-      criterion = (rightOperand as { var: string }).var;
-      actualValue = getVariableValue(criterion, context.data);
-      threshold = evaluateOperand(leftOperand, context.data);
-    }
+/**
+ * Handle standard comparison operators
+ */
+function handleStandardComparison(operator: string, operands: unknown[], context: EvaluationContext): void {
+  if (operands.length < 2) return;
 
-    if (import.meta.env.DEV) {
-      console.log('🔍 [DEBUG] Extracted - criterion:', criterion, 'actualValue:', actualValue, 'threshold:', threshold);
-    }
+  const leftOperand = operands[0];
+  const rightOperand = operands[1];
 
-    if (criterion && actualValue !== undefined && threshold !== undefined) {
-      // Evaluate the comparison to determine if it passed
-      const comparisonResult = evaluateComparison(operator, actualValue, threshold);
-
-      // Generate human-readable comparison
-      const comparison = formatComparison(operator, actualValue, threshold, comparisonResult);
-
-      if (import.meta.env.DEV) {
-        console.log('🔍 [DEBUG] Adding comparison result:', {
-          criterion,
-          met: comparisonResult,
-          value: actualValue,
-          threshold,
-          comparison,
-          operator
-        });
-      }
-
-      context.comparisons.push({
-        criterion,
-        met: comparisonResult,
-        value: actualValue,
-        threshold,
-        comparison,
-        operator
-      });
-    }
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] Left operand:', leftOperand);
+    console.log('🔍 [DEBUG] Right operand:', rightOperand);
   }
 
-  // Handle special SNAP income eligibility operator
-  if (operator === 'snap_income_eligible' && operands.length >= 2) {
-    if (import.meta.env.DEV) {
-      console.log('🔍 [DEBUG] SNAP operator detected! Processing snap_income_eligible...');
-    }
+  const comparisonData = extractComparisonData(leftOperand, rightOperand, context);
+  if (comparisonData) {
+    addComparisonResult(operator, comparisonData, context);
+  }
+}
 
-    const incomeOperand = operands[0];
-    const sizeOperand = operands[1];
+/**
+ * Extract comparison data from operands
+ */
+function extractComparisonData(leftOperand: unknown, rightOperand: unknown, context: EvaluationContext): { criterion: string; actualValue: unknown; threshold: unknown } | null {
+  let criterion = '';
+  let actualValue: unknown;
+  let threshold: unknown;
 
-    const income = evaluateOperand(incomeOperand, context.data);
-    const householdSize = evaluateOperand(sizeOperand, context.data);
+  if (isVariableReference(leftOperand)) {
+    criterion = (leftOperand as { var: string }).var;
+    actualValue = getVariableValue(criterion, context.data);
+    threshold = evaluateOperand(rightOperand, context.data);
+  } else if (isVariableReference(rightOperand)) {
+    criterion = (rightOperand as { var: string }).var;
+    actualValue = getVariableValue(criterion, context.data);
+    threshold = evaluateOperand(leftOperand, context.data);
+  }
 
-    if (import.meta.env.DEV) {
-      console.log('🔍 [DEBUG] SNAP operands evaluated:', { income, householdSize });
-    }
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] Extracted - criterion:', criterion, 'actualValue:', actualValue, 'threshold:', threshold);
+  }
 
-    if (typeof income === 'number' && typeof householdSize === 'number') {
-      // SNAP income limit calculation: 130% of FPL using correct thresholds
-      const incomeLimit = getSNAPGrossIncomeLimit(householdSize);
-      const isEligible = income <= incomeLimit;
+  if (criterion && actualValue !== undefined && threshold !== undefined) {
+    return { criterion, actualValue, threshold };
+  }
 
-      if (import.meta.env.DEV) {
-        console.log('🔍 [DEBUG] SNAP calculation:', { income, householdSize, incomeLimit, isEligible });
-      }
+  return null;
+}
 
-      const incomeComparison = formatCurrency(income) + (isEligible ? ' is within' : ' exceeds') + ' the limit of ' + formatCurrency(incomeLimit);
-      const sizeComparison = `${householdSize} ${householdSize === 1 ? 'person' : 'people'} (determines income limit)`;
+/**
+ * Add comparison result to context
+ */
+function addComparisonResult(operator: string, comparisonData: { criterion: string; actualValue: unknown; threshold: unknown }, context: EvaluationContext): void {
+  const { criterion, actualValue, threshold } = comparisonData;
+  const comparisonResult = evaluateComparison(operator, actualValue, threshold);
+  const comparison = formatComparison(operator, actualValue, threshold, comparisonResult);
 
-      if (import.meta.env.DEV) {
-        console.log('🔍 [DEBUG] SNAP adding comparisons:', { incomeComparison, sizeComparison });
-      }
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] Adding comparison result:', {
+      criterion,
+      met: comparisonResult,
+      value: actualValue,
+      threshold,
+      comparison,
+      operator
+    });
+  }
 
-      context.comparisons.push({
-        criterion: 'householdIncome',
-        met: isEligible,
-        value: income,
-        threshold: incomeLimit,
-        comparison: incomeComparison,
-        operator: 'snap_income_eligible'
-      });
+  context.comparisons.push({
+    criterion,
+    met: comparisonResult,
+    value: actualValue,
+    threshold,
+    comparison,
+    operator
+  });
+}
 
-      context.comparisons.push({
-        criterion: 'householdSize',
-        met: true, // Size itself doesn't fail, it affects the calculation
-        value: householdSize,
-        threshold: householdSize,
-        comparison: sizeComparison,
-        operator: 'household_size'
-      });
+/**
+ * Handle SNAP income eligibility comparison
+ */
+function handleSNAPComparison(operands: unknown[], context: EvaluationContext): void {
+  if (operands.length < 2) return;
 
-      if (import.meta.env.DEV) {
-        console.log('🔍 [DEBUG] SNAP comparisons added. Total comparisons now:', context.comparisons.length);
-        console.log('🔍 [DEBUG] SNAP - All comparisons in context:', context.comparisons.map((c, i) => ({
-          index: i,
-          criterion: c.criterion,
-          met: c.met,
-          value: c.value,
-          threshold: c.threshold,
-          comparison: c.comparison,
-          operator: c.operator
-        })));
-      }
-    } else {
-      if (import.meta.env.DEV) {
-        console.log('🔍 [DEBUG] SNAP operands not numbers:', { income: typeof income, householdSize: typeof householdSize });
-      }
-    }
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] SNAP operator detected! Processing snap_income_eligible...');
+  }
+
+  const incomeOperand = operands[0];
+  const sizeOperand = operands[1];
+  const income = evaluateOperand(incomeOperand, context.data);
+  const householdSize = evaluateOperand(sizeOperand, context.data);
+
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] SNAP operands evaluated:', { income, householdSize });
+  }
+
+  if (typeof income === 'number' && typeof householdSize === 'number') {
+    processSNAPCalculation(income, householdSize, context);
+  } else if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] SNAP operands not numbers:', { income: typeof income, householdSize: typeof householdSize });
+  }
+}
+
+/**
+ * Process SNAP income calculation and add results
+ */
+function processSNAPCalculation(income: number, householdSize: number, context: EvaluationContext): void {
+  const incomeLimit = getSNAPGrossIncomeLimit(householdSize);
+  const isEligible = income <= incomeLimit;
+
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] SNAP calculation:', { income, householdSize, incomeLimit, isEligible });
+  }
+
+  const incomeComparison = `${formatCurrency(income)} ${isEligible ? 'is within' : 'exceeds'} the limit of ${formatCurrency(incomeLimit)}`;
+  const sizeComparison = `${householdSize} ${householdSize === 1 ? 'person' : 'people'} (determines income limit)`;
+
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] SNAP adding comparisons:', { incomeComparison, sizeComparison });
+  }
+
+  context.comparisons.push({
+    criterion: 'householdIncome',
+    met: isEligible,
+    value: income,
+    threshold: incomeLimit,
+    comparison: incomeComparison,
+    operator: 'snap_income_eligible'
+  });
+
+  context.comparisons.push({
+    criterion: 'householdSize',
+    met: true, // Size itself doesn't fail, it affects the calculation
+    value: householdSize,
+    threshold: householdSize,
+    comparison: sizeComparison,
+    operator: 'household_size'
+  });
+
+  if (import.meta.env.DEV) {
+    console.log('🔍 [DEBUG] SNAP comparisons added. Total comparisons now:', context.comparisons.length);
+    console.log('🔍 [DEBUG] SNAP - All comparisons in context:', context.comparisons.map((c, i) => ({
+      index: i,
+      criterion: c.criterion,
+      met: c.met,
+      value: c.value,
+      threshold: c.threshold,
+      comparison: c.comparison,
+      operator: c.operator
+    })));
   }
 }
 
@@ -369,7 +414,7 @@ function generateExplanation(criteria: DetailedCriterionResult[], overallResult:
   if (overallResult) {
     return 'All eligibility requirements have been met';
   } else if (failedCriteria.length > 0) {
-    const reasons = failedCriteria.map(c => c.comparison || `${c.criterion} requirement not met`);
+    const reasons = failedCriteria.map(c => c.comparison ?? `${c.criterion} requirement not met`);
     return `Eligibility requirements not met: ${reasons.join(', ')}`;
   } else {
     return 'Eligibility requirements not met due to program rules';

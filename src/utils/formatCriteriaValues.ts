@@ -134,6 +134,51 @@ export function formatThreshold(
 }
 
 /**
+ * Handle age comparison logic
+ */
+function formatAgeComparison(value: unknown, threshold: unknown, valueStr: string, thresholdStr: string): string {
+  if (typeof value === 'number' && typeof threshold === 'number') {
+    if (value < threshold) {
+      return `${valueStr} is below minimum of ${thresholdStr}`;
+    } else {
+      return `${valueStr} exceeds maximum of ${thresholdStr}`;
+    }
+  }
+  return `${valueStr} does not meet requirement of ${thresholdStr}`;
+}
+
+/**
+ * Handle ineligible result formatting
+ */
+function formatIneligibleResult(
+  value: unknown,
+  threshold: unknown,
+  fieldName: string,
+  valueStr: string,
+  thresholdStr: string
+): string {
+  const lowerFieldName = fieldName.toLowerCase();
+
+  // Income typically needs to be BELOW threshold
+  if (lowerFieldName.includes('income')) {
+    return `${valueStr} exceeds limit of ${thresholdStr}`;
+  }
+
+  // Age typically needs to be ABOVE threshold (minimum age)
+  if (lowerFieldName.includes('age')) {
+    return formatAgeComparison(value, threshold, valueStr, thresholdStr);
+  }
+
+  // Assets typically need to be BELOW threshold
+  if (lowerFieldName.includes('asset') || lowerFieldName.includes('resource')) {
+    return `${valueStr} exceeds limit of ${thresholdStr}`;
+  }
+
+  // Generic comparison
+  return `${valueStr} does not meet requirement of ${thresholdStr}`;
+}
+
+/**
  * Format a comparison string between a value and threshold
  * Used for generating user-friendly comparison statements
  */
@@ -154,31 +199,7 @@ export function formatComparison(
 
   // For ineligible results
   if (!met && !isEligible) {
-    const lowerFieldName = fieldName.toLowerCase();
-
-    // Income typically needs to be BELOW threshold
-    if (lowerFieldName.includes('income')) {
-      return `${valueStr} exceeds limit of ${thresholdStr}`;
-    }
-
-    // Age typically needs to be ABOVE threshold (minimum age)
-    if (lowerFieldName.includes('age')) {
-      if (typeof value === 'number' && typeof threshold === 'number') {
-        if (value < threshold) {
-          return `${valueStr} is below minimum of ${thresholdStr}`;
-        } else {
-          return `${valueStr} exceeds maximum of ${thresholdStr}`;
-        }
-      }
-    }
-
-    // Assets typically need to be BELOW threshold
-    if (lowerFieldName.includes('asset') || lowerFieldName.includes('resource')) {
-      return `${valueStr} exceeds limit of ${thresholdStr}`;
-    }
-
-    // Generic comparison
-    return `${valueStr} does not meet requirement of ${thresholdStr}`;
+    return formatIneligibleResult(value, threshold, fieldName, valueStr, thresholdStr);
   }
 
   // Special handling for household size

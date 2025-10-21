@@ -43,7 +43,6 @@ export { getAllProgramRuleIds, ensureSNAPRulesAreCorrect };
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.debug('[Eligibility Debug]', ...args);
   }
 }
@@ -126,8 +125,9 @@ export async function evaluateEligibility(
       console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details found:', !!resultRuleDetails);
       console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details:', resultRuleDetails);
       if (resultRuleDetails && typeof resultRuleDetails === 'object' && 'criteriaResults' in resultRuleDetails) {
-        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results count:', (resultRuleDetails as any).criteriaResults.length);
-        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results:', (resultRuleDetails as any).criteriaResults);
+        const details = resultRuleDetails as DetailedEvaluationResult;
+        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results count:', details.criteriaResults.length);
+        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results:', details.criteriaResults);
       }
     }
 
@@ -144,7 +144,7 @@ export async function evaluateEligibility(
       programId,
       resultRule,
       combinedEvalResult,
-      resultRuleDetails as DetailedEvaluationResult || fallbackDetailedResult,
+      resultRuleDetails as DetailedEvaluationResult ?? fallbackDetailedResult,
       finalMissingFields,
       executionTime
     );
@@ -156,7 +156,7 @@ export async function evaluateEligibility(
         ruleId: result.ruleId,
         eligible: result.eligible,
         criteriaResults: result.criteriaResults,
-        criteriaResultsCount: result.criteriaResults?.length || 0
+        criteriaResultsCount: result.criteriaResults?.length ?? 0
       });
       console.warn(`eligibility.ts - evaluateEligibility - 🔍 [DEBUG] evaluateEligibility: Built result for ${programId}:`, {
         eligible: result.eligible,

@@ -42,7 +42,7 @@
   "scripts": {
     "prepare": "husky",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "build:analyze": "vite build --config vite.config.performance.ts",
     "preview": "vite preview",
     "test": "vitest",

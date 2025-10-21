@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EnhancedQuestionnaire } from './questionnaire/ui';
 import { ResultsSummary, ProgramCard, ResultsExport, ResultsImport, QuestionnaireAnswersCard, type EligibilityResults } from './components/results';
 import { useResultsManagement } from './components/results/useResultsManagement';
@@ -42,7 +42,7 @@ async function importStateSpecificRules(stateCode: string): Promise<void> {
 
     // Import state-specific rules based on state code
     switch (stateCode) {
-      case 'GA':
+      case 'GA': {
         // Import Georgia Medicaid rules
         const { default: medicaidGeorgiaRules } = await import('./rules/state/georgia/medicaid/medicaid-georgia-rules.json');
         const georgiaResult = await importRules(medicaidGeorgiaRules.rules, {
@@ -53,6 +53,7 @@ async function importStateSpecificRules(stateCode: string): Promise<void> {
         });
         console.log(`[DEBUG] Georgia rules import result:`, georgiaResult);
         break;
+      }
 
       // Add other states as needed
       // case 'CA':
@@ -98,6 +99,16 @@ function App(): React.ReactElement {
 
   const { saveResults, loadAllResults, loadResult } = useResultsManagement();
 
+  // Create sample results for testing
+  const createSampleResults = useCallback((): void => {
+    const sampleResults = createSampleResultsData();
+    setCurrentResults(sampleResults);
+    setHasResults(true);
+
+    // Also save to localStorage for persistence
+    void saveResults({ results: sampleResults });
+  }, [saveResults]);
+
   // Check for existing results on app startup
   useEffect(() => {
     const checkExistingResults = async (): Promise<void> => {
@@ -140,7 +151,7 @@ function App(): React.ReactElement {
     } catch {
       // no-op: defensive for non-browser environments
     }
-  }, []);
+  }, [createSampleResults]);
 
   // Development helper - make clearDatabase available globally
   if (import.meta.env.DEV) {
@@ -230,15 +241,15 @@ function App(): React.ReactElement {
         householdIncome: annualIncome,
         incomePeriod: incomePeriod as 'monthly' | 'annual',
         // Use the date of birth directly from the questionnaire
-        dateOfBirth: dateOfBirth,
+        dateOfBirth,
         citizenship: citizenship as 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other',
         employmentStatus: employmentStatus as 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student',
         // Include state field - this is critical for state-specific eligibility
-        state: state,
+        state,
         // Include other collected fields
         hasDisability: hasQualifyingDisability,
-        isPregnant: isPregnant,
-        hasChildren: hasChildren,
+        isPregnant,
+        hasChildren,
       };
 
       // Create user profile and evaluate eligibility
@@ -250,7 +261,7 @@ function App(): React.ReactElement {
 
         // Store current user profile for passing to components
         setCurrentUserProfile({
-          state: state,
+          state,
           householdSize,
           householdIncome: annualIncome,
           citizenship,
@@ -448,15 +459,6 @@ function App(): React.ReactElement {
     }
   };
 
-  // Create sample results for testing
-  const createSampleResults = (): void => {
-    const sampleResults = createSampleResultsData();
-    setCurrentResults(sampleResults);
-    setHasResults(true);
-
-    // Also save to localStorage for persistence
-    void saveResults({ results: sampleResults });
-  };
 
   return (
     <ErrorBoundary
@@ -803,7 +805,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
-                            userProfile={currentUserProfile || undefined}
+                            userProfile={currentUserProfile ?? undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}
@@ -813,7 +815,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
-                            userProfile={currentUserProfile || undefined}
+                            userProfile={currentUserProfile ?? undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}
@@ -823,7 +825,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
-                            userProfile={currentUserProfile || undefined}
+                            userProfile={currentUserProfile ?? undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}
@@ -833,7 +835,7 @@ function App(): React.ReactElement {
                           <ProgramCard
                             key={result.programId}
                             result={result}
-                            userProfile={currentUserProfile || undefined}
+                            userProfile={currentUserProfile ?? undefined}
                             className="max-w-4xl mx-auto animate-fade-in-up"
                           />
                         ))}

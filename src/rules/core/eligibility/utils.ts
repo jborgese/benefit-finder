@@ -12,7 +12,6 @@ import type { CriteriaBreakdownItem, FieldNameMapping } from './types';
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.debug('[Eligibility Utils Debug]', ...args);
   }
 }
@@ -69,8 +68,9 @@ export const FIELD_NAME_MAPPINGS: FieldNameMapping = {
 export function formatFieldName(fieldName: string): string {
   debugLog('Formatting field name', fieldName);
   if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
-    debugLog('Field mapping found', fieldName, FIELD_NAME_MAPPINGS[fieldName]);
-    return FIELD_NAME_MAPPINGS[fieldName];
+    const mapping = FIELD_NAME_MAPPINGS[fieldName as keyof FieldNameMapping];
+    debugLog('Field mapping found', fieldName, mapping);
+    return mapping;
   }
   return fieldName
     .replace(/([A-Z])/g, ' $1')
@@ -92,7 +92,7 @@ export function generateCriteriaBreakdown(
 
   if (rule.requiredFields) {
     for (const field of rule.requiredFields) {
-      const fieldValue = data[field];
+      const fieldValue = data[field as keyof JsonLogicData];
       const fieldDescription = formatFieldName(field);
       const hasValue = fieldValue !== undefined && fieldValue !== null;
 

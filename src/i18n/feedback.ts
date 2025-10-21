@@ -48,7 +48,7 @@ export class TranslationFeedbackManager {
       appVersion: this.getAppVersion(),
     };
 
-    const existingFeedback = await this.getFeedback();
+    const existingFeedback = this.getFeedback();
     existingFeedback.push(fullFeedback);
 
     localStorage.setItem(this.feedbackKey, JSON.stringify(existingFeedback));
@@ -64,7 +64,7 @@ export class TranslationFeedbackManager {
       timestamp: new Date(),
     };
 
-    const existingIssues = await this.getIssues();
+    const existingIssues = this.getIssues();
     existingIssues.push(fullIssue);
 
     localStorage.setItem(this.issuesKey, JSON.stringify(existingIssues));
@@ -73,7 +73,7 @@ export class TranslationFeedbackManager {
   /**
    * Get all feedback
    */
-  async getFeedback(): Promise<TranslationFeedback[]> {
+  getFeedback(): TranslationFeedback[] {
     try {
       const stored = localStorage.getItem(this.feedbackKey);
       return stored ? JSON.parse(stored) : [];
@@ -85,7 +85,7 @@ export class TranslationFeedbackManager {
   /**
    * Get all issues
    */
-  async getIssues(): Promise<TranslationIssue[]> {
+  getIssues(): TranslationIssue[] {
     try {
       const stored = localStorage.getItem(this.issuesKey);
       return stored ? JSON.parse(stored) : [];
@@ -98,8 +98,8 @@ export class TranslationFeedbackManager {
    * Export feedback for community review
    */
   async exportFeedback(): Promise<string> {
-    const feedback = await this.getFeedback();
-    const issues = await this.getIssues();
+    const feedback = this.getFeedback();
+    const issues = this.getIssues();
 
     const exportData = {
       exportDate: new Date().toISOString(),
@@ -111,8 +111,9 @@ export class TranslationFeedbackManager {
         totalIssues: issues.length,
         languages: [...new Set([...feedback.map(f => f.language), ...issues.map(i => i.language)])],
         issuesBySeverity: issues.reduce((acc, issue) => {
-          acc[issue.severity] = (acc[issue.severity] || 0) + 1;
-          return acc;
+          const newAcc = { ...acc };
+          newAcc[issue.severity] = (newAcc[issue.severity] || 0) + 1;
+          return newAcc;
         }, {} as Record<string, number>),
       },
     };
@@ -123,7 +124,7 @@ export class TranslationFeedbackManager {
   /**
    * Clear all feedback (for privacy)
    */
-  async clearFeedback(): Promise<void> {
+  clearFeedback(): void {
     localStorage.removeItem(this.feedbackKey);
     localStorage.removeItem(this.issuesKey);
   }
@@ -137,8 +138,8 @@ export class TranslationFeedbackManager {
     languages: string[];
     recentActivity: number;
   }> {
-    const feedback = await this.getFeedback();
-    const issues = await this.getIssues();
+    const feedback = this.getFeedback();
+    const issues = this.getIssues();
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -169,27 +170,43 @@ export class TranslationFeedbackManager {
 /**
  * React hook for translation feedback
  */
-export const useTranslationFeedback = () => {
+export const useTranslationFeedback = (): {
+  submitFeedback: (feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>) => Promise<void>;
+  reportIssue: (issue: Omit<TranslationIssue, 'id' | 'timestamp'>) => Promise<void>;
+  exportFeedback: () => Promise<string>;
+  getStatistics: () => Promise<{
+    totalFeedback: number;
+    totalIssues: number;
+    languages: string[];
+    recentActivity: number;
+  }>;
+  clearFeedback: () => Promise<void>;
+} => {
   const manager = new TranslationFeedbackManager();
 
-  const submitFeedback = async (feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>) => {
+  const submitFeedback = async (feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>): Promise<void> => {
     await manager.submitFeedback(feedback);
   };
 
-  const reportIssue = async (issue: Omit<TranslationIssue, 'id' | 'timestamp'>) => {
+  const reportIssue = async (issue: Omit<TranslationIssue, 'id' | 'timestamp'>): Promise<void> => {
     await manager.reportIssue(issue);
   };
 
-  const exportFeedback = async () => {
-    return await manager.exportFeedback();
+  const exportFeedback = async (): Promise<string> => {
+    return manager.exportFeedback();
   };
 
-  const getStatistics = async () => {
-    return await manager.getStatistics();
+  const getStatistics = async (): Promise<{
+    totalFeedback: number;
+    totalIssues: number;
+    languages: string[];
+    recentActivity: number;
+  }> => {
+    return manager.getStatistics();
   };
 
-  const clearFeedback = async () => {
-    await manager.clearFeedback();
+  const clearFeedback = async (): Promise<void> => {
+    manager.clearFeedback();
   };
 
   return {
