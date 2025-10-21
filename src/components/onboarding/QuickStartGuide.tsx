@@ -85,15 +85,15 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-xl shadow-2xl border border-secondary-200 max-w-2xl w-full animate-scale-in">
+      <div className="bg-white dark:bg-secondary-800 rounded-xl shadow-2xl border border-secondary-200 dark:border-secondary-600 max-w-2xl w-full animate-scale-in">
         {/* Header */}
-        <div className="border-b border-secondary-200 p-6">
+        <div className="border-b border-secondary-200 dark:border-secondary-600 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-display font-bold text-secondary-900">
+              <h2 className="text-2xl font-display font-bold text-secondary-900 dark:text-secondary-100">
                 {t('quickstart.title')}
               </h2>
-              <p className="text-secondary-600 mt-1">
+              <p className="text-secondary-600 dark:text-secondary-300 mt-1">
                 {t('quickstart.subtitle')}
               </p>
             </div>
@@ -101,7 +101,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-secondary-500 hover:text-secondary-700"
+              className="text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200"
             >
               ✕
             </Button>
@@ -109,18 +109,18 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
         </div>
 
         {/* Progress */}
-        <div className="px-6 py-4 bg-secondary-50">
+        <div className="px-6 py-4 bg-secondary-50 dark:bg-secondary-700">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-secondary-700">
+            <span className="text-sm font-medium text-secondary-700 dark:text-secondary-200">
               {t('quickstart.progress', { current: currentStep + 1, total: steps.length })}
             </span>
-            <span className="text-sm text-secondary-500">
+            <span className="text-sm text-secondary-500 dark:text-secondary-400">
               {Math.round(progress)}%
             </span>
           </div>
-          <div className="w-full bg-secondary-200 rounded-full h-2">
+          <div className="w-full bg-secondary-200 dark:bg-secondary-600 rounded-full h-2">
             <div
-              className="bg-primary-600 h-2 rounded-full transition-all duration-300 ease-smooth"
+              className="bg-primary-600 dark:bg-primary-500 h-2 rounded-full transition-all duration-300 ease-smooth"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -129,38 +129,38 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
         {/* Content */}
         <div className="p-6">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
+            <div className="w-20 h-20 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
               <span className="text-3xl">{currentStepData.icon}</span>
             </div>
-            <h3 className="text-2xl font-display font-bold text-secondary-900 mb-4">
+            <h3 className="text-2xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-4">
               {currentStepData.title}
             </h3>
-            <p className="text-secondary-600 text-lg leading-relaxed">
+            <p className="text-secondary-600 dark:text-secondary-300 text-lg leading-relaxed">
               {currentStepData.content}
             </p>
           </div>
 
           {/* Step-specific content */}
           {currentStep === 0 && (
-            <div className="bg-primary-50 border border-primary-200 rounded-lg p-6 mb-6">
-              <h4 className="font-semibold text-primary-900 mb-3">
+            <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-6 mb-6">
+              <h4 className="font-semibold text-primary-900 dark:text-primary-100 mb-3">
                 {t('quickstart.welcome.whatYouGet')}
               </h4>
-              <ul className="space-y-2 text-primary-800">
+              <ul className="space-y-2 text-primary-800 dark:text-primary-200">
                 <li className="flex items-center">
-                  <span className="text-primary-600 mr-2">✓</span>
+                  <span className="text-primary-600 dark:text-primary-400 mr-2">✓</span>
                   {t('quickstart.welcome.eligibilityCheck')}
                 </li>
                 <li className="flex items-center">
-                  <span className="text-primary-600 mr-2">✓</span>
+                  <span className="text-primary-600 dark:text-primary-400 mr-2">✓</span>
                   {t('quickstart.welcome.personalizedResults')}
                 </li>
                 <li className="flex items-center">
-                  <span className="text-primary-600 mr-2">✓</span>
+                  <span className="text-primary-600 dark:text-primary-400 mr-2">✓</span>
                   {t('quickstart.welcome.nextSteps')}
                 </li>
                 <li className="flex items-center">
-                  <span className="text-primary-600 mr-2">✓</span>
+                  <span className="text-primary-600 dark:text-primary-400 mr-2">✓</span>
                   {t('quickstart.welcome.privacyFirst')}
                 </li>
               </ul>
@@ -168,25 +168,25 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
           )}
 
           {currentStep === 1 && (
-            <div className="bg-success-50 border border-success-200 rounded-lg p-6 mb-6">
-              <h4 className="font-semibold text-success-900 mb-3">
+            <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-6 mb-6">
+              <h4 className="font-semibold text-success-900 dark:text-success-100 mb-3">
                 {t('quickstart.privacy.keyPoints')}
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-success-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-success-800 dark:text-success-200">
                 <div className="flex items-start">
-                  <span className="text-success-600 mr-2 mt-0.5">🔒</span>
+                  <span className="text-success-600 dark:text-success-400 mr-2 mt-0.5">🔒</span>
                   <span className="text-sm">{t('quickstart.privacy.encrypted')}</span>
                 </div>
                 <div className="flex items-start">
-                  <span className="text-success-600 mr-2 mt-0.5">🏠</span>
+                  <span className="text-success-600 dark:text-success-400 mr-2 mt-0.5">🏠</span>
                   <span className="text-sm">{t('quickstart.privacy.local')}</span>
                 </div>
                 <div className="flex items-start">
-                  <span className="text-success-600 mr-2 mt-0.5">🚫</span>
+                  <span className="text-success-600 dark:text-success-400 mr-2 mt-0.5">🚫</span>
                   <span className="text-sm">{t('quickstart.privacy.noTracking')}</span>
                 </div>
                 <div className="flex items-start">
-                  <span className="text-success-600 mr-2 mt-0.5">📱</span>
+                  <span className="text-success-600 dark:text-success-400 mr-2 mt-0.5">📱</span>
                   <span className="text-sm">{t('quickstart.privacy.offline')}</span>
                 </div>
               </div>
@@ -194,25 +194,25 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
           )}
 
           {currentStep === 2 && (
-            <div className="bg-info-50 border border-info-200 rounded-lg p-6 mb-6">
-              <h4 className="font-semibold text-info-900 mb-3">
+            <div className="bg-info-50 dark:bg-info-900/20 border border-info-200 dark:border-info-800 rounded-lg p-6 mb-6">
+              <h4 className="font-semibold text-info-900 dark:text-info-100 mb-3">
                 {t('quickstart.questionnaire.whatToExpect')}
               </h4>
-              <div className="space-y-3 text-info-800">
+              <div className="space-y-3 text-info-800 dark:text-info-200">
                 <div className="flex items-center">
-                  <span className="bg-info-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">1</span>
+                  <span className="bg-info-600 dark:bg-info-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">1</span>
                   <span className="text-sm">{t('quickstart.questionnaire.step1')}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="bg-info-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">2</span>
+                  <span className="bg-info-600 dark:bg-info-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">2</span>
                   <span className="text-sm">{t('quickstart.questionnaire.step2')}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="bg-info-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">3</span>
+                  <span className="bg-info-600 dark:bg-info-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">3</span>
                   <span className="text-sm">{t('quickstart.questionnaire.step3')}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="bg-info-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">4</span>
+                  <span className="bg-info-600 dark:bg-info-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3">4</span>
                   <span className="text-sm">{t('quickstart.questionnaire.step4')}</span>
                 </div>
               </div>
@@ -220,25 +220,25 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
           )}
 
           {currentStep === 3 && (
-            <div className="bg-warning-50 border border-warning-200 rounded-lg p-6 mb-6">
-              <h4 className="font-semibold text-warning-900 mb-3">
+            <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-6 mb-6">
+              <h4 className="font-semibold text-warning-900 dark:text-warning-100 mb-3">
                 {t('quickstart.results.whatYouGet')}
               </h4>
-              <div className="space-y-3 text-warning-800">
+              <div className="space-y-3 text-warning-800 dark:text-warning-200">
                 <div className="flex items-start">
-                  <span className="text-warning-600 mr-2 mt-0.5">📋</span>
+                  <span className="text-warning-600 dark:text-warning-400 mr-2 mt-0.5">📋</span>
                   <span className="text-sm">{t('quickstart.results.eligibilityStatus')}</span>
                 </div>
                 <div className="flex items-start">
-                  <span className="text-warning-600 mr-2 mt-0.5">📄</span>
+                  <span className="text-warning-600 dark:text-warning-400 mr-2 mt-0.5">📄</span>
                   <span className="text-sm">{t('quickstart.results.requiredDocuments')}</span>
                 </div>
                 <div className="flex items-start">
-                  <span className="text-warning-600 mr-2 mt-0.5">🎯</span>
+                  <span className="text-warning-600 dark:text-warning-400 mr-2 mt-0.5">🎯</span>
                   <span className="text-sm">{t('quickstart.results.nextSteps')}</span>
                 </div>
                 <div className="flex items-start">
-                  <span className="text-warning-600 mr-2 mt-0.5">📊</span>
+                  <span className="text-warning-600 dark:text-warning-400 mr-2 mt-0.5">📊</span>
                   <span className="text-sm">{t('quickstart.results.estimatedBenefits')}</span>
                 </div>
               </div>
@@ -246,15 +246,15 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
           )}
 
           {currentStep === 4 && (
-            <div className="bg-success-50 border border-success-200 rounded-lg p-6 mb-6">
-              <h4 className="font-semibold text-success-900 mb-3">
+            <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-6 mb-6">
+              <h4 className="font-semibold text-success-900 dark:text-success-100 mb-3">
                 {t('quickstart.nextSteps.readyToStart')}
               </h4>
-              <p className="text-success-800 text-sm mb-4">
+              <p className="text-success-800 dark:text-success-200 text-sm mb-4">
                 {t('quickstart.nextSteps.description')}
               </p>
-              <div className="flex items-center text-success-700">
-                <span className="text-success-600 mr-2">⏱️</span>
+              <div className="flex items-center text-success-700 dark:text-success-300">
+                <span className="text-success-600 dark:text-success-400 mr-2">⏱️</span>
                 <span className="text-sm font-medium">
                   {t('quickstart.nextSteps.timeEstimate')}
                 </span>
@@ -264,7 +264,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-secondary-200 p-6">
+        <div className="border-t border-secondary-200 dark:border-secondary-600 p-6">
           <div className="flex items-center justify-between">
             <Button
               onClick={handlePrevious}

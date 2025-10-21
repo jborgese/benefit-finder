@@ -135,59 +135,59 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
               <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🛡️</span>
               </div>
-              <h3 className="text-2xl font-display font-bold text-secondary-900 mb-4">
+              <h3 className="text-2xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-4">
                 {t('privacyExplainer.overview.title')}
               </h3>
-              <p className="text-secondary-600 text-lg leading-relaxed">
+              <p className="text-secondary-600 dark:text-secondary-300 text-lg leading-relaxed">
                 {t('privacyExplainer.overview.description')}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-success-50 border border-success-200 rounded-lg p-4">
+              <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-4">
                 <div className="flex items-center mb-2">
-                  <span className="text-success-600 text-xl mr-2">✅</span>
-                  <h4 className="font-semibold text-success-900">
+                  <span className="text-success-600 dark:text-success-400 text-xl mr-2">✅</span>
+                  <h4 className="font-semibold text-success-900 dark:text-success-100">
                     {t('privacyExplainer.overview.localProcessing')}
                   </h4>
                 </div>
-                <p className="text-success-700 text-sm">
+                <p className="text-success-700 dark:text-success-200 text-sm">
                   {t('privacyExplainer.overview.localProcessingDesc')}
                 </p>
               </div>
 
-              <div className="bg-success-50 border border-success-200 rounded-lg p-4">
+              <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-4">
                 <div className="flex items-center mb-2">
-                  <span className="text-success-600 text-xl mr-2">✅</span>
-                  <h4 className="font-semibold text-success-900">
+                  <span className="text-success-600 dark:text-success-400 text-xl mr-2">✅</span>
+                  <h4 className="font-semibold text-success-900 dark:text-success-100">
                     {t('privacyExplainer.overview.noTracking')}
                   </h4>
                 </div>
-                <p className="text-success-700 text-sm">
+                <p className="text-success-700 dark:text-success-200 text-sm">
                   {t('privacyExplainer.overview.noTrackingDesc')}
                 </p>
               </div>
 
-              <div className="bg-success-50 border border-success-200 rounded-lg p-4">
+              <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-4">
                 <div className="flex items-center mb-2">
-                  <span className="text-success-600 text-xl mr-2">✅</span>
-                  <h4 className="font-semibold text-success-900">
+                  <span className="text-success-600 dark:text-success-400 text-xl mr-2">✅</span>
+                  <h4 className="font-semibold text-success-900 dark:text-success-100">
                     {t('privacyExplainer.overview.encryptedStorage')}
                   </h4>
                 </div>
-                <p className="text-success-700 text-sm">
+                <p className="text-success-700 dark:text-success-200 text-sm">
                   {t('privacyExplainer.overview.encryptedStorageDesc')}
                 </p>
               </div>
 
-              <div className="bg-success-50 border border-success-200 rounded-lg p-4">
+              <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-4">
                 <div className="flex items-center mb-2">
-                  <span className="text-success-600 text-xl mr-2">✅</span>
-                  <h4 className="font-semibold text-success-900">
+                  <span className="text-success-600 dark:text-success-400 text-xl mr-2">✅</span>
+                  <h4 className="font-semibold text-success-900 dark:text-success-100">
                     {t('privacyExplainer.overview.offlineFirst')}
                   </h4>
                 </div>
-                <p className="text-success-700 text-sm">
+                <p className="text-success-700 dark:text-success-200 text-sm">
                   {t('privacyExplainer.overview.offlineFirstDesc')}
                 </p>
               </div>
@@ -202,52 +202,52 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
               <div className="w-16 h-16 bg-info-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">📊</span>
               </div>
-              <h3 className="text-2xl font-display font-bold text-secondary-900 mb-4">
+              <h3 className="text-2xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-4">
                 {t('privacyExplainer.data.title')}
               </h3>
-              <p className="text-secondary-600 text-lg leading-relaxed">
+              <p className="text-secondary-600 dark:text-secondary-300 text-lg leading-relaxed">
                 {t('privacyExplainer.data.description')}
               </p>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
-                  <span className="text-blue-600 text-xl mr-2">📝</span>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center">
+                  <span className="text-blue-600 dark:text-blue-400 text-xl mr-2">📝</span>
                   {t('privacyExplainer.data.whatWeCollect')}
                 </h4>
-                <ul className="space-y-2 text-blue-800">
+                <ul className="space-y-2 text-blue-800 dark:text-blue-200">
                   <li className="flex items-start">
-                    <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                    <span className="text-blue-600 dark:text-blue-400 mr-2 mt-0.5">•</span>
                     {t('privacyExplainer.data.householdInfo')}
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                    <span className="text-blue-600 dark:text-blue-400 mr-2 mt-0.5">•</span>
                     {t('privacyExplainer.data.eligibilityResults')}
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                    <span className="text-blue-600 dark:text-blue-400 mr-2 mt-0.5">•</span>
                     {t('privacyExplainer.data.appPreferences')}
                   </li>
                 </ul>
               </div>
 
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h4 className="font-semibold text-green-900 mb-3 flex items-center">
-                  <span className="text-green-600 text-xl mr-2">❌</span>
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-3 flex items-center">
+                  <span className="text-green-600 dark:text-green-400 text-xl mr-2">❌</span>
                   {t('privacyExplainer.data.whatWeDontCollect')}
                 </h4>
-                <ul className="space-y-2 text-green-800">
+                <ul className="space-y-2 text-green-800 dark:text-green-200">
                   <li className="flex items-start">
-                    <span className="text-green-600 mr-2 mt-0.5">•</span>
+                    <span className="text-green-600 dark:text-green-400 mr-2 mt-0.5">•</span>
                     {t('privacyExplainer.data.personalIdentifiers')}
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-600 mr-2 mt-0.5">•</span>
+                    <span className="text-green-600 dark:text-green-400 mr-2 mt-0.5">•</span>
                     {t('privacyExplainer.data.browsingHistory')}
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-600 mr-2 mt-0.5">•</span>
+                    <span className="text-green-600 dark:text-green-400 mr-2 mt-0.5">•</span>
                     {t('privacyExplainer.data.analytics')}
                   </li>
                 </ul>
@@ -263,51 +263,51 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
               <div className="w-16 h-16 bg-warning-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🔒</span>
               </div>
-              <h3 className="text-2xl font-display font-bold text-secondary-900 mb-4">
+              <h3 className="text-2xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-4">
                 {t('privacyExplainer.security.title')}
               </h3>
-              <p className="text-secondary-600 text-lg leading-relaxed">
+              <p className="text-secondary-600 dark:text-secondary-300 text-lg leading-relaxed">
                 {t('privacyExplainer.security.description')}
               </p>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-warning-50 border border-warning-200 rounded-lg p-6">
-                <h4 className="font-semibold text-warning-900 mb-3 flex items-center">
-                  <span className="text-warning-600 text-xl mr-2">🔐</span>
+              <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-6">
+                <h4 className="font-semibold text-warning-900 dark:text-warning-100 mb-3 flex items-center">
+                  <span className="text-warning-600 dark:text-warning-400 text-xl mr-2">🔐</span>
                   {t('privacyExplainer.security.encryption')}
                 </h4>
-                <p className="text-warning-800 mb-3">
+                <p className="text-warning-800 dark:text-warning-200 mb-3">
                   {t('privacyExplainer.security.encryptionDesc')}
                 </p>
-                <div className="bg-warning-100 rounded-lg p-3">
-                  <code className="text-warning-900 text-sm font-mono">
+                <div className="bg-warning-100 dark:bg-warning-800/30 rounded-lg p-3">
+                  <code className="text-warning-900 dark:text-warning-100 text-sm font-mono">
                     AES-256-GCM Encryption
                   </code>
                 </div>
               </div>
 
-              <div className="bg-primary-50 border border-primary-200 rounded-lg p-6">
-                <h4 className="font-semibold text-primary-900 mb-3 flex items-center">
-                  <span className="text-primary-600 text-xl mr-2">🏠</span>
+              <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-6">
+                <h4 className="font-semibold text-primary-900 dark:text-primary-100 mb-3 flex items-center">
+                  <span className="text-primary-600 dark:text-primary-400 text-xl mr-2">🏠</span>
                   {t('privacyExplainer.security.localStorage')}
                 </h4>
-                <p className="text-primary-800 mb-3">
+                <p className="text-primary-800 dark:text-primary-200 mb-3">
                   {t('privacyExplainer.security.localStorageDesc')}
                 </p>
-                <div className="bg-primary-100 rounded-lg p-3">
-                  <code className="text-primary-900 text-sm font-mono">
+                <div className="bg-primary-100 dark:bg-primary-800/30 rounded-lg p-3">
+                  <code className="text-primary-900 dark:text-primary-100 text-sm font-mono">
                     IndexedDB + RxDB
                   </code>
                 </div>
               </div>
 
-              <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-6">
-                <h4 className="font-semibold text-secondary-900 mb-3 flex items-center">
-                  <span className="text-secondary-600 text-xl mr-2">🌐</span>
+              <div className="bg-secondary-50 dark:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 rounded-lg p-6">
+                <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-3 flex items-center">
+                  <span className="text-secondary-600 dark:text-secondary-400 text-xl mr-2">🌐</span>
                   {t('privacyExplainer.security.noServers')}
                 </h4>
-                <p className="text-secondary-800">
+                <p className="text-secondary-800 dark:text-secondary-200">
                   {t('privacyExplainer.security.noServersDesc')}
                 </p>
               </div>
@@ -322,21 +322,21 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
               <div className="w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">⚖️</span>
               </div>
-              <h3 className="text-2xl font-display font-bold text-secondary-900 mb-4">
+              <h3 className="text-2xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-4">
                 {t('privacyExplainer.rights.title')}
               </h3>
-              <p className="text-secondary-600 text-lg leading-relaxed">
+              <p className="text-secondary-600 dark:text-secondary-300 text-lg leading-relaxed">
                 {t('privacyExplainer.rights.description')}
               </p>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-success-50 border border-success-200 rounded-lg p-6">
-                <h4 className="font-semibold text-success-900 mb-3 flex items-center">
-                  <span className="text-success-600 text-xl mr-2">🗑️</span>
+              <div className="bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg p-6">
+                <h4 className="font-semibold text-success-900 dark:text-success-100 mb-3 flex items-center">
+                  <span className="text-success-600 dark:text-success-400 text-xl mr-2">🗑️</span>
                   {t('privacyExplainer.rights.deleteData')}
                 </h4>
-                <p className="text-success-800 mb-3">
+                <p className="text-success-800 dark:text-success-200 mb-3">
                   {t('privacyExplainer.rights.deleteDataDesc')}
                 </p>
                 <Button
@@ -344,18 +344,18 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                   size="sm"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isLoading || !database}
-                  className="hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors"
+                  className="hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                 >
                   {isLoading ? 'Deleting...' : t('privacyExplainer.rights.deleteButton')}
                 </Button>
               </div>
 
-              <div className="bg-info-50 border border-info-200 rounded-lg p-6">
-                <h4 className="font-semibold text-info-900 mb-3 flex items-center">
-                  <span className="text-info-600 text-xl mr-2">📤</span>
+              <div className="bg-info-50 dark:bg-info-900/20 border border-info-200 dark:border-info-800 rounded-lg p-6">
+                <h4 className="font-semibold text-info-900 dark:text-info-100 mb-3 flex items-center">
+                  <span className="text-info-600 dark:text-info-400 text-xl mr-2">📤</span>
                   {t('privacyExplainer.rights.exportData')}
                 </h4>
-                <p className="text-info-800 mb-3">
+                <p className="text-info-800 dark:text-info-200 mb-3">
                   {t('privacyExplainer.rights.exportDataDesc')}
                 </p>
                 <Button
@@ -363,18 +363,18 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                   size="sm"
                   onClick={handleExportData}
                   disabled={isLoading || !database}
-                  className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors"
+                  className="hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                 >
                   {isLoading ? 'Exporting...' : t('privacyExplainer.rights.exportButton')}
                 </Button>
               </div>
 
-              <div className="bg-primary-50 border border-primary-200 rounded-lg p-6">
-                <h4 className="font-semibold text-primary-900 mb-3 flex items-center">
-                  <span className="text-primary-600 text-xl mr-2">👁️</span>
+              <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-6">
+                <h4 className="font-semibold text-primary-900 dark:text-primary-100 mb-3 flex items-center">
+                  <span className="text-primary-600 dark:text-primary-400 text-xl mr-2">👁️</span>
                   {t('privacyExplainer.rights.viewData')}
                 </h4>
-                <p className="text-primary-800">
+                <p className="text-primary-800 dark:text-primary-200">
                   {t('privacyExplainer.rights.viewDataDesc')}
                 </p>
               </div>
@@ -391,7 +391,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
         <div
-          className="bg-white rounded-xl shadow-2xl border border-secondary-200 max-w-4xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
+          className="bg-white dark:bg-secondary-800 rounded-xl shadow-2xl border border-secondary-200 dark:border-secondary-600 max-w-4xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
           role="dialog"
           aria-labelledby="privacy-modal-title"
           aria-describedby="privacy-modal-description"
@@ -399,11 +399,11 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
           onKeyDown={handleKeyDown}
         >
           {/* Header */}
-          <div className="border-b border-secondary-200 p-6">
+          <div className="border-b border-secondary-200 dark:border-secondary-600 p-6">
             <div className="flex items-center justify-between">
               <h2
                 id="privacy-modal-title"
-                className="text-2xl font-display font-bold text-secondary-900"
+                className="text-2xl font-display font-bold text-secondary-900 dark:text-secondary-100"
               >
                 {t('privacyExplainer.title')}
               </h2>
@@ -411,7 +411,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="text-secondary-500 hover:text-secondary-700"
+                className="text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200"
                 aria-label="Close privacy modal"
               >
                 ✕
@@ -420,7 +420,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-secondary-200">
+          <div className="border-b border-secondary-200 dark:border-secondary-600">
             <div className="flex overflow-x-auto" role="tablist" aria-label="Privacy information tabs">
               {tabs.map((tab) => (
                 <button
@@ -434,8 +434,8 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                   flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap
                   transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-inset
                   ${activeTab === tab.id
-                      ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50'
-                      : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
+                      ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      : 'text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-secondary-100 hover:bg-secondary-50 dark:hover:bg-secondary-700'
                     }
                 `}
                 >
@@ -457,7 +457,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="border-t border-secondary-200 p-6">
+          <div className="border-t border-secondary-200 dark:border-secondary-600 p-6">
             <div className="flex justify-end">
               <Button onClick={onClose} variant="primary">
                 {t('common.close')}
@@ -471,19 +471,19 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 flex items-center justify-center p-4">
           <div
-            className="bg-white rounded-xl shadow-2xl border border-secondary-200 max-w-md w-full p-6"
+            className="bg-white dark:bg-secondary-800 rounded-xl shadow-2xl border border-secondary-200 dark:border-secondary-600 max-w-md w-full p-6"
             role="dialog"
             aria-labelledby="delete-confirm-title"
             aria-describedby="delete-confirm-description"
           >
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">⚠️</span>
               </div>
-              <h3 id="delete-confirm-title" className="text-xl font-bold text-secondary-900 mb-2">
+              <h3 id="delete-confirm-title" className="text-xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
                 Confirm Data Deletion
               </h3>
-              <p id="delete-confirm-description" className="text-secondary-600">
+              <p id="delete-confirm-description" className="text-secondary-600 dark:text-secondary-300">
                 This will permanently delete all your stored data including questionnaire responses and eligibility results. This action cannot be undone.
               </p>
             </div>
@@ -500,7 +500,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                 variant="secondary"
                 onClick={handleDeleteData}
                 disabled={isLoading}
-                className="bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700"
+                className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white border-red-600 hover:border-red-700 dark:border-red-500 dark:hover:border-red-600"
               >
                 {isLoading ? 'Deleting...' : 'Delete All Data'}
               </Button>

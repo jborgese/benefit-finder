@@ -49,39 +49,39 @@ export function Button({
   // Enhanced variant classes with better color usage
   const variantClasses = {
     primary: `
-      bg-primary-600 text-white
-      hover:bg-primary-700 hover:shadow-md hover:shadow-primary-600/25
-      focus:ring-primary-500
-      active:bg-primary-800
+      bg-primary-600 dark:bg-primary-500 text-white
+      hover:bg-primary-700 dark:hover:bg-primary-600 hover:shadow-md hover:shadow-primary-600/25
+      focus:ring-primary-500 dark:focus:ring-primary-400
+      active:bg-primary-800 dark:active:bg-primary-700
     `,
     secondary: `
       bg-secondary-700 dark:bg-secondary-600 text-secondary-100
       hover:bg-secondary-600 dark:hover:bg-secondary-500 hover:shadow-md hover:shadow-secondary-600/25
-      focus:ring-secondary-500
+      focus:ring-secondary-500 dark:focus:ring-secondary-400
       active:bg-secondary-800 dark:active:bg-secondary-700
     `,
     success: `
-      bg-success-600 text-white
-      hover:bg-success-700 hover:shadow-md hover:shadow-success-600/25
-      focus:ring-success-500
-      active:bg-success-800
+      bg-success-600 dark:bg-success-500 text-white
+      hover:bg-success-700 dark:hover:bg-success-600 hover:shadow-md hover:shadow-success-600/25
+      focus:ring-success-500 dark:focus:ring-success-400
+      active:bg-success-800 dark:active:bg-success-700
     `,
     warning: `
-      bg-warning-600 text-white
-      hover:bg-warning-700 hover:shadow-md hover:shadow-warning-600/25
-      focus:ring-warning-500
-      active:bg-warning-800
+      bg-warning-600 dark:bg-warning-500 text-white
+      hover:bg-warning-700 dark:hover:bg-warning-600 hover:shadow-md hover:shadow-warning-600/25
+      focus:ring-warning-500 dark:focus:ring-warning-400
+      active:bg-warning-800 dark:active:bg-warning-700
     `,
     error: `
-      bg-error-600 text-white
-      hover:bg-error-700 hover:shadow-md hover:shadow-error-600/25
-      focus:ring-error-500
-      active:bg-error-800
+      bg-error-600 dark:bg-error-500 text-white
+      hover:bg-error-700 dark:hover:bg-error-600 hover:shadow-md hover:shadow-error-600/25
+      focus:ring-error-500 dark:focus:ring-error-400
+      active:bg-error-800 dark:active:bg-error-700
     `,
     ghost: `
       bg-transparent text-secondary-700 dark:text-secondary-200 border border-secondary-300 dark:border-secondary-600
       hover:bg-secondary-50 dark:hover:bg-secondary-700 hover:border-secondary-400 dark:hover:border-secondary-500
-      focus:ring-secondary-500
+      focus:ring-secondary-500 dark:focus:ring-secondary-400
       active:bg-secondary-100 dark:active:bg-secondary-600
     `,
   };

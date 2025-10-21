@@ -186,21 +186,21 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
       {/* Tour card */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
         <div
-          className="bg-white rounded-xl shadow-2xl border border-secondary-200 p-6 w-full max-w-md animate-fade-in-up"
+          className="bg-white dark:bg-secondary-800 rounded-xl shadow-2xl border border-secondary-200 dark:border-secondary-600 p-6 w-full max-w-md animate-fade-in-up"
         >
           {/* Progress bar */}
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-secondary-600">
+              <span className="text-sm font-medium text-secondary-600 dark:text-secondary-300">
                 {t('onboarding.tour.progress', { current: currentStep + 1, total: tourSteps.length })}
               </span>
-              <span className="text-sm text-secondary-500">
+              <span className="text-sm text-secondary-500 dark:text-secondary-400">
                 {Math.round(progress)}%
               </span>
             </div>
-            <div className="w-full bg-secondary-200 rounded-full h-2">
+            <div className="w-full bg-secondary-200 dark:bg-secondary-600 rounded-full h-2">
               <div
-                className="bg-primary-600 h-2 rounded-full transition-all duration-300 ease-smooth"
+                className="bg-primary-600 dark:bg-primary-500 h-2 rounded-full transition-all duration-300 ease-smooth"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -208,10 +208,10 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
 
           {/* Step content */}
           <div className="mb-6">
-            <h3 className="text-xl font-display font-bold text-secondary-900 mb-3">
+            <h3 className="text-xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-3">
               {currentStepData.title}
             </h3>
-            <p className="text-secondary-600 leading-relaxed">
+            <p className="text-secondary-600 dark:text-secondary-300 leading-relaxed">
               {currentStepData.content}
             </p>
           </div>
