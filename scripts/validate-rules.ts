@@ -4,8 +4,8 @@
  * This script validates rule files and runs their embedded test cases.
  * Usage:
  *   npm run validate-rules [filepath]
- *   npm run validate-rules src/rules/examples/snap-federal-rules.json
- *   npm run validate-rules  (validates all rules in examples/)
+ *   npm run validate-rules src/rules/packages/snap-federal-rules.json
+ *   npm run validate-rules  (validates all rules in packages/)
  */
 
 import { readFileSync, readdirSync } from 'fs';
@@ -165,7 +165,7 @@ function testRule(rule: RuleDefinition): RuleTestReport {
 
   rule.testCases.forEach((testCase) => {
     try {
-      const result = jsonLogic.apply(rule.ruleLogic, testCase.input);
+      const result = jsonLogic.apply(rule.ruleLogic as any, testCase.input);
 
       if (result === testCase.expected) {
         report.testsPassed++;

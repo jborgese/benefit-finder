@@ -44,7 +44,7 @@ async function importStateSpecificRules(stateCode: string): Promise<void> {
     switch (stateCode) {
       case 'GA':
         // Import Georgia Medicaid rules
-        const { default: medicaidGeorgiaRules } = await import('./rules/examples/medicaid-georgia-rules.json');
+        const { default: medicaidGeorgiaRules } = await import('./rules/packages/medicaid-georgia-rules.json');
         const georgiaResult = await importRules(medicaidGeorgiaRules.rules, {
           validate: true,
           skipTests: false,
@@ -56,7 +56,7 @@ async function importStateSpecificRules(stateCode: string): Promise<void> {
 
       // Add other states as needed
       // case 'CA':
-      //   const { default: californiaRules } = await import('./rules/examples/medicaid-california-rules.json');
+      //   const { default: californiaRules } = await import('./rules/packages/medicaid-california-rules.json');
       //   await importRules(californiaRules, { validate: true, skipTests: false, mode: 'upsert', overwriteExisting: true });
       //   break;
 

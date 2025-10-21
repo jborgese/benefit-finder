@@ -84,15 +84,37 @@ export async function initializeApp(): Promise<void> {
       createdAt: Date.now(),
     });
 
+    // Create WIC program with explicit ID to match rules
+    await db.benefit_programs.insert({
+      id: 'wic-federal',
+      name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
+      shortName: 'WIC',
+      description: 'Provides nutrition assistance to pregnant women, new mothers, and young children',
+      category: 'food',
+      jurisdiction: US_FEDERAL_JURISDICTION,
+      jurisdictionLevel: 'federal',
+      website: 'https://www.fns.usda.gov/wic',
+      phoneNumber: '1-800-221-5689',
+      applicationUrl: 'https://www.fns.usda.gov/wic/wic-contacts',
+      active: true,
+      tags: ['food', 'nutrition', 'maternal-health', 'children', 'infants'],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
+    });
+
     // Load sample rules
 
     // Import SNAP rules
-    const snapRules = await import('../rules/examples/snap-rules.json');
+    const snapRules = await import('../rules/packages/snap-rules.json');
     await importRulePackage(snapRules.default);
 
     // Import Medicaid rules
-    const medicaidRules = await import('../rules/examples/medicaid-federal-rules.json');
+    const medicaidRules = await import('../rules/packages/medicaid-federal-rules.json');
     await importRulePackage(medicaidRules.default);
+
+    // Import WIC rules
+    const wicRules = await import('../rules/packages/wic-federal-rules.json');
+    await importRulePackage(wicRules.default);
 
   } catch (error) {
     console.error('[DEBUG] initializeApp: Error initializing app:', error);
@@ -153,12 +175,32 @@ export async function initializeApp(): Promise<void> {
           createdAt: Date.now(),
         });
 
+        await retryDb.benefit_programs.insert({
+          id: 'wic-federal',
+          name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
+          shortName: 'WIC',
+          description: 'Provides nutrition assistance to pregnant women, new mothers, and young children',
+          category: 'food',
+          jurisdiction: US_FEDERAL_JURISDICTION,
+          jurisdictionLevel: 'federal',
+          website: 'https://www.fns.usda.gov/wic',
+          phoneNumber: '1-800-221-5689',
+          applicationUrl: 'https://www.fns.usda.gov/wic/wic-contacts',
+          active: true,
+          tags: ['food', 'nutrition', 'maternal-health', 'children', 'infants'],
+          lastUpdated: Date.now(),
+          createdAt: Date.now(),
+        });
+
         // Load sample rules
-        const snapRules = await import('../rules/examples/snap-rules.json');
+        const snapRules = await import('../rules/packages/snap-rules.json');
         await importRulePackage(snapRules.default);
 
-        const medicaidRules = await import('../rules/examples/medicaid-federal-rules.json');
+        const medicaidRules = await import('../rules/packages/medicaid-federal-rules.json');
         await importRulePackage(medicaidRules.default);
+
+        const wicRules = await import('../rules/packages/wic-federal-rules.json');
+        await importRulePackage(wicRules.default);
 
         console.warn('Database initialized successfully after clearing');
         isInitializing = false;

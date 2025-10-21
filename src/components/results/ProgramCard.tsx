@@ -9,6 +9,9 @@ import { ProgramEligibilityResult } from './types';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Dialog from '@radix-ui/react-dialog';
 import { WhyExplanation } from './WhyExplanation';
+import { WicExplanation } from './WicExplanation';
+import { MedicaidExplanation } from './MedicaidExplanation';
+import { SnapExplanation } from './SnapExplanation';
 import { ConfidenceScore } from './ConfidenceScore';
 import { DocumentChecklist } from './DocumentChecklist';
 import { NextStepsList } from './NextStepsList';
@@ -264,13 +267,39 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
           <Dialog.Content
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto z-50 print:hidden"
           >
-            <WhyExplanation
-              programName={result.programName}
-              status={result.status}
-              explanation={result.explanation}
-              userProfile={userProfile}
-              onClose={() => setShowExplanation(false)}
-            />
+            {result.programId === 'wic-federal' ? (
+              <WicExplanation
+                programName={result.programName}
+                status={result.status}
+                explanation={result.explanation}
+                userProfile={userProfile}
+                onClose={() => setShowExplanation(false)}
+              />
+            ) : result.programId === 'medicaid-federal' ? (
+              <MedicaidExplanation
+                programName={result.programName}
+                status={result.status}
+                explanation={result.explanation}
+                userProfile={userProfile}
+                onClose={() => setShowExplanation(false)}
+              />
+            ) : result.programId === 'snap-federal' ? (
+              <SnapExplanation
+                programName={result.programName}
+                status={result.status}
+                explanation={result.explanation}
+                userProfile={userProfile}
+                onClose={() => setShowExplanation(false)}
+              />
+            ) : (
+              <WhyExplanation
+                programName={result.programName}
+                status={result.status}
+                explanation={result.explanation}
+                userProfile={userProfile}
+                onClose={() => setShowExplanation(false)}
+              />
+            )}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

@@ -104,6 +104,267 @@
       "needsVerification": "Needs Verification",
       "clearMismatch": "Clear Mismatch"
     },
+    "wic": {
+      "statusMessages": {
+        "qualified": "You are eligible for WIC! You can receive nutritional benefits and support.",
+        "likely": "You appear to be eligible for WIC. Contact your local WIC office to confirm and apply.",
+        "maybe": "You may be eligible for WIC. Contact your local WIC office to discuss your situation.",
+        "unlikely": "You may not currently qualify for WIC, but eligibility can change. Contact your local WIC office to discuss.",
+        "notQualified": "You may not currently qualify for WIC. Contact your local WIC office to discuss your situation and see if you qualify."
+      },
+      "benefits": {
+        "title": "What WIC provides:",
+        "prenatal": "Prenatal nutrition counseling and education",
+        "monthlyFood": "Monthly food package worth approximately $45",
+        "foods": "Milk, cheese, eggs, cereal, juice, fruits, vegetables, whole grains, and legumes",
+        "childNutrition": "Child nutrition counseling and education",
+        "childFood": "Monthly food package worth approximately $35-55 per child",
+        "generalNutrition": "Nutrition counseling and education",
+        "generalFood": "Monthly food package with healthy foods",
+        "referrals": "Referrals to other health and social services"
+      },
+      "requirements": {
+        "title": "WIC requirements:",
+        "citizenship": "Must be a U.S. citizen or qualified immigrant",
+        "residence": "Must live in the state where you apply",
+        "nutritionalRisk": "Must have nutritional risk (assessed by WIC staff)",
+        "pregnant": "Must be pregnant (any stage of pregnancy)",
+        "children": "Must have children under 5 years old",
+        "category": "Must be pregnant, postpartum (up to 6 months), breastfeeding (up to 1 year), or have children under 5",
+        "income": "Must meet income guidelines (185% of federal poverty level)"
+      },
+      "nextSteps": {
+        "title": "Next steps:",
+        "contact": "Contact your local WIC office to apply",
+        "schedule": "Schedule an appointment for nutritional assessment",
+        "documents": "Bring required documents to your appointment",
+        "prenatalCounseling": "Ask about prenatal nutrition counseling",
+        "childGuidance": "Ask about child nutrition and feeding guidance",
+        "discuss": "Contact your local WIC office to discuss your situation",
+        "alternatives": "Ask about alternative nutrition programs",
+        "checkBack": "Check back if your situation changes",
+        "reapply": "Consider reapplying if your situation changes"
+      },
+      "additionalSteps": {
+        "prenatalCare": "Ask about prenatal care coverage and services",
+        "childrenHealth": "Ask about children's health coverage and services",
+        "prenatalNutrition": "Ask about nutrition education for pregnant women",
+        "familyNutrition": "Ask about nutrition education for families with children",
+        "alternativeHealth": "Ask about alternative health coverage options",
+        "alternativeFood": "Ask about alternative food assistance programs",
+        "otherHealth": "Ask about other health coverage programs",
+        "otherFood": "Ask about other food assistance programs"
+      },
+      "howToApply": {
+        "title": "How to apply for WIC:",
+        "findOffice": "Find your local WIC office by calling 1-800-221-5689 or visiting fns.usda.gov/wic",
+        "schedule": "Schedule an appointment for nutritional assessment",
+        "bringDocuments": "Bring required documents (ID, proof of income, proof of pregnancy/children)",
+        "assessment": "Complete nutritional assessment with WIC staff",
+        "receiveBenefits": "Receive WIC benefits if eligible"
+      },
+      "resources": {
+        "title": "Additional resources:",
+        "website": "WIC website: fns.usda.gov/wic",
+        "hotline": "WIC hotline: 1-800-221-5689",
+        "education": "WIC provides nutrition education and breastfeeding support",
+        "locations": "WIC benefits are provided through local health departments and clinics"
+      }
+    },
+    "medicaid": {
+      "statusMessages": {
+        "qualified": "You are eligible for Medicaid! You can receive comprehensive health coverage.",
+        "likely": "You appear to be eligible for Medicaid. Contact your state Medicaid office to confirm and apply.",
+        "maybe": "You may be eligible for Medicaid. Contact your state Medicaid office to discuss your situation.",
+        "unlikely": "You may not currently qualify for Medicaid, but eligibility can change. Contact your state Medicaid office to discuss.",
+        "notQualified": "You may not currently qualify for Medicaid. Contact your state Medicaid office to discuss your situation and see if you qualify."
+      },
+      "benefits": {
+        "title": "What Medicaid provides:",
+        "healthCoverage": "Comprehensive health insurance coverage",
+        "doctorVisits": "Doctor visits and specialist care",
+        "hospitalCare": "Hospital stays and emergency care",
+        "prescriptions": "Prescription medications",
+        "preventiveCare": "Preventive care and screenings",
+        "mentalHealth": "Mental health and substance abuse treatment",
+        "dentalVision": "Dental and vision care (varies by state)",
+        "transportation": "Transportation to medical appointments (if needed)"
+      },
+      "requirements": {
+        "title": "Medicaid requirements:",
+        "citizenship": "Must be a U.S. citizen or qualified immigrant",
+        "residence": "Must live in the state where you apply",
+        "income": "Must meet income guidelines (varies by state and category)",
+        "age": "Age requirements vary by state and program",
+        "disability": "Disability status (for some programs)",
+        "pregnancy": "Pregnancy status (for pregnant women programs)",
+        "children": "Children under 19 (for children's programs)"
+      },
+      "nextSteps": {
+        "title": "Next steps:",
+        "contact": "Contact your state Medicaid office to apply",
+        "online": "Apply online through your state's Medicaid website",
+        "documents": "Gather required documents (ID, proof of income, proof of citizenship)",
+        "interview": "Complete application and interview process",
+        "verification": "Provide verification of income and other requirements",
+        "enrollment": "Choose a health plan and enroll in coverage"
+      },
+      "additionalSteps": {
+        "prenatalCare": "Ask about prenatal care coverage and services",
+        "childrenHealth": "Ask about children's health coverage and services",
+        "alternativeHealth": "Ask about alternative health coverage options",
+        "otherHealth": "Ask about other health coverage programs"
+      },
+      "howToApply": {
+        "title": "How to apply for Medicaid:",
+        "findOffice": "Find your state Medicaid office or apply online",
+        "gatherDocuments": "Gather required documents (ID, proof of income, proof of citizenship)",
+        "completeApplication": "Complete the Medicaid application",
+        "interview": "Participate in any required interviews",
+        "verification": "Provide verification of income and other requirements",
+        "enrollment": "Choose a health plan and enroll in coverage"
+      },
+      "resources": {
+        "title": "Additional resources:",
+        "website": "Medicaid website: medicaid.gov",
+        "stateOffice": "Contact your state Medicaid office",
+        "healthcare": "Medicaid provides comprehensive health coverage",
+        "coverage": "Coverage varies by state but includes essential health benefits"
+      },
+      "stateSpecific": {
+        "CA": {
+          "statusMessages": {
+            "qualified": "You are eligible for Medi-Cal! California's Medicaid program provides comprehensive health coverage.",
+            "likely": "You appear to be eligible for Medi-Cal. Contact your local county office to confirm and apply."
+          },
+          "benefits": {
+            "title": "What Medi-Cal provides:",
+            "dentalVision": "Dental and vision care (included in California)",
+            "mentalHealth": "Mental health and substance abuse treatment (expanded in California)",
+            "transportation": "Transportation to medical appointments (available in California)"
+          },
+          "resources": {
+            "website": "Medi-Cal website: dhcs.ca.gov/medi-cal",
+            "stateOffice": "Contact your local county social services office",
+            "coverage": "Medi-Cal includes all essential health benefits plus additional California-specific services"
+          }
+        },
+        "TX": {
+          "statusMessages": {
+            "qualified": "You are eligible for Texas Medicaid! You can receive health coverage through the state program.",
+            "likely": "You appear to be eligible for Texas Medicaid. Contact your local HHSC office to confirm and apply."
+          },
+          "benefits": {
+            "title": "What Texas Medicaid provides:",
+            "dentalVision": "Limited dental and vision care (varies by program)",
+            "mentalHealth": "Mental health services (limited in Texas)",
+            "transportation": "Transportation assistance (limited availability)"
+          },
+          "resources": {
+            "website": "Texas Medicaid website: hhs.texas.gov/services/health/medicaid-chip",
+            "stateOffice": "Contact your local HHSC office",
+            "coverage": "Texas Medicaid coverage varies by program and may be more limited than other states"
+          }
+        }
+      }
+    },
+    "snap": {
+      "statusMessages": {
+        "qualified": "You are eligible for SNAP! You can receive monthly food assistance.",
+        "likely": "You appear to be eligible for SNAP. Contact your local SNAP office to confirm and apply.",
+        "maybe": "You may be eligible for SNAP. Contact your local SNAP office to discuss your situation.",
+        "unlikely": "You may not currently qualify for SNAP, but eligibility can change. Contact your local SNAP office to discuss.",
+        "notQualified": "You may not currently qualify for SNAP. Contact your local SNAP office to discuss your situation and see if you qualify."
+      },
+      "benefits": {
+        "title": "What SNAP provides:",
+        "monthlyBenefits": "Monthly food assistance benefits",
+        "ebtCard": "Electronic Benefits Transfer (EBT) card for food purchases",
+        "foodItems": "Can be used to buy most food items at participating stores",
+        "farmerMarkets": "Can be used at many farmers markets",
+        "onlineShopping": "Can be used for online grocery shopping (in some areas)",
+        "nutritionEducation": "Nutrition education and cooking classes",
+        "workSupport": "Work support and employment services"
+      },
+      "requirements": {
+        "title": "SNAP requirements:",
+        "citizenship": "Must be a U.S. citizen or qualified immigrant",
+        "residence": "Must live in the state where you apply",
+        "income": "Must meet income guidelines (130% of federal poverty level)",
+        "assets": "Must meet asset limits (varies by household type)",
+        "work": "Must meet work requirements (for able-bodied adults without dependents)",
+        "socialSecurity": "Must provide Social Security numbers for all household members"
+      },
+      "nextSteps": {
+        "title": "Next steps:",
+        "contact": "Contact your local SNAP office to apply",
+        "online": "Apply online through your state's SNAP website",
+        "documents": "Gather required documents (ID, proof of income, proof of expenses)",
+        "interview": "Complete application and interview process",
+        "verification": "Provide verification of income and expenses",
+        "ebtCard": "Receive EBT card and start using benefits"
+      },
+      "additionalSteps": {
+        "prenatalNutrition": "Ask about nutrition education for pregnant women",
+        "familyNutrition": "Ask about nutrition education for families with children",
+        "alternativeFood": "Ask about alternative food assistance programs",
+        "otherFood": "Ask about other food assistance programs"
+      },
+      "howToApply": {
+        "title": "How to apply for SNAP:",
+        "findOffice": "Find your local SNAP office or apply online",
+        "gatherDocuments": "Gather required documents (ID, proof of income, proof of expenses)",
+        "completeApplication": "Complete the SNAP application",
+        "interview": "Participate in required interview",
+        "verification": "Provide verification of income and expenses",
+        "ebtCard": "Receive EBT card and start using benefits"
+      },
+      "resources": {
+        "title": "Additional resources:",
+        "website": "SNAP website: fns.usda.gov/snap",
+        "hotline": "SNAP hotline: 1-800-221-5689",
+        "nutrition": "SNAP provides nutrition assistance to low-income individuals and families",
+        "ebt": "Benefits are provided through Electronic Benefits Transfer (EBT) cards"
+      },
+      "stateSpecific": {
+        "CA": {
+          "statusMessages": {
+            "qualified": "You are eligible for CalFresh! California's SNAP program provides monthly food assistance.",
+            "likely": "You appear to be eligible for CalFresh. Contact your local county office to confirm and apply."
+          },
+          "benefits": {
+            "title": "What CalFresh provides:",
+            "monthlyBenefits": "Monthly food assistance benefits (CalFresh)",
+            "ebtCard": "Golden State Advantage EBT card for food purchases",
+            "farmerMarkets": "Can be used at farmers markets (many accept CalFresh)",
+            "onlineShopping": "Can be used for online grocery shopping (expanded in California)"
+          },
+          "resources": {
+            "website": "CalFresh website: cdss.ca.gov/food-nutrition/calfresh",
+            "stateOffice": "Contact your local county social services office",
+            "nutrition": "CalFresh provides nutrition assistance with additional California-specific programs"
+          }
+        },
+        "TX": {
+          "statusMessages": {
+            "qualified": "You are eligible for SNAP! You can receive monthly food assistance through the Texas program.",
+            "likely": "You appear to be eligible for SNAP. Contact your local HHSC office to confirm and apply."
+          },
+          "benefits": {
+            "title": "What Texas SNAP provides:",
+            "monthlyBenefits": "Monthly food assistance benefits",
+            "ebtCard": "Lone Star Card (EBT) for food purchases",
+            "farmerMarkets": "Can be used at participating farmers markets",
+            "onlineShopping": "Limited online shopping availability"
+          },
+          "resources": {
+            "website": "Texas SNAP website: hhs.texas.gov/services/food/snap-food-benefits",
+            "stateOffice": "Contact your local HHSC office",
+            "nutrition": "Texas SNAP provides nutrition assistance with state-specific programs"
+          }
+        }
+      }
+    },
     "additionalInfo": {
       "title": "Additional Information Needed",
       "message": "You may qualify for some programs, but we need more information to determine eligibility. Review the program details below and contact the program office for assistance."

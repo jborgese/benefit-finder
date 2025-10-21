@@ -380,7 +380,14 @@
       "ruleLogic": {
         "or": [
           {
-            "var": "receivesSNAP"
+            "snap_income_eligible": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "var": "householdSize"
+              }
+            ]
           },
           {
             "var": "receivesMedicaid"
@@ -392,7 +399,10 @@
       },
       "ruleType": "eligibility",
       "explanation": "If you or your child already receives SNAP (food stamps), Medicaid, or TANF (Temporary Assistance for Needy Families), you automatically meet WIC's income requirement. This is called 'adjunctive eligibility.' You still need to meet the categorical requirements (be pregnant, postpartum, breastfeeding, infant, or child under 5) and nutritional risk criteria.",
-      "requiredFields": [],
+      "requiredFields": [
+        "householdIncome",
+        "householdSize"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-snap",

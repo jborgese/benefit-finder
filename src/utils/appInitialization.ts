@@ -127,11 +127,11 @@ async function loadSamplePrograms(db: ReturnType<typeof getDatabase>): Promise<v
  */
 async function loadSampleRules(): Promise<void> {
   // Import SNAP rules
-  const snapRules = await import('../rules/examples/snap-rules.json');
+  const snapRules = await import('../rules/packages/snap-rules.json');
   await importRulePackage(snapRules.default);
 
   // Import Medicaid rules
-  const medicaidRules = await import('../rules/examples/medicaid-federal-rules.json');
+  const medicaidRules = await import('../rules/packages/medicaid-federal-rules.json');
   await importRulePackage(medicaidRules.default);
 }
 
