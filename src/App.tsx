@@ -19,6 +19,7 @@ import { ShortcutsHelp } from './components/ShortcutsHelp';
 import { clearDatabase } from './db';
 import { createUserProfile } from './db/utils';
 import { evaluateAllPrograms, getAllProgramRuleIds, type EligibilityEvaluationResult } from './rules';
+import { importRules } from './rules/import-export';
 
 // Import utilities
 import { initializeApp } from './utils/initializeApp';
@@ -31,6 +32,43 @@ import { sampleFlow } from './questionnaire/sampleFlow';
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
 
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
+
+/**
+ * Import state-specific rules based on the user's state
+ */
+async function importStateSpecificRules(stateCode: string): Promise<void> {
+  try {
+    console.log(`[DEBUG] Importing rules for state: ${stateCode}`);
+
+    // Import state-specific rules based on state code
+    switch (stateCode) {
+      case 'GA':
+        // Import Georgia Medicaid rules
+        const { default: medicaidGeorgiaRules } = await import('./rules/examples/medicaid-georgia-rules.json');
+        const georgiaResult = await importRules(medicaidGeorgiaRules.rules, {
+          validate: true,
+          skipTests: false,
+          mode: 'upsert',
+          overwriteExisting: true
+        });
+        console.log(`[DEBUG] Georgia rules import result:`, georgiaResult);
+        break;
+
+      // Add other states as needed
+      // case 'CA':
+      //   const { default: californiaRules } = await import('./rules/examples/medicaid-california-rules.json');
+      //   await importRules(californiaRules, { validate: true, skipTests: false, mode: 'upsert', overwriteExisting: true });
+      //   break;
+
+      default:
+        console.log(`[DEBUG] No specific rules to import for state: ${stateCode}`);
+        break;
+    }
+  } catch (error) {
+    console.error(`[DEBUG] Failed to import rules for state ${stateCode}:`, error);
+    // Don't throw - this shouldn't block the user's experience
+  }
+}
 
 function App(): React.ReactElement {
   const { t } = useI18n();
@@ -174,6 +212,13 @@ function App(): React.ReactElement {
       const incomePeriod = answers.incomePeriod as string;
       const householdSize = answers.householdSize as number;
       const age = answers.age as number;
+      const state = answers.state as string;
+      const citizenship = answers.citizenship as string;
+      const employmentStatus = answers.employmentStatus as string;
+      // Convert string boolean values to actual booleans
+      const hasQualifyingDisability = answers.hasQualifyingDisability === 'true' || answers.hasQualifyingDisability === true;
+      const isPregnant = answers.isPregnant === 'true' || answers.isPregnant === true;
+      const hasChildren = answers.hasChildren === 'true' || answers.hasChildren === true;
 
       // Convert income to annual amount based on user's selection
       const annualIncome = incomePeriod === 'monthly' ? householdIncome * 12 : householdIncome;
@@ -185,10 +230,14 @@ function App(): React.ReactElement {
         incomePeriod: incomePeriod as 'monthly' | 'annual',
         // Set age from date of birth (approximate)
         dateOfBirth: new Date(new Date().getFullYear() - age, 0, 1).toISOString().split('T')[0],
-        citizenship: 'us_citizen' as const,
-        employmentStatus: 'employed' as const,
-        // Only include fields that were actually collected from the user
-        // Don't set defaults for fields not asked in questionnaire
+        citizenship: citizenship as 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other',
+        employmentStatus: employmentStatus as 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student',
+        // Include state field - this is critical for state-specific eligibility
+        state: state,
+        // Include other collected fields
+        hasDisability: hasQualifyingDisability,
+        isPregnant: isPregnant,
+        hasChildren: hasChildren,
       };
 
       // Create user profile and evaluate eligibility
@@ -197,6 +246,12 @@ function App(): React.ReactElement {
 
       try {
         profile = await createUserProfile(profileData);
+
+        // Import state-specific rules if state is provided
+        if (state) {
+          await importStateSpecificRules(state);
+        }
+
         batchResult = await evaluateAllPrograms(profile.id);
       } catch (dbError) {
         console.error('Database operations failed:', dbError);
