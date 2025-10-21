@@ -17,11 +17,45 @@ src/components/results/
 ├── WicExplanation.tsx          # WIC-specific explanation
 ├── MedicaidExplanation.tsx     # Medicaid-specific explanation
 ├── SnapExplanation.tsx         # SNAP-specific explanation
+├── TanfExplanation.tsx         # TANF-specific explanation
 ├── [ProgramName]Explanation.tsx # Future program explanations
 ├── ConfidenceScore.tsx         # Confidence indicator component
 ├── DocumentChecklist.tsx       # Required documents component
 ├── NextStepsList.tsx          # Next steps component
 └── types.ts                   # Type definitions
+```
+
+### Rules Directory Structure
+
+```
+src/rules/
+├── core/                      # Core rule engine files
+│   ├── evaluator.ts          # Rule evaluation logic
+│   ├── validator.ts          # Rule validation
+│   ├── schema.ts             # Rule schemas and types
+│   ├── tester.ts             # Rule testing framework
+│   ├── debug.ts              # Debug utilities
+│   ├── performance.ts        # Performance monitoring
+│   ├── explanation.ts        # Rule explanation
+│   ├── eligibility.ts        # Eligibility evaluation
+│   ├── detailedEvaluator.ts  # Detailed evaluation
+│   ├── import-export.ts      # Import/export functionality
+│   ├── versioning.ts         # Version management
+│   ├── types.ts              # TypeScript type definitions
+│   ├── eligibility/          # Eligibility-specific modules
+│   └── examples/             # Example rule files
+├── federal/                  # Federal-level rules
+│   ├── snap/                 # SNAP federal rules
+│   ├── medicaid/             # Medicaid federal rules
+│   ├── tanf/                 # TANF federal rules
+│   └── wic/                  # WIC federal rules
+├── state/                    # State-specific rules
+│   ├── california/           # California state rules
+│   └── georgia/              # Georgia state rules
+├── packages/                 # Legacy rule packages (for reference)
+├── __tests__/                # Test files
+├── index.ts                  # Main exports
+└── README.md                 # Main documentation
 ```
 
 ## Standard Card Layout
@@ -396,6 +430,37 @@ const statusMessages = {
 - Track conversion rates to applications
 - Iterate based on user behavior
 
+## Rules Integration
+
+### Rule Loading Process
+Program cards automatically load the appropriate rules based on:
+- **Program ID**: Determines which federal rules to load
+- **User State**: Determines which state-specific rules to load
+- **Rule Priority**: State rules override federal rules when conflicts exist
+
+### Rule File Naming Conventions
+- **Federal rules**: `{program}-federal-rules.json`
+- **State rules**: `{program}-{state}-rules.json`
+- **Legacy/example rules**: `{program}-rules.json`
+
+### Examples
+- `snap-federal-rules.json` - Federal SNAP rules
+- `snap-california-rules.json` - California SNAP rules
+- `medicaid-georgia-rules.json` - Georgia Medicaid rules
+- `tanf-federal-rules.json` - Federal TANF rules
+
+### Import Paths
+```typescript
+// Import from core engine
+import { evaluateRule, validateRule } from '@/rules';
+// or directly from core
+import { evaluateRule } from '@/rules/core/evaluator';
+
+// Import specific rule files
+import snapFederalRules from '@/rules/federal/snap/snap-federal-rules.json';
+import snapCaliforniaRules from '@/rules/state/california/snap/snap-california-rules.json';
+```
+
 ## Examples
 
 ### WIC Card Example
@@ -452,6 +517,27 @@ const stateSpecificEBT = {
   'CA': 'Golden State Advantage EBT card',
   'TX': 'Lone Star Card (EBT)'
 };
+```
+
+### TANF Card Example
+```typescript
+// Program-specific benefits
+const benefits = [
+  'Monthly cash assistance for families with children',
+  'Work support services and job training',
+  'Child care assistance for working parents',
+  'Transportation assistance for work-related travel',
+  'Emergency assistance for families in crisis'
+];
+
+// Program-specific requirements
+const requirements = [
+  'Must be a U.S. citizen or qualified immigrant',
+  'Must have children under 18 (or 19 if still in high school)',
+  'Must meet income and asset limits',
+  'Must participate in work activities (if able-bodied)',
+  'Must cooperate with child support enforcement'
+];
 ```
 
 This standardization ensures consistent, accessible, and user-friendly program cards across all benefit programs while maintaining the flexibility to customize content for each program's unique characteristics.

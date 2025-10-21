@@ -17,7 +17,41 @@ src/components/results/
 ├── WicExplanation.tsx          # WIC-specific explanation
 ├── MedicaidExplanation.tsx     # Medicaid-specific explanation
 ├── SnapExplanation.tsx         # SNAP-specific explanation
+├── TanfExplanation.tsx         # TANF-specific explanation
 └── [ProgramName]Explanation.tsx # Future program explanations
+```
+
+### Rules Directory Structure
+
+```
+src/rules/
+├── core/                      # Core rule engine files
+│   ├── evaluator.ts          # Rule evaluation logic
+│   ├── validator.ts          # Rule validation
+│   ├── schema.ts             # Rule schemas and types
+│   ├── tester.ts             # Rule testing framework
+│   ├── debug.ts              # Debug utilities
+│   ├── performance.ts        # Performance monitoring
+│   ├── explanation.ts        # Rule explanation
+│   ├── eligibility.ts        # Eligibility evaluation
+│   ├── detailedEvaluator.ts  # Detailed evaluation
+│   ├── import-export.ts      # Import/export functionality
+│   ├── versioning.ts         # Version management
+│   ├── types.ts              # TypeScript type definitions
+│   ├── eligibility/          # Eligibility-specific modules
+│   └── examples/             # Example rule files
+├── federal/                  # Federal-level rules
+│   ├── snap/                 # SNAP federal rules
+│   ├── medicaid/             # Medicaid federal rules
+│   ├── tanf/                 # TANF federal rules
+│   └── wic/                  # WIC federal rules
+├── state/                    # State-specific rules
+│   ├── california/           # California state rules
+│   └── georgia/              # Georgia state rules
+├── packages/                 # Legacy rule packages (for reference)
+├── __tests__/                # Test files
+├── index.ts                  # Main exports
+└── README.md                 # Main documentation
 ```
 
 ### Translation Structure
@@ -308,6 +342,37 @@ import { [ProgramName]Explanation } from './[ProgramName]Explanation';
 )}
 ```
 
+## Rules Integration
+
+### Rule Loading Process
+Explanation modals automatically load the appropriate rules based on:
+- **Program ID**: Determines which federal rules to load
+- **User State**: Determines which state-specific rules to load
+- **Rule Priority**: State rules override federal rules when conflicts exist
+
+### Rule File Naming Conventions
+- **Federal rules**: `{program}-federal-rules.json`
+- **State rules**: `{program}-{state}-rules.json`
+- **Legacy/example rules**: `{program}-rules.json`
+
+### Examples
+- `snap-federal-rules.json` - Federal SNAP rules
+- `snap-california-rules.json` - California SNAP rules
+- `medicaid-georgia-rules.json` - Georgia Medicaid rules
+- `tanf-federal-rules.json` - Federal TANF rules
+
+### Import Paths
+```typescript
+// Import from core engine
+import { evaluateRule, validateRule } from '@/rules';
+// or directly from core
+import { evaluateRule } from '@/rules/core/evaluator';
+
+// Import specific rule files
+import snapFederalRules from '@/rules/federal/snap/snap-federal-rules.json';
+import snapCaliforniaRules from '@/rules/state/california/snap/snap-california-rules.json';
+```
+
 ## Design Principles
 
 ### 1. Consistency
@@ -446,5 +511,12 @@ import { [ProgramName]Explanation } from './[ProgramName]Explanation';
 - **Requirements**: Income limits, work requirements, asset limits
 - **Application**: Local SNAP office, interview process, EBT card issuance
 - **State Variations**: Some states have different asset limits, work requirements, or additional programs (e.g., CalFresh in CA)
+
+### TANF Explanation
+- **Focus**: Temporary cash assistance for families with children
+- **Benefits**: Monthly cash benefits, work support services, child care assistance
+- **Requirements**: Income limits, work participation, child support cooperation
+- **Application**: State TANF office, work plan development, benefit calculation
+- **State Variations**: Completely state-administered with varying eligibility, benefits, and work requirements
 
 This structure ensures that all benefit programs provide consistent, informative, and user-friendly explanations while maintaining the flexibility to customize content for each program's unique characteristics.
