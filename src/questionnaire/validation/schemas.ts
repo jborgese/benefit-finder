@@ -197,7 +197,8 @@ function applyValidation(schema: z.ZodTypeAny, validation: ValidationDefinition)
 function getBaseSchema(
   inputType: string,
   min?: number,
-  max?: number
+  max?: number,
+  fieldName?: string
 ): z.ZodTypeAny {
   switch (inputType) {
     case 'email':
@@ -209,6 +210,10 @@ function getBaseSchema(
     case 'currency':
       return currencySchema(min, max);
     case 'date':
+      // Use birthDateSchema for birth date fields
+      if (fieldName && (fieldName.toLowerCase().includes('birth') || fieldName.toLowerCase().includes('dob'))) {
+        return birthDateSchema;
+      }
       return dateSchema;
     case 'boolean':
       return booleanSchema;
@@ -232,12 +237,13 @@ function getBaseSchema(
  */
 export function createSchemaFromQuestion(question: {
   inputType: string;
+  fieldName?: string;
   required?: boolean;
   min?: number;
   max?: number;
   validations?: ValidationDefinition[];
 }): z.ZodTypeAny {
-  let schema = getBaseSchema(question.inputType, question.min, question.max);
+  let schema = getBaseSchema(question.inputType, question.min, question.max, question.fieldName);
 
   // Apply custom validations if provided
   if (question.validations) {

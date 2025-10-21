@@ -14,6 +14,7 @@ import {
   MultiSelectInput,
   DateInput,
 } from '../components';
+import { DateOfBirthInput } from '../components/DateOfBirthInput';
 import type { QuestionDefinition } from '../types';
 import { createSchemaFromQuestion, validateWithSchema } from '../validation/schemas';
 
@@ -64,10 +65,19 @@ export const Question: React.FC<QuestionProps> = ({
     }
   }, [question, onValidationChange]);
 
-  // Validate initial value and notify parent
+  // Initialize validation state - only validate if touched
   React.useEffect(() => {
-    // Only validate if the field has been touched by the user
-    // This prevents showing "Required" errors immediately when the question loads
+    if (touched) {
+      validateValue(value);
+    } else {
+      // Clear errors when not touched to prevent showing validation errors on mount
+      setErrors([]);
+      onValidationChange?.(true, []);
+    }
+  }, [touched, validateValue, onValidationChange]);
+
+  // Validate on value change (only if touched)
+  React.useEffect(() => {
     if (touched) {
       validateValue(value);
     }
@@ -141,6 +151,19 @@ export const Question: React.FC<QuestionProps> = ({
         );
 
       case 'date':
+        // Use enhanced DateOfBirthInput for birth date questions
+        if (question.fieldName.toLowerCase().includes('birth') ||
+          question.fieldName.toLowerCase().includes('dob') ||
+          question.text.toLowerCase().includes('birth')) {
+          return (
+            <DateOfBirthInput
+              {...commonProps}
+              value={value as string}
+              showAge={true}
+              showAgeInWords={true}
+            />
+          );
+        }
         return <DateInput {...commonProps} value={value as string} />;
 
       case 'boolean':

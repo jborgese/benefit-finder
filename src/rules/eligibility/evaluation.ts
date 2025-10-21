@@ -480,6 +480,28 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
     _timestamp: Date.now(),
   };
 
+  // Calculate age from dateOfBirth
+  if (processedData.dateOfBirth) {
+    // Parse the ISO date string and create a date object in local timezone
+    // This prevents timezone shift issues when calculating age
+    const [year, month, day] = processedData.dateOfBirth.split('-').map(Number);
+    const birthDate = new Date(year, month - 1, day); // month is 0-indexed
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    processedData.age = age;
+
+    debugLog('Calculated age from dateOfBirth', {
+      dateOfBirth: processedData.dateOfBirth,
+      calculatedAge: age
+    });
+  }
+
   // Convert annual income to monthly
   if (processedData.householdIncome && typeof processedData.householdIncome === 'number') {
     const originalAnnualIncome = processedData.householdIncome;

@@ -211,7 +211,7 @@ function App(): React.ReactElement {
       const householdIncome = answers.householdIncome as number;
       const incomePeriod = answers.incomePeriod as string;
       const householdSize = answers.householdSize as number;
-      const age = answers.age as number;
+      const dateOfBirth = answers.dateOfBirth as string;
       const state = answers.state as string;
       const citizenship = answers.citizenship as string;
       const employmentStatus = answers.employmentStatus as string;
@@ -228,8 +228,8 @@ function App(): React.ReactElement {
         householdSize,
         householdIncome: annualIncome,
         incomePeriod: incomePeriod as 'monthly' | 'annual',
-        // Set age from date of birth (approximate)
-        dateOfBirth: new Date(new Date().getFullYear() - age, 0, 1).toISOString().split('T')[0],
+        // Use the date of birth directly from the questionnaire
+        dateOfBirth: dateOfBirth,
         citizenship: citizenship as 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other',
         employmentStatus: employmentStatus as 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student',
         // Include state field - this is critical for state-specific eligibility

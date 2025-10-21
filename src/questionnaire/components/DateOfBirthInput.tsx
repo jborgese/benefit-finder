@@ -1,14 +1,23 @@
 /**
- * Date Input Component
+ * Date of Birth Input Component
  *
- * Accessible date picker with validation
- * for birth dates, employment dates, etc.
+ * Enhanced date picker specifically designed for birth dates
+ * with user-friendly features and age calculation display
  */
 
-import React, { useState, useId } from 'react';
+import React, { useState, useId, useEffect } from 'react';
 import type { DateInputProps } from './types';
 
-export const DateInput: React.FC<DateInputProps> = ({
+interface DateOfBirthInputProps extends Omit<DateInputProps, 'format'> {
+  /** Show calculated age */
+  showAge?: boolean;
+  /** Show age in a friendly format */
+  showAgeInWords?: boolean;
+  /** Custom age calculation function */
+  calculateAge?: (birthDate: string) => number | null;
+}
+
+export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   question,
   value,
   onChange,
@@ -18,19 +27,23 @@ export const DateInput: React.FC<DateInputProps> = ({
   autoFocus = false,
   min,
   max,
-  format = 'medium',
   showPicker = true,
   onEnterKey,
+  showAge = true,
+  showAgeInWords = false,
+  calculateAge: customCalculateAge,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
   const descId = `${id}-desc`;
   const [isFocused, setIsFocused] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
+  const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  // Convert error to array format without nested ternaries
+
+  // Convert error to array format
   let errors: string[];
   if (Array.isArray(error)) {
     errors = error;
@@ -39,6 +52,42 @@ export const DateInput: React.FC<DateInputProps> = ({
   } else {
     errors = [];
   }
+
+  // Default age calculation function
+  const defaultCalculateAge = (birthDate: string): number | null => {
+    if (!birthDate) return null;
+
+    try {
+      const today = new Date();
+      // Parse the ISO date string and create a date object in local timezone
+      // This prevents timezone shift issues when calculating age
+      const [year, month, day] = birthDate.split('-').map(Number);
+      const birth = new Date(year, month - 1, day); // month is 0-indexed
+
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+
+      return age;
+    } catch {
+      return null;
+    }
+  };
+
+  const ageCalculator = customCalculateAge || defaultCalculateAge;
+
+  // Calculate age when value changes
+  useEffect(() => {
+    if (value && showAge) {
+      const age = ageCalculator(value);
+      setCalculatedAge(age);
+    } else {
+      setCalculatedAge(null);
+    }
+  }, [value, showAge, ageCalculator]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     onChange(e.target.value);
@@ -69,51 +118,33 @@ export const DateInput: React.FC<DateInputProps> = ({
       const [year, month, day] = isoDate.split('-').map(Number);
       const date = new Date(year, month - 1, day); // month is 0-indexed
 
-      // Determine format options without nested ternaries
-      let options: Intl.DateTimeFormatOptions;
-      if (format === 'short') {
-        options = { month: 'numeric', day: 'numeric', year: '2-digit' };
-      } else if (format === 'long') {
-        options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      } else {
-        options = { year: 'numeric', month: 'long', day: 'numeric' };
-      }
-
-      return new Intl.DateTimeFormat('en-US', options).format(date);
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(date);
     } catch {
       return isoDate;
     }
   };
 
-  const calculateAge = (birthDate: string): number | null => {
-    if (!birthDate) return null;
-
-    try {
-      const today = new Date();
-      // Parse the ISO date string and create a date object in local timezone
-      // This prevents timezone shift issues when calculating age
-      const [year, month, day] = birthDate.split('-').map(Number);
-      const birth = new Date(year, month - 1, day); // month is 0-indexed
-
-      let age = today.getFullYear() - birth.getFullYear();
-      const monthDiff = today.getMonth() - birth.getMonth();
-
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-        age--;
-      }
-
-      return age;
-    } catch {
-      return null;
-    }
+  const formatAgeInWords = (age: number): string => {
+    if (age < 1) return 'Less than 1 year old';
+    if (age === 1) return '1 year old';
+    if (age < 2) return '1 year old';
+    return `${age} years old`;
   };
 
-  const age = question.fieldName.toLowerCase().includes('birth') && value
-    ? calculateAge(value)
-    : null;
+  // Set reasonable min/max dates for birth dates
+  const today = new Date();
+  const maxDate = today.toISOString().split('T')[0]; // Today
+  const minDate = new Date(today.getFullYear() - 120, 0, 1).toISOString().split('T')[0]; // 120 years ago
+
+  const effectiveMin = min || minDate;
+  const effectiveMax = max || maxDate;
 
   return (
-    <div className={`question-date-input ${className}`}>
+    <div className={`question-date-of-birth-input ${className}`}>
       <label
         htmlFor={id}
         className="block text-sm font-medium text-gray-700 mb-1"
@@ -145,8 +176,8 @@ export const DateInput: React.FC<DateInputProps> = ({
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          min={min}
-          max={max}
+          min={effectiveMin}
+          max={effectiveMax}
           autoFocus={autoFocus}
           required={question.required}
           aria-invalid={showError}
@@ -180,11 +211,33 @@ export const DateInput: React.FC<DateInputProps> = ({
         )}
       </div>
 
-      {value && !showError && (
-        <p className="mt-1 text-xs text-gray-600">
-          {formatDateForDisplay(value)}
-          {age !== null && ` (Age: ${age})`}
-        </p>
+      {/* Age display */}
+      {value && !showError && calculatedAge !== null && showAge && (
+        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <div className="flex items-center">
+            <svg
+              className="w-4 h-4 text-blue-600 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-blue-900">
+                {formatDateForDisplay(value)}
+              </p>
+              <p className="text-xs text-blue-700">
+                {showAgeInWords ? formatAgeInWords(calculatedAge) : `Age: ${calculatedAge}`}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {question.helpText && !showError && (
@@ -211,5 +264,4 @@ export const DateInput: React.FC<DateInputProps> = ({
   );
 };
 
-DateInput.displayName = 'DateInput';
-
+DateOfBirthInput.displayName = 'DateOfBirthInput';

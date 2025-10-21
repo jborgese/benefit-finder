@@ -101,18 +101,18 @@ const nodes: FlowNode[] = [
       min: 0
     },
     previousId: 'income-period',
-    nextId: 'age'
+    nextId: 'date-of-birth'
   },
   {
-    id: 'age',
+    id: 'date-of-birth',
     question: {
-      id: 'age',
-      text: 'What is your age?',
-      inputType: 'number',
-      fieldName: 'age',
+      id: 'date-of-birth',
+      text: 'What is your date of birth?',
+      description: 'We need your exact birth date to determine your age for eligibility calculations.',
+      inputType: 'date',
+      fieldName: 'dateOfBirth',
       required: true,
-      min: 0,
-      max: 120
+      helpText: 'Your age will be calculated automatically from your birth date.'
     },
     previousId: 'income',
     nextId: 'citizenship'
@@ -136,7 +136,7 @@ const nodes: FlowNode[] = [
         { value: 'other', label: 'Other Status' }
       ]
     },
-    previousId: 'age',
+    previousId: 'date-of-birth',
     nextId: 'state'
   },
   {
