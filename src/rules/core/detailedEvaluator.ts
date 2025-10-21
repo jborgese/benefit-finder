@@ -314,9 +314,11 @@ function isVariableReference(operand: unknown): boolean {
  * Get the value of a variable from data
  */
 function getVariableValue(varName: string, data: JsonLogicData): unknown {
-  return Object.prototype.hasOwnProperty.call(data, varName)
-    ? data[varName]
-    : undefined;
+  // Safely check for property existence and return value
+  if (varName in data) {
+    return data[varName];
+  }
+  return undefined;
 }
 
 /**

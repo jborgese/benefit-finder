@@ -40,7 +40,7 @@ function getTanfStatusMessage(status: EligibilityStatus, userProfile?: { hasChil
       return t('results.tanf.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.hasChildren) {
-        return t('results.tanf.statusMessages.notQualified') + ' Contact your local TANF office to discuss your family situation and work requirements.';
+        return `${t('results.tanf.statusMessages.notQualified')} Contact your local TANF office to discuss your family situation and work requirements.`;
       }
       return t('results.tanf.statusMessages.notQualified');
     default:
@@ -130,7 +130,7 @@ function getTanfRequirementsExplanation(userProfile?: { hasChildren?: boolean; h
 export const TanfExplanation: React.FC<TanfExplanationProps> = ({
   programName,
   status,
-  explanation,
+  explanation: _explanation,
   userProfile,
   onClose,
 }) => {

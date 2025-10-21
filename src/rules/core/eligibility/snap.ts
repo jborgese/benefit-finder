@@ -9,7 +9,6 @@ import { getDatabase } from '../../../db/database';
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.debug('[SNAP Rules Debug]', ...args);
   }
 }
@@ -45,8 +44,8 @@ export async function ensureSNAPRulesAreCorrect(): Promise<void> {
       const lessOrEqual = ruleLogic['<='];
       if (!Array.isArray(lessOrEqual)) return false;
       const [_incomeVar, thresholdCalc] = lessOrEqual;
-      if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc['*']) {
-        const [_sizeVar, multiplier] = thresholdCalc['*'];
+      if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc !== null && '*' in thresholdCalc) {
+        const [_sizeVar, multiplier] = (thresholdCalc as { '*': [unknown, unknown] })['*'];
         if (multiplier === 1500) {
           debugLog('Incorrect SNAP rule logic detected', { ruleId: rule.id });
           return true;

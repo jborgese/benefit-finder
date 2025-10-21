@@ -37,28 +37,10 @@ interface WhyExplanationProps {
 }
 
 /**
- * Convert technical rule codes to user-friendly descriptions with specific values
+ * Get program identifier mappings
  */
-function getUserFriendlyRuleDescription(
-  ruleCode: string,
-  calculations?: Array<{ label: string; value: string | number; comparison?: string }>,
-  userProfile?: { state?: string;[key: string]: unknown }
-): string {
-  // Try to find specific calculation for this rule
-  if (calculations && calculations.length > 0) {
-    const relevantCalc = calculations.find(calc =>
-      calc.label.toLowerCase().includes('income') ||
-      calc.label.toLowerCase().includes('threshold') ||
-      calc.label.toLowerCase().includes('limit')
-    );
-
-    if (relevantCalc) {
-      return `${relevantCalc.label}: ${relevantCalc.value}${relevantCalc.comparison ? ` (${relevantCalc.comparison})` : ''}`;
-    }
-  }
-
-  // Handle program identifiers (like "medicaid federal", "snap federal")
-  const programIdentifierMappings: Record<string, string> = {
+function getProgramIdentifierMappings(): Record<string, string> {
+  return {
     'medicaid federal': 'Federal Medicaid eligibility requirements including income limits, household size requirements, and citizenship status',
     'snap federal': 'Federal SNAP (Food Stamps) eligibility requirements including income limits, asset limits, work requirements, and household composition',
     'medicaid': 'Medicaid eligibility requirements including income limits, household size requirements, and citizenship status',
@@ -91,39 +73,13 @@ function getUserFriendlyRuleDescription(
     'snap-federal-social-security': 'Federal SNAP Social Security Number requirements for all household members',
     'snap-federal-residence': 'Federal SNAP state residence requirements',
   };
+}
 
-  // Check for program identifier match (case insensitive)
-  const lowerRuleCode = ruleCode.toLowerCase().trim();
-
-  // Handle state-specific Medicaid expansion messaging
-  if (lowerRuleCode === 'medicaid-federal-residence-requirement' && userProfile?.state) {
-    const stateName = userProfile.state;
-    const isExpansionState = isMedicaidExpansionState(stateName);
-
-    if (isExpansionState) {
-      return `Federal Medicaid state residence requirements (${stateName} has expanded Medicaid under the ACA)`;
-    } else {
-      return `Federal Medicaid state residence requirements (${stateName} has NOT expanded Medicaid under the ACA - this limits adult eligibility)`;
-    }
-  }
-
-  // Direct match first
-  if (Object.prototype.hasOwnProperty.call(programIdentifierMappings, lowerRuleCode)) {
-    // eslint-disable-next-line security/detect-object-injection -- lowerRuleCode is validated via hasOwnProperty check
-    return programIdentifierMappings[lowerRuleCode];
-  }
-
-  // Partial matching only for simple program names (not rule codes with dashes)
-  if (!lowerRuleCode.includes('-') && !lowerRuleCode.includes('_')) {
-    for (const [key, value] of Object.entries(programIdentifierMappings)) {
-      if (lowerRuleCode.includes(key) || key.includes(lowerRuleCode)) {
-        return value;
-      }
-    }
-  }
-
-  // Common rule patterns with more specific descriptions
-  const ruleDescriptions: Record<string, string> = {
+/**
+ * Get rule descriptions for common patterns
+ */
+function getRuleDescriptions(): Record<string, string> {
+  return {
     // SNAP rules
     'SNAP-INCOME-001': 'Gross monthly income must be below 130% of federal poverty level',
     'SNAP-INCOME-002': 'Net monthly income must be below 100% of federal poverty level',
@@ -168,56 +124,142 @@ function getUserFriendlyRuleDescription(
     'GENERAL-RESIDENCE-001': 'Residency requirements',
     'GENERAL-DISABILITY-001': 'Disability status requirements',
   };
+}
 
-  // Check for exact match first
+/**
+ * Handle state-specific Medicaid expansion messaging
+ */
+function handleMedicaidExpansionMessaging(ruleCode: string, userProfile?: { state?: string }): string | null {
+  if (ruleCode !== 'medicaid-federal-residence-requirement' || !userProfile?.state) {
+    return null;
+  }
+
+  const stateName = userProfile.state;
+  const isExpansionState = isMedicaidExpansionState(stateName);
+
+  if (isExpansionState) {
+    return `Federal Medicaid state residence requirements (${stateName} has expanded Medicaid under the ACA)`;
+  }
+  return `Federal Medicaid state residence requirements (${stateName} has NOT expanded Medicaid under the ACA - this limits adult eligibility)`;
+}
+
+/**
+ * Try to find relevant calculation for rule
+ */
+function findRelevantCalculation(
+  calculations?: Array<{ label: string; value: string | number; comparison?: string }>
+): string | null {
+  if (!calculations || calculations.length === 0) {
+    return null;
+  }
+
+  const relevantCalc = calculations.find(calc =>
+    calc.label.toLowerCase().includes('income') ||
+    calc.label.toLowerCase().includes('threshold') ||
+    calc.label.toLowerCase().includes('limit')
+  );
+
+  if (!relevantCalc) {
+    return null;
+  }
+
+  return `${relevantCalc.label}: ${relevantCalc.value}${relevantCalc.comparison ? ` (${relevantCalc.comparison})` : ''}`;
+}
+
+/**
+ * Parse common rule patterns for fallback descriptions
+ */
+function parseRulePattern(ruleCode: string): string {
+  const parts = ruleCode.split('-');
+  if (parts.length < 3) {
+    return `Program eligibility requirement (${ruleCode})`;
+  }
+
+  const program = parts[0];
+  const category = parts[1];
+
+  const categoryDescriptions: Record<string, string> = {
+    'INCOME': 'income eligibility requirements',
+    'ASSETS': 'asset eligibility requirements',
+    'HOUSEHOLD': 'household size and composition requirements',
+    'AGE': 'age-based eligibility criteria',
+    'CITIZENSHIP': 'citizenship and immigration status requirements',
+    'WORK': 'work participation requirements',
+    'DISABILITY': 'disability status requirements',
+    'RESIDENCE': 'residency requirements',
+    'NUTRITION': 'nutritional risk requirements',
+    'CATEGORY': 'participant category requirements',
+    'TIME': 'time limit requirements',
+  };
+
+  const programDescriptions: Record<string, string> = {
+    'SNAP': 'Supplemental Nutrition Assistance Program',
+    'MEDICAID': 'Medicaid health insurance',
+    'WIC': 'Women, Infants, and Children nutrition program',
+    'TANF': 'Temporary Assistance for Needy Families',
+    'HOUSING': 'Housing assistance',
+    'GENERAL': 'general program',
+  };
+
+  const programName = Object.prototype.hasOwnProperty.call(programDescriptions, program)
+    // eslint-disable-next-line security/detect-object-injection -- program is validated via hasOwnProperty check
+    ? programDescriptions[program]
+    : program;
+  const categoryDesc = Object.prototype.hasOwnProperty.call(categoryDescriptions, category)
+    // eslint-disable-next-line security/detect-object-injection -- category is validated via hasOwnProperty check
+    ? categoryDescriptions[category]
+    : category.toLowerCase();
+
+  return `${programName} ${categoryDesc}`;
+}
+
+/**
+ * Convert technical rule codes to user-friendly descriptions with specific values
+ */
+function getUserFriendlyRuleDescription(
+  ruleCode: string,
+  calculations?: Array<{ label: string; value: string | number; comparison?: string }>,
+  userProfile?: { state?: string;[key: string]: unknown }
+): string {
+  // Try to find specific calculation for this rule
+  const calculationResult = findRelevantCalculation(calculations);
+  if (calculationResult) {
+    return calculationResult;
+  }
+
+  // Handle state-specific Medicaid expansion messaging
+  const expansionResult = handleMedicaidExpansionMessaging(ruleCode, userProfile);
+  if (expansionResult) {
+    return expansionResult;
+  }
+
+  const lowerRuleCode = ruleCode.toLowerCase().trim();
+  const programMappings = getProgramIdentifierMappings();
+
+  // Direct match first
+  if (Object.prototype.hasOwnProperty.call(programMappings, lowerRuleCode)) {
+    // eslint-disable-next-line security/detect-object-injection -- lowerRuleCode is validated via hasOwnProperty check
+    return programMappings[lowerRuleCode];
+  }
+
+  // Partial matching only for simple program names (not rule codes with dashes)
+  if (!lowerRuleCode.includes('-') && !lowerRuleCode.includes('_')) {
+    for (const [key, value] of Object.entries(programMappings)) {
+      if (lowerRuleCode.includes(key) || key.includes(lowerRuleCode)) {
+        return value;
+      }
+    }
+  }
+
+  // Check for exact match in rule descriptions
+  const ruleDescriptions = getRuleDescriptions();
   if (Object.prototype.hasOwnProperty.call(ruleDescriptions, ruleCode)) {
     // eslint-disable-next-line security/detect-object-injection -- ruleCode is validated via hasOwnProperty check
     return ruleDescriptions[ruleCode];
   }
 
   // Parse common patterns for fallback descriptions
-  const parts = ruleCode.split('-');
-  if (parts.length >= 3) {
-    const program = parts[0];
-    const category = parts[1];
-
-    const categoryDescriptions: Record<string, string> = {
-      'INCOME': 'income eligibility requirements',
-      'ASSETS': 'asset eligibility requirements',
-      'HOUSEHOLD': 'household size and composition requirements',
-      'AGE': 'age-based eligibility criteria',
-      'CITIZENSHIP': 'citizenship and immigration status requirements',
-      'WORK': 'work participation requirements',
-      'DISABILITY': 'disability status requirements',
-      'RESIDENCE': 'residency requirements',
-      'NUTRITION': 'nutritional risk requirements',
-      'CATEGORY': 'participant category requirements',
-      'TIME': 'time limit requirements',
-    };
-
-    const programDescriptions: Record<string, string> = {
-      'SNAP': 'Supplemental Nutrition Assistance Program',
-      'MEDICAID': 'Medicaid health insurance',
-      'WIC': 'Women, Infants, and Children nutrition program',
-      'TANF': 'Temporary Assistance for Needy Families',
-      'HOUSING': 'Housing assistance',
-      'GENERAL': 'general program',
-    };
-
-    const programName = Object.prototype.hasOwnProperty.call(programDescriptions, program)
-      // eslint-disable-next-line security/detect-object-injection -- program is validated via hasOwnProperty check
-      ? programDescriptions[program]
-      : program;
-    const categoryDesc = Object.prototype.hasOwnProperty.call(categoryDescriptions, category)
-      // eslint-disable-next-line security/detect-object-injection -- category is validated via hasOwnProperty check
-      ? categoryDescriptions[category]
-      : category.toLowerCase();
-
-    return `${programName} ${categoryDesc}`;
-  }
-
-  // Fallback for unrecognized rule codes
-  return `Program eligibility requirement (${ruleCode})`;
+  return parseRulePattern(ruleCode);
 }
 
 export const WhyExplanation: React.FC<WhyExplanationProps> = ({

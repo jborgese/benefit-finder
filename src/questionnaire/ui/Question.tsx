@@ -74,7 +74,7 @@ export const Question: React.FC<QuestionProps> = ({
       setErrors([]);
       onValidationChange?.(true, []);
     }
-  }, [touched, validateValue, onValidationChange]);
+  }, [touched, validateValue, onValidationChange, value]);
 
   // Validate on value change (only if touched)
   React.useEffect(() => {
@@ -159,8 +159,8 @@ export const Question: React.FC<QuestionProps> = ({
             <DateOfBirthInput
               {...commonProps}
               value={value as string}
-              showAge={true}
-              showAgeInWords={true}
+              showAge
+              showAgeInWords
             />
           );
         }

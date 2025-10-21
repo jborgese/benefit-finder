@@ -97,7 +97,7 @@ export async function evaluateEligibility(
       firstFailedRule,
       firstFailedResult,
       allMissingFields
-    } = await evaluateAllRules(rules, data, profileId, programId);
+    } = evaluateAllRules(rules, data, profileId, programId);
 
     const executionTime = performance.now() - startTime;
     const finalMissingFields = Array.from(allMissingFields);
@@ -144,7 +144,7 @@ export async function evaluateEligibility(
       programId,
       resultRule,
       combinedEvalResult,
-      resultRuleDetails as DetailedEvaluationResult ?? fallbackDetailedResult,
+      (resultRuleDetails as DetailedEvaluationResult) || fallbackDetailedResult,
       finalMissingFields,
       executionTime
     );

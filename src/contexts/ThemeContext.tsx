@@ -25,14 +25,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Get saved theme from localStorage or default to 'system'
     const saved = localStorage.getItem('bf-theme');
-    return (saved as Theme) || 'system';
+    return (saved as Theme) ?? 'system';
   });
 
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
 
   // Function to get system preference
   const getSystemTheme = (): 'light' | 'dark' => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
+    if (typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     return 'light';
@@ -57,14 +57,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     // Set data attribute for CSS
     document.documentElement.setAttribute('data-theme', resolved);
-  }, [theme]);
+  }, [theme, resolveTheme]);
 
   // Listen for system theme changes
   useEffect(() => {
     if (theme === 'system' && typeof window !== 'undefined') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-      const handleChange = (e: MediaQueryListEvent) => {
+      const handleChange = (e: MediaQueryListEvent): void => {
         const resolved = e.matches ? 'dark' : 'light';
         setActualTheme(resolved);
         document.documentElement.classList.remove('light', 'dark');
@@ -77,12 +77,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   }, [theme]);
 
-  const setTheme = (newTheme: Theme) => {
+  const setTheme = (newTheme: Theme): void => {
     setThemeState(newTheme);
     localStorage.setItem('bf-theme', newTheme);
   };
 
-  const toggleTheme = () => {
+  const toggleTheme = (): void => {
     const newTheme = actualTheme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
   };
@@ -108,5 +108,3 @@ export const useTheme = (): ThemeContextType => {
   }
   return context;
 };
-
-export default ThemeContext;

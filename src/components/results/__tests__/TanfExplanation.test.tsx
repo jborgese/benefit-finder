@@ -41,7 +41,7 @@ vi.mock('../../../i18n/hooks', () => ({
         'results.tanf.resources.childcare': 'Childcare assistance programs',
         'results.tanf.resources.statePrograms': 'State-specific TANF programs and services'
       };
-      return translations[key] || key;
+      return translations[key as keyof typeof translations] || key;
     }
   })
 }));
@@ -66,9 +66,9 @@ describe('TanfExplanation', () => {
   };
 
   // Helper function to render component with Dialog context
-  const renderWithDialog = (props = defaultProps) => {
+  const renderWithDialog = (props = defaultProps): ReturnType<typeof render> => {
     return render(
-      <Dialog.Root open={true}>
+      <Dialog.Root open>
         <Dialog.Content>
           <TanfExplanation {...props} />
         </Dialog.Content>
@@ -132,7 +132,7 @@ describe('TanfExplanation', () => {
     expect(screen.getByText('qualified')).toBeInTheDocument();
 
     rerender(
-      <Dialog.Root open={true}>
+      <Dialog.Root open>
         <Dialog.Content>
           <TanfExplanation {...defaultProps} status="likely" />
         </Dialog.Content>
@@ -141,7 +141,7 @@ describe('TanfExplanation', () => {
     expect(screen.getByText('likely')).toBeInTheDocument();
 
     rerender(
-      <Dialog.Root open={true}>
+      <Dialog.Root open>
         <Dialog.Content>
           <TanfExplanation {...defaultProps} status="not-qualified" />
         </Dialog.Content>
@@ -189,7 +189,7 @@ describe('TanfExplanation', () => {
 
     // Test not-qualified status
     rerender(
-      <Dialog.Root open={true}>
+      <Dialog.Root open>
         <Dialog.Content>
           <TanfExplanation {...defaultProps} status="not-qualified" />
         </Dialog.Content>

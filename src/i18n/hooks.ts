@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import type { i18n as I18nInstance } from 'i18next';
 
 /**
  * RTL (Right-to-Left) language codes
@@ -38,7 +39,21 @@ const LANGUAGE_METADATA: Record<string, {
  * Custom hook for accessing translations with type safety
  * Provides access to the t function and i18n instance
  */
-export const useI18n = () => {
+export const useI18n = (): {
+  t: (key: string, options?: Record<string, unknown>) => string;
+  changeLanguage: (lng: string) => Promise<void>;
+  currentLanguage: string;
+  availableLanguages: string[];
+  getLanguageDisplayName: (lng: string) => string;
+  getLanguageNativeName: (lng: string) => string;
+  getLanguageFlag: (lng: string) => string;
+  isRightToLeft: (lng: string) => boolean;
+  getDirection: () => 'ltr' | 'rtl';
+  formatCurrency: (amount: number, currency?: string) => string;
+  formatDate: (date: Date, options?: Intl.DateTimeFormatOptions) => string;
+  formatNumber: (number: number, options?: Intl.NumberFormatOptions) => string;
+  i18n: I18nInstance;
+} => {
   const { t, i18n } = useTranslation();
 
   /**
@@ -70,7 +85,8 @@ export const useI18n = () => {
   const getLanguageDisplayName = (lng: string): string => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    return LANGUAGE_METADATA[normalizedLng]?.name || normalizedLng;
+    const metadata = LANGUAGE_METADATA[normalizedLng];
+    return metadata?.name ?? normalizedLng;
   };
 
   /**
@@ -79,7 +95,8 @@ export const useI18n = () => {
   const getLanguageNativeName = (lng: string): string => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    return LANGUAGE_METADATA[normalizedLng]?.nativeName || normalizedLng;
+    const metadata = LANGUAGE_METADATA[normalizedLng];
+    return metadata?.nativeName ?? normalizedLng;
   };
 
   /**
@@ -88,7 +105,8 @@ export const useI18n = () => {
   const getLanguageFlag = (lng: string): string => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    return LANGUAGE_METADATA[normalizedLng]?.flag || '🌐';
+    const metadata = LANGUAGE_METADATA[normalizedLng];
+    return metadata?.flag ?? '🌐';
   };
 
   /**
@@ -97,7 +115,8 @@ export const useI18n = () => {
   const isRightToLeft = (lng: string): boolean => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    return RTL_LANGUAGES.includes(normalizedLng) || LANGUAGE_METADATA[normalizedLng]?.isRTL || false;
+    const metadata = LANGUAGE_METADATA[normalizedLng];
+    return RTL_LANGUAGES.includes(normalizedLng) || (metadata?.isRTL ?? false);
   };
 
   /**
@@ -111,7 +130,8 @@ export const useI18n = () => {
    * Format currency for current locale
    */
   const formatCurrency = (amount: number, currency?: string): string => {
-    const localeCurrency = currency || LANGUAGE_METADATA[currentLanguage]?.currency || 'USD';
+    const metadata = LANGUAGE_METADATA[currentLanguage];
+    const localeCurrency = currency ?? (metadata?.currency ?? 'USD');
     return new Intl.NumberFormat(currentLanguage, {
       style: 'currency',
       currency: localeCurrency,
@@ -159,7 +179,7 @@ export const useTranslationWithFallback = (
   key: string,
   fallback?: string,
   options?: Record<string, unknown>
-) => {
+): string => {
   const { t } = useTranslation();
 
   const translatedText = t(key, options);

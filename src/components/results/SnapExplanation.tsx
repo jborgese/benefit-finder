@@ -41,9 +41,9 @@ function getSnapStatusMessage(status: EligibilityStatus, userProfile?: { isPregn
       return t('results.snap.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.isPregnant) {
-        return t('results.snap.statusMessages.notQualified') + ' Contact your local SNAP office to discuss your pregnancy and food assistance needs.';
+        return `${t('results.snap.statusMessages.notQualified')} Contact your local SNAP office to discuss your pregnancy and food assistance needs.`;
       } else if (userProfile?.hasChildren) {
-        return t('results.snap.statusMessages.notQualified') + ' Contact your local SNAP office to discuss your children and food assistance needs.';
+        return `${t('results.snap.statusMessages.notQualified')} Contact your local SNAP office to discuss your children and food assistance needs.`;
       }
       return t('results.snap.statusMessages.notQualified');
     default:
@@ -134,7 +134,7 @@ function getSnapRequirementsExplanation(userProfile?: { isPregnant?: boolean; ha
 export const SnapExplanation: React.FC<SnapExplanationProps> = ({
   programName,
   status,
-  explanation,
+  explanation: _explanation,
   userProfile,
   onClose,
 }) => {

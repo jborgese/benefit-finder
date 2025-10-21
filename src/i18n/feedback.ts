@@ -39,7 +39,7 @@ export class TranslationFeedbackManager {
   /**
    * Submit feedback for a translation
    */
-  async submitFeedback(feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>): Promise<void> {
+  submitFeedback(feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>): void {
     const fullFeedback: TranslationFeedback = {
       ...feedback,
       id: this.generateId(),
@@ -57,7 +57,7 @@ export class TranslationFeedbackManager {
   /**
    * Report an issue with a translation
    */
-  async reportIssue(issue: Omit<TranslationIssue, 'id' | 'timestamp'>): Promise<void> {
+  reportIssue(issue: Omit<TranslationIssue, 'id' | 'timestamp'>): void {
     const fullIssue: TranslationIssue = {
       ...issue,
       id: this.generateId(),
@@ -97,7 +97,7 @@ export class TranslationFeedbackManager {
   /**
    * Export feedback for community review
    */
-  async exportFeedback(): Promise<string> {
+  exportFeedback(): string {
     const feedback = this.getFeedback();
     const issues = this.getIssues();
 
@@ -132,12 +132,12 @@ export class TranslationFeedbackManager {
   /**
    * Get feedback statistics
    */
-  async getStatistics(): Promise<{
+  getStatistics(): {
     totalFeedback: number;
     totalIssues: number;
     languages: string[];
     recentActivity: number;
-  }> {
+  } {
     const feedback = this.getFeedback();
     const issues = this.getIssues();
 
@@ -171,41 +171,41 @@ export class TranslationFeedbackManager {
  * React hook for translation feedback
  */
 export const useTranslationFeedback = (): {
-  submitFeedback: (feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>) => Promise<void>;
-  reportIssue: (issue: Omit<TranslationIssue, 'id' | 'timestamp'>) => Promise<void>;
-  exportFeedback: () => Promise<string>;
-  getStatistics: () => Promise<{
+  submitFeedback: (feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>) => void;
+  reportIssue: (issue: Omit<TranslationIssue, 'id' | 'timestamp'>) => void;
+  exportFeedback: () => string;
+  getStatistics: () => {
     totalFeedback: number;
     totalIssues: number;
     languages: string[];
     recentActivity: number;
-  }>;
-  clearFeedback: () => Promise<void>;
+  };
+  clearFeedback: () => void;
 } => {
   const manager = new TranslationFeedbackManager();
 
-  const submitFeedback = async (feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>): Promise<void> => {
-    await manager.submitFeedback(feedback);
+  const submitFeedback = (feedback: Omit<TranslationFeedback, 'id' | 'timestamp' | 'userAgent' | 'appVersion'>): void => {
+    manager.submitFeedback(feedback);
   };
 
-  const reportIssue = async (issue: Omit<TranslationIssue, 'id' | 'timestamp'>): Promise<void> => {
-    await manager.reportIssue(issue);
+  const reportIssue = (issue: Omit<TranslationIssue, 'id' | 'timestamp'>): void => {
+    manager.reportIssue(issue);
   };
 
-  const exportFeedback = async (): Promise<string> => {
+  const exportFeedback = (): string => {
     return manager.exportFeedback();
   };
 
-  const getStatistics = async (): Promise<{
+  const getStatistics = (): {
     totalFeedback: number;
     totalIssues: number;
     languages: string[];
     recentActivity: number;
-  }> => {
+  } => {
     return manager.getStatistics();
   };
 
-  const clearFeedback = async (): Promise<void> => {
+  const clearFeedback = (): void => {
     manager.clearFeedback();
   };
 

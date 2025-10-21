@@ -12,7 +12,6 @@ import type { EligibilityEvaluationResult } from './types';
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.debug('[Eligibility Cache Debug]', ...args);
   }
 }

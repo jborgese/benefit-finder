@@ -5,8 +5,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
-type TextSize = 'small' | 'medium' | 'large' | 'extra-large';
+import { TextSize, TEXT_SIZE_ORDER, TEXT_SIZE_MULTIPLIERS } from './textSizeConstants';
 
 interface TextSizeContextType {
   textSize: TextSize;
@@ -22,49 +21,41 @@ interface TextSizeProviderProps {
   children: React.ReactNode;
 }
 
-const TEXT_SIZE_ORDER: TextSize[] = ['small', 'medium', 'large', 'extra-large'];
-
-const TEXT_SIZE_MULTIPLIERS = {
-  small: 0.875,      // 14px base
-  medium: 1,         // 16px base (default)
-  large: 1.125,      // 18px base
-  'extra-large': 1.25, // 20px base
-};
 
 export const TextSizeProvider: React.FC<TextSizeProviderProps> = ({ children }) => {
   const [textSize, setTextSizeState] = useState<TextSize>(() => {
     // Get saved text size from localStorage or default to 'medium'
     const saved = localStorage.getItem('bf-text-size');
-    return (saved as TextSize) || 'medium';
+    return (saved as TextSize) ?? 'medium';
   });
 
   // Apply text size to document
   useEffect(() => {
-    const multiplier = TEXT_SIZE_MULTIPLIERS[textSize];
+    const multiplier = TEXT_SIZE_MULTIPLIERS[textSize] ?? 1;
     document.documentElement.style.fontSize = `${multiplier}rem`;
     document.documentElement.setAttribute('data-text-size', textSize);
   }, [textSize]);
 
-  const setTextSize = (size: TextSize) => {
+  const setTextSize = (size: TextSize): void => {
     setTextSizeState(size);
     localStorage.setItem('bf-text-size', size);
   };
 
-  const increaseTextSize = () => {
+  const increaseTextSize = (): void => {
     const currentIndex = TEXT_SIZE_ORDER.indexOf(textSize);
     if (currentIndex < TEXT_SIZE_ORDER.length - 1) {
       setTextSize(TEXT_SIZE_ORDER[currentIndex + 1]);
     }
   };
 
-  const decreaseTextSize = () => {
+  const decreaseTextSize = (): void => {
     const currentIndex = TEXT_SIZE_ORDER.indexOf(textSize);
     if (currentIndex > 0) {
       setTextSize(TEXT_SIZE_ORDER[currentIndex - 1]);
     }
   };
 
-  const resetTextSize = () => {
+  const resetTextSize = (): void => {
     setTextSize('medium');
   };
 

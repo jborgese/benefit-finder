@@ -179,12 +179,12 @@ function logRuleResult(
 /**
  * Evaluate all rules for eligibility
  */
-export async function evaluateAllRules(
+export function evaluateAllRules(
   rules: EligibilityRuleDocument[],
   data: JsonLogicData,
   profileId: string,
   programId: string
-): Promise<AllRulesEvaluationResult> {
+): AllRulesEvaluationResult {
   debugLog('Beginning evaluation of all rules', { profileId, programId, ruleCount: rules.length });
   const ruleResults: RuleEvaluationWithDetails[] = [];
 
@@ -374,8 +374,8 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
   const missing: string[] = [];
   debugLog('Checking missing fields', { requiredFields, data });
   for (const field of requiredFields) {
-    // Use Object.hasOwnProperty to safely check for field existence
-    const fieldValue = Object.hasOwnProperty.call(data, field) ? data[field] : undefined;
+    // Safely check for field existence
+    const fieldValue = field in data ? data[field] : undefined;
     if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
       missing.push(field);
     }
@@ -457,8 +457,8 @@ function normalizeStateToCode(stateValue: string): string {
 
   // If it's a full state name, convert to code
   const normalizedName = stateValue.trim();
-  // Use Object.hasOwnProperty to safely access the mapping
-  const code = Object.hasOwnProperty.call(stateNameToCode, normalizedName) ? stateNameToCode[normalizedName] : undefined;
+  // Safely access the mapping
+  const code = normalizedName in stateNameToCode ? stateNameToCode[normalizedName] : undefined;
 
   if (code) {
     return code;

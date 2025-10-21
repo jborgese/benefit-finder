@@ -21,7 +21,7 @@ interface SsiExplanationProps {
 export const SsiExplanation: React.FC<SsiExplanationProps> = ({
   programName,
   status,
-  explanation,
+  explanation: _explanation,
   userProfile,
   onClose,
 }) => {
@@ -35,7 +35,7 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
 
   // Helper function to get status color classes
   const getStatusColor = (status: EligibilityStatus): string => {
-    const colorMap = {
+    const colorMap: Record<string, string> = {
       'qualified': 'text-green-700 bg-green-50 border-green-200',
       'likely': 'text-blue-700 bg-blue-50 border-blue-200',
       'maybe': 'text-yellow-700 bg-yellow-50 border-yellow-200',
@@ -47,7 +47,7 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
 
   // Helper function to get status icon
   const getStatusIcon = (status: EligibilityStatus): string => {
-    const iconMap = {
+    const iconMap: Record<string, string> = {
       'qualified': '✅',
       'likely': '✔️',
       'maybe': '❓',
@@ -82,7 +82,7 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
 
   // Get requirements based on user profile
   const getRequirements = (): string[] => {
-    const requirements = [
+    return [
       t('results.ssi.requirements.age'),
       t('results.ssi.requirements.disability'),
       t('results.ssi.requirements.income'),
@@ -90,8 +90,6 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
       t('results.ssi.requirements.citizenship'),
       t('results.ssi.requirements.residence')
     ];
-
-    return requirements;
   };
 
   // Get next steps based on status

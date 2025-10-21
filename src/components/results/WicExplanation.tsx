@@ -40,9 +40,9 @@ function getWicStatusMessage(status: EligibilityStatus, userProfile?: { isPregna
       return t('results.wic.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.isPregnant) {
-        return t('results.wic.statusMessages.notQualified') + ' Contact your local WIC office to discuss your pregnancy and nutritional needs.';
+        return `${t('results.wic.statusMessages.notQualified')} Contact your local WIC office to discuss your pregnancy and nutritional needs.`;
       } else if (userProfile?.hasChildren) {
-        return t('results.wic.statusMessages.notQualified') + ' Contact your local WIC office to discuss your children and nutritional needs.';
+        return `${t('results.wic.statusMessages.notQualified')} Contact your local WIC office to discuss your children and nutritional needs.`;
       }
       return t('results.wic.statusMessages.notQualified');
     default:
@@ -134,7 +134,7 @@ function getWicRequirementsExplanation(userProfile?: { isPregnant?: boolean; has
 export const WicExplanation: React.FC<WicExplanationProps> = ({
   programName,
   status,
-  explanation,
+  explanation: _explanation,
   userProfile,
   onClose,
 }) => {

@@ -33,6 +33,86 @@ interface ProgramCardProps {
   className?: string;
 }
 
+// Helper function to get status badge configuration
+const getStatusBadgeConfig = (status: string, t: (key: string) => string): { classes: string; text: string; icon: string } => {
+  const badgeConfigs = {
+    'qualified': {
+      classes: 'bg-green-100 text-green-800 border-green-300',
+      text: t('results.status.qualified'),
+      icon: '✓'
+    },
+    'likely': {
+      classes: 'bg-blue-100 text-blue-800 border-blue-300',
+      text: t('results.status.likely'),
+      icon: '◐'
+    },
+    'maybe': {
+      classes: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      text: t('results.status.maybe'),
+      icon: '?'
+    },
+    'unlikely': {
+      classes: 'bg-orange-100 text-orange-800 border-orange-300',
+      text: t('results.status.unlikely'),
+      icon: '◔'
+    },
+    'not-qualified': {
+      classes: 'bg-gray-100 text-gray-800 border-gray-300',
+      text: t('results.status.notQualified'),
+      icon: '✗'
+    }
+  };
+
+  return badgeConfigs[status as keyof typeof badgeConfigs] ?? badgeConfigs['not-qualified'];
+};
+
+// Helper function to render status badge
+const renderStatusBadge = (status: string, t: (key: string) => string): React.ReactElement => {
+  const config = getStatusBadgeConfig(status, t);
+
+  return (
+    <span
+      className={`
+        inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border-2
+        ${config.classes}
+      `}
+    >
+      <span className="mr-1.5">{config.icon}</span>
+      {config.text}
+    </span>
+  );
+};
+
+// Helper function to get explanation component
+const getExplanationComponent = (programId: string, result: ProgramEligibilityResult, userProfile: unknown, onClose: () => void): React.ReactElement => {
+  const commonProps = {
+    programName: result.programName,
+    status: result.status,
+    explanation: result.explanation,
+    userProfile,
+    onClose
+  };
+
+  const componentMap: Record<string, React.ComponentType<{
+    programName: string;
+    status: string;
+    explanation: string;
+    userProfile: unknown;
+    onClose: () => void;
+  }>> = {
+    'wic-federal': WicExplanation,
+    'medicaid-federal': MedicaidExplanation,
+    'snap-federal': SnapExplanation,
+    'tanf-federal': TanfExplanation,
+    'ssi-federal': SsiExplanation,
+    'section8-federal': Section8Explanation,
+    'lihtc-federal': LihtcExplanation
+  };
+
+  const Component = componentMap[programId] ?? WhyExplanation;
+  return <Component {...commonProps} />;
+};
+
 export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
   result,
   userProfile,
@@ -42,54 +122,6 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
 }) => {
   const { t } = useI18n();
   const [showExplanation, setShowExplanation] = useState(false);
-
-  const getStatusBadge = (): React.ReactElement => {
-    const { status } = result;
-
-    const badgeClasses: Record<typeof status, string> = {
-      'qualified': 'bg-green-100 text-green-800 border-green-300',
-      'likely': 'bg-blue-100 text-blue-800 border-blue-300',
-      'maybe': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      'unlikely': 'bg-orange-100 text-orange-800 border-orange-300',
-      'not-qualified': 'bg-gray-100 text-gray-800 border-gray-300',
-    };
-
-    const badgeText: Record<typeof status, string> = {
-      'qualified': t('results.status.qualified'),
-      'likely': t('results.status.likely'),
-      'maybe': t('results.status.maybe'),
-      'unlikely': t('results.status.unlikely'),
-      'not-qualified': t('results.status.notQualified'),
-    };
-
-    const badgeIcons: Record<typeof status, string> = {
-      'qualified': '✓',
-      'likely': '◐',
-      'maybe': '?',
-      'unlikely': '◔',
-      'not-qualified': '✗',
-    };
-
-    // Safe: status is strictly typed from ProgramEligibilityResult
-    // eslint-disable-next-line security/detect-object-injection
-    const classes = badgeClasses[status];
-    // eslint-disable-next-line security/detect-object-injection
-    const icon = badgeIcons[status];
-    // eslint-disable-next-line security/detect-object-injection
-    const text = badgeText[status];
-
-    return (
-      <span
-        className={`
-          inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border-2
-          ${classes}
-        `}
-      >
-        <span className="mr-1.5">{icon}</span>
-        {text}
-      </span>
-    );
-  };
 
 
   const { shouldShowDocuments, shouldShowNextSteps, jurisdictionLabel, formattedBenefit } = useMemo(() => {
@@ -137,7 +169,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
               <h3 className="text-xl font-bold text-gray-900">
                 {t(getProgramNameKey(result.programId))}
               </h3>
-              {getStatusBadge()}
+              {renderStatusBadge(result.status, t)}
             </div>
             <p className="text-sm text-gray-600">{jurisdictionLabel}</p>
           </div>
@@ -271,71 +303,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
           <Dialog.Content
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto z-50 print:hidden"
           >
-            {result.programId === 'wic-federal' ? (
-              <WicExplanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            ) : result.programId === 'medicaid-federal' ? (
-              <MedicaidExplanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            ) : result.programId === 'snap-federal' ? (
-              <SnapExplanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            ) : result.programId === 'tanf-federal' ? (
-              <TanfExplanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            ) : result.programId === 'ssi-federal' ? (
-              <SsiExplanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            ) : result.programId === 'section8-federal' ? (
-              <Section8Explanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            ) : result.programId === 'lihtc-federal' ? (
-              <LihtcExplanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            ) : (
-              <WhyExplanation
-                programName={result.programName}
-                status={result.status}
-                explanation={result.explanation}
-                userProfile={userProfile}
-                onClose={() => setShowExplanation(false)}
-              />
-            )}
+            {getExplanationComponent(result.programId, result, userProfile, () => setShowExplanation(false))}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

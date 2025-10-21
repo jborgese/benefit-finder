@@ -36,11 +36,11 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
   } | null>(null);
 
   useEffect(() => {
-    const loadStatistics = async (): Promise<void> => {
-      const stats = await getStatistics();
+    const loadStatistics = (): void => {
+      const stats = getStatistics();
       setStatistics(stats);
     };
-    void loadStatistics();
+    loadStatistics();
   }, [getStatistics]);
 
   const handleSubmitFeedback = async (): Promise<void> => {
@@ -56,7 +56,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
         reason,
         context
       );
-      await submitFeedback(feedback);
+      submitFeedback(feedback);
       setIsOpen(false);
       setSuggestedText('');
       setReason('');
@@ -79,7 +79,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
         severity,
         context
       );
-      await reportIssue(issue);
+      reportIssue(issue);
       setIsOpen(false);
       setIssueDescription('');
     } catch (error) {
@@ -91,7 +91,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
 
   const handleExportFeedback = async (): Promise<void> => {
     try {
-      const feedbackData = await exportFeedback();
+      const feedbackData = exportFeedback();
       const blob = new Blob([feedbackData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

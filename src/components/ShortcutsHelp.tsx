@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { Button } from './Button';
-import { useI18n } from '../i18n/hooks';
 
 interface ShortcutsHelpProps {
   isOpen: boolean;
@@ -17,7 +16,6 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { t } = useI18n();
 
   if (!isOpen) return null;
 

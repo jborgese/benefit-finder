@@ -4,7 +4,7 @@
  * Interactive guided tour for new users introducing key features
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '../Button';
 import { useI18n } from '../../i18n/hooks';
 
@@ -86,10 +86,10 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const step = tourSteps[currentStep];
+    const step = tourSteps[currentStep] ?? tourSteps[0];
     const element = document.querySelector(step.target) as HTMLElement;
 
-    if (element && element.offsetParent !== null) {
+    if (element?.offsetParent !== null) {
       setHighlightedElement(element);
 
       // Scroll element into view
@@ -106,7 +106,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
     return () => {
       setHighlightedElement(null);
     };
-  }, [currentStep, isOpen]);
+  }, [currentStep, isOpen, tourSteps]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -124,37 +124,37 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, currentStep]);
+  }, [isOpen, currentStep, handleNext, handlePrevious, onClose]);
 
-  const handleNext = (): void => {
+  const handleNext = useCallback((): void => {
     if (currentStep < tourSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       onComplete();
     }
-  };
+  }, [currentStep, tourSteps.length, onComplete]);
 
-  const handlePrevious = (): void => {
+  const handlePrevious = useCallback((): void => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
-  };
+  }, [currentStep]);
 
-  const handleSkip = (): void => {
+  const handleSkip = useCallback((): void => {
     onClose();
-  };
+  }, [onClose]);
 
-  const handleActionClick = (): void => {
-    const step = tourSteps[currentStep];
+  const handleActionClick = useCallback((): void => {
+    const step = tourSteps[currentStep] ?? tourSteps[0];
     if (step.action) {
       step.action.onClick();
     }
     handleNext();
-  };
+  }, [currentStep, tourSteps, handleNext]);
 
   if (!isOpen) return null;
 
-  const currentStepData = tourSteps[currentStep];
+  const currentStepData = tourSteps[currentStep] ?? tourSteps[0];
   const progress = ((currentStep + 1) / tourSteps.length) * 100;
 
   return (

@@ -55,11 +55,11 @@ interface LihtcExplanationProps {
   onClose: () => void;
 }
 
-const getLihtcStatusMessage = (status: EligibilityStatus, t: (key: string) => string) => {
+const getLihtcStatusMessage = (status: EligibilityStatus, t: (key: string) => string): string => {
   return t(`results.lihtc.statusMessages.${status}`);
 };
 
-const getLihtcBenefitInfo = (t: (key: string) => string, userProfile?: LihtcExplanationProps['userProfile']) => {
+const getLihtcBenefitInfo = (t: (key: string) => string, userProfile?: LihtcExplanationProps['userProfile']): string[] => {
   const benefits = [
     t('results.lihtc.benefits.affordableHousing'),
     t('results.lihtc.benefits.reducedRent'),
@@ -81,7 +81,7 @@ const getLihtcBenefitInfo = (t: (key: string) => string, userProfile?: LihtcExpl
   return benefits;
 };
 
-const getLihtcRequirementsExplanation = (t: (key: string) => string) => {
+const getLihtcRequirementsExplanation = (t: (key: string) => string): string[] => {
   return [
     t('results.lihtc.requirements.income'),
     t('results.lihtc.requirements.familySize'),
@@ -92,7 +92,7 @@ const getLihtcRequirementsExplanation = (t: (key: string) => string) => {
   ];
 };
 
-const getLihtcNextSteps = (t: (key: string) => string) => {
+const getLihtcNextSteps = (t: (key: string) => string): string[] => {
   return [
     t('results.lihtc.nextSteps.contact'),
     t('results.lihtc.nextSteps.waitlist'),
@@ -102,7 +102,7 @@ const getLihtcNextSteps = (t: (key: string) => string) => {
   ];
 };
 
-const getLihtcHowToApply = (t: (key: string) => string) => {
+const getLihtcHowToApply = (t: (key: string) => string): string[] => {
   return [
     t('results.lihtc.howToApply.step1'),
     t('results.lihtc.howToApply.step2'),
@@ -112,7 +112,7 @@ const getLihtcHowToApply = (t: (key: string) => string) => {
   ];
 };
 
-const getLihtcResources = (t: (key: string) => string) => {
+const getLihtcResources = (t: (key: string) => string): string[] => {
   return [
     t('results.lihtc.resources.website'),
     t('results.lihtc.resources.hotline'),
@@ -124,7 +124,7 @@ const getLihtcResources = (t: (key: string) => string) => {
 export const LihtcExplanation: React.FC<LihtcExplanationProps> = ({
   programName,
   status,
-  explanation,
+  explanation: _explanation,
   userProfile,
   onClose,
 }) => {
@@ -151,7 +151,7 @@ export const LihtcExplanation: React.FC<LihtcExplanationProps> = ({
         <Dialog.Close asChild>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close explanation">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </Dialog.Close>

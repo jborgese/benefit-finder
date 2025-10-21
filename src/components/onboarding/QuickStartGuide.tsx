@@ -62,7 +62,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
     },
   ];
 
-  const currentStepData = steps[currentStep];
+  const currentStepData = steps[currentStep] ?? steps[0];
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   const handleNext = (): void => {

@@ -360,6 +360,14 @@ function main(): void {
     try {
       for (const dir of ruleDirs) {
         try {
+          // Validate that the directory path is within our expected structure
+          const normalizedDir = join(process.cwd(), 'src', 'rules');
+          if (!dir.startsWith(normalizedDir)) {
+            console.warn(`${colors.yellow}Skipping suspicious path: ${dir}${colors.reset}`);
+            continue;
+          }
+
+          // eslint-disable-next-line security/detect-non-literal-fs-filename
           const files = readdirSync(dir, { recursive: true })
             .filter((f): f is string => typeof f === 'string' && f.endsWith('.json'));
           filesToValidate.push(...files.map((f) => join(dir, f)));

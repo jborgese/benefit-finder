@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import * as Dialog from '@radix-ui/react-dialog';
 import { LihtcExplanation } from '../LihtcExplanation';
-import { EligibilityStatus, EligibilityExplanation } from '../types';
+import { EligibilityExplanation } from '../types';
 
 // Mock the i18n hook
 vi.mock('../../../i18n/hooks', () => ({
@@ -36,9 +36,9 @@ describe('LihtcExplanation', () => {
 
   const mockOnClose = vi.fn();
 
-  const renderWithDialog = (props: any) => {
-    return render(
-      <Dialog.Root open={true}>
+  const renderWithDialog = (props: any): void => {
+    render(
+      <Dialog.Root open>
         <Dialog.Content>
           <LihtcExplanation {...props} />
         </Dialog.Content>

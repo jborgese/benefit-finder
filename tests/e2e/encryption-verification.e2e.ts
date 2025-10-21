@@ -26,6 +26,48 @@ function isExternalRequest(url: string): boolean {
 }
 
 /**
+ * Check if a button should be skipped
+ */
+function shouldSkipButton(buttonText: string): boolean {
+  if (!buttonText) return true;
+
+  const skipKeywords = ['home', 'new assessment', 'refresh'];
+  return skipKeywords.some(keyword =>
+    buttonText.toLowerCase().includes(keyword)
+  );
+}
+
+/**
+ * Attempt to click a button safely
+ */
+async function clickButtonSafely(button: any, buttonText: string): Promise<void> {
+  try {
+    await button.click({ timeout: 2000 });
+  } catch (clickError) {
+    // Log but don't fail on click errors - focus on network monitoring
+    console.log(`Button click failed: ${buttonText}`, clickError);
+  }
+}
+
+/**
+ * Process a single button
+ */
+async function processButton(page: any, button: any, buttonText: string): Promise<void> {
+  if (await button.isVisible({ timeout: 1000 })) {
+    if (shouldSkipButton(buttonText)) {
+      return;
+    }
+
+    await clickButtonSafely(button, buttonText);
+
+    // Check if page is still alive after click
+    if (!page.isClosed()) {
+      await page.waitForTimeout(300);
+    }
+  }
+}
+
+/**
  * Perform button operations safely with error handling
  */
 async function performButtonOperations(page: any): Promise<void> {
@@ -46,32 +88,8 @@ async function performButtonOperations(page: any): Promise<void> {
         continue;
       }
 
-      // Only click visible buttons that won't cause navigation
-      if (await button.isVisible({ timeout: 1000 })) {
-        const buttonText = await button.textContent().catch(() => '');
-
-        // Skip buttons that might cause problematic navigation or actions
-        if (buttonText && (
-          buttonText.toLowerCase().includes('home') ||
-          buttonText.toLowerCase().includes('new assessment') ||
-          buttonText.toLowerCase().includes('refresh')
-        )) {
-          continue;
-        }
-
-        // Click with better error handling
-        try {
-          await button.click({ timeout: 2000 });
-
-          // Check if page is still alive after click
-          if (!page.isClosed()) {
-            await page.waitForTimeout(300);
-          }
-        } catch (clickError) {
-          // Log but don't fail on click errors - focus on network monitoring
-          console.log(`Button click failed: ${buttonText}`, clickError);
-        }
-      }
+      const buttonText = await button.textContent().catch(() => '');
+      await processButton(page, button, buttonText);
 
       // Short pause between operations
       if (!page.isClosed()) {

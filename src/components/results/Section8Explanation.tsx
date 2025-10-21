@@ -54,11 +54,11 @@ interface Section8ExplanationProps {
   onClose: () => void;
 }
 
-const getSection8StatusMessage = (status: EligibilityStatus, t: (key: string) => string) => {
+const getSection8StatusMessage = (status: EligibilityStatus, t: (key: string) => string): string => {
   return t(`results.section8.statusMessages.${status}`);
 };
 
-const getSection8BenefitInfo = (t: (key: string) => string, userProfile?: Section8ExplanationProps['userProfile']) => {
+const getSection8BenefitInfo = (t: (key: string) => string, userProfile?: Section8ExplanationProps['userProfile']): string[] => {
   const benefits = [
     t('results.section8.benefits.rentalAssistance'),
     t('results.section8.benefits.housingChoice'),
@@ -80,7 +80,7 @@ const getSection8BenefitInfo = (t: (key: string) => string, userProfile?: Sectio
   return benefits;
 };
 
-const getSection8RequirementsExplanation = (t: (key: string) => string) => {
+const getSection8RequirementsExplanation = (t: (key: string) => string): string[] => {
   return [
     t('results.section8.requirements.income'),
     t('results.section8.requirements.citizenship'),
@@ -91,7 +91,7 @@ const getSection8RequirementsExplanation = (t: (key: string) => string) => {
   ];
 };
 
-const getSection8NextSteps = (t: (key: string) => string) => {
+const getSection8NextSteps = (t: (key: string) => string): string[] => {
   return [
     t('results.section8.nextSteps.contact'),
     t('results.section8.nextSteps.waitlist'),
@@ -101,7 +101,7 @@ const getSection8NextSteps = (t: (key: string) => string) => {
   ];
 };
 
-const getSection8HowToApply = (t: (key: string) => string) => {
+const getSection8HowToApply = (t: (key: string) => string): string[] => {
   return [
     t('results.section8.howToApply.step1'),
     t('results.section8.howToApply.step2'),
@@ -111,7 +111,7 @@ const getSection8HowToApply = (t: (key: string) => string) => {
   ];
 };
 
-const getSection8Resources = (t: (key: string) => string) => {
+const getSection8Resources = (t: (key: string) => string): string[] => {
   return [
     t('results.section8.resources.website'),
     t('results.section8.resources.hotline'),
@@ -123,7 +123,7 @@ const getSection8Resources = (t: (key: string) => string) => {
 export const Section8Explanation: React.FC<Section8ExplanationProps> = ({
   programName,
   status,
-  explanation,
+  explanation: _explanation,
   userProfile,
   onClose,
 }) => {
@@ -150,7 +150,7 @@ export const Section8Explanation: React.FC<Section8ExplanationProps> = ({
         <Dialog.Close asChild>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close explanation">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </Dialog.Close>

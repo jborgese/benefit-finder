@@ -67,7 +67,7 @@ export const FIELD_NAME_MAPPINGS: FieldNameMapping = {
  */
 export function formatFieldName(fieldName: string): string {
   debugLog('Formatting field name', fieldName);
-  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
+  if (fieldName in FIELD_NAME_MAPPINGS) {
     const mapping = FIELD_NAME_MAPPINGS[fieldName as keyof FieldNameMapping];
     debugLog('Field mapping found', fieldName, mapping);
     return mapping;
@@ -92,7 +92,7 @@ export function generateCriteriaBreakdown(
 
   if (rule.requiredFields) {
     for (const field of rule.requiredFields) {
-      const fieldValue = data[field as keyof JsonLogicData];
+      const fieldValue = data[field];
       const fieldDescription = formatFieldName(field);
       const hasValue = fieldValue !== undefined && fieldValue !== null;
 
