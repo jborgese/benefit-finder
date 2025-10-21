@@ -63,11 +63,21 @@ This is the MOST COMMON FAILURE MODE for agents. Don't let this happen.
 - Use `Test-Path` instead of checking file existence with bash commands
 
 ### Development Server Management
-Before running `npm run dev`, ALWAYS check if it's already running:
+🚨 **CRITICAL: Always check for existing servers before starting new ones!** 🚨
+
+Before running `npm run dev`, ALWAYS check if it's already running on common Vite ports:
 ```powershell
-Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+# Check for existing Vite dev servers on ports 5173-5179
+Get-NetTCPConnection -LocalPort 5173,5174,5175,5176,5177,5178,5179 -State Listen -ErrorAction SilentlyContinue
 ```
-If this returns any output, the server is already running. Don't start another one.
+
+**If ANY output is returned, a server is already running. DO NOT start another one!**
+
+Instead, inform the user that a server is already running and provide the URL:
+```powershell
+# If server is found, tell user it's running
+Write-Host "Development server is already running! Check: http://localhost:5173/"
+```
 
 ### Complete Example: Starting Dev Server
 ```powershell
@@ -77,11 +87,25 @@ cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
 # Step 2: Verify location
 Test-Path package.json
 
-# Step 3: Check if already running
-Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+# Step 3: Check if already running (check multiple ports)
+$existingServer = Get-NetTCPConnection -LocalPort 5173,5174,5175,5176,5177,5178,5179 -State Listen -ErrorAction SilentlyContinue
+if ($existingServer) {
+    $port = $existingServer.LocalPort
+    Write-Host "Development server is already running on port $port! Access it at: http://localhost:$port/"
+} else {
+    # Step 4: Start server (only if no existing server found)
+    npm run dev
+}
+```
 
-# Step 4: Start server (only if port check was empty)
-npm run dev
+### Port Cleanup (When Needed)
+If you need to kill existing development servers:
+```powershell
+# Find processes on Vite ports
+$processes = Get-NetTCPConnection -LocalPort 5173,5174,5175,5176,5177,5178,5179 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique
+if ($processes) {
+    taskkill /F /PID ($processes -join " /PID ")
+}
 ```
 
 ### Tool Usage Requirements
