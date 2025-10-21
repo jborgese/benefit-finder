@@ -77,9 +77,15 @@ export const Question: React.FC<QuestionProps> = ({
   const handleChange = (newValue: unknown): void => {
     onChange(newValue);
 
-    // Validate when user changes the value (even if not touched yet)
-    // This provides immediate feedback when user makes a selection
-    validateValue(newValue);
+    // Mark as touched when user first interacts with the field
+    if (!touched) {
+      setTouched(true);
+      // Validate immediately after marking as touched
+      validateValue(newValue);
+    } else {
+      // Only validate if the field has been touched by the user
+      validateValue(newValue);
+    }
   };
 
   // Mark as touched on blur
