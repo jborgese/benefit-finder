@@ -12,6 +12,7 @@ import { WhyExplanation } from './WhyExplanation';
 import { WicExplanation } from './WicExplanation';
 import { MedicaidExplanation } from './MedicaidExplanation';
 import { SnapExplanation } from './SnapExplanation';
+import { TanfExplanation } from './TanfExplanation';
 import { ConfidenceScore } from './ConfidenceScore';
 import { DocumentChecklist } from './DocumentChecklist';
 import { NextStepsList } from './NextStepsList';
@@ -285,6 +286,14 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
               />
             ) : result.programId === 'snap-federal' ? (
               <SnapExplanation
+                programName={result.programName}
+                status={result.status}
+                explanation={result.explanation}
+                userProfile={userProfile}
+                onClose={() => setShowExplanation(false)}
+              />
+            ) : result.programId === 'tanf-federal' ? (
+              <TanfExplanation
                 programName={result.programName}
                 status={result.status}
                 explanation={result.explanation}

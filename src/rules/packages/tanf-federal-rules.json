@@ -1,0 +1,622 @@
+{
+  "metadata": {
+    "id": "tanf-federal-rules-2024",
+    "name": "TANF Federal Eligibility Rules (2024)",
+    "description": "Federal baseline TANF (Temporary Assistance for Needy Families) eligibility rules for 2024. TANF provides temporary cash assistance and support services to low-income families with children.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": [
+      "tanf-federal"
+    ],
+    "tags": [
+      "tanf",
+      "cash-assistance",
+      "federal",
+      "2024",
+      "families",
+      "children"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "tanf-federal-categorical-eligibility",
+      "programId": "tanf-federal",
+      "name": "TANF Categorical Eligibility",
+      "description": "Must have children under 18 (or 19 if still in high school)",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "hasChildren"
+          },
+          {
+            "and": [
+              {
+                "var": "hasChildren"
+              },
+              {
+                "<=": [
+                  {
+                    "var": "childAge"
+                  },
+                  19
+                ]
+              },
+              {
+                "var": "childInHighSchool"
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "TANF serves families with children. You must have children under 18 years old, or children who are 18-19 years old and still in high school.",
+      "requiredFields": [
+        "hasChildren"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-children",
+          "name": "Proof of Children",
+          "description": "Birth certificates, school records, or other proof of children in household",
+          "required": true,
+          "alternatives": [
+            "School enrollment records",
+            "Medical records",
+            "Court documents"
+          ],
+          "where": "Hospital, school, or court records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you have children, proceed to income and work requirement tests",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "TANF Eligibility Requirements",
+          "url": "https://www.acf.hhs.gov/ofa/programs/tanf",
+          "legalReference": "45 CFR § 260.30",
+          "date": "2024-10-01",
+          "notes": "TANF serves families with children under 18"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-eligible-with-children",
+          "description": "Family with children under 18 - should qualify",
+          "input": {
+            "hasChildren": true,
+            "childAge": 12
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "children"
+          ]
+        },
+        {
+          "id": "test-eligible-high-school",
+          "description": "Family with 19-year-old in high school - should qualify",
+          "input": {
+            "hasChildren": true,
+            "childAge": 19,
+            "childInHighSchool": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "high-school"
+          ]
+        },
+        {
+          "id": "test-not-eligible-no-children",
+          "description": "Adult without children - should not qualify",
+          "input": {
+            "hasChildren": false
+          },
+          "expected": false,
+          "tags": [
+            "not-eligible",
+            "no-children"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tanf-federal-income-test",
+      "programId": "tanf-federal",
+      "name": "TANF Income Test",
+      "description": "Household income must be below state-determined limits (varies by state)",
+      "ruleLogic": {
+        "<": [
+          {
+            "var": "householdIncome"
+          },
+          {
+            "*": [
+              {
+                "var": "householdSize"
+              },
+              2000
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "TANF income limits vary by state, but generally your household income must be below the state's limit. This is typically around 200% of the federal poverty level or lower, depending on your state.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income",
+          "name": "Proof of Income",
+          "description": "Recent pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2 forms",
+            "1099 forms",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer, IRS, bank, or your own records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you meet income requirements, proceed to work requirement assessment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "TANF Income Limits by State",
+          "url": "https://www.acf.hhs.gov/ofa/programs/tanf",
+          "legalReference": "45 CFR § 260.30",
+          "date": "2024-10-01",
+          "notes": "Income limits vary by state and household composition"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 9,
+      "testCases": [
+        {
+          "id": "test-eligible-low-income",
+          "description": "Family with low income - should qualify",
+          "input": {
+            "householdIncome": 3000,
+            "householdSize": 3,
+            "hasChildren": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "low-income"
+          ]
+        },
+        {
+          "id": "test-not-eligible-high-income",
+          "description": "Family with high income - should not qualify",
+          "input": {
+            "householdIncome": 8000,
+            "householdSize": 3,
+            "hasChildren": true
+          },
+          "expected": false,
+          "tags": [
+            "not-eligible",
+            "high-income"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tanf-federal-work-requirements",
+      "programId": "tanf-federal",
+      "name": "TANF Work Requirements",
+      "description": "Must participate in work activities or be exempt",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "isEmployed"
+          },
+          {
+            "var": "isWorkExempt"
+          },
+          {
+            "and": [
+              {
+                "var": "hasChildren"
+              },
+              {
+                "<=": [
+                  {
+                    "var": "childAge"
+                  },
+                  3
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "TANF recipients must participate in work activities unless exempt. Exemptions include: caring for a child under 3, being disabled, or being over 60. Work activities include employment, job search, education, or training.",
+      "requiredFields": [
+        "isEmployed",
+        "isWorkExempt",
+        "hasChildren",
+        "childAge"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-status",
+          "name": "Proof of Work Status",
+          "description": "Employment verification or exemption documentation",
+          "required": true,
+          "alternatives": [
+            "Pay stubs",
+            "Employer letter",
+            "Medical documentation",
+            "School records"
+          ],
+          "where": "Employer, doctor, or school"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you meet work requirements, you may be eligible for TANF benefits",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "TANF Work Requirements",
+          "url": "https://www.acf.hhs.gov/ofa/programs/tanf",
+          "legalReference": "45 CFR § 261.10",
+          "date": "2024-10-01",
+          "notes": "Work participation requirements vary by state"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 8,
+      "testCases": [
+        {
+          "id": "test-eligible-employed",
+          "description": "Employed parent - should qualify",
+          "input": {
+            "isEmployed": true,
+            "hasChildren": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "employed"
+          ]
+        },
+        {
+          "id": "test-eligible-work-exempt",
+          "description": "Work-exempt parent - should qualify",
+          "input": {
+            "isWorkExempt": true,
+            "hasChildren": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-eligible-young-child",
+          "description": "Parent with child under 3 - should qualify",
+          "input": {
+            "hasChildren": true,
+            "childAge": 2
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "young-child"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tanf-federal-citizenship",
+      "programId": "tanf-federal",
+      "name": "TANF Citizenship Requirements",
+      "description": "Must be U.S. citizen or qualified immigrant",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "isCitizen"
+          },
+          {
+            "var": "isQualifiedImmigrant"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "TANF recipients must be U.S. citizens or qualified immigrants. Qualified immigrants include lawful permanent residents, refugees, and certain other categories.",
+      "requiredFields": [
+        "isCitizen",
+        "isQualifiedImmigrant"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, or immigration documents",
+          "required": true,
+          "alternatives": [
+            "Naturalization certificate",
+            "Green card",
+            "Refugee documentation"
+          ],
+          "where": "Birth certificate from hospital, passport from State Department, immigration documents from USCIS"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you meet citizenship requirements, proceed to other eligibility tests",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "TANF Citizenship Requirements",
+          "url": "https://www.acf.hhs.gov/ofa/programs/tanf",
+          "legalReference": "45 CFR § 260.30",
+          "date": "2024-10-01",
+          "notes": "Citizenship or qualified immigrant status required"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 7,
+      "testCases": [
+        {
+          "id": "test-eligible-citizen",
+          "description": "U.S. citizen - should qualify",
+          "input": {
+            "isCitizen": true,
+            "hasChildren": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "citizen"
+          ]
+        },
+        {
+          "id": "test-eligible-immigrant",
+          "description": "Qualified immigrant - should qualify",
+          "input": {
+            "isQualifiedImmigrant": true,
+            "hasChildren": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "immigrant"
+          ]
+        },
+        {
+          "id": "test-not-eligible-non-citizen",
+          "description": "Non-citizen without qualified status - should not qualify",
+          "input": {
+            "isCitizen": false,
+            "isQualifiedImmigrant": false,
+            "hasChildren": true
+          },
+          "expected": false,
+          "tags": [
+            "not-eligible",
+            "non-citizen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tanf-federal-residence",
+      "programId": "tanf-federal",
+      "name": "TANF Residence Requirements",
+      "description": "Must live in the state where you apply",
+      "ruleLogic": {
+        "var": "livesInState"
+      },
+      "ruleType": "eligibility",
+      "explanation": "You must live in the state where you apply for TANF benefits. You cannot receive TANF from multiple states at the same time.",
+      "requiredFields": [
+        "livesInState"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-residence",
+          "name": "Proof of Residence",
+          "description": "Utility bills, lease agreement, or other proof of address",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "Bank statements",
+            "Mail with current address"
+          ],
+          "where": "Utility company, landlord, DMV, or bank"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you live in the state, proceed to other eligibility tests",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "TANF Residence Requirements",
+          "url": "https://www.acf.hhs.gov/ofa/programs/tanf",
+          "legalReference": "45 CFR § 260.30",
+          "date": "2024-10-01",
+          "notes": "Must be resident of the state where applying"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 6,
+      "testCases": [
+        {
+          "id": "test-eligible-resident",
+          "description": "State resident - should qualify",
+          "input": {
+            "livesInState": true,
+            "hasChildren": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "resident"
+          ]
+        },
+        {
+          "id": "test-not-eligible-non-resident",
+          "description": "Non-resident - should not qualify",
+          "input": {
+            "livesInState": false,
+            "hasChildren": true
+          },
+          "expected": false,
+          "tags": [
+            "not-eligible",
+            "non-resident"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tanf-federal-time-limit",
+      "programId": "tanf-federal",
+      "name": "TANF Time Limit Check",
+      "description": "Must not have exceeded lifetime time limits (typically 60 months)",
+      "ruleLogic": {
+        "<": [
+          {
+            "var": "monthsOnTANF"
+          },
+          60
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "TANF has lifetime time limits. Most states limit TANF benefits to 60 months (5 years) in a lifetime. Some states have shorter limits. If you've already received TANF for the maximum time, you may not be eligible for additional benefits.",
+      "requiredFields": [
+        "monthsOnTANF"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-tanf-history",
+          "name": "Proof of TANF History",
+          "description": "Previous TANF benefit statements or case records",
+          "required": false,
+          "alternatives": [
+            "Case worker verification",
+            "State benefit records"
+          ],
+          "where": "Previous state TANF office or case worker"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you haven't exceeded time limits, you may be eligible for TANF benefits",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "TANF Time Limits",
+          "url": "https://www.acf.hhs.gov/ofa/programs/tanf",
+          "legalReference": "45 CFR § 264.1",
+          "date": "2024-10-01",
+          "notes": "60-month lifetime limit for TANF benefits"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 5,
+      "testCases": [
+        {
+          "id": "test-eligible-within-limits",
+          "description": "Within time limits - should qualify",
+          "input": {
+            "monthsOnTANF": 24,
+            "hasChildren": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "within-limits"
+          ]
+        },
+        {
+          "id": "test-not-eligible-exceeded-limits",
+          "description": "Exceeded time limits - should not qualify",
+          "input": {
+            "monthsOnTANF": 65,
+            "hasChildren": true
+          },
+          "expected": false,
+          "tags": [
+            "not-eligible",
+            "exceeded-limits"
+          ]
+        }
+      ]
+    }
+  ]
+}

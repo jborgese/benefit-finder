@@ -365,6 +365,110 @@
         }
       }
     },
+    "tanf": {
+      "statusMessages": {
+        "qualified": "You are eligible for TANF! You can receive temporary cash assistance and support services.",
+        "likely": "You appear to be eligible for TANF. Contact your local TANF office to confirm and apply.",
+        "maybe": "You may be eligible for TANF. Contact your local TANF office to discuss your situation.",
+        "unlikely": "You may not currently qualify for TANF, but eligibility can change. Contact your local TANF office to discuss.",
+        "notQualified": "You may not currently qualify for TANF. Contact your local TANF office to discuss your situation and see if you qualify."
+      },
+      "benefits": {
+        "title": "What TANF provides:",
+        "cashAssistance": "Temporary cash assistance for families with children",
+        "familySupport": "Family support services and case management",
+        "childcare": "Childcare assistance for work or education",
+        "generalCash": "Temporary cash assistance for eligible families",
+        "workSupport": "Work support services and job training",
+        "services": "Support services including transportation and job search assistance",
+        "timeLimit": "Benefits are time-limited (typically 60 months lifetime)",
+        "workRequirements": "Must participate in work activities (varies by state)"
+      },
+      "requirements": {
+        "title": "TANF requirements:",
+        "citizenship": "Must be a U.S. citizen or qualified immigrant",
+        "residence": "Must live in the state where you apply",
+        "income": "Must meet income guidelines (varies by state and household size)",
+        "children": "Must have children under 18 (or 19 if still in high school)",
+        "family": "Must be part of a family with children",
+        "work": "Must participate in work activities (varies by state)",
+        "timeLimit": "Subject to lifetime time limits (typically 60 months)"
+      },
+      "nextSteps": {
+        "title": "Next steps:",
+        "contact": "Contact your local TANF office to apply",
+        "schedule": "Schedule an appointment for application and interview",
+        "documents": "Gather required documents (ID, proof of income, proof of children)",
+        "familyServices": "Ask about family support services and case management",
+        "workRequirements": "Discuss work requirements and available job training",
+        "discuss": "Contact your local TANF office to discuss your situation",
+        "alternatives": "Ask about alternative assistance programs",
+        "checkBack": "Check back if your situation changes",
+        "reapply": "Consider reapplying if your situation changes"
+      },
+      "additionalSteps": {
+        "familySupport": "Ask about family support services and case management",
+        "childcareAssistance": "Ask about childcare assistance for work or education",
+        "workTraining": "Ask about job training and employment services",
+        "alternativeAssistance": "Ask about alternative cash assistance programs",
+        "otherFamily": "Ask about other family support programs"
+      },
+      "howToApply": {
+        "title": "How to apply for TANF:",
+        "findOffice": "Find your local TANF office or apply online",
+        "schedule": "Schedule an appointment for application and interview",
+        "bringDocuments": "Bring required documents (ID, proof of income, proof of children)",
+        "interview": "Complete application and participate in interview",
+        "workPlan": "Develop and agree to work plan and requirements",
+        "receiveBenefits": "Receive benefits and participate in required activities"
+      },
+      "resources": {
+        "title": "Additional resources:",
+        "website": "TANF website: acf.hhs.gov/ofa",
+        "hotline": "TANF hotline: Contact your local office for assistance",
+        "workServices": "Work support services and job training programs",
+        "childcare": "Childcare assistance programs",
+        "statePrograms": "State-specific TANF programs and services"
+      },
+      "stateSpecific": {
+        "CA": {
+          "statusMessages": {
+            "qualified": "You are eligible for CalWORKs! California's TANF program provides temporary cash assistance.",
+            "likely": "You appear to be eligible for CalWORKs. Contact your local county office to confirm and apply."
+          },
+          "benefits": {
+            "title": "What CalWORKs provides:",
+            "cashAssistance": "Temporary cash assistance for families with children",
+            "familySupport": "Family support services and case management",
+            "childcare": "Childcare assistance for work or education",
+            "workSupport": "Work support services and job training"
+          },
+          "resources": {
+            "website": "CalWORKs website: cdss.ca.gov/cash-aid/calworks",
+            "stateOffice": "Contact your local county social services office",
+            "workServices": "CalWORKs provides comprehensive work support services"
+          }
+        },
+        "TX": {
+          "statusMessages": {
+            "qualified": "You are eligible for TANF! You can receive temporary cash assistance through the Texas program.",
+            "likely": "You appear to be eligible for TANF. Contact your local HHSC office to confirm and apply."
+          },
+          "benefits": {
+            "title": "What Texas TANF provides:",
+            "cashAssistance": "Temporary cash assistance for families with children",
+            "familySupport": "Family support services and case management",
+            "childcare": "Childcare assistance for work or education",
+            "workSupport": "Work support services and job training"
+          },
+          "resources": {
+            "website": "Texas TANF website: hhs.texas.gov/services/financial/tanf",
+            "stateOffice": "Contact your local HHSC office",
+            "workServices": "Texas TANF provides work support services and job training"
+          }
+        }
+      }
+    },
     "additionalInfo": {
       "title": "Additional Information Needed",
       "message": "You may qualify for some programs, but we need more information to determine eligibility. Review the program details below and contact the program office for assistance."
@@ -473,6 +577,7 @@
       "medicaid": "Health coverage for low-income individuals and families",
       "snap": "SNAP helps low-income individuals and families buy food",
       "wic": "Provides nutrition assistance to pregnant women, new mothers, and young children",
+      "tanf": "Temporary financial assistance for low-income families with children",
       "default": "Government benefit program"
     }
   },
