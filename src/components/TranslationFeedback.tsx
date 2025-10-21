@@ -36,14 +36,14 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
   } | null>(null);
 
   useEffect(() => {
-    const loadStatistics = async () => {
+    const loadStatistics = async (): Promise<void> => {
       const stats = await getStatistics();
       setStatistics(stats);
     };
-    loadStatistics();
+    void loadStatistics();
   }, [getStatistics]);
 
-  const handleSubmitFeedback = async () => {
+  const handleSubmitFeedback = async (): Promise<void> => {
     if (!suggestedText.trim() || !reason.trim()) return;
 
     setIsSubmitting(true);
@@ -67,7 +67,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
     }
   };
 
-  const handleReportIssue = async () => {
+  const handleReportIssue = async (): Promise<void> => {
     if (!issueDescription.trim()) return;
 
     setIsSubmitting(true);
@@ -89,7 +89,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
     }
   };
 
-  const handleExportFeedback = async () => {
+  const handleExportFeedback = async (): Promise<void> => {
     try {
       const feedbackData = await exportFeedback();
       const blob = new Blob([feedbackData], { type: 'application/json' });
@@ -230,7 +230,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
 
             <div className="flex justify-between items-center mt-6">
               <button
-                onClick={handleExportFeedback}
+                onClick={() => void handleExportFeedback()}
                 className="inline-flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
               >
                 <DownloadIcon className="w-4 h-4" />
@@ -246,7 +246,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
                   Cancel
                 </Button>
                 <Button
-                  onClick={feedbackType === 'suggestion' ? handleSubmitFeedback : handleReportIssue}
+                  onClick={() => void (feedbackType === 'suggestion' ? handleSubmitFeedback() : handleReportIssue())}
                   disabled={isSubmitting || (feedbackType === 'suggestion' ? !suggestedText.trim() || !reason.trim() : !issueDescription.trim())}
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit'}

@@ -20,7 +20,6 @@ import type {
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.debug('[Eligibility Evaluation Debug]', ...args);
   }
 }
@@ -205,7 +204,7 @@ export async function evaluateAllRules(
     logRuleEvaluation(profileId, programId, rule.id, rule.ruleLogic, data);
 
     // Use detailed evaluator to capture comparison values
-    const detailedResult = await evaluateRuleWithDetails(
+    const detailedResult = evaluateRuleWithDetails(
       rule.ruleLogic as JsonLogicRule,
       data
     );
@@ -302,7 +301,8 @@ export function buildEvaluationResult(
 
   if (import.meta.env.DEV) {
     detailedResult.criteriaResults?.forEach((cr, i) => {
-      debugLog(`buildEvaluationResult [${i}]`, { input: cr, output: criteriaResults?.[i] });
+      const outputResult = criteriaResults?.[i];
+      debugLog(`buildEvaluationResult [${i}]`, { input: cr, output: outputResult });
       console.log(`evaluation.ts - buildEvaluationResult -  [${i}] Input:`, {
         criterion: cr.criterion,
         comparison: cr.comparison,
@@ -311,11 +311,11 @@ export function buildEvaluationResult(
         met: cr.met
       });
       console.log(`evaluation.ts - buildEvaluationResult -  [${i}] Output:`, {
-        criterion: criteriaResults?.[i]?.criterion,
-        comparison: criteriaResults?.[i]?.comparison,
-        threshold: criteriaResults?.[i]?.threshold,
-        value: criteriaResults?.[i]?.value,
-        met: criteriaResults?.[i]?.met
+        criterion: outputResult?.criterion,
+        comparison: outputResult?.comparison,
+        threshold: outputResult?.threshold,
+        value: outputResult?.value,
+        met: outputResult?.met
       });
     });
   }
@@ -374,7 +374,9 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
   const missing: string[] = [];
   debugLog('Checking missing fields', { requiredFields, data });
   for (const field of requiredFields) {
-    if (data[field] === undefined || data[field] === null || data[field] === '') {
+    // Use Object.hasOwnProperty to safely check for field existence
+    const fieldValue = Object.hasOwnProperty.call(data, field) ? data[field] : undefined;
+    if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
       missing.push(field);
     }
   }
@@ -455,7 +457,8 @@ function normalizeStateToCode(stateValue: string): string {
 
   // If it's a full state name, convert to code
   const normalizedName = stateValue.trim();
-  const code = stateNameToCode[normalizedName];
+  // Use Object.hasOwnProperty to safely access the mapping
+  const code = Object.hasOwnProperty.call(stateNameToCode, normalizedName) ? stateNameToCode[normalizedName] : undefined;
 
   if (code) {
     return code;

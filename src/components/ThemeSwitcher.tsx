@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Button } from './Button';
 import * as Select from '@radix-ui/react-select';
 import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 
@@ -21,7 +20,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   size = 'sm',
   variant = 'default',
 }) => {
-  const { theme, actualTheme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const sizeClasses = {
     sm: 'h-8 px-2 text-sm',
@@ -46,15 +45,15 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
     { value: 'system', label: 'System', icon: '💻' },
   ];
 
-  const currentTheme = themeOptions.find(option => option.value === theme) || themeOptions[0];
+  const currentTheme = themeOptions.find(option => option.value === theme) ?? themeOptions[0];
 
   return (
-    <Select.Root value={theme} onValueChange={(value) => setTheme(value as any)}>
+    <Select.Root value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}>
       <Select.Trigger
         className={`
           inline-flex items-center justify-between rounded-md
-          ${sizeClasses[size]}
-          ${variantClasses[variant]}
+          ${sizeClasses[size as keyof typeof sizeClasses]}
+          ${variantClasses[variant as keyof typeof variantClasses]}
           transition-colors duration-200
           focus:outline-none
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -73,7 +72,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           </span>
         </Select.Value>
         <Select.Icon className={variant === 'minimal' ? 'text-gray-500 dark:text-white/70' : 'text-gray-500 dark:text-secondary-400'}>
-          <ChevronDownIcon className={iconSizeClasses[size]} />
+          <ChevronDownIcon className={iconSizeClasses[size as keyof typeof iconSizeClasses]} />
         </Select.Icon>
       </Select.Trigger>
 

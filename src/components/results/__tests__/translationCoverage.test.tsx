@@ -36,9 +36,9 @@ const mockResults: EligibilityResults = {
 };
 
 describe('Translation Coverage Tests', () => {
-  const renderWithI18n = (component: React.ReactElement, language = 'en') => {
+  const renderWithI18n = (component: React.ReactElement, language = 'en'): ReturnType<typeof render> => {
     // Change language for testing
-    i18n.changeLanguage(language);
+    void i18n.changeLanguage(language);
     return render(
       <I18nextProvider i18n={i18n}>
         {component}
@@ -48,7 +48,7 @@ describe('Translation Coverage Tests', () => {
 
   describe('English Translation Coverage', () => {
     beforeEach(() => {
-      i18n.changeLanguage('en');
+      void i18n.changeLanguage('en');
     });
 
     it('ProgramCard renders all text in English', () => {
@@ -75,7 +75,7 @@ describe('Translation Coverage Tests', () => {
 
   describe('Spanish Translation Coverage', () => {
     beforeEach(() => {
-      i18n.changeLanguage('es');
+      void i18n.changeLanguage('es');
     });
 
     it('ProgramCard renders all text in Spanish', () => {

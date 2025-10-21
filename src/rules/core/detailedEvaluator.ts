@@ -64,7 +64,7 @@ export function evaluateRuleWithDetails(
     analyzeRule(rule, context);
 
     // Perform standard evaluation
-    const result = jsonLogic.apply(rule as JsonLogicRule, data) as boolean;
+    const result = jsonLogic.apply(rule, data) as boolean;
     const endTime = performance.now();
 
     if (import.meta.env.DEV) {
@@ -315,7 +315,7 @@ function isVariableReference(operand: unknown): boolean {
  */
 function getVariableValue(varName: string, data: JsonLogicData): unknown {
   return Object.prototype.hasOwnProperty.call(data, varName)
-    ? data[varName as keyof JsonLogicData]
+    ? data[varName]
     : undefined;
 }
 

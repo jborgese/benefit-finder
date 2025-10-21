@@ -29,7 +29,7 @@ describe('Detailed Criteria Flow', () => {
     };
 
     // Execute detailed evaluation
-    const result = await evaluateRuleWithDetails(snapRule, testData);
+    const result = evaluateRuleWithDetails(snapRule, testData);
 
     // Verify detailed evaluation captured the data correctly
     console.log('Test result:', result);
@@ -81,7 +81,7 @@ describe('Detailed Criteria Flow', () => {
       householdSize: 1
     };
 
-    const result = await evaluateRuleWithDetails(medicaidRule, testData);
+    const result = evaluateRuleWithDetails(medicaidRule, testData);
 
     console.log('Medicaid test result:', result);
 
