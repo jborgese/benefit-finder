@@ -193,7 +193,10 @@ export const SelectInput: React.FC<SelectProps> = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search..."
-          className="question-input w-full px-3 py-2 mb-2 border rounded-md"
+          className="question-input w-full px-3 py-2 mb-2 border rounded-md
+                     bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
+                     border-secondary-300 dark:border-secondary-600
+                     focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
         />
       )}
 
@@ -212,10 +215,12 @@ export const SelectInput: React.FC<SelectProps> = ({
         aria-label={question.ariaLabel ?? question.text}
         className={`
           question-input w-full px-4 py-3 border rounded-lg shadow-sm
+          bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
+          border-secondary-300 dark:border-secondary-600
           focus:outline-none transition-all duration-200 ease-smooth
           ${showError ? 'border-error-400 ring-2 ring-error-400/20' : ''}
           ${isFocused ? 'ring-2 ring-primary-400/20 border-primary-400' : ''}
-          ${!showError && !isFocused ? 'hover:border-secondary-400' : ''}
+          ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
         `}
       >
         <option value="" disabled>

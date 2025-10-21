@@ -203,9 +203,12 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           aria-label={question.ariaLabel ?? question.text}
           className={`
             question-input w-full pl-8 pr-3 py-2 border rounded-md shadow-sm
-            focus:outline-none
-            ${showError ? 'border-red-400' : ''}
-            ${isFocused ? 'ring-2 ring-blue-400/20' : ''}
+            bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
+            border-secondary-300 dark:border-secondary-600
+            focus:outline-none transition-all duration-200 ease-smooth
+            ${showError ? 'border-red-400 dark:border-red-400' : ''}
+            ${isFocused ? 'ring-2 ring-blue-400/20 border-blue-400 dark:border-blue-400' : ''}
+            ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
           `}
         />
       </div>

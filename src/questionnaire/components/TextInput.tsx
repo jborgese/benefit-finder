@@ -114,15 +114,17 @@ export const TextInput: React.FC<TextInputProps> = ({
           aria-label={question.ariaLabel ?? question.text}
           className={`
             question-input w-full px-4 py-3 border rounded-lg shadow-sm
+            bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
+            border-secondary-300 dark:border-secondary-600
             focus:outline-none transition-all duration-200 ease-smooth
             ${showError ? 'border-error-400 ring-2 ring-error-400/20' : ''}
             ${isFocused ? 'ring-2 ring-primary-400/20 border-primary-400' : ''}
-            ${!showError && !isFocused ? 'hover:border-secondary-400' : ''}
+            ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
           `}
         />
 
         {maxLength && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-secondary-400">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-secondary-400 dark:text-secondary-400">
             {value.length}/{maxLength}
           </div>
         )}

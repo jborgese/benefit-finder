@@ -81,7 +81,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   const renderConstraintsText = (): React.ReactElement | null => {
     if (!(minSelections ?? maxSelections)) return null;
     return (
-      <p className="text-xs text-gray-500 mt-1 mb-3">
+      <p className="text-xs text-gray-500 dark:text-secondary-400 mt-1 mb-3">
         {getSelectionMessage()}
       </p>
     );
@@ -110,10 +110,10 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
     return (
       <div className={`question-multiselect-pills ${className}`} onKeyDown={handleKeyDown}>
         <div className="mb-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-secondary-200">
             {question.text}
             {question.required && (
-              <span className="text-red-500 ml-1" aria-label="required">
+              <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
                 *
               </span>
             )}
@@ -122,7 +122,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
           {question.description && (
             <p
               id={descId}
-              className="text-sm text-gray-600 mt-1"
+              className="text-sm text-gray-600 dark:text-secondary-300 mt-1"
             >
               {question.description}
             </p>
@@ -152,7 +152,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
                   transition-all border-2
                   ${isSelected
                     ? 'bg-blue-500 text-white border-blue-500'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                    : 'bg-white dark:bg-secondary-700 text-gray-700 dark:text-secondary-200 border-gray-300 dark:border-secondary-600 hover:border-blue-300 dark:hover:border-blue-400'
                   }
                   ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
@@ -181,7 +181,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         </div>
 
         {question.helpText && !showError && (
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
             {question.helpText}
           </p>
         )}
@@ -195,10 +195,10 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   return (
     <div className={`question-multiselect-checkbox ${className}`}>
       <fieldset onKeyDown={handleKeyDown}>
-        <legend className="block text-sm font-medium text-gray-700 mb-2">
+        <legend className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
           {question.text}
           {question.required && (
-            <span className="text-red-500 ml-1" aria-label="required">
+            <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
               *
             </span>
           )}
@@ -207,7 +207,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         {question.description && (
           <p
             id={descId}
-            className="text-sm text-gray-600 mb-3"
+            className="text-sm text-gray-600 dark:text-secondary-300 mb-3"
           >
             {question.description}
           </p>
@@ -228,7 +228,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
                 className={`
                   flex items-start p-3 border rounded-md cursor-pointer
                   transition-colors
-                  ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+                  ${isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-secondary-600 hover:border-gray-400 dark:hover:border-secondary-500'}
                   ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
@@ -249,13 +249,13 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
                         {option.icon}
                       </span>
                     )}
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 dark:text-secondary-100">
                       {option.label}
                     </span>
                   </div>
 
                   {option.description && (
-                    <p id={`${optionId}-desc`} className="mt-1 text-sm text-gray-500">
+                    <p id={`${optionId}-desc`} className="mt-1 text-sm text-gray-500 dark:text-secondary-400">
                       {option.description}
                     </p>
                   )}
@@ -267,7 +267,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
       </fieldset>
 
       {question.helpText && !showError && (
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
           {question.helpText}
         </p>
       )}
