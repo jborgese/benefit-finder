@@ -55,10 +55,10 @@ export function Button({
       active:bg-primary-800
     `,
     secondary: `
-      bg-secondary-700 text-secondary-100
-      hover:bg-secondary-600 hover:shadow-md hover:shadow-secondary-600/25
+      bg-secondary-700 dark:bg-secondary-600 text-secondary-100
+      hover:bg-secondary-600 dark:hover:bg-secondary-500 hover:shadow-md hover:shadow-secondary-600/25
       focus:ring-secondary-500
-      active:bg-secondary-800
+      active:bg-secondary-800 dark:active:bg-secondary-700
     `,
     success: `
       bg-success-600 text-white
@@ -79,10 +79,10 @@ export function Button({
       active:bg-error-800
     `,
     ghost: `
-      bg-transparent text-secondary-700 border border-secondary-300
-      hover:bg-secondary-50 hover:border-secondary-400
+      bg-transparent text-secondary-700 dark:text-secondary-200 border border-secondary-300 dark:border-secondary-600
+      hover:bg-secondary-50 dark:hover:bg-secondary-700 hover:border-secondary-400 dark:hover:border-secondary-500
       focus:ring-secondary-500
-      active:bg-secondary-100
+      active:bg-secondary-100 dark:active:bg-secondary-600
     `,
   };
 

@@ -407,7 +407,7 @@ function App(): React.ReactElement {
             onGoHome={handleBackToHome}
             onViewResults={handleViewResults}
           />
-          <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 text-secondary-900">
+          <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 dark:from-secondary-900 dark:to-primary-900 text-secondary-900 dark:text-secondary-100">
             {/* Screen reader announcements */}
             <LiveRegion
               message={announcementMessage}
@@ -415,9 +415,9 @@ function App(): React.ReactElement {
               clearAfter={3000}
             />
 
-            <nav className="bg-white/80 backdrop-blur-md border-b border-secondary-200 px-4 py-4 shadow-sm">
+            <nav className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700 px-4 py-4 shadow-sm">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
-                <h1 className="text-xl font-display font-semibold text-secondary-900">
+                <h1 className="text-xl font-display font-semibold text-secondary-900 dark:text-secondary-100">
                   {t('app.title')}
                 </h1>
                 <div className="flex items-center space-x-4">
@@ -514,10 +514,10 @@ function App(): React.ReactElement {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               {appState === 'home' && (
                 <div className="text-center animate-fade-in-up">
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-secondary-900 px-4">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-secondary-900 dark:text-secondary-100 px-4">
                     {t('app.subtitle')}
                   </h2>
-                  <p className="text-secondary-600 mb-8 sm:mb-12 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed px-4">
+                  <p className="text-secondary-600 dark:text-secondary-300 mb-8 sm:mb-12 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed px-4">
                     {t('app.description')}
                   </p>
 
@@ -553,38 +553,38 @@ function App(): React.ReactElement {
 
                   <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4">
                     <div
-                      className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                      className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                       data-tour="privacy-card"
                     >
                       <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                         <span className="text-2xl">🔒</span>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.title')}</h3>
-                      <p className="text-secondary-600 text-sm leading-relaxed">
+                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900 dark:text-secondary-100">{t('privacy.title')}</h3>
+                      <p className="text-secondary-600 dark:text-secondary-300 text-sm leading-relaxed">
                         {t('privacy.description')}
                       </p>
                     </div>
                     <div
-                      className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                      className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                       data-tour="offline-card"
                     >
                       <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                         <span className="text-2xl">📱</span>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.offline')}</h3>
-                      <p className="text-secondary-600 text-sm leading-relaxed">
+                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900 dark:text-secondary-100">{t('privacy.offline')}</h3>
+                      <p className="text-secondary-600 dark:text-secondary-300 text-sm leading-relaxed">
                         {t('privacy.localStorage')}
                       </p>
                     </div>
                     <div
-                      className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 sm:col-span-2 lg:col-span-1"
+                      className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 sm:col-span-2 lg:col-span-1"
                       data-tour="encryption-card"
                     >
                       <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                         <span className="text-2xl">🛡️</span>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('app.encryption')}</h3>
-                      <p className="text-secondary-600 text-sm leading-relaxed">
+                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900 dark:text-secondary-100">{t('app.encryption')}</h3>
+                      <p className="text-secondary-600 dark:text-secondary-300 text-sm leading-relaxed">
                         {t('privacy.encryption')}
                       </p>
                     </div>
@@ -595,10 +595,10 @@ function App(): React.ReactElement {
               {appState === 'questionnaire' && (
                 <div className="animate-fade-in">
                   <div className="mb-6 sm:mb-8 text-center px-4">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-2">
                       Benefit Eligibility Assessment
                     </h2>
-                    <p className="text-secondary-600 text-sm sm:text-base">
+                    <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base">
                       Complete this questionnaire to check your eligibility for government benefits
                     </p>
                   </div>
@@ -655,17 +655,17 @@ function App(): React.ReactElement {
                 <div>
                   {/* Avoid nested ternary by early return pattern */}
                   {isProcessingResults && (
-                    <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-secondary-200 p-12 text-center max-w-2xl mx-auto animate-scale-in">
+                    <div className="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-secondary-200 dark:border-secondary-700 p-12 text-center max-w-2xl mx-auto animate-scale-in">
                       <div className="flex items-center justify-center mb-6">
                         <div className="relative">
                           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200" />
                           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 border-t-transparent absolute top-0 left-0" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
                         </div>
                       </div>
-                      <h2 className="text-3xl font-display font-bold text-secondary-900 mb-4">
+                      <h2 className="text-3xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-4">
                         {t('results.processing.title')}
                       </h2>
-                      <p className="text-secondary-600 mb-8 text-lg">
+                      <p className="text-secondary-600 dark:text-secondary-300 mb-8 text-lg">
                         {t('results.processing.description')}
                       </p>
                       <div className="flex items-center justify-center text-primary-600 text-lg">
@@ -680,10 +680,10 @@ function App(): React.ReactElement {
                       <div className="mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
                           <div className="text-center sm:text-left">
-                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-2">
                               {t('results.summary.title')}
                             </h2>
-                            <p className="text-secondary-600 text-sm sm:text-base">
+                            <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base">
                               Your personalized benefit eligibility results
                             </p>
                           </div>
@@ -748,8 +748,8 @@ function App(): React.ReactElement {
                       </div>
 
                       {/* Helpful links for accessibility */}
-                      <div className="mt-6 sm:mt-8 bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 max-w-4xl mx-auto mx-4 sm:mx-auto">
-                        <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-secondary-900">{t('results.resources.title')}</h3>
+                      <div className="mt-6 sm:mt-8 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 max-w-4xl mx-auto mx-4 sm:mx-auto">
+                        <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-secondary-900 dark:text-secondary-100">{t('results.resources.title')}</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                           <div>
                             <h4 className="font-medium mb-2">{t('results.resources.government')}</h4>

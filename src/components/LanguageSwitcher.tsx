@@ -70,8 +70,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   // Variant-based styling
   const variantClasses = {
-    default: 'bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-    minimal: 'bg-transparent border-none hover:bg-white/10 focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-white',
+    default: 'bg-white dark:bg-secondary-800 border border-gray-300 dark:border-secondary-600 shadow-sm hover:bg-gray-50 dark:hover:bg-secondary-700 focus:bg-white dark:focus:bg-secondary-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-secondary-200',
+    minimal: 'bg-transparent border-none hover:bg-white/10 dark:hover:bg-white/10 focus:bg-white/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-white',
   };
 
   return (
@@ -92,7 +92,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         aria-label="Select language"
       >
         <Select.Value>
-          <span className={`flex items-center gap-2 ${variant === 'minimal' ? 'text-white' : 'text-gray-900'}`}>
+          <span className={`flex items-center gap-2 ${variant === 'minimal' ? 'text-gray-700 dark:text-white' : 'text-gray-900 dark:text-secondary-100'}`}>
             <span className="text-lg" role="img" aria-hidden="true">
               {getLanguageFlag(currentLanguage)}
             </span>
@@ -101,7 +101,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             </span>
           </span>
         </Select.Value>
-        <Select.Icon className={variant === 'minimal' ? 'text-white/70' : 'text-gray-500'}>
+        <Select.Icon className={variant === 'minimal' ? 'text-gray-500 dark:text-white/70' : 'text-gray-500 dark:text-secondary-400'}>
           <ChevronDownIcon className={iconSizeClasses[size]} />
         </Select.Icon>
       </Select.Trigger>
@@ -109,7 +109,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <Select.Portal>
         <Select.Content
           className="
-            bg-white rounded-md shadow-lg border border-gray-200
+            bg-white dark:bg-secondary-800 rounded-md shadow-lg border border-gray-200 dark:border-secondary-700
             min-w-[160px] max-h-[200px] overflow-hidden
             z-50
           "
@@ -123,20 +123,20 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                 value={language}
                 className="
                   flex items-center gap-3 px-3 py-2 rounded-sm
-                  text-sm cursor-pointer text-gray-900
-                  hover:bg-gray-100 focus:bg-gray-100 focus:outline-none
-                  data-[highlighted]:bg-gray-100 data-[highlighted]:text-gray-900
-                  data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-700
+                  text-sm cursor-pointer text-gray-900 dark:text-secondary-100
+                  hover:bg-gray-100 dark:hover:bg-secondary-700 focus:bg-gray-100 dark:focus:bg-secondary-700 focus:outline-none
+                  data-[highlighted]:bg-gray-100 dark:data-[highlighted]:bg-secondary-700 data-[highlighted]:text-gray-900 dark:data-[highlighted]:text-secondary-100
+                  data-[state=checked]:bg-blue-50 dark:data-[state=checked]:bg-blue-900/30 data-[state=checked]:text-blue-700 dark:data-[state=checked]:text-blue-300
                   transition-colors duration-150
                 "
               >
-                <Select.ItemIndicator className="text-blue-600">
+                <Select.ItemIndicator className="text-blue-600 dark:text-blue-400">
                   <CheckIcon className="w-4 h-4" />
                 </Select.ItemIndicator>
                 <span className="text-lg" role="img" aria-hidden="true">
                   {getLanguageFlag(language)}
                 </span>
-                <Select.ItemText className="font-medium text-gray-900">
+                <Select.ItemText className="font-medium text-gray-900 dark:text-secondary-100">
                   {getLanguageDisplayName(language)}
                 </Select.ItemText>
               </Select.Item>

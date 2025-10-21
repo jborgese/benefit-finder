@@ -36,8 +36,8 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   };
 
   const variantClasses = {
-    default: 'bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-    minimal: 'bg-transparent border-none hover:bg-white/10 focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-white',
+    default: 'bg-white dark:bg-secondary-800 border border-gray-300 dark:border-secondary-600 shadow-sm hover:bg-gray-50 dark:hover:bg-secondary-700 focus:bg-white dark:focus:bg-secondary-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-secondary-200',
+    minimal: 'bg-transparent border-none hover:bg-white/10 dark:hover:bg-white/10 focus:bg-white/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-white',
   };
 
   const themeOptions = [
@@ -63,7 +63,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         aria-label="Select theme"
       >
         <Select.Value>
-          <span className={`flex items-center gap-2 ${variant === 'minimal' ? 'text-white' : 'text-gray-900'}`}>
+          <span className={`flex items-center gap-2 ${variant === 'minimal' ? 'text-gray-700 dark:text-white' : 'text-gray-900 dark:text-secondary-100'}`}>
             <span className="text-lg" role="img" aria-hidden="true">
               {currentTheme.icon}
             </span>
@@ -72,7 +72,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             </span>
           </span>
         </Select.Value>
-        <Select.Icon className={variant === 'minimal' ? 'text-white/70' : 'text-gray-500'}>
+        <Select.Icon className={variant === 'minimal' ? 'text-gray-500 dark:text-white/70' : 'text-gray-500 dark:text-secondary-400'}>
           <ChevronDownIcon className={iconSizeClasses[size]} />
         </Select.Icon>
       </Select.Trigger>

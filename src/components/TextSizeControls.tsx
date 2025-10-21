@@ -30,8 +30,8 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
   };
 
   const variantClasses = {
-    default: 'bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-    minimal: 'bg-transparent border-none hover:bg-white/10 focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-white',
+    default: 'bg-white dark:bg-secondary-800 border border-gray-300 dark:border-secondary-600 shadow-sm hover:bg-gray-50 dark:hover:bg-secondary-700 focus:bg-white dark:focus:bg-secondary-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-secondary-200',
+    minimal: 'bg-transparent border-none hover:bg-white/10 dark:hover:bg-white/10 focus:bg-white/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-white',
   };
 
   const isMaxSize = textSize === 'extra-large';
@@ -40,7 +40,7 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       {showLabels && (
-        <span className={`text-sm font-medium mr-2 ${variant === 'minimal' ? 'text-white' : 'text-gray-700'}`}>
+        <span className={`text-sm font-medium mr-2 ${variant === 'minimal' ? 'text-gray-700 dark:text-white' : 'text-gray-700 dark:text-secondary-200'}`}>
           Text Size:
         </span>
       )}
@@ -63,7 +63,7 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
         <span className="text-xs" aria-hidden="true">-</span>
       </Button>
 
-      <div className={`px-2 py-1 rounded text-xs font-medium ${variant === 'minimal' ? 'text-white' : 'text-gray-700'}`}>
+      <div className={`px-2 py-1 rounded text-xs font-medium ${variant === 'minimal' ? 'text-gray-700 dark:text-white' : 'text-gray-700 dark:text-secondary-200'}`}>
         {textSize}
       </div>
 

@@ -3,11 +3,16 @@
 ## ⚠️ COMMAND EXECUTION - READ THIS FIRST ⚠️
 🚨 **STOP! Before running ANY command, you MUST read and follow this section** 🚨
 
-### THE FUNDAMENTAL RULE
-**NEVER execute npm, node, vite, vitest, playwright, or ANY project command without first navigating to:**
-```
-C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder
-```
+### THE FUNDAMENTAL RULES
+1. **NEVER execute npm, node, vite, vitest, playwright, or ANY project command without first navigating to:**
+   ```
+   C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder
+   ```
+
+2. **NEVER run `npm run dev` without checking if a development server is already running!**
+   - Always check ports 5173-5179 first using `Get-NetTCPConnection`
+   - Starting multiple dev servers creates conflicts and wastes resources
+   - See "Development Server Management" section below for detailed instructions
 
 ### CRITICAL: Auto-Ran Command Blocks
 🚨 **"Auto-Ran" commands create FRESH shell instances that start from the home directory!** 🚨
@@ -65,6 +70,8 @@ This is the MOST COMMON FAILURE MODE for agents. Don't let this happen.
 ### Development Server Management
 🚨 **CRITICAL: Always check for existing servers before starting new ones!** 🚨
 
+**NEVER run `npm run dev` without first checking for existing development servers!**
+
 Before running `npm run dev`, ALWAYS check if it's already running on common Vite ports:
 ```powershell
 # Check for existing Vite dev servers on ports 5173-5179
@@ -92,10 +99,36 @@ $existingServer = Get-NetTCPConnection -LocalPort 5173,5174,5175,5176,5177,5178,
 if ($existingServer) {
     $port = $existingServer.LocalPort
     Write-Host "Development server is already running on port $port! Access it at: http://localhost:$port/"
+    Write-Host "DO NOT start another instance - this will create conflicts and waste resources!"
 } else {
     # Step 4: Start server (only if no existing server found)
     npm run dev
 }
+```
+
+### Alternative: Check for Node.js Processes
+If the port check doesn't work, you can also check for running Node.js processes:
+```powershell
+# Check for running Node processes that might be dev servers
+Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like "*vite*" -or $_.CommandLine -like "*vite*" }
+```
+
+### When Server Is Already Running
+If you find an existing development server:
+1. **DO NOT start another instance**
+2. **Inform the user** with the existing server URL
+3. **Provide the port number** where it's running
+4. **Suggest alternatives** like:
+   - Opening the existing server URL in browser
+   - Killing the existing server if they want to restart it
+   - Using the existing server for development
+
+Example response when server is found:
+```powershell
+Write-Host "✅ Development server is already running on port $port!"
+Write-Host "🌐 Access your app at: http://localhost:$port/"
+Write-Host "⚠️  Do NOT start another instance - this will create conflicts!"
+Write-Host "💡 If you need to restart, first kill the existing server with the cleanup commands below."
 ```
 
 ### Port Cleanup (When Needed)
