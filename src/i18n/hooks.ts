@@ -68,28 +68,36 @@ export const useI18n = () => {
    * Get language display name
    */
   const getLanguageDisplayName = (lng: string): string => {
-    return LANGUAGE_METADATA[lng]?.name || lng;
+    // Normalize language code (handle cases like 'en-US' -> 'en')
+    const normalizedLng = lng.split('-')[0];
+    return LANGUAGE_METADATA[normalizedLng]?.name || normalizedLng;
   };
 
   /**
    * Get language native name
    */
   const getLanguageNativeName = (lng: string): string => {
-    return LANGUAGE_METADATA[lng]?.nativeName || lng;
+    // Normalize language code (handle cases like 'en-US' -> 'en')
+    const normalizedLng = lng.split('-')[0];
+    return LANGUAGE_METADATA[normalizedLng]?.nativeName || normalizedLng;
   };
 
   /**
    * Get language flag emoji
    */
   const getLanguageFlag = (lng: string): string => {
-    return LANGUAGE_METADATA[lng]?.flag || '🌐';
+    // Normalize language code (handle cases like 'en-US' -> 'en')
+    const normalizedLng = lng.split('-')[0];
+    return LANGUAGE_METADATA[normalizedLng]?.flag || '🌐';
   };
 
   /**
    * Check if a language is right-to-left
    */
   const isRightToLeft = (lng: string): boolean => {
-    return RTL_LANGUAGES.includes(lng) || LANGUAGE_METADATA[lng]?.isRTL || false;
+    // Normalize language code (handle cases like 'en-US' -> 'en')
+    const normalizedLng = lng.split('-')[0];
+    return RTL_LANGUAGES.includes(normalizedLng) || LANGUAGE_METADATA[normalizedLng]?.isRTL || false;
   };
 
   /**

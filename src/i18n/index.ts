@@ -16,6 +16,43 @@ const resources = {
   },
 };
 
+/**
+ * Normalize language code to supported format
+ * Converts browser language codes like 'en-US' to 'en'
+ */
+const normalizeLanguageCode = (language: string): string => {
+  // Map common browser language codes to our supported languages
+  const languageMap: Record<string, string> = {
+    'en-US': 'en',
+    'en-GB': 'en',
+    'en-CA': 'en',
+    'en-AU': 'en',
+    'es-ES': 'es',
+    'es-MX': 'es',
+    'es-AR': 'es',
+    'es-CO': 'es',
+    'es-PE': 'es',
+    'es-VE': 'es',
+    'es-CL': 'es',
+    'es-UY': 'es',
+    'es-PY': 'es',
+    'es-BO': 'es',
+    'es-EC': 'es',
+    'es-CR': 'es',
+    'es-PA': 'es',
+    'es-HN': 'es',
+    'es-SV': 'es',
+    'es-GT': 'es',
+    'es-NI': 'es',
+    'es-CU': 'es',
+    'es-DO': 'es',
+    'es-PR': 'es',
+  };
+
+  // Return mapped language or just the first part (before hyphen)
+  return languageMap[language] || language.split('-')[0];
+};
+
 const initOptions: InitOptions = {
   resources,
   fallbackLng: 'en',
@@ -29,6 +66,9 @@ const initOptions: InitOptions = {
 
     // Cache user language detection
     caches: ['localStorage'],
+
+    // Convert detected language to supported format
+    convertDetectedLanguage: normalizeLanguageCode,
   },
 
   interpolation: {

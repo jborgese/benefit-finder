@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useI18n } from '../i18n/hooks';
+import { useAppSettingsStore } from '../stores/appSettingsStore';
 import * as Select from '@radix-ui/react-select';
 import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 
@@ -19,20 +20,40 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   variant = 'default',
 }) => {
   const {
-    currentLanguage,
     availableLanguages,
     getLanguageDisplayName,
     getLanguageFlag,
     changeLanguage,
+    i18n,
   } = useI18n();
+
+  // Use app settings store for current language to ensure consistency
+  const { language: currentLanguage, setLanguage } = useAppSettingsStore((state) => ({
+    language: state.language,
+    setLanguage: state.setLanguage,
+  }));
 
   const handleLanguageChange = async (newLanguage: string) => {
     try {
+      // Update both systems to keep them in sync
       await changeLanguage(newLanguage);
+      setLanguage(newLanguage as 'en' | 'es');
     } catch (error) {
       console.error('Failed to change language:', error);
     }
   };
+
+  // Synchronize i18n system with app settings store on mount
+  useEffect(() => {
+    const normalizedCurrentLanguage = currentLanguage.split('-')[0];
+
+    // If i18n language doesn't match app settings, update i18n to match
+    if (i18n.language !== normalizedCurrentLanguage) {
+      changeLanguage(normalizedCurrentLanguage).catch((error) => {
+        console.error('Failed to sync i18n language:', error);
+      });
+    }
+  }, [currentLanguage, changeLanguage, i18n.language]);
 
   // Size-based styling
   const sizeClasses = {
