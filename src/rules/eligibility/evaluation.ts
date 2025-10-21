@@ -428,6 +428,45 @@ function isMedicaidExpansionState(stateCode: string): boolean {
 }
 
 /**
+ * Normalize state name or code to 2-character state code
+ */
+function normalizeStateToCode(stateValue: string): string {
+  // State name to code mapping
+  const stateNameToCode: Record<string, string> = {
+    'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR',
+    'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE',
+    'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID',
+    'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS',
+    'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+    'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS',
+    'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV',
+    'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
+    'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK',
+    'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+    'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT',
+    'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV',
+    'Wisconsin': 'WI', 'Wyoming': 'WY', 'District of Columbia': 'DC'
+  };
+
+  // If it's already a 2-character code, return it
+  if (stateValue.length === 2) {
+    return stateValue.toUpperCase();
+  }
+
+  // If it's a full state name, convert to code
+  const normalizedName = stateValue.trim();
+  const code = stateNameToCode[normalizedName];
+
+  if (code) {
+    return code;
+  }
+
+  // Fallback: return the original value (shouldn't happen in normal usage)
+  console.warn(`[prepareDataContext] Unknown state value: ${stateValue}`);
+  return stateValue;
+}
+
+/**
  * Prepare data context from user profile
  */
 export function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
@@ -464,8 +503,11 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
   }
 
   // Add state-specific variables for benefit eligibility
-  const stateCode = processedData.state as string;
-  if (stateCode) {
+  const stateValue = processedData.state as string;
+  if (stateValue) {
+    // Normalize state value to 2-character code
+    const stateCode = normalizeStateToCode(stateValue);
+
     // Medicaid expansion status
     processedData.stateHasExpanded = isMedicaidExpansionState(stateCode);
 
@@ -479,7 +521,8 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
     processedData.livesInFlorida = stateCode === 'FL';
 
     debugLog('Added state-specific variables', {
-      stateCode,
+      originalState: stateValue,
+      normalizedStateCode: stateCode,
       stateHasExpanded: processedData.stateHasExpanded,
       livesInState: processedData.livesInState,
       livesInGeorgia: processedData.livesInGeorgia
@@ -487,7 +530,8 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
 
     if (import.meta.env.DEV) {
       console.warn('🔍 [DEBUG] prepareDataContext: State-specific variables:', {
-        stateCode,
+        originalState: stateValue,
+        normalizedStateCode: stateCode,
         stateHasExpanded: processedData.stateHasExpanded,
         livesInState: processedData.livesInState,
         livesInGeorgia: processedData.livesInGeorgia,
