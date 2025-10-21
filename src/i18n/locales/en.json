@@ -365,6 +365,57 @@
         }
       }
     },
+    "ssi": {
+      "statusMessages": {
+        "qualified": "You are eligible for SSI! You can receive monthly cash assistance and other benefits.",
+        "likely": "You appear to be eligible for SSI. Contact Social Security to confirm and apply.",
+        "maybe": "You may be eligible for SSI. Contact Social Security to discuss your situation.",
+        "unlikely": "You may not currently qualify for SSI, but eligibility can change. Contact Social Security to discuss.",
+        "notQualified": "You may not currently qualify for SSI. Contact Social Security to discuss your situation and see if you qualify."
+      },
+      "benefits": {
+        "title": "What SSI provides:",
+        "monthlyCash": "Monthly cash assistance (up to $943 for individuals, $1,415 for couples in 2024)",
+        "medicaid": "Automatic Medicaid eligibility in most states",
+        "snap": "Automatic SNAP eligibility in most states",
+        "housing": "Housing assistance and rent subsidies",
+        "workIncentives": "Work incentives and employment support programs",
+        "elderly": "Additional benefits for elderly recipients",
+        "disability": "Disability-specific services and supports"
+      },
+      "requirements": {
+        "title": "SSI requirements:",
+        "age": "Must be 65 or older, OR blind, OR disabled",
+        "disability": "Must have a qualifying disability (if under 65 and not blind)",
+        "income": "Must have limited income (varies by state and living situation)",
+        "assets": "Must have limited resources (under $2,000 for individuals, $3,000 for couples)",
+        "citizenship": "Must be a U.S. citizen or qualified immigrant",
+        "residence": "Must live in the United States or Northern Mariana Islands"
+      },
+      "nextSteps": {
+        "title": "Next steps:",
+        "contact": "Contact Social Security at 1-800-772-1213 or visit ssa.gov",
+        "gather": "Gather required documents (birth certificate, medical records, financial statements)",
+        "apply": "Apply online at ssa.gov or visit your local Social Security office",
+        "urgent": "Apply as soon as possible - benefits are not retroactive",
+        "review": "Review your situation with a Social Security representative"
+      },
+      "howToApply": {
+        "title": "How to apply for SSI:",
+        "step1": "Contact Social Security at 1-800-772-1213 or visit ssa.gov",
+        "step2": "Schedule an appointment at your local Social Security office",
+        "step3": "Gather required documents (birth certificate, medical records, financial statements)",
+        "step4": "Complete the SSI application with a Social Security representative",
+        "step5": "Wait for a decision (usually 3-5 months)"
+      },
+      "resources": {
+        "title": "Additional resources:",
+        "website": "SSI website: ssa.gov/ssi",
+        "hotline": "Social Security hotline: 1-800-772-1213",
+        "localOffice": "Find your local Social Security office at ssa.gov/locator",
+        "advocacy": "Get help from disability advocacy organizations"
+      }
+    },
     "tanf": {
       "statusMessages": {
         "qualified": "You are eligible for TANF! You can receive temporary cash assistance and support services.",
@@ -578,6 +629,7 @@
       "snap": "SNAP helps low-income individuals and families buy food",
       "wic": "Provides nutrition assistance to pregnant women, new mothers, and young children",
       "tanf": "Temporary financial assistance for low-income families with children",
+      "ssi": "Monthly cash assistance for disabled, blind, or elderly with limited income",
       "default": "Government benefit program"
     }
   },

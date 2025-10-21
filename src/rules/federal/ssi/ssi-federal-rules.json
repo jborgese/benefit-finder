@@ -1,0 +1,347 @@
+{
+  "metadata": {
+    "id": "ssi-federal-rules-2024",
+    "name": "SSI Federal Eligibility Rules (2024)",
+    "description": "Federal SSI (Supplemental Security Income) eligibility rules for 2024. SSI provides monthly cash assistance to disabled, blind, or elderly individuals with limited income and resources.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": [
+      "ssi-federal"
+    ],
+    "tags": [
+      "ssi",
+      "cash-assistance",
+      "federal",
+      "2024",
+      "disability",
+      "elderly",
+      "blind"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "ssi-federal-age-eligibility",
+      "programId": "ssi-federal",
+      "name": "SSI Age Eligibility",
+      "description": "Must be 65 or older, OR blind, OR disabled",
+      "ruleLogic": {
+        "or": [
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "var": "isBlind"
+          },
+          {
+            "var": "hasDisability"
+          }
+        ]
+      },
+      "explanation": {
+        "qualified": "You meet the age, blindness, or disability requirement for SSI.",
+        "notQualified": "You must be 65 or older, blind, or have a qualifying disability to be eligible for SSI."
+      },
+      "requiredFields": [
+        "age",
+        "isBlind",
+        "hasDisability"
+      ],
+      "weight": 1.0
+    },
+    {
+      "id": "ssi-federal-income-eligibility",
+      "programId": "ssi-federal",
+      "name": "SSI Income Eligibility",
+      "description": "Must have limited income (varies by state and living situation)",
+      "ruleLogic": {
+        "and": [
+          {
+            "<": [
+              {
+                "var": "monthlyIncome"
+              },
+              {
+                "if": [
+                  {
+                    "var": "isMarried"
+                  },
+                  1415,
+                  943
+                ]
+              }
+            ]
+          },
+          {
+            ">=": [
+              {
+                "var": "monthlyIncome"
+              },
+              0
+            ]
+          }
+        ]
+      },
+      "explanation": {
+        "qualified": "Your income is within SSI limits.",
+        "notQualified": "Your income exceeds SSI limits. The maximum monthly income is $943 for individuals and $1,415 for couples in 2024."
+      },
+      "requiredFields": [
+        "monthlyIncome",
+        "isMarried"
+      ],
+      "weight": 1.0
+    },
+    {
+      "id": "ssi-federal-asset-eligibility",
+      "programId": "ssi-federal",
+      "name": "SSI Asset Eligibility",
+      "description": "Must have limited resources (under $2,000 for individuals, $3,000 for couples)",
+      "ruleLogic": {
+        "<": [
+          {
+            "var": "totalAssets"
+          },
+          {
+            "if": [
+              {
+                "var": "isMarried"
+              },
+              3000,
+              2000
+            ]
+          }
+        ]
+      },
+      "explanation": {
+        "qualified": "Your assets are within SSI limits.",
+        "notQualified": "Your assets exceed SSI limits. The maximum resources are $2,000 for individuals and $3,000 for couples in 2024."
+      },
+      "requiredFields": [
+        "totalAssets",
+        "isMarried"
+      ],
+      "weight": 1.0
+    },
+    {
+      "id": "ssi-federal-citizenship-eligibility",
+      "programId": "ssi-federal",
+      "name": "SSI Citizenship Eligibility",
+      "description": "Must be a U.S. citizen or qualified immigrant",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "isUSCitizen"
+          },
+          {
+            "var": "isQualifiedImmigrant"
+          }
+        ]
+      },
+      "explanation": {
+        "qualified": "You meet the citizenship or immigration status requirement for SSI.",
+        "notQualified": "You must be a U.S. citizen or qualified immigrant to be eligible for SSI."
+      },
+      "requiredFields": [
+        "isUSCitizen",
+        "isQualifiedImmigrant"
+      ],
+      "weight": 1.0
+    },
+    {
+      "id": "ssi-federal-residence-eligibility",
+      "programId": "ssi-federal",
+      "name": "SSI Residence Eligibility",
+      "description": "Must live in the United States or Northern Mariana Islands",
+      "ruleLogic": {
+        "var": "livesInUS"
+      },
+      "explanation": {
+        "qualified": "You meet the residence requirement for SSI.",
+        "notQualified": "You must live in the United States or Northern Mariana Islands to be eligible for SSI."
+      },
+      "requiredFields": [
+        "livesInUS"
+      ],
+      "weight": 1.0
+    },
+    {
+      "id": "ssi-federal-disability-eligibility",
+      "programId": "ssi-federal",
+      "name": "SSI Disability Eligibility",
+      "description": "Must have a qualifying disability (if under 65 and not blind)",
+      "ruleLogic": {
+        "or": [
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "var": "isBlind"
+          },
+          {
+            "and": [
+              {
+                "var": "hasDisability"
+              },
+              {
+                "var": "disabilityPreventsWork"
+              }
+            ]
+          }
+        ]
+      },
+      "explanation": {
+        "qualified": "You meet the disability requirement for SSI.",
+        "notQualified": "If you are under 65 and not blind, you must have a qualifying disability that prevents you from working to be eligible for SSI."
+      },
+      "requiredFields": [
+        "age",
+        "isBlind",
+        "hasDisability",
+        "disabilityPreventsWork"
+      ],
+      "weight": 0.8
+    }
+  ],
+  "requiredFields": [
+    "age",
+    "isBlind",
+    "hasDisability",
+    "monthlyIncome",
+    "isMarried",
+    "totalAssets",
+    "isUSCitizen",
+    "isQualifiedImmigrant",
+    "livesInUS",
+    "disabilityPreventsWork"
+  ],
+  "requiredDocuments": [
+    {
+      "id": "birth-certificate",
+      "name": "Birth Certificate",
+      "description": "Proof of age and citizenship",
+      "required": true
+    },
+    {
+      "id": "medical-records",
+      "name": "Medical Records",
+      "description": "Documentation of disability or medical condition",
+      "required": true
+    },
+    {
+      "id": "financial-statements",
+      "name": "Financial Statements",
+      "description": "Bank statements, pay stubs, and other financial documents",
+      "required": true
+    },
+    {
+      "id": "social-security-card",
+      "name": "Social Security Card",
+      "description": "Proof of Social Security number",
+      "required": true
+    },
+    {
+      "id": "proof-of-residence",
+      "name": "Proof of Residence",
+      "description": "Utility bills, lease agreement, or other proof of address",
+      "required": true
+    }
+  ],
+  "nextSteps": [
+    {
+      "id": "contact-social-security",
+      "title": "Contact Social Security",
+      "description": "Call 1-800-772-1213 or visit ssa.gov to start your application",
+      "priority": "high"
+    },
+    {
+      "id": "gather-documents",
+      "title": "Gather Required Documents",
+      "description": "Collect all necessary documents including birth certificate, medical records, and financial statements",
+      "priority": "high"
+    },
+    {
+      "id": "schedule-appointment",
+      "title": "Schedule Appointment",
+      "description": "Make an appointment at your local Social Security office",
+      "priority": "medium"
+    },
+    {
+      "id": "complete-application",
+      "title": "Complete Application",
+      "description": "Fill out the SSI application with a Social Security representative",
+      "priority": "high"
+    },
+    {
+      "id": "wait-for-decision",
+      "title": "Wait for Decision",
+      "description": "Wait for Social Security to make a decision (usually 3-5 months)",
+      "priority": "low"
+    }
+  ],
+  "benefits": {
+    "monthlyCash": {
+      "amount": 943,
+      "currency": "USD",
+      "frequency": "monthly",
+      "description": "Monthly cash assistance (up to $943 for individuals, $1,415 for couples in 2024)"
+    },
+    "medicaid": {
+      "description": "Automatic Medicaid eligibility in most states"
+    },
+    "snap": {
+      "description": "Automatic SNAP eligibility in most states"
+    },
+    "housing": {
+      "description": "Housing assistance and rent subsidies"
+    },
+    "workIncentives": {
+      "description": "Work incentives and employment support programs"
+    }
+  },
+  "eligibilityCriteria": {
+    "age": {
+      "min": 0,
+      "max": null,
+      "description": "Must be 65 or older, OR blind, OR disabled"
+    },
+    "income": {
+      "max": 943,
+      "currency": "USD",
+      "frequency": "monthly",
+      "description": "Must have limited income (varies by state and living situation)"
+    },
+    "assets": {
+      "max": 2000,
+      "currency": "USD",
+      "description": "Must have limited resources (under $2,000 for individuals, $3,000 for couples)"
+    },
+    "citizenship": {
+      "required": true,
+      "description": "Must be a U.S. citizen or qualified immigrant"
+    },
+    "residence": {
+      "required": true,
+      "description": "Must live in the United States or Northern Mariana Islands"
+    }
+  }
+}
