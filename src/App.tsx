@@ -7,6 +7,7 @@ import { LiveRegion } from './questionnaire/accessibility';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { useI18n } from './i18n/hooks';
 import { WelcomeTour, HelpTooltip, PrivacyExplainer, QuickStartGuide } from './components/onboarding';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Import database functions
 import { clearDatabase } from './db';
@@ -383,428 +384,435 @@ function App(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 text-secondary-900">
-      {/* Screen reader announcements */}
-      <LiveRegion
-        message={announcementMessage}
-        priority="polite"
-        clearAfter={3000}
-      />
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('App Error Boundary caught an error:', error, errorInfo);
+        // You could send this to an error reporting service here
+      }}
+    >
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 text-secondary-900">
+        {/* Screen reader announcements */}
+        <LiveRegion
+          message={announcementMessage}
+          priority="polite"
+          clearAfter={3000}
+        />
 
-      <nav className="bg-white/80 backdrop-blur-md border-b border-secondary-200 px-4 py-4 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-display font-semibold text-secondary-900">
-            {t('app.title')}
-          </h1>
-          <div className="flex items-center space-x-4">
-            {appState !== 'home' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBackToHome}
-                aria-label={t('navigation.home')}
-                className="animate-slide-in-right"
-              >
-                {t('navigation.home')}
-              </Button>
-            )}
-            {hasResults && appState !== 'results' && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleViewResults}
-                aria-label={t('navigation.results')}
-                className="animate-slide-in-right"
-              >
-                {t('navigation.results')}
-              </Button>
-            )}
-
-            {/* Onboarding buttons for home page */}
-            {appState === 'home' && (
-              <div className="flex items-center space-x-2">
-                <HelpTooltip
-                  content="Take a guided tour of the app to learn about key features"
-                  trigger="hover"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleStartWelcomeTour}
-                    className="text-xs"
-                  >
-                    🎯 {t('navigation.tour')}
-                  </Button>
-                </HelpTooltip>
-                <HelpTooltip
-                  content="Learn about how we protect your privacy and data"
-                  trigger="hover"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowPrivacyExplainer(true)}
-                    className="text-xs"
-                  >
-                    🔒 {t('navigation.privacy')}
-                  </Button>
-                </HelpTooltip>
-                <HelpTooltip
-                  content="Get a quick start guide to using the app"
-                  trigger="hover"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleStartQuickStartGuide}
-                    className="text-xs"
-                  >
-                    📖 {t('navigation.guide')}
-                  </Button>
-                </HelpTooltip>
-              </div>
-            )}
-
-            <LanguageSwitcher size="sm" />
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {appState === 'home' && (
-          <div className="text-center animate-fade-in-up">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-secondary-900 px-4">
-              {t('app.subtitle')}
-            </h2>
-            <p className="text-secondary-600 mb-8 sm:mb-12 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed px-4">
-              {t('app.description')}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
-              <HelpTooltip
-                content="Click here to start the benefit eligibility assessment. It takes about 5-10 minutes to complete."
-                trigger="hover"
-              >
+        <nav className="bg-white/80 backdrop-blur-md border-b border-secondary-200 px-4 py-4 shadow-sm">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <h1 className="text-xl font-display font-semibold text-secondary-900">
+              {t('app.title')}
+            </h1>
+            <div className="flex items-center space-x-4">
+              {appState !== 'home' && (
                 <Button
-                  onClick={handleStartQuestionnaire}
-                  size="lg"
-                  className="animate-bounce-gentle"
-                  aria-label={t('questionnaire.title')}
-                  data-tour="start-button"
-                >
-                  {hasResults ? t('common.continue') : t('questionnaire.title')}
-                </Button>
-              </HelpTooltip>
-
-              {hasResults && (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={handleViewResults}
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBackToHome}
+                  aria-label={t('navigation.home')}
                   className="animate-slide-in-right"
+                >
+                  {t('navigation.home')}
+                </Button>
+              )}
+              {hasResults && appState !== 'results' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleViewResults}
                   aria-label={t('navigation.results')}
+                  className="animate-slide-in-right"
                 >
                   {t('navigation.results')}
                 </Button>
               )}
-            </div>
 
-            <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4">
-              <div
-                className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                data-tour="privacy-card"
-              >
-                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🔒</span>
+              {/* Onboarding buttons for home page */}
+              {appState === 'home' && (
+                <div className="flex items-center space-x-2">
+                  <HelpTooltip
+                    content="Take a guided tour of the app to learn about key features"
+                    trigger="hover"
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleStartWelcomeTour}
+                      className="text-xs"
+                    >
+                      🎯 {t('navigation.tour')}
+                    </Button>
+                  </HelpTooltip>
+                  <HelpTooltip
+                    content="Learn about how we protect your privacy and data"
+                    trigger="hover"
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowPrivacyExplainer(true)}
+                      className="text-xs"
+                    >
+                      🔒 {t('navigation.privacy')}
+                    </Button>
+                  </HelpTooltip>
+                  <HelpTooltip
+                    content="Get a quick start guide to using the app"
+                    trigger="hover"
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleStartQuickStartGuide}
+                      className="text-xs"
+                    >
+                      📖 {t('navigation.guide')}
+                    </Button>
+                  </HelpTooltip>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.title')}</h3>
-                <p className="text-secondary-600 text-sm leading-relaxed">
-                  {t('privacy.description')}
-                </p>
-              </div>
-              <div
-                className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                data-tour="offline-card"
-              >
-                <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">📱</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.offline')}</h3>
-                <p className="text-secondary-600 text-sm leading-relaxed">
-                  {t('privacy.localStorage')}
-                </p>
-              </div>
-              <div
-                className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 sm:col-span-2 lg:col-span-1"
-                data-tour="encryption-card"
-              >
-                <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🛡️</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('app.encryption')}</h3>
-                <p className="text-secondary-600 text-sm leading-relaxed">
-                  {t('privacy.encryption')}
-                </p>
-              </div>
+              )}
+
+              <LanguageSwitcher size="sm" />
             </div>
           </div>
-        )}
+        </nav>
 
-        {appState === 'questionnaire' && (
-          <div className="animate-fade-in">
-            <div className="mb-6 sm:mb-8 text-center px-4">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
-                Benefit Eligibility Assessment
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {appState === 'home' && (
+            <div className="text-center animate-fade-in-up">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-secondary-900 px-4">
+                {t('app.subtitle')}
               </h2>
-              <p className="text-secondary-600 text-sm sm:text-base">
-                Complete this questionnaire to check your eligibility for government benefits
+              <p className="text-secondary-600 mb-8 sm:mb-12 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed px-4">
+                {t('app.description')}
               </p>
-            </div>
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-0">
-              <EnhancedQuestionnaire
-                flow={sampleFlow}
-                onComplete={(answers): void => {
-                  void handleCompleteQuestionnaire(answers);
-                }}
-              />
-            </div>
-          </div>
-        )}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
+                <HelpTooltip
+                  content="Click here to start the benefit eligibility assessment. It takes about 5-10 minutes to complete."
+                  trigger="hover"
+                >
+                  <Button
+                    onClick={handleStartQuestionnaire}
+                    size="lg"
+                    className="animate-bounce-gentle"
+                    aria-label={t('questionnaire.title')}
+                    data-tour="start-button"
+                  >
+                    {hasResults ? t('common.continue') : t('questionnaire.title')}
+                  </Button>
+                </HelpTooltip>
 
-        {appState === 'error' && (
-          <div>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-red-400">Error</h2>
-            </div>
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-red-400 mb-2">Unable to Process Request</h3>
-                  <p className="text-slate-300 mb-4">{errorMessage}</p>
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={handleGoHome}
-                      variant="primary"
-                      aria-label="Return to home page"
-                    >
-                      Return to Home
-                    </Button>
-                    <Button
-                      onClick={() => window.location.reload()}
-                      variant="secondary"
-                      aria-label="Refresh the page"
-                    >
-                      Refresh Page
-                    </Button>
+                {hasResults && (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    onClick={handleViewResults}
+                    className="animate-slide-in-right"
+                    aria-label={t('navigation.results')}
+                  >
+                    {t('navigation.results')}
+                  </Button>
+                )}
+              </div>
+
+              <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4">
+                <div
+                  className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  data-tour="privacy-card"
+                >
+                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🔒</span>
                   </div>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.title')}</h3>
+                  <p className="text-secondary-600 text-sm leading-relaxed">
+                    {t('privacy.description')}
+                  </p>
+                </div>
+                <div
+                  className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  data-tour="offline-card"
+                >
+                  <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">📱</span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('privacy.offline')}</h3>
+                  <p className="text-secondary-600 text-sm leading-relaxed">
+                    {t('privacy.localStorage')}
+                  </p>
+                </div>
+                <div
+                  className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 sm:col-span-2 lg:col-span-1"
+                  data-tour="encryption-card"
+                >
+                  <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🛡️</span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900">{t('app.encryption')}</h3>
+                  <p className="text-secondary-600 text-sm leading-relaxed">
+                    {t('privacy.encryption')}
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {appState === 'results' && (
-          <div>
-            {/* Avoid nested ternary by early return pattern */}
-            {isProcessingResults && (
-              <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-secondary-200 p-12 text-center max-w-2xl mx-auto animate-scale-in">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="relative">
-                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200" />
-                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 border-t-transparent absolute top-0 left-0" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
-                  </div>
-                </div>
-                <h2 className="text-3xl font-display font-bold text-secondary-900 mb-4">
-                  {t('results.processing.title')}
+          {appState === 'questionnaire' && (
+            <div className="animate-fade-in">
+              <div className="mb-6 sm:mb-8 text-center px-4">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
+                  Benefit Eligibility Assessment
                 </h2>
-                <p className="text-secondary-600 mb-8 text-lg">
-                  {t('results.processing.description')}
+                <p className="text-secondary-600 text-sm sm:text-base">
+                  Complete this questionnaire to check your eligibility for government benefits
                 </p>
-                <div className="flex items-center justify-center text-primary-600 text-lg">
-                  <div className="animate-pulse-soft">•</div>
-                  <div className="animate-pulse-soft mx-3" style={{ animationDelay: '0.2s' }}>•</div>
-                  <div className="animate-pulse-soft" style={{ animationDelay: '0.4s' }}>•</div>
+              </div>
+
+              <div className="max-w-4xl mx-auto px-4 sm:px-0">
+                <EnhancedQuestionnaire
+                  flow={sampleFlow}
+                  onComplete={(answers): void => {
+                    void handleCompleteQuestionnaire(answers);
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {appState === 'error' && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-red-400">Error</h2>
+              </div>
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-red-400 mb-2">Unable to Process Request</h3>
+                    <p className="text-slate-300 mb-4">{errorMessage}</p>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={handleGoHome}
+                        variant="primary"
+                        aria-label="Return to home page"
+                      >
+                        Return to Home
+                      </Button>
+                      <Button
+                        onClick={() => window.location.reload()}
+                        variant="secondary"
+                        aria-label="Refresh the page"
+                      >
+                        Refresh Page
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
-            {!isProcessingResults && currentResults ? (
-              <div>
-                <div className="mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
-                    <div className="text-center sm:text-left">
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
-                        {t('results.summary.title')}
-                      </h2>
-                      <p className="text-secondary-600 text-sm sm:text-base">
-                        Your personalized benefit eligibility results
-                      </p>
+            </div>
+          )}
+
+          {appState === 'results' && (
+            <div>
+              {/* Avoid nested ternary by early return pattern */}
+              {isProcessingResults && (
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-secondary-200 p-12 text-center max-w-2xl mx-auto animate-scale-in">
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="relative">
+                      <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200" />
+                      <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 border-t-transparent absolute top-0 left-0" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleNewAssessment}
-                        aria-label="Start new assessment"
-                        className="w-full sm:w-auto order-2 sm:order-1"
-                      >
-                        {t('results.actions.newAssessment')}
-                      </Button>
-                      <div className="flex flex-col sm:flex-row gap-2 order-1 sm:order-2">
-                        <ResultsExport results={currentResults} />
-                        <ResultsImport onImport={(results) => void handleImportResults(results)} />
+                  </div>
+                  <h2 className="text-3xl font-display font-bold text-secondary-900 mb-4">
+                    {t('results.processing.title')}
+                  </h2>
+                  <p className="text-secondary-600 mb-8 text-lg">
+                    {t('results.processing.description')}
+                  </p>
+                  <div className="flex items-center justify-center text-primary-600 text-lg">
+                    <div className="animate-pulse-soft">•</div>
+                    <div className="animate-pulse-soft mx-3" style={{ animationDelay: '0.2s' }}>•</div>
+                    <div className="animate-pulse-soft" style={{ animationDelay: '0.4s' }}>•</div>
+                  </div>
+                </div>
+              )}
+              {!isProcessingResults && currentResults ? (
+                <div>
+                  <div className="mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+                      <div className="text-center sm:text-left">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 mb-2">
+                          {t('results.summary.title')}
+                        </h2>
+                        <p className="text-secondary-600 text-sm sm:text-base">
+                          Your personalized benefit eligibility results
+                        </p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleNewAssessment}
+                          aria-label="Start new assessment"
+                          className="w-full sm:w-auto order-2 sm:order-1"
+                        >
+                          {t('results.actions.newAssessment')}
+                        </Button>
+                        <div className="flex flex-col sm:flex-row gap-2 order-1 sm:order-2">
+                          <ResultsExport results={currentResults} />
+                          <ResultsImport onImport={(results) => void handleImportResults(results)} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ResultsSummary results={currentResults} />
+
+                  <QuestionnaireAnswersCard />
+
+                  <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6 px-4 sm:px-0">
+                    {/* Qualified Programs */}
+                    {currentResults.qualified.map((result) => (
+                      <ProgramCard
+                        key={result.programId}
+                        result={result}
+                        className="max-w-4xl mx-auto animate-fade-in-up"
+                      />
+                    ))}
+
+                    {/* Maybe Programs */}
+                    {currentResults.maybe.map((result) => (
+                      <ProgramCard
+                        key={result.programId}
+                        result={result}
+                        className="max-w-4xl mx-auto animate-fade-in-up"
+                      />
+                    ))}
+
+                    {/* Likely Programs */}
+                    {currentResults.likely.map((result) => (
+                      <ProgramCard
+                        key={result.programId}
+                        result={result}
+                        className="max-w-4xl mx-auto animate-fade-in-up"
+                      />
+                    ))}
+
+                    {/* Not Qualified Programs */}
+                    {currentResults.notQualified.map((result) => (
+                      <ProgramCard
+                        key={result.programId}
+                        result={result}
+                        className="max-w-4xl mx-auto animate-fade-in-up"
+                      />
+                    ))}
+                  </div>
+
+                  {/* Helpful links for accessibility */}
+                  <div className="mt-6 sm:mt-8 bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 max-w-4xl mx-auto mx-4 sm:mx-auto">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-secondary-900">{t('results.resources.title')}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                      <div>
+                        <h4 className="font-medium mb-2">{t('results.resources.government')}</h4>
+                        <ul className="space-y-2 text-sm">
+                          <li>
+                            <a
+                              href="https://www.benefits.gov"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 underline"
+                              aria-label="Visit Benefits.gov to learn about federal benefits"
+                            >
+                              {t('results.resources.benefitsGov')}
+                            </a>
+                          </li>
+                          <li>
+                            <a
+                              href="https://www.usa.gov/benefits"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 underline"
+                              aria-label="Visit USA.gov benefits page for comprehensive benefit information"
+                            >
+                              {t('results.resources.usaGov')}
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-2">{t('results.resources.support')}</h4>
+                        <ul className="space-y-2 text-sm">
+                          <li>
+                            <a
+                              href="tel:211"
+                              className="text-blue-400 hover:text-blue-300 underline"
+                              aria-label="Call 211 for local assistance with benefits and services"
+                            >
+                              {t('results.resources.localAssistance')}
+                            </a>
+                          </li>
+                          <li>
+                            <a
+                              href="https://www.healthcare.gov"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 underline"
+                              aria-label="Visit Healthcare.gov for health insurance information"
+                            >
+                              {t('results.resources.healthcareGov')}
+                            </a>
+                          </li>
+                        </ul>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                <ResultsSummary results={currentResults} />
-
-                <QuestionnaireAnswersCard />
-
-                <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6 px-4 sm:px-0">
-                  {/* Qualified Programs */}
-                  {currentResults.qualified.map((result) => (
-                    <ProgramCard
-                      key={result.programId}
-                      result={result}
-                      className="max-w-4xl mx-auto animate-fade-in-up"
-                    />
-                  ))}
-
-                  {/* Maybe Programs */}
-                  {currentResults.maybe.map((result) => (
-                    <ProgramCard
-                      key={result.programId}
-                      result={result}
-                      className="max-w-4xl mx-auto animate-fade-in-up"
-                    />
-                  ))}
-
-                  {/* Likely Programs */}
-                  {currentResults.likely.map((result) => (
-                    <ProgramCard
-                      key={result.programId}
-                      result={result}
-                      className="max-w-4xl mx-auto animate-fade-in-up"
-                    />
-                  ))}
-
-                  {/* Not Qualified Programs */}
-                  {currentResults.notQualified.map((result) => (
-                    <ProgramCard
-                      key={result.programId}
-                      result={result}
-                      className="max-w-4xl mx-auto animate-fade-in-up"
-                    />
-                  ))}
+              ) : (
+                <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
+                  <div className="text-6xl mb-4" aria-hidden="true">📝</div>
+                  <h2 className="text-2xl font-bold text-slate-100 mb-4">
+                    {t('results.noResults.title')}
+                  </h2>
+                  <p className="text-slate-300 mb-6">
+                    {t('results.noResults.description')}
+                  </p>
+                  <Button
+                    onClick={handleNewAssessment}
+                    variant="primary"
+                    className="inline-flex items-center gap-2"
+                  >
+                    {t('results.noResults.startAssessment')}
+                  </Button>
                 </div>
+              )}
+            </div>
+          )}
+        </main>
 
-                {/* Helpful links for accessibility */}
-                <div className="mt-6 sm:mt-8 bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 max-w-4xl mx-auto mx-4 sm:mx-auto">
-                  <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-secondary-900">{t('results.resources.title')}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                      <h4 className="font-medium mb-2">{t('results.resources.government')}</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li>
-                          <a
-                            href="https://www.benefits.gov"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 underline"
-                            aria-label="Visit Benefits.gov to learn about federal benefits"
-                          >
-                            {t('results.resources.benefitsGov')}
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="https://www.usa.gov/benefits"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 underline"
-                            aria-label="Visit USA.gov benefits page for comprehensive benefit information"
-                          >
-                            {t('results.resources.usaGov')}
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">{t('results.resources.support')}</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li>
-                          <a
-                            href="tel:211"
-                            className="text-blue-400 hover:text-blue-300 underline"
-                            aria-label="Call 211 for local assistance with benefits and services"
-                          >
-                            {t('results.resources.localAssistance')}
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="https://www.healthcare.gov"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 underline"
-                            aria-label="Visit Healthcare.gov for health insurance information"
-                          >
-                            {t('results.resources.healthcareGov')}
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
-                <div className="text-6xl mb-4" aria-hidden="true">📝</div>
-                <h2 className="text-2xl font-bold text-slate-100 mb-4">
-                  {t('results.noResults.title')}
-                </h2>
-                <p className="text-slate-300 mb-6">
-                  {t('results.noResults.description')}
-                </p>
-                <Button
-                  onClick={handleNewAssessment}
-                  variant="primary"
-                  className="inline-flex items-center gap-2"
-                >
-                  {t('results.noResults.startAssessment')}
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-      </main>
+        {/* Onboarding Components */}
+        <WelcomeTour
+          isOpen={showWelcomeTour}
+          onClose={() => setShowWelcomeTour(false)}
+          onComplete={handleCompleteWelcomeTour}
+          onStartAssessment={handleStartQuestionnaire}
+        />
 
-      {/* Onboarding Components */}
-      <WelcomeTour
-        isOpen={showWelcomeTour}
-        onClose={() => setShowWelcomeTour(false)}
-        onComplete={handleCompleteWelcomeTour}
-        onStartAssessment={handleStartQuestionnaire}
-      />
+        <PrivacyExplainer
+          isOpen={showPrivacyExplainer}
+          onClose={() => setShowPrivacyExplainer(false)}
+        />
 
-      <PrivacyExplainer
-        isOpen={showPrivacyExplainer}
-        onClose={() => setShowPrivacyExplainer(false)}
-      />
-
-      <QuickStartGuide
-        isOpen={showQuickStartGuide}
-        onClose={() => setShowQuickStartGuide(false)}
-        onStartAssessment={handleStartAssessmentFromGuide}
-      />
-    </div>
+        <QuickStartGuide
+          isOpen={showQuickStartGuide}
+          onClose={() => setShowQuickStartGuide(false)}
+          onStartAssessment={handleStartAssessmentFromGuide}
+        />
+      </div>
+    </ErrorBoundary>
   );
 }
 

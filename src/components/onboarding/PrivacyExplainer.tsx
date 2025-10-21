@@ -4,9 +4,11 @@
  * Interactive component that explains the app's privacy features
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '../Button';
 import { useI18n } from '../../i18n/hooks';
+import { useDatabase } from '../../db/hooks';
+import { isDatabaseInitialized } from '../../db/database';
 
 interface PrivacyExplainerProps {
   isOpen: boolean;
@@ -19,6 +21,101 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
 }) => {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<'overview' | 'data' | 'security' | 'your-rights'>('overview');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Get database instance safely
+  let database: ReturnType<typeof useDatabase> | null = null;
+  try {
+    if (isDatabaseInitialized()) {
+      database = useDatabase();
+    }
+  } catch (error) {
+    console.warn('Database not available in PrivacyExplainer:', error);
+    database = null;
+  }
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      onClose();
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      const tabIds = ['overview', 'data', 'security', 'your-rights'] as const;
+      const currentIndex = tabIds.indexOf(activeTab);
+      const nextIndex = event.key === 'ArrowLeft'
+        ? (currentIndex - 1 + tabIds.length) % tabIds.length
+        : (currentIndex + 1) % tabIds.length;
+      setActiveTab(tabIds[nextIndex]);
+    }
+  }, [activeTab, onClose]);
+
+  // Handle data export
+  const handleExportData = useCallback(async () => {
+    if (!database) {
+      console.warn('Database not available for export');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Export all user data
+      const userData = await database.user_profiles.find().exec();
+      const resultsData = await database.eligibility_results.find().exec();
+      const settingsData = await database.app_settings.find().exec();
+
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        version: '1.0',
+        userProfiles: userData.map((doc: any) => doc.toJSON()),
+        eligibilityResults: resultsData.map((doc: any) => doc.toJSON()),
+        appSettings: settingsData.map((doc: any) => doc.toJSON()),
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `benefit-finder-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [database]);
+
+  // Handle data deletion
+  const handleDeleteData = useCallback(async () => {
+    if (!database) {
+      console.warn('Database not available for deletion');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Delete all user data
+      await database.user_profiles.find().remove();
+      await database.eligibility_results.find().remove();
+      await database.app_settings.find().remove();
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error('Delete failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [database]);
+
+  // Focus management
+  useEffect(() => {
+    if (isOpen) {
+      const modal = document.querySelector('[role="dialog"]') as HTMLElement;
+      modal?.focus();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -142,7 +239,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                 </h4>
                 <ul className="space-y-2 text-green-800">
                   <li className="flex items-start">
-                    <span className="text-green- augment-600 mr-2 mt-0.5">•</span>
+                    <span className="text-green-600 mr-2 mt-0.5">•</span>
                     {t('privacyExplainer.data.personalIdentifiers')}
                   </li>
                   <li className="flex items-start">
@@ -242,8 +339,14 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                 <p className="text-success-800 mb-3">
                   {t('privacyExplainer.rights.deleteDataDesc')}
                 </p>
-                <Button variant="secondary" size="sm">
-                  {t('privacyExplainer.rights.deleteButton')}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isLoading || !database}
+                  className="hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors"
+                >
+                  {isLoading ? 'Deleting...' : t('privacyExplainer.rights.deleteButton')}
                 </Button>
               </div>
 
@@ -255,8 +358,14 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
                 <p className="text-info-800 mb-3">
                   {t('privacyExplainer.rights.exportDataDesc')}
                 </p>
-                <Button variant="secondary" size="sm">
-                  {t('privacyExplainer.rights.exportButton')}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleExportData}
+                  disabled={isLoading || !database}
+                  className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors"
+                >
+                  {isLoading ? 'Exporting...' : t('privacyExplainer.rights.exportButton')}
                 </Button>
               </div>
 
@@ -279,63 +388,127 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-xl shadow-2xl border border-secondary-200 max-w-4xl w-full max-h-[90vh] overflow-hidden animate-scale-in">
-        {/* Header */}
-        <div className="border-b border-secondary-200 p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-display font-bold text-secondary-900">
-              {t('privacyExplainer.title')}
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="text-secondary-500 hover:text-secondary-700"
-            >
-              ✕
-            </Button>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b border-secondary-200">
-          <div className="flex overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`
-                  flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap
-                  transition-colors duration-200
-                  ${activeTab === tab.id
-                    ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50'
-                    : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
-                  }
-                `}
+    <>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div
+          className="bg-white rounded-xl shadow-2xl border border-secondary-200 max-w-4xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
+          role="dialog"
+          aria-labelledby="privacy-modal-title"
+          aria-describedby="privacy-modal-description"
+          tabIndex={-1}
+          onKeyDown={handleKeyDown}
+        >
+          {/* Header */}
+          <div className="border-b border-secondary-200 p-6">
+            <div className="flex items-center justify-between">
+              <h2
+                id="privacy-modal-title"
+                className="text-2xl font-display font-bold text-secondary-900"
               >
-                <span>{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
+                {t('privacyExplainer.title')}
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="text-secondary-500 hover:text-secondary-700"
+                aria-label="Close privacy modal"
+              >
+                ✕
+              </Button>
+            </div>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
-          {renderContent()}
-        </div>
+          {/* Tabs */}
+          <div className="border-b border-secondary-200">
+            <div className="flex overflow-x-auto" role="tablist" aria-label="Privacy information tabs">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={`tabpanel-${tab.id}`}
+                  id={`tab-${tab.id}`}
+                  className={`
+                  flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap
+                  transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-inset
+                  ${activeTab === tab.id
+                      ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50'
+                      : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
+                    }
+                `}
+                >
+                  <span aria-hidden="true">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* Footer */}
-        <div className="border-t border-secondary-200 p-6">
-          <div className="flex justify-end">
-            <Button onClick={onClose} variant="primary">
-              {t('common.close')}
-            </Button>
+          {/* Content */}
+          <div
+            className="p-6 overflow-y-auto max-h-[60vh]"
+            role="tabpanel"
+            id={`tabpanel-${activeTab}`}
+            aria-labelledby={`tab-${activeTab}`}
+          >
+            {renderContent()}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-secondary-200 p-6">
+            <div className="flex justify-end">
+              <Button onClick={onClose} variant="primary">
+                {t('common.close')}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 flex items-center justify-center p-4">
+          <div
+            className="bg-white rounded-xl shadow-2xl border border-secondary-200 max-w-md w-full p-6"
+            role="dialog"
+            aria-labelledby="delete-confirm-title"
+            aria-describedby="delete-confirm-description"
+          >
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <h3 id="delete-confirm-title" className="text-xl font-bold text-secondary-900 mb-2">
+                Confirm Data Deletion
+              </h3>
+              <p id="delete-confirm-description" className="text-secondary-600">
+                This will permanently delete all your stored data including questionnaire responses and eligibility results. This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleDeleteData}
+                disabled={isLoading}
+                className="bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700"
+              >
+                {isLoading ? 'Deleting...' : 'Delete All Data'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

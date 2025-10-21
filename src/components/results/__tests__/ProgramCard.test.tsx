@@ -21,8 +21,7 @@ const mockProgramResult: ProgramEligibilityResult = {
   },
   estimatedBenefit: {
     amount: 500,
-    frequency: 'month',
-    currency: 'USD',
+    frequency: 'monthly',
   },
   requiredDocuments: [],
   nextSteps: [],

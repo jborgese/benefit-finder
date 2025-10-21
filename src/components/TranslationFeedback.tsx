@@ -4,7 +4,7 @@ import { useI18n } from '../i18n/hooks';
 import { Button } from './Button';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
-import { CrossIcon, FeedbackIcon, DownloadIcon } from '@radix-ui/react-icons';
+import { Cross1Icon, ChatBubbleIcon, DownloadIcon } from '@radix-ui/react-icons';
 
 interface TranslationFeedbackProps {
   translationKey: string;
@@ -115,7 +115,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
             aria-label="Provide translation feedback"
             title="Provide translation feedback"
           >
-            <FeedbackIcon className="w-3 h-3" />
+            <ChatBubbleIcon className="w-3 h-3" />
             <span>Feedback</span>
           </button>
         </Dialog.Trigger>
@@ -259,7 +259,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
                 className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
                 aria-label="Close"
               >
-                <CrossIcon className="w-4 h-4" />
+                <Cross1Icon className="w-4 h-4" />
               </button>
             </Dialog.Close>
           </Dialog.Content>

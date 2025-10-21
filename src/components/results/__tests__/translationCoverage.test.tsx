@@ -220,7 +220,6 @@ describe('Translation Coverage Tests', () => {
   describe('Fallback Behavior', () => {
     it('falls back to English when Spanish translation is missing', () => {
       // Mock missing translation
-      const originalTranslation = i18n.t('results.status.qualified');
 
       renderWithI18n(<ProgramCard result={mockProgramResult} />, 'es');
 
