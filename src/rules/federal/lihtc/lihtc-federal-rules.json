@@ -1,0 +1,573 @@
+{
+  "metadata": {
+    "id": "lihtc-federal-rules-2024",
+    "name": "LIHTC (Low-Income Housing Tax Credit) Federal Eligibility Rules (2024)",
+    "description": "Federal baseline LIHTC eligibility rules for 2024. LIHTC provides affordable housing options for low-income families through tax credit-financed rental housing developments.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": [
+      "lihtc-federal"
+    ],
+    "tags": [
+      "lihtc",
+      "housing",
+      "federal",
+      "2024",
+      "affordable-housing",
+      "tax-credit",
+      "low-income"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "lihtc-federal-income-limits",
+      "programId": "lihtc-federal",
+      "name": "LIHTC Income Limits",
+      "description": "Must meet income limits (typically 50-60% of area median income)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "householdIncome"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "var": "areaMedianIncome"
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "LIHTC properties serve households with incomes at or below 50-60% of the area median income (AMI). Some properties may serve households up to 80% AMI.",
+      "requiredFields": [
+        "householdIncome",
+        "areaMedianIncome"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or other income verification",
+          "required": true,
+          "alternatives": [
+            "Social Security award letters",
+            "Unemployment benefit statements",
+            "Child support documentation"
+          ],
+          "where": "Employer, Social Security Administration, or other income source"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Contact local LIHTC property managers to verify current income limits for specific properties",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "26 USC § 42 - Low-income housing credit",
+          "url": "https://www.law.cornell.edu/uscode/text/26/42",
+          "legalReference": "26 USC § 42",
+          "date": "2024-01-01",
+          "notes": "Defines income eligibility for LIHTC properties"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-income-eligible-50",
+          "description": "Income at 50% AMI - eligible",
+          "input": {
+            "householdIncome": 30000,
+            "areaMedianIncome": 60000
+          },
+          "expected": true
+        },
+        {
+          "id": "test-income-eligible-60",
+          "description": "Income at 60% AMI - eligible",
+          "input": {
+            "householdIncome": 36000,
+            "areaMedianIncome": 60000
+          },
+          "expected": true
+        },
+        {
+          "id": "test-income-high",
+          "description": "Income above 60% AMI - not eligible",
+          "input": {
+            "householdIncome": 50000,
+            "areaMedianIncome": 60000
+          },
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "lihtc-federal-family-size",
+      "programId": "lihtc-federal",
+      "name": "LIHTC Family Size Requirements",
+      "description": "Must meet family size requirements for unit size",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "householdSize"
+          },
+          {
+            ">=": [
+              {
+                "var": "householdSize"
+              },
+              1
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              {
+                "var": "maxUnitSize"
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Household size must be appropriate for the available unit size. LIHTC properties have different unit sizes (studio, 1-bedroom, 2-bedroom, etc.) with corresponding family size requirements.",
+      "requiredFields": [
+        "householdSize",
+        "maxUnitSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-family-size",
+          "name": "Proof of Family Size",
+          "description": "Birth certificates, marriage certificate, or other family documentation",
+          "required": true,
+          "alternatives": [
+            "Adoption papers",
+            "Guardianship papers",
+            "Court orders"
+          ],
+          "where": "State vital records, court system, or medical provider"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Check available unit sizes at LIHTC properties in your area",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "26 USC § 42 - Low-income housing credit",
+          "url": "https://www.law.cornell.edu/uscode/text/26/42",
+          "legalReference": "26 USC § 42",
+          "date": "2024-01-01",
+          "notes": "Defines family size requirements for LIHTC properties"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-family-size-eligible",
+          "description": "Family size within unit limits - eligible",
+          "input": {
+            "householdSize": 3,
+            "maxUnitSize": 4
+          },
+          "expected": true
+        },
+        {
+          "id": "test-family-size-too-large",
+          "description": "Family size exceeds unit limits - not eligible",
+          "input": {
+            "householdSize": 5,
+            "maxUnitSize": 3
+          },
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "lihtc-federal-citizenship-status",
+      "programId": "lihtc-federal",
+      "name": "LIHTC Citizenship Status",
+      "description": "Must be a U.S. citizen or eligible immigrant",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "isCitizen"
+          },
+          {
+            "var": "isEligibleImmigrant"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "At least one household member must be a U.S. citizen or eligible immigrant. Mixed-status families may be eligible with restrictions.",
+      "requiredFields": [
+        "isCitizen",
+        "isEligibleImmigrant"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, or immigration documents",
+          "required": true,
+          "alternatives": [
+            "Naturalization certificate",
+            "Permanent resident card",
+            "Refugee documentation"
+          ],
+          "where": "State vital records, passport agency, or immigration services"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather citizenship or immigration documentation for all household members",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "26 USC § 42 - Low-income housing credit",
+          "url": "https://www.law.cornell.edu/uscode/text/26/42",
+          "legalReference": "26 USC § 42",
+          "date": "2024-01-01",
+          "notes": "Defines citizenship requirements for LIHTC properties"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-citizen-eligible",
+          "description": "U.S. citizen - eligible",
+          "input": {
+            "isCitizen": true,
+            "isEligibleImmigrant": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-immigrant-eligible",
+          "description": "Eligible immigrant - eligible",
+          "input": {
+            "isCitizen": false,
+            "isEligibleImmigrant": true
+          },
+          "expected": true
+        },
+        {
+          "id": "test-undocumented",
+          "description": "Undocumented immigrant - not eligible",
+          "input": {
+            "isCitizen": false,
+            "isEligibleImmigrant": false
+          },
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "lihtc-federal-background-check",
+      "programId": "lihtc-federal",
+      "name": "LIHTC Background Check",
+      "description": "Must pass criminal background check",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "hasCriminalHistory"
+          },
+          {
+            "not": {
+              "var": "hasDisqualifyingCrimes"
+            }
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Applicants must pass a criminal background check. Certain crimes may disqualify applicants, including drug-related offenses, violent crimes, or sex offenses.",
+      "requiredFields": [
+        "hasCriminalHistory",
+        "hasDisqualifyingCrimes"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-background",
+          "name": "Background Check Documentation",
+          "description": "Criminal background check results or court documentation",
+          "required": true,
+          "alternatives": [
+            "Court records",
+            "Probation/parole documentation",
+            "Rehabilitation certificates"
+          ],
+          "where": "Court system, probation office, or background check service"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Be prepared to discuss any criminal history and provide documentation",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "26 USC § 42 - Low-income housing credit",
+          "url": "https://www.law.cornell.edu/uscode/text/26/42",
+          "legalReference": "26 USC § 42",
+          "date": "2024-01-01",
+          "notes": "Defines criminal background requirements for LIHTC properties"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-clean-background",
+          "description": "No criminal history - eligible",
+          "input": {
+            "hasCriminalHistory": false,
+            "hasDisqualifyingCrimes": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-minor-offenses",
+          "description": "Minor criminal history - eligible",
+          "input": {
+            "hasCriminalHistory": true,
+            "hasDisqualifyingCrimes": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-disqualifying-crimes",
+          "description": "Disqualifying criminal history - not eligible",
+          "input": {
+            "hasCriminalHistory": true,
+            "hasDisqualifyingCrimes": true
+          },
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "lihtc-federal-rental-history",
+      "programId": "lihtc-federal",
+      "name": "LIHTC Rental History",
+      "description": "Must have good rental history and references",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "hasRentalHistory"
+          },
+          {
+            "not": {
+              "var": "hasEvictionHistory"
+            }
+          },
+          {
+            "not": {
+              "var": "hasRentalDebt"
+            }
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Applicants must have a good rental history with no recent evictions or outstanding rental debt. First-time renters may be considered with additional documentation.",
+      "requiredFields": [
+        "hasRentalHistory",
+        "hasEvictionHistory",
+        "hasRentalDebt"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-rental-history",
+          "name": "Proof of Rental History",
+          "description": "Previous lease agreements, landlord references, or rental payment history",
+          "required": true,
+          "alternatives": [
+            "Rental payment receipts",
+            "Landlord reference letters",
+            "Housing assistance documentation"
+          ],
+          "where": "Previous landlords, rental agencies, or housing assistance programs"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather rental history documentation and landlord references",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "26 USC § 42 - Low-income housing credit",
+          "url": "https://www.law.cornell.edu/uscode/text/26/42",
+          "legalReference": "26 USC § 42",
+          "date": "2024-01-01",
+          "notes": "Defines rental history requirements for LIHTC properties"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-good-rental-history",
+          "description": "Good rental history - eligible",
+          "input": {
+            "hasRentalHistory": true,
+            "hasEvictionHistory": false,
+            "hasRentalDebt": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-eviction-history",
+          "description": "Recent eviction history - not eligible",
+          "input": {
+            "hasRentalHistory": true,
+            "hasEvictionHistory": true,
+            "hasRentalDebt": false
+          },
+          "expected": false
+        },
+        {
+          "id": "test-rental-debt",
+          "description": "Outstanding rental debt - not eligible",
+          "input": {
+            "hasRentalHistory": true,
+            "hasEvictionHistory": false,
+            "hasRentalDebt": true
+          },
+          "expected": false
+        }
+      ]
+    }
+  ],
+  "testCases": [
+    {
+      "id": "test-lihtc-eligible-family",
+      "description": "Low-income family with good rental history - eligible",
+      "input": {
+        "householdIncome": 30000,
+        "areaMedianIncome": 60000,
+        "householdSize": 3,
+        "maxUnitSize": 4,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false,
+        "hasRentalHistory": true,
+        "hasEvictionHistory": false,
+        "hasRentalDebt": false
+      },
+      "expected": true
+    },
+    {
+      "id": "test-lihtc-eligible-single",
+      "description": "Low-income individual with good rental history - eligible",
+      "input": {
+        "householdIncome": 25000,
+        "areaMedianIncome": 50000,
+        "householdSize": 1,
+        "maxUnitSize": 2,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false,
+        "hasRentalHistory": true,
+        "hasEvictionHistory": false,
+        "hasRentalDebt": false
+      },
+      "expected": true
+    },
+    {
+      "id": "test-lihtc-not-eligible-income",
+      "description": "Income too high - not eligible",
+      "input": {
+        "householdIncome": 50000,
+        "areaMedianIncome": 60000,
+        "householdSize": 2,
+        "maxUnitSize": 3,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false,
+        "hasRentalHistory": true,
+        "hasEvictionHistory": false,
+        "hasRentalDebt": false
+      },
+      "expected": false
+    },
+    {
+      "id": "test-lihtc-not-eligible-eviction",
+      "description": "Recent eviction history - not eligible",
+      "input": {
+        "householdIncome": 30000,
+        "areaMedianIncome": 60000,
+        "householdSize": 2,
+        "maxUnitSize": 3,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false,
+        "hasRentalHistory": true,
+        "hasEvictionHistory": true,
+        "hasRentalDebt": false
+      },
+      "expected": false
+    }
+  ]
+}

@@ -15,6 +15,7 @@ import { SnapExplanation } from './SnapExplanation';
 import { TanfExplanation } from './TanfExplanation';
 import { SsiExplanation } from './SsiExplanation';
 import { Section8Explanation } from './Section8Explanation';
+import { LihtcExplanation } from './LihtcExplanation';
 import { ConfidenceScore } from './ConfidenceScore';
 import { DocumentChecklist } from './DocumentChecklist';
 import { NextStepsList } from './NextStepsList';
@@ -312,6 +313,14 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
               />
             ) : result.programId === 'section8-federal' ? (
               <Section8Explanation
+                programName={result.programName}
+                status={result.status}
+                explanation={result.explanation}
+                userProfile={userProfile}
+                onClose={() => setShowExplanation(false)}
+              />
+            ) : result.programId === 'lihtc-federal' ? (
+              <LihtcExplanation
                 programName={result.programName}
                 status={result.status}
                 explanation={result.explanation}

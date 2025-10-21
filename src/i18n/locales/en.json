@@ -572,6 +572,58 @@
         "housingAuthority": "Contact your local housing authority for application and waiting list information"
       }
     },
+    "lihtc": {
+      "statusMessages": {
+        "qualified": "You are eligible for LIHTC housing! You can access affordable housing options in your area.",
+        "likely": "You appear to be eligible for LIHTC housing. Contact local housing providers to confirm and apply.",
+        "maybe": "You may be eligible for LIHTC housing. Contact local housing providers to discuss your situation.",
+        "unlikely": "You may not currently qualify for LIHTC housing, but eligibility can change. Contact local housing providers to discuss.",
+        "notQualified": "You may not currently qualify for LIHTC housing. Contact local housing providers to discuss your situation and see if you qualify."
+      },
+      "benefits": {
+        "title": "What LIHTC housing provides:",
+        "affordableHousing": "Affordable housing units with reduced rent",
+        "reducedRent": "Rent set at 30% of income or below",
+        "qualityHousing": "Quality, well-maintained housing units",
+        "locationChoice": "Choice of location within participating properties",
+        "longTermStability": "Long-term housing stability and security",
+        "elderly": "Senior-friendly housing with accessibility features",
+        "disability": "Accessible housing with disability accommodations",
+        "families": "Family-friendly housing with multiple bedrooms"
+      },
+      "requirements": {
+        "title": "LIHTC housing requirements:",
+        "income": "Must meet income limits (typically 50-60% of area median income)",
+        "familySize": "Must meet family size requirements for unit size",
+        "citizenship": "Must be a U.S. citizen or eligible immigrant",
+        "backgroundCheck": "Must pass criminal background check",
+        "rentalHistory": "Must have good rental history and references",
+        "application": "Must complete application and provide documentation"
+      },
+      "nextSteps": {
+        "title": "Next steps:",
+        "contact": "Contact local LIHTC housing providers immediately",
+        "waitlist": "Get on waiting lists for available units",
+        "documentation": "Gather required documents (income verification, ID, etc.)",
+        "interview": "Complete application and participate in interview",
+        "lease": "Sign lease and move into affordable housing unit"
+      },
+      "howToApply": {
+        "title": "How to apply for LIHTC housing:",
+        "step1": "Find LIHTC properties in your area through local housing authorities",
+        "step2": "Contact property managers to check availability and get on waiting lists",
+        "step3": "Complete application and provide required documentation",
+        "step4": "Participate in interview and background check process",
+        "step5": "Sign lease and move into your affordable housing unit"
+      },
+      "resources": {
+        "title": "Additional resources:",
+        "website": "LIHTC website: hud.gov/program_offices/housing/mfh/progdesc/lihtc",
+        "hotline": "HUD hotline: 1-800-955-2232",
+        "localOffice": "Find local housing authorities at hud.gov/program_offices/public_indian_housing/pha/contacts",
+        "housingAuthority": "Contact your local housing authority for LIHTC property listings"
+      }
+    },
     "additionalInfo": {
       "title": "Additional Information Needed",
       "message": "You may qualify for some programs, but we need more information to determine eligibility. Review the program details below and contact the program office for assistance."
@@ -666,6 +718,7 @@
     "ssi": "SSI",
     "ssdi": "SSDI",
     "section8": "Section 8",
+    "lihtc": "LIHTC",
     "unemployment": "Unemployment Insurance",
     "housing": "Housing Assistance",
     "energy": "Energy Assistance",
@@ -684,6 +737,7 @@
       "tanf": "Temporary financial assistance for low-income families with children",
       "ssi": "Monthly cash assistance for disabled, blind, or elderly with limited income",
       "section8": "Rental assistance for low-income families and individuals",
+      "lihtc": "Affordable housing options for low-income families",
       "default": "Government benefit program"
     }
   },
