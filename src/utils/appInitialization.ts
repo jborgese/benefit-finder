@@ -120,6 +120,60 @@ async function loadSamplePrograms(db: ReturnType<typeof getDatabase>): Promise<v
     lastUpdated: Date.now(),
     createdAt: Date.now(),
   });
+
+  // Create WIC program with explicit ID to match rules
+  await db.benefit_programs.insert({
+    id: 'wic-federal',
+    name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
+    shortName: 'WIC',
+    description: 'Provides nutrition assistance to pregnant women, new mothers, and young children',
+    category: 'food',
+    jurisdiction: US_FEDERAL_JURISDICTION,
+    jurisdictionLevel: 'federal',
+    website: 'https://www.fns.usda.gov/wic',
+    phoneNumber: '1-800-942-3678',
+    applicationUrl: 'https://www.fns.usda.gov/wic/how-apply',
+    active: true,
+    tags: ['food', 'nutrition', 'women', 'children', 'infants'],
+    lastUpdated: Date.now(),
+    createdAt: Date.now(),
+  });
+
+  // Create TANF program with explicit ID to match rules
+  await db.benefit_programs.insert({
+    id: 'tanf-federal',
+    name: 'Temporary Assistance for Needy Families (TANF)',
+    shortName: 'TANF',
+    description: 'Provides temporary cash assistance and support services to low-income families with children',
+    category: 'financial',
+    jurisdiction: US_FEDERAL_JURISDICTION,
+    jurisdictionLevel: 'federal',
+    website: 'https://www.acf.hhs.gov/ofa/programs/tanf',
+    phoneNumber: '1-800-358-8837',
+    applicationUrl: 'https://www.benefits.gov/benefit/1081',
+    active: true,
+    tags: ['cash', 'assistance', 'families', 'children'],
+    lastUpdated: Date.now(),
+    createdAt: Date.now(),
+  });
+
+  // Create SSI program with explicit ID to match rules
+  await db.benefit_programs.insert({
+    id: 'ssi-federal',
+    name: 'Supplemental Security Income (SSI)',
+    shortName: 'SSI',
+    description: 'Monthly cash assistance for disabled, blind, or elderly individuals with limited income and resources',
+    category: 'financial',
+    jurisdiction: US_FEDERAL_JURISDICTION,
+    jurisdictionLevel: 'federal',
+    website: 'https://www.ssa.gov/ssi',
+    phoneNumber: '1-800-772-1213',
+    applicationUrl: 'https://www.ssa.gov/benefits/ssi/',
+    active: true,
+    tags: ['cash', 'disability', 'elderly', 'blind'],
+    lastUpdated: Date.now(),
+    createdAt: Date.now(),
+  });
 }
 
 /**
@@ -133,6 +187,18 @@ async function loadSampleRules(): Promise<void> {
   // Import Medicaid rules
   const medicaidRules = await import('../rules/federal/medicaid/medicaid-federal-rules.json');
   await importRulePackage(medicaidRules.default);
+
+  // Import WIC rules
+  const wicRules = await import('../rules/federal/wic/wic-federal-rules.json');
+  await importRulePackage(wicRules.default);
+
+  // Import TANF rules
+  const tanfRules = await import('../rules/federal/tanf/tanf-federal-rules.json');
+  await importRulePackage(tanfRules.default);
+
+  // Import SSI rules
+  const ssiRules = await import('../rules/federal/ssi/ssi-federal-rules.json');
+  await importRulePackage(ssiRules.default);
 }
 
 /**

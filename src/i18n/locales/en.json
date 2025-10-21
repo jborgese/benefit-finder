@@ -520,6 +520,58 @@
         }
       }
     },
+    "section8": {
+      "statusMessages": {
+        "qualified": "You are eligible for Section 8! You can receive rental assistance to help with housing costs.",
+        "likely": "You appear to be eligible for Section 8. Contact your local housing authority to confirm and apply.",
+        "maybe": "You may be eligible for Section 8. Contact your local housing authority to discuss your situation.",
+        "unlikely": "You may not currently qualify for Section 8, but eligibility can change. Contact your local housing authority to discuss.",
+        "notQualified": "You may not currently qualify for Section 8. Contact your local housing authority to discuss your situation and see if you qualify."
+      },
+      "benefits": {
+        "title": "What Section 8 provides:",
+        "rentalAssistance": "Rental assistance to help pay for housing in the private market",
+        "housingChoice": "Choice of housing anywhere in the United States (with portability)",
+        "portability": "Ability to move and keep your voucher (portability)",
+        "fairMarketRent": "Assistance based on local fair market rent rates",
+        "utilities": "Some utility assistance may be available",
+        "elderly": "Additional priority for elderly applicants",
+        "disability": "Reasonable accommodations for disabilities",
+        "families": "Priority for families with children"
+      },
+      "requirements": {
+        "title": "Section 8 requirements:",
+        "income": "Must have very low income (typically 50% of area median income or less)",
+        "citizenship": "Must be a U.S. citizen or eligible immigrant",
+        "housingNeed": "Must demonstrate housing need (overcrowded, unsafe, or unaffordable housing)",
+        "familyComposition": "Must meet family composition requirements",
+        "backgroundCheck": "Must pass criminal background check",
+        "cooperation": "Must cooperate with housing authority requirements"
+      },
+      "nextSteps": {
+        "title": "Next steps:",
+        "contact": "Contact your local housing authority immediately",
+        "waitlist": "Get on the waiting list (can be very long - years)",
+        "documentation": "Gather required documents (income verification, ID, etc.)",
+        "interview": "Complete application and participate in interview",
+        "voucher": "Receive voucher and find suitable housing"
+      },
+      "howToApply": {
+        "title": "How to apply for Section 8:",
+        "step1": "Contact your local housing authority to get on the waiting list",
+        "step2": "Complete the Section 8 application when your name comes up",
+        "step3": "Provide required documentation (income, family composition, etc.)",
+        "step4": "Participate in interview and housing inspection",
+        "step5": "Find suitable housing and receive voucher"
+      },
+      "resources": {
+        "title": "Additional resources:",
+        "website": "Section 8 website: hud.gov/program_offices/public_indian_housing/programs/hcv",
+        "hotline": "HUD hotline: 1-800-955-2232",
+        "localOffice": "Find your local housing authority at hud.gov/program_offices/public_indian_housing/pha/contacts",
+        "housingAuthority": "Contact your local housing authority for application and waiting list information"
+      }
+    },
     "additionalInfo": {
       "title": "Additional Information Needed",
       "message": "You may qualify for some programs, but we need more information to determine eligibility. Review the program details below and contact the program office for assistance."
@@ -613,6 +665,7 @@
     "tanf": "TANF",
     "ssi": "SSI",
     "ssdi": "SSDI",
+    "section8": "Section 8",
     "unemployment": "Unemployment Insurance",
     "housing": "Housing Assistance",
     "energy": "Energy Assistance",
@@ -630,6 +683,7 @@
       "wic": "Provides nutrition assistance to pregnant women, new mothers, and young children",
       "tanf": "Temporary financial assistance for low-income families with children",
       "ssi": "Monthly cash assistance for disabled, blind, or elderly with limited income",
+      "section8": "Rental assistance for low-income families and individuals",
       "default": "Government benefit program"
     }
   },

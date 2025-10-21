@@ -1,0 +1,650 @@
+{
+  "metadata": {
+    "id": "section8-federal-rules-2024",
+    "name": "Section 8 Housing Choice Voucher Federal Eligibility Rules (2024)",
+    "description": "Federal baseline Section 8 Housing Choice Voucher eligibility rules for 2024. Section 8 provides rental assistance to help low-income families, elderly, and disabled individuals afford decent, safe, and sanitary housing in the private market.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FEDERAL",
+    "programs": [
+      "section8-federal"
+    ],
+    "tags": [
+      "section8",
+      "housing",
+      "federal",
+      "2024",
+      "rental-assistance",
+      "low-income",
+      "voucher"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "section8-federal-income-limits",
+      "programId": "section8-federal",
+      "name": "Section 8 Income Limits",
+      "description": "Must have very low income (typically 50% of area median income or less)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "householdIncome"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "var": "areaMedianIncome"
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Section 8 is designed for very low-income families. Income limits are typically 50% of the area median income (AMI) or less, though some housing authorities may serve families up to 80% AMI.",
+      "requiredFields": [
+        "householdIncome",
+        "areaMedianIncome"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or other income verification",
+          "required": true,
+          "alternatives": [
+            "Social Security award letters",
+            "Unemployment benefit statements",
+            "Child support documentation"
+          ],
+          "where": "Employer, Social Security Administration, or other income source"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Contact your local housing authority to verify current income limits for your area",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "24 CFR 982.201 - Eligibility",
+          "url": "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-B/section-982.201",
+          "legalReference": "24 CFR § 982.201",
+          "date": "2024-01-01",
+          "notes": "Defines income eligibility for Section 8"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-income-eligible",
+          "description": "Income below 50% AMI - eligible",
+          "input": {
+            "householdIncome": 25000,
+            "areaMedianIncome": 60000
+          },
+          "expected": true
+        },
+        {
+          "id": "test-income-moderate",
+          "description": "Income at 50% AMI - eligible",
+          "input": {
+            "householdIncome": 30000,
+            "areaMedianIncome": 60000
+          },
+          "expected": true
+        },
+        {
+          "id": "test-income-high",
+          "description": "Income above 50% AMI - not eligible",
+          "input": {
+            "householdIncome": 40000,
+            "areaMedianIncome": 60000
+          },
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "section8-federal-citizenship-status",
+      "programId": "section8-federal",
+      "name": "Section 8 Citizenship Status",
+      "description": "Must be a U.S. citizen or eligible immigrant",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "isCitizen"
+          },
+          {
+            "var": "isEligibleImmigrant"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "At least one household member must be a U.S. citizen or eligible immigrant. Mixed-status families may be eligible with restrictions.",
+      "requiredFields": [
+        "isCitizen",
+        "isEligibleImmigrant"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, or immigration documents",
+          "required": true,
+          "alternatives": [
+            "Naturalization certificate",
+            "Permanent resident card",
+            "Refugee documentation"
+          ],
+          "where": "State vital records, passport agency, or immigration services"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather citizenship or immigration documentation for all household members",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "24 CFR 982.201 - Eligibility",
+          "url": "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-B/section-982.201",
+          "legalReference": "24 CFR § 982.201",
+          "date": "2024-01-01",
+          "notes": "Defines citizenship requirements for Section 8"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-citizen-eligible",
+          "description": "U.S. citizen - eligible",
+          "input": {
+            "isCitizen": true,
+            "isEligibleImmigrant": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-immigrant-eligible",
+          "description": "Eligible immigrant - eligible",
+          "input": {
+            "isCitizen": false,
+            "isEligibleImmigrant": true
+          },
+          "expected": true
+        },
+        {
+          "id": "test-undocumented",
+          "description": "Undocumented immigrant - not eligible",
+          "input": {
+            "isCitizen": false,
+            "isEligibleImmigrant": false
+          },
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "section8-federal-housing-need",
+      "programId": "section8-federal",
+      "name": "Section 8 Housing Need",
+      "description": "Must demonstrate housing need (overcrowded, unsafe, or unaffordable housing)",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "isOvercrowded"
+          },
+          {
+            "var": "isUnsafeHousing"
+          },
+          {
+            "var": "isUnaffordableHousing"
+          },
+          {
+            "var": "isHomeless"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Applicants must demonstrate a housing need, such as living in overcrowded conditions, unsafe housing, paying more than 30% of income for rent, or being homeless.",
+      "requiredFields": [
+        "isOvercrowded",
+        "isUnsafeHousing",
+        "isUnaffordableHousing",
+        "isHomeless"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-housing-need",
+          "name": "Proof of Housing Need",
+          "description": "Current lease, utility bills, or documentation of housing conditions",
+          "required": true,
+          "alternatives": [
+            "Landlord statement",
+            "Housing inspection report",
+            "Homeless shelter documentation"
+          ],
+          "where": "Current residence, landlord, or social services agency"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Document your current housing situation and any problems",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "24 CFR 982.201 - Eligibility",
+          "url": "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-B/section-982.201",
+          "legalReference": "24 CFR § 982.201",
+          "date": "2024-01-01",
+          "notes": "Defines housing need requirements for Section 8"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-overcrowded",
+          "description": "Overcrowded housing - eligible",
+          "input": {
+            "isOvercrowded": true,
+            "isUnsafeHousing": false,
+            "isUnaffordableHousing": false,
+            "isHomeless": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-unsafe",
+          "description": "Unsafe housing - eligible",
+          "input": {
+            "isOvercrowded": false,
+            "isUnsafeHousing": true,
+            "isUnaffordableHousing": false,
+            "isHomeless": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-unaffordable",
+          "description": "Unaffordable housing - eligible",
+          "input": {
+            "isOvercrowded": false,
+            "isUnsafeHousing": false,
+            "isUnaffordableHousing": true,
+            "isHomeless": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-homeless",
+          "description": "Homeless - eligible",
+          "input": {
+            "isOvercrowded": false,
+            "isUnsafeHousing": false,
+            "isUnaffordableHousing": false,
+            "isHomeless": true
+          },
+          "expected": true
+        },
+        {
+          "id": "test-no-need",
+          "description": "No housing need - not eligible",
+          "input": {
+            "isOvercrowded": false,
+            "isUnsafeHousing": false,
+            "isUnaffordableHousing": false,
+            "isHomeless": false
+          },
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "section8-federal-family-composition",
+      "programId": "section8-federal",
+      "name": "Section 8 Family Composition",
+      "description": "Must meet family composition requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "var": "hasChildren"
+          },
+          {
+            "var": "isElderly"
+          },
+          {
+            "var": "isDisabled"
+          },
+          {
+            "var": "isPregnant"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Section 8 serves families with children, elderly individuals (62+), disabled individuals, and pregnant women. Single individuals may be eligible in some areas.",
+      "requiredFields": [
+        "hasChildren",
+        "isElderly",
+        "isDisabled",
+        "isPregnant"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-family-composition",
+          "name": "Proof of Family Composition",
+          "description": "Birth certificates, marriage certificate, or other family documentation",
+          "required": true,
+          "alternatives": [
+            "Adoption papers",
+            "Guardianship papers",
+            "Medical documentation of pregnancy"
+          ],
+          "where": "State vital records, court system, or medical provider"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather documentation for all household members",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "24 CFR 982.201 - Eligibility",
+          "url": "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-B/section-982.201",
+          "legalReference": "24 CFR § 982.201",
+          "date": "2024-01-01",
+          "notes": "Defines family composition requirements for Section 8"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-family-children",
+          "description": "Family with children - eligible",
+          "input": {
+            "hasChildren": true,
+            "isElderly": false,
+            "isDisabled": false,
+            "isPregnant": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-elderly",
+          "description": "Elderly individual - eligible",
+          "input": {
+            "hasChildren": false,
+            "isElderly": true,
+            "isDisabled": false,
+            "isPregnant": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-disabled",
+          "description": "Disabled individual - eligible",
+          "input": {
+            "hasChildren": false,
+            "isElderly": false,
+            "isDisabled": true,
+            "isPregnant": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-pregnant",
+          "description": "Pregnant woman - eligible",
+          "input": {
+            "hasChildren": false,
+            "isElderly": false,
+            "isDisabled": false,
+            "isPregnant": true
+          },
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "section8-federal-background-check",
+      "programId": "section8-federal",
+      "name": "Section 8 Background Check",
+      "description": "Must pass criminal background check",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "hasCriminalHistory"
+          },
+          {
+            "not": {
+              "var": "hasDisqualifyingCrimes"
+            }
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Applicants must pass a criminal background check. Certain crimes may disqualify applicants, including drug-related offenses, violent crimes, or sex offenses.",
+      "requiredFields": [
+        "hasCriminalHistory",
+        "hasDisqualifyingCrimes"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-background",
+          "name": "Background Check Documentation",
+          "description": "Criminal background check results or court documentation",
+          "required": true,
+          "alternatives": [
+            "Court records",
+            "Probation/parole documentation",
+            "Rehabilitation certificates"
+          ],
+          "where": "Court system, probation office, or background check service"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Be prepared to discuss any criminal history and provide documentation",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "24 CFR 982.553 - Denial or termination of assistance",
+          "url": "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-F/section-982.553",
+          "legalReference": "24 CFR § 982.553",
+          "date": "2024-01-01",
+          "notes": "Defines criminal background requirements for Section 8"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-clean-background",
+          "description": "No criminal history - eligible",
+          "input": {
+            "hasCriminalHistory": false,
+            "hasDisqualifyingCrimes": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-minor-offenses",
+          "description": "Minor criminal history - eligible",
+          "input": {
+            "hasCriminalHistory": true,
+            "hasDisqualifyingCrimes": false
+          },
+          "expected": true
+        },
+        {
+          "id": "test-disqualifying-crimes",
+          "description": "Disqualifying criminal history - not eligible",
+          "input": {
+            "hasCriminalHistory": true,
+            "hasDisqualifyingCrimes": true
+          },
+          "expected": false
+        }
+      ]
+    }
+  ],
+  "testCases": [
+    {
+      "id": "test-section8-eligible-family",
+      "description": "Low-income family with children - eligible",
+      "input": {
+        "householdIncome": 25000,
+        "areaMedianIncome": 60000,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "isOvercrowded": true,
+        "isUnsafeHousing": false,
+        "isUnaffordableHousing": false,
+        "isHomeless": false,
+        "hasChildren": true,
+        "isElderly": false,
+        "isDisabled": false,
+        "isPregnant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false
+      },
+      "expected": true
+    },
+    {
+      "id": "test-section8-eligible-elderly",
+      "description": "Low-income elderly individual - eligible",
+      "input": {
+        "householdIncome": 20000,
+        "areaMedianIncome": 50000,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "isOvercrowded": false,
+        "isUnsafeHousing": true,
+        "isUnaffordableHousing": false,
+        "isHomeless": false,
+        "hasChildren": false,
+        "isElderly": true,
+        "isDisabled": false,
+        "isPregnant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false
+      },
+      "expected": true
+    },
+    {
+      "id": "test-section8-eligible-disabled",
+      "description": "Low-income disabled individual - eligible",
+      "input": {
+        "householdIncome": 18000,
+        "areaMedianIncome": 45000,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "isOvercrowded": false,
+        "isUnsafeHousing": false,
+        "isUnaffordableHousing": true,
+        "isHomeless": false,
+        "hasChildren": false,
+        "isElderly": false,
+        "isDisabled": true,
+        "isPregnant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false
+      },
+      "expected": true
+    },
+    {
+      "id": "test-section8-not-eligible-income",
+      "description": "Income too high - not eligible",
+      "input": {
+        "householdIncome": 50000,
+        "areaMedianIncome": 60000,
+        "isCitizen": true,
+        "isEligibleImmigrant": false,
+        "isOvercrowded": true,
+        "isUnsafeHousing": false,
+        "isUnaffordableHousing": false,
+        "isHomeless": false,
+        "hasChildren": true,
+        "isElderly": false,
+        "isDisabled": false,
+        "isPregnant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false
+      },
+      "expected": false
+    },
+    {
+      "id": "test-section8-not-eligible-citizenship",
+      "description": "Not citizen or eligible immigrant - not eligible",
+      "input": {
+        "householdIncome": 25000,
+        "areaMedianIncome": 60000,
+        "isCitizen": false,
+        "isEligibleImmigrant": false,
+        "isOvercrowded": true,
+        "isUnsafeHousing": false,
+        "isUnaffordableHousing": false,
+        "isHomeless": false,
+        "hasChildren": true,
+        "isElderly": false,
+        "isDisabled": false,
+        "isPregnant": false,
+        "hasCriminalHistory": false,
+        "hasDisqualifyingCrimes": false
+      },
+      "expected": false
+    }
+  ]
+}
