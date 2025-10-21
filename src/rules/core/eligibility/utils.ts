@@ -67,7 +67,7 @@ export const FIELD_NAME_MAPPINGS: FieldNameMapping = {
  */
 export function formatFieldName(fieldName: string): string {
   debugLog('Formatting field name', fieldName);
-  if (fieldName in FIELD_NAME_MAPPINGS) {
+  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
     const mapping = FIELD_NAME_MAPPINGS[fieldName as keyof FieldNameMapping];
     debugLog('Field mapping found', fieldName, mapping);
     return mapping;
@@ -77,6 +77,54 @@ export function formatFieldName(fieldName: string): string {
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (l) => l.toUpperCase())
     .trim();
+}
+
+/**
+ * Determine criterion status and whether it's met
+ */
+function determineCriterionStatus(fieldValue: unknown): { criterionMet: boolean; status: string } {
+  const hasValue = fieldValue !== undefined && fieldValue !== null;
+
+  if (!hasValue) {
+    return { criterionMet: false, status: 'Not provided' };
+  }
+
+  if (typeof fieldValue === 'boolean') {
+    const criterionMet = fieldValue === true;
+    const status = fieldValue === true ? 'Met' : 'Not applicable';
+    return { criterionMet, status };
+  }
+
+  return { criterionMet: true, status: 'Met' };
+}
+
+/**
+ * Process a single field for criteria breakdown
+ */
+function processFieldForBreakdown(
+  field: string,
+  data: JsonLogicData,
+  breakdown: CriteriaBreakdownItem[]
+): void {
+  const fieldValue = Object.prototype.hasOwnProperty.call(data, field)
+    ? data[field]
+    : undefined;
+  const fieldDescription = formatFieldName(field);
+  const { criterionMet, status } = determineCriterionStatus(fieldValue);
+
+  if (fieldValue === undefined || fieldValue === null) {
+    debugLog('Field not provided in breakdown', field);
+    return;
+  }
+
+  debugLog('Adding to breakdown', { field, criterionMet, fieldValue, status });
+
+  breakdown.push({
+    criterion: field,
+    met: criterionMet,
+    value: fieldValue,
+    description: `${fieldDescription}: ${status}`,
+  });
 }
 
 /**
@@ -92,29 +140,7 @@ export function generateCriteriaBreakdown(
 
   if (rule.requiredFields) {
     for (const field of rule.requiredFields) {
-      const fieldValue = data[field];
-      const fieldDescription = formatFieldName(field);
-      const hasValue = fieldValue !== undefined && fieldValue !== null;
-
-      let criterionMet = hasValue;
-      let status = hasValue ? 'Met' : 'Not provided';
-
-      if (!hasValue) {
-        debugLog('Field not provided in breakdown', field);
-        continue;
-      } else if (typeof fieldValue === 'boolean') {
-        criterionMet = fieldValue === true;
-        status = fieldValue === true ? 'Met' : 'Not applicable';
-      }
-
-      debugLog('Adding to breakdown', { field, criterionMet, fieldValue, status });
-
-      breakdown.push({
-        criterion: field,
-        met: criterionMet,
-        value: fieldValue,
-        description: `${fieldDescription}: ${status}`,
-      });
+      processFieldForBreakdown(field, data, breakdown);
     }
   }
 

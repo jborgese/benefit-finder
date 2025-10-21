@@ -9,7 +9,11 @@ import { Button } from '../Button';
 import { useI18n } from '../../i18n/hooks';
 import { useDatabase } from '../../db/hooks';
 import { isDatabaseInitialized } from '../../db/database';
-import type { RxDocument } from 'rxdb';
+import type {
+  UserProfileDocument,
+  EligibilityResultDocument,
+  AppSettingDocument
+} from '../../db/schemas';
 
 interface PrivacyExplainerProps {
   isOpen: boolean;
@@ -61,9 +65,9 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
       const exportData = {
         timestamp: new Date().toISOString(),
         version: '1.0',
-        userProfiles: userData.map((doc: RxDocument) => doc.toJSON()),
-        eligibilityResults: resultsData.map((doc: RxDocument) => doc.toJSON()),
-        appSettings: settingsData.map((doc: RxDocument) => doc.toJSON()),
+        userProfiles: userData.map((doc: UserProfileDocument) => doc.toJSON()),
+        eligibilityResults: resultsData.map((doc: EligibilityResultDocument) => doc.toJSON()),
+        appSettings: settingsData.map((doc: AppSettingDocument) => doc.toJSON()),
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });

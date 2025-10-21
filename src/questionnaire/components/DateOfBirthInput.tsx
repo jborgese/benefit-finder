@@ -77,7 +77,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     }
   };
 
-  const ageCalculator = customCalculateAge || defaultCalculateAge;
+  const ageCalculator = customCalculateAge ?? defaultCalculateAge;
 
   // Calculate age when value changes
   useEffect(() => {
@@ -140,8 +140,8 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   const maxDate = today.toISOString().split('T')[0]; // Today
   const minDate = new Date(today.getFullYear() - 120, 0, 1).toISOString().split('T')[0]; // 120 years ago
 
-  const effectiveMin = min || minDate;
-  const effectiveMax = max || maxDate;
+  const effectiveMin = min ?? minDate;
+  const effectiveMax = max ?? maxDate;
 
   return (
     <div className={`question-date-of-birth-input ${className}`}>

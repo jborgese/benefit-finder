@@ -144,7 +144,7 @@ export async function evaluateEligibility(
       programId,
       resultRule,
       combinedEvalResult,
-      (resultRuleDetails as DetailedEvaluationResult) || fallbackDetailedResult,
+      resultRuleDetails ? (resultRuleDetails as DetailedEvaluationResult) : fallbackDetailedResult,
       finalMissingFields,
       executionTime
     );

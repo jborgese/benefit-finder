@@ -28,45 +28,65 @@ function formatSNAPIncomeCriteria(
 }
 
 /**
+ * Criterion type handlers for generating descriptions
+ */
+const criterionHandlers = {
+  income: (fieldName: string, met: boolean) =>
+    met
+      ? `${fieldName}: Too high for program eligibility`
+      : `${fieldName}: Income information processed, but exceeds program limits`,
+
+  householdSize: (fieldName: string, met: boolean) =>
+    met
+      ? `${fieldName}: Household size contributes to income limit calculation`
+      : `${fieldName}: Household size affects your eligibility determination`,
+
+  citizenship: (fieldName: string, met: boolean) =>
+    met
+      ? `${fieldName}: Citizenship verified but other factors affect eligibility`
+      : `${fieldName}: Does not meet citizenship requirements`,
+
+  asset: (fieldName: string, met: boolean) =>
+    met
+      ? `${fieldName}: Assets within limits`
+      : `${fieldName}: Assets exceed program limits`,
+
+  work: (fieldName: string, met: boolean) =>
+    met
+      ? `${fieldName}: Work requirements verified`
+      : `${fieldName}: Does not meet work requirements`,
+
+  default: (fieldName: string, met: boolean) =>
+    met
+      ? `${fieldName}: Information verified, but other factors prevent qualification`
+      : `${fieldName}: Does not meet program requirements`
+};
+
+/**
+ * Determine criterion type from criterion name
+ */
+function getCriterionType(criterion: string): keyof typeof criterionHandlers {
+  const lowerCriterion = criterion.toLowerCase();
+
+  if (lowerCriterion.includes('income')) return 'income';
+  if (lowerCriterion.includes('household') && lowerCriterion.includes('size')) return 'householdSize';
+  if (lowerCriterion.includes('citizenship') || lowerCriterion.includes('immigration')) return 'citizenship';
+  if (lowerCriterion.includes('asset') || lowerCriterion.includes('resource')) return 'asset';
+  if (lowerCriterion.includes('work') || lowerCriterion.includes('employment')) return 'work';
+
+  return 'default';
+}
+
+/**
  * Generate context-aware description for failed criteria
  */
 function generateFailedCriteriaDescription(cr: CriterionResult, fieldName: string): string {
-  const criterion = cr.criterion.toLowerCase();
-
-  if (criterion.includes('income')) {
-    return cr.met
-      ? `${fieldName}: Too high for program eligibility`
-      : `${fieldName}: Income information processed, but exceeds program limits`;
+  const criterionType = getCriterionType(cr.criterion);
+  let handler = criterionHandlers.default;
+  if (Object.prototype.hasOwnProperty.call(criterionHandlers, criterionType)) {
+    handler = criterionHandlers[criterionType];
   }
-
-  if (criterion.includes('household') && criterion.includes('size')) {
-    return cr.met
-      ? `${fieldName}: Household size contributes to income limit calculation`
-      : `${fieldName}: Household size affects your eligibility determination`;
-  }
-
-  if (criterion.includes('citizenship') || criterion.includes('immigration')) {
-    return cr.met
-      ? `${fieldName}: Citizenship verified but other factors affect eligibility`
-      : `${fieldName}: Does not meet citizenship requirements`;
-  }
-
-  if (criterion.includes('asset') || criterion.includes('resource')) {
-    return cr.met
-      ? `${fieldName}: Assets within limits`
-      : `${fieldName}: Assets exceed program limits`;
-  }
-
-  if (criterion.includes('work') || criterion.includes('employment')) {
-    return cr.met
-      ? `${fieldName}: Work requirements verified`
-      : `${fieldName}: Does not meet work requirements`;
-  }
-
-  // Generic fallback with more helpful context
-  return cr.met
-    ? `${fieldName}: Information verified, but other factors prevent qualification`
-    : `${fieldName}: Does not meet program requirements`;
+  return handler(fieldName, cr.met);
 }
 
 /**
@@ -100,6 +120,31 @@ function extractSNAPIncomeStatus(criteriaResults: Array<CriterionResult>): boole
 }
 
 /**
+ * Determine formatting strategy for a criterion
+ */
+function determineFormattingStrategy(
+  cr: CriterionResult,
+  isSNAPProgram: boolean
+): 'snap_income' | 'comparison' | 'message' | 'context' {
+  const criterionLower = cr.criterion.toLowerCase();
+  const isIncomeCriterion = criterionLower.includes('income') && !criterionLower.includes('size');
+
+  if (isSNAPProgram && isIncomeCriterion) {
+    return 'snap_income';
+  }
+
+  if (cr.value !== undefined && cr.threshold !== undefined) {
+    return 'comparison';
+  }
+
+  if (cr.message) {
+    return 'message';
+  }
+
+  return 'context';
+}
+
+/**
  * Format a single criterion result
  */
 function formatSingleCriterion(
@@ -110,30 +155,25 @@ function formatSingleCriterion(
   householdSize: number,
   metSNAPIncome: boolean
 ): string {
-  const { criterion, value, threshold, message } = cr;
-  const criterionLower = criterion.toLowerCase();
-  const isIncomeCriterion = criterionLower.includes('income') && !criterionLower.includes('size');
+  const strategy = determineFormattingStrategy(cr, isSNAPProgram);
 
-  // Special handling for SNAP income criteria
-  if (isSNAPProgram && isIncomeCriterion) {
-    return formatSNAPIncomeCriteria(cr, fieldName, householdSize, metSNAPIncome);
+  switch (strategy) {
+    case 'snap_income':
+      return formatSNAPIncomeCriteria(cr, fieldName, householdSize, metSNAPIncome);
+
+    case 'comparison': {
+      const comparisonStr = formatComparison(cr.value, cr.threshold, cr.criterion, cr.met, isEligible);
+      return `${fieldName}: ${comparisonStr}`;
+    }
+
+    case 'message':
+      return `${fieldName}: ${cr.message}`;
+
+    case 'context':
+      return isEligible
+        ? `${fieldName}: Meets requirements`
+        : generateFailedCriteriaDescription(cr, fieldName);
   }
-
-  // If we have specific comparison details, use them
-  if (value !== undefined && threshold !== undefined) {
-    const comparisonStr = formatComparison(value, threshold, criterion, cr.met, isEligible);
-    return `${fieldName}: ${comparisonStr}`;
-  }
-
-  // If we have a specific message, use it
-  if (message) {
-    return `${fieldName}: ${message}`;
-  }
-
-  // Enhanced context-aware descriptions based on field type and eligibility
-  return isEligible
-    ? `${fieldName}: Meets requirements`
-    : generateFailedCriteriaDescription(cr, fieldName);
 }
 
 /**

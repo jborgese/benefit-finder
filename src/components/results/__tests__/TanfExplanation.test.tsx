@@ -41,7 +41,7 @@ vi.mock('../../../i18n/hooks', () => ({
         'results.tanf.resources.childcare': 'Childcare assistance programs',
         'results.tanf.resources.statePrograms': 'State-specific TANF programs and services'
       };
-      return translations[key as keyof typeof translations] || key;
+      return translations[key] || key;
     }
   })
 }));

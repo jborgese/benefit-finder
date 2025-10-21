@@ -51,9 +51,10 @@ const normalizeLanguageCode = (language: string): string => {
 
   // Return mapped language or just the first part (before hyphen)
   // Use Object.prototype.hasOwnProperty.call for safe property access
-  return Object.prototype.hasOwnProperty.call(languageMap, language)
-    ? languageMap[language]
-    : language.split('-')[0];
+  if (Object.prototype.hasOwnProperty.call(languageMap, language)) {
+    return languageMap[language];
+  }
+  return language.split('-')[0];
 };
 
 const initOptions: InitOptions = {

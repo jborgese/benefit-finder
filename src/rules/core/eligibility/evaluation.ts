@@ -301,7 +301,7 @@ export function buildEvaluationResult(
 
   if (import.meta.env.DEV) {
     detailedResult.criteriaResults?.forEach((cr, i) => {
-      const outputResult = criteriaResults?.[i];
+      const outputResult = criteriaResults && i < criteriaResults.length ? criteriaResults[i] : undefined;
       debugLog(`buildEvaluationResult [${i}]`, { input: cr, output: outputResult });
       console.log(`evaluation.ts - buildEvaluationResult -  [${i}] Input:`, {
         criterion: cr.criterion,
@@ -375,7 +375,7 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
   debugLog('Checking missing fields', { requiredFields, data });
   for (const field of requiredFields) {
     // Safely check for field existence
-    const fieldValue = field in data ? data[field] : undefined;
+    const fieldValue = Object.prototype.hasOwnProperty.call(data, field) ? data[field] : undefined;
     if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
       missing.push(field);
     }
@@ -458,7 +458,10 @@ function normalizeStateToCode(stateValue: string): string {
   // If it's a full state name, convert to code
   const normalizedName = stateValue.trim();
   // Safely access the mapping
-  const code = normalizedName in stateNameToCode ? stateNameToCode[normalizedName] : undefined;
+  let code: string | undefined;
+  if (Object.prototype.hasOwnProperty.call(stateNameToCode, normalizedName)) {
+    code = stateNameToCode[normalizedName];
+  }
 
   if (code) {
     return code;

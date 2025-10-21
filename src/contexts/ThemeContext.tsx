@@ -4,9 +4,8 @@
  * Provides theme management (light/dark mode) with system preference detection
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-
-type Theme = 'light' | 'dark' | 'system';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import type { Theme } from './themeConstants';
 
 interface ThemeContextType {
   theme: Theme;
@@ -25,7 +24,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Get saved theme from localStorage or default to 'system'
     const saved = localStorage.getItem('bf-theme');
-    return (saved as Theme) ?? 'system';
+    return saved as Theme ?? 'system';
   });
 
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
@@ -39,12 +38,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   };
 
   // Function to resolve the actual theme
-  const resolveTheme = (currentTheme: Theme): 'light' | 'dark' => {
+  const resolveTheme = useCallback((currentTheme: Theme): 'light' | 'dark' => {
     if (currentTheme === 'system') {
       return getSystemTheme();
     }
     return currentTheme;
-  };
+  }, []);
 
   // Update actual theme when theme changes
   useEffect(() => {

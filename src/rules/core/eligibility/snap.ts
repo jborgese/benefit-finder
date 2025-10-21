@@ -40,11 +40,11 @@ export async function ensureSNAPRulesAreCorrect(): Promise<void> {
     // Check for incorrect logic
     const hasIncorrectRule = snapRules.some(rule => {
       const { ruleLogic } = rule;
-      if (typeof ruleLogic !== 'object' || ruleLogic === null || Array.isArray(ruleLogic)) return false;
+      if (typeof ruleLogic !== 'object' || Array.isArray(ruleLogic)) return false;
       const lessOrEqual = ruleLogic['<='];
       if (!Array.isArray(lessOrEqual)) return false;
       const [_incomeVar, thresholdCalc] = lessOrEqual;
-      if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc !== null && '*' in thresholdCalc) {
+      if (thresholdCalc && typeof thresholdCalc === 'object' && thresholdCalc !== null && Object.prototype.hasOwnProperty.call(thresholdCalc, '*')) {
         const [_sizeVar, multiplier] = (thresholdCalc as { '*': [unknown, unknown] })['*'];
         if (multiplier === 1500) {
           debugLog('Incorrect SNAP rule logic detected', { ruleId: rule.id });
