@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import type { RxDocument, RxQuery, MangoQuery } from 'rxdb';
-import { getDatabase } from './database';
+import { getDatabase, isDatabaseInitialized } from './database';
 import type { BenefitFinderDatabase } from './database';
 import type {
   UserProfile,
@@ -20,10 +20,19 @@ import type {
 /**
  * Hook to access the database instance
  *
- * @returns Database instance
+ * @returns Database instance or null if not initialized
  */
-export function useDatabase(): BenefitFinderDatabase {
-  return getDatabase();
+export function useDatabase(): BenefitFinderDatabase | null {
+  if (!isDatabaseInitialized()) {
+    return null;
+  }
+
+  try {
+    return getDatabase();
+  } catch (error) {
+    console.warn('Database not available:', error);
+    return null;
+  }
 }
 
 /**
@@ -115,12 +124,12 @@ export function useUserProfiles(): {
   result: RxDocument<UserProfile>[];
   isFetching: boolean;
 } {
-  const db = getDatabase();
+  const db = useDatabase();
 
   return useRxQuery<UserProfile>(() =>
-    db.user_profiles.find({
+    db ? db.user_profiles.find({
       sort: [{ updatedAt: 'desc' }],
-    })
+    }) : null
   );
 }
 
@@ -134,10 +143,10 @@ export function useUserProfile(profileId: string | null): {
   result: RxDocument<UserProfile> | null;
   isFetching: boolean;
 } {
-  const db = getDatabase();
+  const db = useDatabase();
 
   return useRxDocument<UserProfile>(() =>
-    profileId
+    db && profileId
       ? db.user_profiles.findOne({
           selector: { id: profileId },
         })
@@ -155,9 +164,11 @@ export function useBenefitPrograms(jurisdiction?: string): {
   result: RxDocument<BenefitProgram>[];
   isFetching: boolean;
 } {
-  const db = getDatabase();
+  const db = useDatabase();
 
   return useRxQuery<BenefitProgram>(() => {
+    if (!db) return null;
+
     const query: MangoQuery<BenefitProgram> = {
       selector: {
         active: true,
@@ -180,10 +191,10 @@ export function useEligibilityRules(programId: string | null): {
   result: RxDocument<EligibilityRule>[];
   isFetching: boolean;
 } {
-  const db = getDatabase();
+  const db = useDatabase();
 
   return useRxQuery<EligibilityRule>(() =>
-    programId
+    db && programId
       ? db.eligibility_rules.find({
           selector: { programId, active: true },
         })
@@ -201,10 +212,10 @@ export function useEligibilityResults(userProfileId: string | null): {
   result: RxDocument<EligibilityResult>[];
   isFetching: boolean;
 } {
-  const db = getDatabase();
+  const db = useDatabase();
 
   return useRxQuery<EligibilityResult>(() =>
-    userProfileId
+    db && userProfileId
       ? db.eligibility_results.find({
           selector: { userProfileId },
           sort: [{ evaluatedAt: 'desc' }],
@@ -223,11 +234,11 @@ export function useAppSetting(key: string): {
   value: unknown | null;
   isFetching: boolean;
 } {
-  const db = getDatabase();
+  const db = useDatabase();
   const { result, isFetching } = useRxDocument<AppSetting>(() =>
-    db.app_settings.findOne({
+    db ? db.app_settings.findOne({
       selector: { key },
-    })
+    }) : null
   );
 
   return {

@@ -108,6 +108,20 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
     };
   }, [currentStep, isOpen, tourSteps]);
 
+  const handleNext = useCallback((): void => {
+    if (currentStep < tourSteps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      onComplete();
+    }
+  }, [currentStep, tourSteps.length, onComplete]);
+
+  const handlePrevious = useCallback((): void => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  }, [currentStep]);
+
   // Handle keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
@@ -124,21 +138,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, currentStep, handleNext, handlePrevious, onClose]);
-
-  const handleNext = useCallback((): void => {
-    if (currentStep < tourSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      onComplete();
-    }
-  }, [currentStep, tourSteps.length, onComplete]);
-
-  const handlePrevious = useCallback((): void => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  }, [currentStep]);
+  }, [isOpen, handleNext, handlePrevious, onClose]);
 
   const handleSkip = useCallback((): void => {
     onClose();

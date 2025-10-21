@@ -488,22 +488,27 @@ function App(): React.ReactElement {
             <nav className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700 px-4 py-4 shadow-sm">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  <h1 className="text-xl font-display font-semibold text-secondary-900 dark:text-secondary-100">
+                    {t('app.title')}
+                  </h1>
                   <a
                     href="https://frootsnoops.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center"
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200"
                     aria-label="Visit frootsnoops.com"
                   >
-                    <img
-                      src="/frootsnoops_mascot.png"
-                      alt="Frootsnoops mascot"
-                      className="w-8 h-8 hover:scale-110 transition-transform duration-200"
-                    />
+                    <div className="w-10 h-10 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
+                      <img
+                        src="/frootsnoops_mascot.png"
+                        alt="Frootsnoops mascot"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span className="text-xs text-secondary-600 dark:text-secondary-400 font-medium">
+                      a frootsnoops site
+                    </span>
                   </a>
-                  <h1 className="text-xl font-display font-semibold text-secondary-900 dark:text-secondary-100">
-                    {t('app.title')}
-                  </h1>
                 </div>
                 <div className="flex items-center space-x-4">
                   {appState !== 'home' && (
