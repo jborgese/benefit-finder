@@ -13,8 +13,18 @@
       "organization": "BenefitFinder"
     },
     "jurisdiction": "US-GA",
-    "programs": ["medicaid-georgia", "peachcare-georgia"],
-    "tags": ["medicaid", "healthcare", "georgia", "2024", "state-specific", "peachcare"],
+    "programs": [
+      "medicaid-georgia",
+      "peachcare-georgia"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "georgia",
+      "2024",
+      "state-specific",
+      "peachcare"
+    ],
     "createdAt": 1728777600000,
     "updatedAt": 1728777600000
   },
@@ -28,12 +38,40 @@
         "if": [
           {
             "and": [
-              { "var": "livesInGeorgia" },
-              { ">=": [{ "var": "age" }, 19] },
-              { "<": [{ "var": "age" }, 65] },
-              { "!": { "var": "isPregnant" } },
-              { "!": { "var": "hasQualifyingDisability" } },
-              { "!": { "var": "hasChildren" } }
+              {
+                "var": "livesInGeorgia"
+              },
+              {
+                ">=": [
+                  {
+                    "var": "age"
+                  },
+                  19
+                ]
+              },
+              {
+                "<": [
+                  {
+                    "var": "age"
+                  },
+                  65
+                ]
+              },
+              {
+                "!": {
+                  "var": "isPregnant"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasQualifyingDisability"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasChildren"
+                }
+              }
             ]
           },
           false,
@@ -42,7 +80,13 @@
       },
       "ruleType": "eligibility",
       "explanation": "IMPORTANT: Georgia has NOT expanded Medicaid. This means most non-disabled, non-pregnant adults age 19-64 without children do NOT qualify for Medicaid in Georgia, even with very low income. The coverage gap affects approximately 350,000 Georgians. If you fall into this gap, explore options at HealthCare.gov for marketplace plans with subsidies, or contact a Community Health Center for care on a sliding fee scale.",
-      "requiredFields": ["age", "isPregnant", "hasQualifyingDisability", "hasChildren", "livesInGeorgia"],
+      "requiredFields": [
+        "age",
+        "isPregnant",
+        "hasQualifyingDisability",
+        "hasChildren",
+        "livesInGeorgia"
+      ],
       "nextSteps": [
         {
           "step": "If you're in the coverage gap, check HealthCare.gov for marketplace plan subsidies",
@@ -88,7 +132,11 @@
             "livesInGeorgia": true
           },
           "expected": false,
-          "tags": ["ineligible", "coverage-gap", "non-expansion"]
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
         },
         {
           "id": "test-ga-pregnant",
@@ -101,7 +149,10 @@
             "livesInGeorgia": true
           },
           "expected": true,
-          "tags": ["eligible", "use-pregnancy-rules"]
+          "tags": [
+            "eligible",
+            "use-pregnancy-rules"
+          ]
         },
         {
           "id": "test-ga-disabled",
@@ -114,12 +165,20 @@
             "livesInGeorgia": true
           },
           "expected": true,
-          "tags": ["eligible", "use-disability-rules"]
+          "tags": [
+            "eligible",
+            "use-disability-rules"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["expansion", "coverage-gap", "adults", "georgia-specific"],
+      "tags": [
+        "expansion",
+        "coverage-gap",
+        "adults",
+        "georgia-specific"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-GA"
     },
@@ -130,14 +189,22 @@
       "description": "Pregnant women with income up to 220% FPL qualify for Medicaid in Georgia",
       "ruleLogic": {
         "and": [
-          { "var": "livesInGeorgia" },
-          { "var": "isPregnant" },
+          {
+            "var": "livesInGeorgia"
+          },
+          {
+            "var": "isPregnant"
+          },
           {
             "<=": [
-              { "var": "householdIncome" },
+              {
+                "var": "householdIncome"
+              },
               {
                 "*": [
-                  { "var": "householdSize" },
+                  {
+                    "var": "householdSize"
+                  },
                   3256
                 ]
               }
@@ -147,14 +214,22 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia covers pregnant women through Medicaid if household income is at or below 220% of the federal poverty level. This is higher than the federal minimum (200% FPL). For 2024, this means: 1 person = $3,256/month, 2 people = $4,408/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
-      "requiredFields": ["isPregnant", "householdIncome", "householdSize", "livesInGeorgia"],
+      "requiredFields": [
+        "isPregnant",
+        "householdIncome",
+        "householdSize",
+        "livesInGeorgia"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-pregnancy-ga",
           "name": "Proof of Pregnancy",
           "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
           "required": true,
-          "alternatives": ["Ultrasound results", "Prenatal appointment records"],
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
           "where": "Healthcare provider or clinic"
         },
         {
@@ -162,7 +237,11 @@
           "name": "Proof of Income",
           "description": "Pay stubs, tax returns, or benefit statements",
           "required": true,
-          "alternatives": ["W-2", "1099", "Self-employment records"],
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
           "where": "Employer or your records"
         }
       ],
@@ -204,7 +283,11 @@
             "householdSize": 1
           },
           "expected": true,
-          "tags": ["eligible", "pregnant", "georgia"]
+          "tags": [
+            "eligible",
+            "pregnant",
+            "georgia"
+          ]
         },
         {
           "id": "test-ga-pregnant-ineligible",
@@ -215,7 +298,10 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "high-income"]
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
         },
         {
           "id": "test-ga-not-pregnant",
@@ -226,12 +312,19 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "not-pregnant"]
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["pregnancy", "maternal-health", "220-percent-fpl"],
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "220-percent-fpl"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-GA"
     },
@@ -242,14 +335,27 @@
       "description": "Children under 19 qualify for Medicaid (up to 209% FPL) or PeachCare (209-247% FPL)",
       "ruleLogic": {
         "and": [
-          { "var": "livesInGeorgia" },
-          { "<": [{ "var": "age" }, 19] },
+          {
+            "var": "livesInGeorgia"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
           {
             "<=": [
-              { "var": "householdIncome" },
+              {
+                "var": "householdIncome"
+              },
               {
                 "*": [
-                  { "var": "householdSize" },
+                  {
+                    "var": "householdSize"
+                  },
                   3659
                 ]
               }
@@ -259,14 +365,23 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia children have two programs: 1) **Medicaid**: Free for children in families with income up to 209% FPL ($3,096/month for a family of 3). 2) **PeachCare for Kids**: Low-cost coverage ($20-35/month) for families with income 209-247% FPL ($3,659/month for a family of 3). Both programs cover doctor visits, immunizations, dental, vision, and hospital care. Children can enroll year-round.",
-      "requiredFields": ["age", "householdIncome", "householdSize", "livesInGeorgia"],
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInGeorgia"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-child-age-ga",
           "name": "Proof of Child's Age",
           "description": "Birth certificate, hospital records, or passport",
           "required": true,
-          "alternatives": ["School records", "Adoption papers", "Religious records"],
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
           "where": "Vital records or hospital"
         },
         {
@@ -274,7 +389,11 @@
           "name": "Proof of Household Income",
           "description": "Parents' pay stubs, tax returns, or benefit statements",
           "required": true,
-          "alternatives": ["W-2", "1099", "Self-employment records"],
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
           "where": "Employer or tax records"
         }
       ],
@@ -320,7 +439,11 @@
             "householdSize": 3
           },
           "expected": true,
-          "tags": ["eligible", "child", "medicaid"]
+          "tags": [
+            "eligible",
+            "child",
+            "medicaid"
+          ]
         },
         {
           "id": "test-ga-child-peachcare",
@@ -331,7 +454,11 @@
             "householdSize": 3
           },
           "expected": true,
-          "tags": ["eligible", "child", "peachcare"]
+          "tags": [
+            "eligible",
+            "child",
+            "peachcare"
+          ]
         },
         {
           "id": "test-ga-child-ineligible",
@@ -342,7 +469,10 @@
             "householdSize": 3
           },
           "expected": false,
-          "tags": ["ineligible", "high-income"]
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
         },
         {
           "id": "test-ga-too-old",
@@ -353,12 +483,20 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "age-limit"]
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["children", "peachcare", "chip", "209-percent-fpl"],
+      "tags": [
+        "children",
+        "peachcare",
+        "chip",
+        "209-percent-fpl"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-GA"
     },
@@ -369,19 +507,29 @@
       "description": "Parents and caretaker relatives with very low income may qualify for Medicaid",
       "ruleLogic": {
         "and": [
-          { "var": "livesInGeorgia" },
+          {
+            "var": "livesInGeorgia"
+          },
           {
             "or": [
-              { "var": "isParentOfDependentChild" },
-              { "var": "isCaretakerOfRelativeChild" }
+              {
+                "var": "isParentOfDependentChild"
+              },
+              {
+                "var": "isCaretakerOfRelativeChild"
+              }
             ]
           },
           {
             "<=": [
-              { "var": "householdIncome" },
+              {
+                "var": "householdIncome"
+              },
               {
                 "*": [
-                  { "var": "householdSize" },
+                  {
+                    "var": "householdSize"
+                  },
                   444
                 ]
               }
@@ -391,14 +539,24 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia Medicaid covers parents and caretaker relatives, but only with VERY low income - about 30% of the federal poverty level. For 2024, this means: 1 person = $444/month, 2 people = $600/month, 3 people = $756/month. This is one of the lowest income limits in the nation. If you're a parent with slightly higher income, you likely fall into Georgia's coverage gap and should explore marketplace plans at HealthCare.gov.",
-      "requiredFields": ["isParentOfDependentChild", "isCaretakerOfRelativeChild", "householdIncome", "householdSize", "livesInGeorgia"],
+      "requiredFields": [
+        "isParentOfDependentChild",
+        "isCaretakerOfRelativeChild",
+        "householdIncome",
+        "householdSize",
+        "livesInGeorgia"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-caretaker-status",
           "name": "Proof of Parent/Caretaker Status",
           "description": "Birth certificates showing relationship to children",
           "required": true,
-          "alternatives": ["Court documents", "Custody papers", "School records"],
+          "alternatives": [
+            "Court documents",
+            "Custody papers",
+            "School records"
+          ],
           "where": "Vital records or court"
         },
         {
@@ -406,7 +564,10 @@
           "name": "Proof of Income",
           "description": "Pay stubs, tax returns, or statement of no income",
           "required": true,
-          "alternatives": ["Zero income statement", "Unemployment records"],
+          "alternatives": [
+            "Zero income statement",
+            "Unemployment records"
+          ],
           "where": "Employer or your records"
         }
       ],
@@ -449,7 +610,11 @@
             "householdSize": 2
           },
           "expected": true,
-          "tags": ["eligible", "parent", "very-low-income"]
+          "tags": [
+            "eligible",
+            "parent",
+            "very-low-income"
+          ]
         },
         {
           "id": "test-ga-parent-too-high-income",
@@ -461,7 +626,10 @@
             "householdSize": 2
           },
           "expected": false,
-          "tags": ["ineligible", "coverage-gap"]
+          "tags": [
+            "ineligible",
+            "coverage-gap"
+          ]
         },
         {
           "id": "test-ga-not-parent",
@@ -473,12 +641,20 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "not-parent"]
+          "tags": [
+            "ineligible",
+            "not-parent"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["parents", "caretakers", "30-percent-fpl", "very-low-income"],
+      "tags": [
+        "parents",
+        "caretakers",
+        "30-percent-fpl",
+        "very-low-income"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-GA"
     },
@@ -489,28 +665,57 @@
       "description": "Aged (65+), blind, or disabled individuals may qualify if receiving SSI or meeting income/asset limits",
       "ruleLogic": {
         "and": [
-          { "var": "livesInGeorgia" },
+          {
+            "var": "livesInGeorgia"
+          },
           {
             "or": [
-              { ">=": [{ "var": "age" }, 65] },
-              { "var": "isBlind" },
-              { "var": "hasQualifyingDisability" }
+              {
+                ">=": [
+                  {
+                    "var": "age"
+                  },
+                  65
+                ]
+              },
+              {
+                "var": "isBlind"
+              },
+              {
+                "var": "hasQualifyingDisability"
+              }
             ]
           },
           {
             "or": [
-              { "var": "receivesSSI" },
+              {
+                "var": "receivesSSI"
+              },
               {
                 "and": [
                   {
                     "<=": [
-                      { "var": "householdIncome" },
                       {
-                        "*": [{ "var": "householdSize" }, 1133]
+                        "var": "householdIncome"
+                      },
+                      {
+                        "*": [
+                          {
+                            "var": "householdSize"
+                          },
+                          1133
+                        ]
                       }
                     ]
                   },
-                  { "<=": [{ "var": "countableAssets" }, 2000] }
+                  {
+                    "<=": [
+                      {
+                        "var": "countableAssets"
+                      },
+                      2000
+                    ]
+                  }
                 ]
               }
             ]
@@ -519,14 +724,26 @@
       },
       "ruleType": "eligibility",
       "explanation": "Georgia Medicaid covers aged (65+), blind, or disabled individuals if they: 1) Receive SSI (automatic eligibility), OR 2) Have income below approximately 74% FPL ($1,133/month for individual in 2024) AND countable assets under $2,000 ($3,000 for couples). Home, one vehicle, and certain other assets don't count. Many people in this category also qualify for Medicare.",
-      "requiredFields": ["age", "isBlind", "hasQualifyingDisability", "receivesSSI", "householdIncome", "householdSize", "countableAssets", "livesInGeorgia"],
+      "requiredFields": [
+        "age",
+        "isBlind",
+        "hasQualifyingDisability",
+        "receivesSSI",
+        "householdIncome",
+        "householdSize",
+        "countableAssets",
+        "livesInGeorgia"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-ssi-ga",
           "name": "Proof of SSI (if applicable)",
           "description": "SSI award letter or benefit verification",
           "required": false,
-          "alternatives": ["Social Security benefit statement", "Bank deposits"],
+          "alternatives": [
+            "Social Security benefit statement",
+            "Bank deposits"
+          ],
           "where": "Social Security Administration"
         },
         {
@@ -534,7 +751,10 @@
           "name": "Proof of Disability/Blindness/Age",
           "description": "Medical records, SSA disability determination, or birth certificate",
           "required": true,
-          "alternatives": ["Medicare card", "Doctor's certification"],
+          "alternatives": [
+            "Medicare card",
+            "Doctor's certification"
+          ],
           "where": "SSA or healthcare provider"
         }
       ],
@@ -577,7 +797,11 @@
             "countableAssets": 1000
           },
           "expected": true,
-          "tags": ["eligible", "ssi", "aged"]
+          "tags": [
+            "eligible",
+            "ssi",
+            "aged"
+          ]
         },
         {
           "id": "test-ga-disabled-low-income",
@@ -592,7 +816,11 @@
             "countableAssets": 1500
           },
           "expected": true,
-          "tags": ["eligible", "disabled", "low-income"]
+          "tags": [
+            "eligible",
+            "disabled",
+            "low-income"
+          ]
         },
         {
           "id": "test-ga-disabled-high-assets",
@@ -607,15 +835,23 @@
             "countableAssets": 3000
           },
           "expected": false,
-          "tags": ["ineligible", "high-assets"]
+          "tags": [
+            "ineligible",
+            "high-assets"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["aged", "blind", "disabled", "ssi", "medicare"],
+      "tags": [
+        "aged",
+        "blind",
+        "disabled",
+        "ssi",
+        "medicare"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-GA"
     }
   ]
 }
-

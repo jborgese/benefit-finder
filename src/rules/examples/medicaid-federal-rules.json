@@ -13,8 +13,16 @@
       "organization": "BenefitFinder"
     },
     "jurisdiction": "US-FEDERAL",
-    "programs": ["medicaid-federal"],
-    "tags": ["medicaid", "healthcare", "federal", "2024", "aca"],
+    "programs": [
+      "medicaid-federal"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "federal",
+      "2024",
+      "aca"
+    ],
     "createdAt": 1728777600000,
     "updatedAt": 1728777600000
   },
@@ -26,14 +34,27 @@
       "description": "In expansion states, adults under 65 qualify if income is at or below 138% FPL",
       "ruleLogic": {
         "and": [
-          { "var": "stateHasExpanded" },
-          { "<": [{ "var": "age" }, 65] },
+          {
+            "var": "stateHasExpanded"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
           {
             "<=": [
-              { "var": "householdIncome" },
+              {
+                "var": "householdIncome"
+              },
               {
                 "*": [
-                  { "var": "householdSize" },
+                  {
+                    "var": "householdSize"
+                  },
                   2040
                 ]
               }
@@ -43,14 +64,25 @@
       },
       "ruleType": "eligibility",
       "explanation": "Under the Affordable Care Act, states that expanded Medicaid cover adults under age 65 with household income up to 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. Currently, 40 states plus DC have expanded Medicaid.",
-      "requiredFields": ["stateHasExpanded", "age", "householdIncome", "householdSize", "livesInState"],
+      "requiredFields": [
+        "stateHasExpanded",
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInState"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-income",
           "name": "Proof of Income",
           "description": "Recent pay stubs, tax returns, or benefit statements",
           "required": true,
-          "alternatives": ["W-2 forms", "1099 forms", "Bank statements", "Self-employment records"],
+          "alternatives": [
+            "W-2 forms",
+            "1099 forms",
+            "Bank statements",
+            "Self-employment records"
+          ],
           "where": "Employer, IRS, bank, or your own records"
         },
         {
@@ -58,7 +90,11 @@
           "name": "Proof of Identity",
           "description": "Driver's license, state ID, or passport",
           "required": true,
-          "alternatives": ["Birth certificate", "Tribal ID", "School ID with photo"],
+          "alternatives": [
+            "Birth certificate",
+            "Tribal ID",
+            "School ID with photo"
+          ],
           "where": "DMV, State Department, or issuing agency"
         }
       ],
@@ -109,7 +145,11 @@
             "householdSize": 1
           },
           "expected": true,
-          "tags": ["eligible", "expansion", "adult"]
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
         },
         {
           "id": "test-expansion-ineligible-high-income",
@@ -121,7 +161,10 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "high-income"]
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
         },
         {
           "id": "test-non-expansion-state",
@@ -133,7 +176,10 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "non-expansion"]
+          "tags": [
+            "ineligible",
+            "non-expansion"
+          ]
         },
         {
           "id": "test-elderly-not-eligible-under-this-rule",
@@ -145,12 +191,21 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "elderly", "different-category"]
+          "tags": [
+            "ineligible",
+            "elderly",
+            "different-category"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["income", "expansion", "aca", "adults"],
+      "tags": [
+        "income",
+        "expansion",
+        "aca",
+        "adults"
+      ],
       "category": "financial-eligibility",
       "jurisdiction": "US-FEDERAL"
     },
@@ -161,13 +216,24 @@
       "description": "Children under 19 in families with income up to 200% FPL (varies by state)",
       "ruleLogic": {
         "and": [
-          { "<": [{ "var": "age" }, 19] },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
           {
             "<=": [
-              { "var": "householdIncome" },
+              {
+                "var": "householdIncome"
+              },
               {
                 "*": [
-                  { "var": "householdSize" },
+                  {
+                    "var": "householdSize"
+                  },
                   2960
                 ]
               }
@@ -177,14 +243,22 @@
       },
       "ruleType": "eligibility",
       "explanation": "All states cover children under age 19 in families with incomes up to 200% of the federal poverty level through Medicaid or CHIP (Children's Health Insurance Program). Many states cover children at even higher income levels. For 2024 at 200% FPL: 1 child = $2,960/month, 2 children = $4,007/month, 3 children = $5,054/month. Check your state's CHIP program for specific income limits.",
-      "requiredFields": ["age", "householdIncome", "householdSize"],
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-age",
           "name": "Proof of Child's Age",
           "description": "Birth certificate, hospital records, or passport",
           "required": true,
-          "alternatives": ["School records", "Religious records", "Adoption papers"],
+          "alternatives": [
+            "School records",
+            "Religious records",
+            "Adoption papers"
+          ],
           "where": "Vital records office, hospital, or school"
         },
         {
@@ -192,7 +266,11 @@
           "name": "Proof of Household Income",
           "description": "Parents' pay stubs, tax returns, or benefit statements",
           "required": true,
-          "alternatives": ["W-2", "1099", "Self-employment records"],
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
           "where": "Parents' employers or tax records"
         }
       ],
@@ -238,7 +316,11 @@
             "householdSize": 3
           },
           "expected": true,
-          "tags": ["eligible", "child", "chip"]
+          "tags": [
+            "eligible",
+            "child",
+            "chip"
+          ]
         },
         {
           "id": "test-child-high-income",
@@ -249,7 +331,10 @@
             "householdSize": 2
           },
           "expected": false,
-          "tags": ["ineligible", "high-income"]
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
         },
         {
           "id": "test-boundary-19-years",
@@ -260,12 +345,19 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "age-limit"]
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["children", "chip", "pediatric"],
+      "tags": [
+        "children",
+        "chip",
+        "pediatric"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-FEDERAL"
     },
@@ -276,13 +368,19 @@
       "description": "Pregnant women with income up to 200% FPL (minimum federal requirement)",
       "ruleLogic": {
         "and": [
-          { "var": "isPregnant" },
+          {
+            "var": "isPregnant"
+          },
           {
             "<=": [
-              { "var": "householdIncome" },
+              {
+                "var": "householdIncome"
+              },
               {
                 "*": [
-                  { "var": "householdSize" },
+                  {
+                    "var": "householdSize"
+                  },
                   2960
                 ]
               }
@@ -292,14 +390,21 @@
       },
       "ruleType": "eligibility",
       "explanation": "Pregnant women are covered by Medicaid in all states if family income is at or below 200% of the federal poverty level. Many states cover pregnant women at higher income levels. Coverage includes prenatal care, delivery, and postpartum care for up to 60 days after pregnancy ends. For 2024 at 200% FPL: 1 person = $2,960/month, 2 people = $4,007/month.",
-      "requiredFields": ["isPregnant", "householdIncome", "householdSize"],
+      "requiredFields": [
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-pregnancy",
           "name": "Proof of Pregnancy",
           "description": "Doctor's note or positive pregnancy test",
           "required": true,
-          "alternatives": ["Prenatal clinic verification", "Hospital records"],
+          "alternatives": [
+            "Prenatal clinic verification",
+            "Hospital records"
+          ],
           "where": "Healthcare provider or clinic"
         },
         {
@@ -307,7 +412,10 @@
           "name": "Proof of Income",
           "description": "Pay stubs, tax returns, or benefit statements",
           "required": true,
-          "alternatives": ["W-2", "Unemployment benefits statement"],
+          "alternatives": [
+            "W-2",
+            "Unemployment benefits statement"
+          ],
           "where": "Employer or government agency"
         }
       ],
@@ -348,7 +456,10 @@
             "householdSize": 1
           },
           "expected": true,
-          "tags": ["eligible", "pregnant"]
+          "tags": [
+            "eligible",
+            "pregnant"
+          ]
         },
         {
           "id": "test-pregnant-high-income",
@@ -359,7 +470,10 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "high-income"]
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
         },
         {
           "id": "test-not-pregnant",
@@ -370,12 +484,19 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "not-pregnant"]
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["pregnancy", "maternal-health", "prenatal"],
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "prenatal"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-FEDERAL"
     },
@@ -386,16 +507,24 @@
       "description": "People receiving SSI (Supplemental Security Income) automatically qualify for Medicaid",
       "ruleLogic": {
         "or": [
-          { "var": "receivesSSI" },
+          {
+            "var": "receivesSSI"
+          },
           {
             "and": [
-              { "var": "hasQualifyingDisability" },
+              {
+                "var": "hasQualifyingDisability"
+              },
               {
                 "<=": [
-                  { "var": "householdIncome" },
+                  {
+                    "var": "householdIncome"
+                  },
                   {
                     "*": [
-                      { "var": "householdSize" },
+                      {
+                        "var": "householdSize"
+                      },
                       1133
                     ]
                   }
@@ -407,14 +536,22 @@
       },
       "ruleType": "eligibility",
       "explanation": "If you receive Supplemental Security Income (SSI), you automatically qualify for Medicaid in most states. Even if you don't receive SSI, you may qualify for Medicaid if you have a disability and meet income requirements (typically around 74% of FPL for individuals). States may have different rules for people with disabilities under Medicaid Buy-In programs.",
-      "requiredFields": ["receivesSSI", "hasQualifyingDisability", "householdIncome", "householdSize"],
+      "requiredFields": [
+        "receivesSSI",
+        "hasQualifyingDisability",
+        "householdIncome",
+        "householdSize"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-ssi",
           "name": "Proof of SSI",
           "description": "SSI award letter or benefit verification",
           "required": false,
-          "alternatives": ["Social Security benefit statement", "Bank statement showing SSI deposits"],
+          "alternatives": [
+            "Social Security benefit statement",
+            "Bank statement showing SSI deposits"
+          ],
           "where": "Social Security Administration"
         },
         {
@@ -422,7 +559,11 @@
           "name": "Proof of Disability",
           "description": "Social Security disability determination or doctor's certification",
           "required": false,
-          "alternatives": ["SSDI award letter", "Medical records", "Functional assessment"],
+          "alternatives": [
+            "SSDI award letter",
+            "Medical records",
+            "Functional assessment"
+          ],
           "where": "Social Security Administration or healthcare provider"
         }
       ],
@@ -468,7 +609,11 @@
             "householdSize": 1
           },
           "expected": true,
-          "tags": ["eligible", "ssi", "disability"]
+          "tags": [
+            "eligible",
+            "ssi",
+            "disability"
+          ]
         },
         {
           "id": "test-disability-low-income",
@@ -480,7 +625,11 @@
             "householdSize": 1
           },
           "expected": true,
-          "tags": ["eligible", "disability", "low-income"]
+          "tags": [
+            "eligible",
+            "disability",
+            "low-income"
+          ]
         },
         {
           "id": "test-disability-high-income",
@@ -492,12 +641,19 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "high-income"]
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["disability", "ssi", "medicare-medicaid"],
+      "tags": [
+        "disability",
+        "ssi",
+        "medicare-medicaid"
+      ],
       "category": "categorical-eligibility",
       "jurisdiction": "US-FEDERAL"
     },
@@ -510,32 +666,62 @@
         "or": [
           {
             "in": [
-              { "var": "citizenship" },
-              ["us_citizen", "us_national"]
+              {
+                "var": "citizenship"
+              },
+              [
+                "us_citizen",
+                "us_national"
+              ]
             ]
           },
           {
             "and": [
               {
                 "in": [
-                  { "var": "citizenship" },
-                  ["permanent_resident", "refugee", "asylee", "trafficking_victim", "cuban_haitian"]
+                  {
+                    "var": "citizenship"
+                  },
+                  [
+                    "permanent_resident",
+                    "refugee",
+                    "asylee",
+                    "trafficking_victim",
+                    "cuban_haitian"
+                  ]
                 ]
               },
-              { ">=": [{ "var": "yearsInUS" }, 5] }
+              {
+                ">=": [
+                  {
+                    "var": "yearsInUS"
+                  },
+                  5
+                ]
+              }
             ]
           },
           {
             "in": [
-              { "var": "citizenship" },
-              ["refugee", "asylee", "trafficking_victim", "cuban_haitian"]
+              {
+                "var": "citizenship"
+              },
+              [
+                "refugee",
+                "asylee",
+                "trafficking_victim",
+                "cuban_haitian"
+              ]
             ]
           }
         ]
       },
       "ruleType": "eligibility",
       "explanation": "U.S. citizens and nationals qualify for Medicaid. Lawfully present immigrants may qualify, but most must wait 5 years after obtaining qualified status. Exceptions to the 5-year wait include: refugees, asylees, trafficking victims, Cuban/Haitian entrants, certain military members and families. Emergency Medicaid is available to all regardless of immigration status.",
-      "requiredFields": ["citizenship", "yearsInUS"],
+      "requiredFields": [
+        "citizenship",
+        "yearsInUS"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-citizenship-medicaid",
@@ -592,7 +778,10 @@
             "yearsInUS": 0
           },
           "expected": true,
-          "tags": ["eligible", "citizen"]
+          "tags": [
+            "eligible",
+            "citizen"
+          ]
         },
         {
           "id": "test-refugee",
@@ -602,7 +791,11 @@
             "yearsInUS": 0
           },
           "expected": true,
-          "tags": ["eligible", "refugee", "no-wait"]
+          "tags": [
+            "eligible",
+            "refugee",
+            "no-wait"
+          ]
         },
         {
           "id": "test-lpr-5-years",
@@ -612,7 +805,11 @@
             "yearsInUS": 6
           },
           "expected": true,
-          "tags": ["eligible", "lpr", "5-year-rule"]
+          "tags": [
+            "eligible",
+            "lpr",
+            "5-year-rule"
+          ]
         },
         {
           "id": "test-lpr-under-5-years",
@@ -622,12 +819,20 @@
             "yearsInUS": 3
           },
           "expected": false,
-          "tags": ["ineligible", "lpr", "waiting-period"]
+          "tags": [
+            "ineligible",
+            "lpr",
+            "waiting-period"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["citizenship", "immigration", "5-year-rule"],
+      "tags": [
+        "citizenship",
+        "immigration",
+        "5-year-rule"
+      ],
       "category": "eligibility-requirement",
       "jurisdiction": "US-FEDERAL"
     },
@@ -641,14 +846,20 @@
       },
       "ruleType": "eligibility",
       "explanation": "You must be a resident of the state where you apply for Medicaid. Residency means you live in the state and intend to stay or return. You don't need a permanent address - homeless individuals can qualify. You cannot receive Medicaid from more than one state at the same time.",
-      "requiredFields": ["livesInState"],
+      "requiredFields": [
+        "livesInState"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-residence-medicaid",
           "name": "Proof of State Residence",
           "description": "Mail, utility bill, lease, or employer letter showing state address",
           "required": false,
-          "alternatives": ["Driver's license", "Homeless shelter statement", "Statement from person you live with"],
+          "alternatives": [
+            "Driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
           "where": "Varies by document type"
         }
       ],
@@ -676,7 +887,10 @@
             "livesInState": true
           },
           "expected": true,
-          "tags": ["eligible", "resident"]
+          "tags": [
+            "eligible",
+            "resident"
+          ]
         },
         {
           "id": "test-not-in-state-medicaid",
@@ -685,15 +899,20 @@
             "livesInState": false
           },
           "expected": false,
-          "tags": ["ineligible", "non-resident"]
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["residence", "state-requirement"],
+      "tags": [
+        "residence",
+        "state-requirement"
+      ],
       "category": "eligibility-requirement",
       "jurisdiction": "US-FEDERAL"
     }
   ]
 }
-

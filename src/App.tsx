@@ -675,7 +675,12 @@ function App(): React.ReactElement {
                       </div>
                     </div>
                   )}
-                  {!isProcessingResults && currentResults ? (
+                  {!isProcessingResults && currentResults && (
+                    currentResults.qualified.length > 0 ||
+                    currentResults.maybe.length > 0 ||
+                    currentResults.likely.length > 0 ||
+                    currentResults.notQualified.length > 0
+                  ) ? (
                     <div>
                       <div className="mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
@@ -806,7 +811,7 @@ function App(): React.ReactElement {
                         </div>
                       </div>
                     </div>
-                  ) : (
+                  ) : !isProcessingResults ? (
                     <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
                       <div className="text-6xl mb-4" aria-hidden="true">📝</div>
                       <h2 className="text-2xl font-bold text-slate-100 mb-4">
@@ -823,7 +828,7 @@ function App(): React.ReactElement {
                         {t('results.noResults.startAssessment')}
                       </Button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               )}
             </main>
