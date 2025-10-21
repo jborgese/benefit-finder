@@ -29,6 +29,7 @@ const nodes: FlowNode[] = [
         { value: 'annual', label: 'Annual income (e.g., $36,000/year)' }
       ]
     },
+    previousId: 'household-size',
     nextId: 'income'
   },
   {
@@ -41,6 +42,7 @@ const nodes: FlowNode[] = [
       required: true,
       min: 0
     },
+    previousId: 'income-period',
     nextId: 'age'
   },
   {
@@ -54,6 +56,7 @@ const nodes: FlowNode[] = [
       min: 0,
       max: 120
     },
+    previousId: 'income',
     isTerminal: true
   }
 ];
