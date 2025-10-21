@@ -485,9 +485,24 @@ function App(): React.ReactElement {
 
             <nav className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700 px-4 py-4 shadow-sm">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
-                <h1 className="text-xl font-display font-semibold text-secondary-900 dark:text-secondary-100">
-                  {t('app.title')}
-                </h1>
+                <div className="flex items-center gap-3">
+                  <a
+                    href="https://frootsnoops.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center"
+                    aria-label="Visit frootsnoops.com"
+                  >
+                    <img
+                      src="/frootsnoops_mascot.png"
+                      alt="Frootsnoops mascot"
+                      className="w-8 h-8 hover:scale-110 transition-transform duration-200"
+                    />
+                  </a>
+                  <h1 className="text-xl font-display font-semibold text-secondary-900 dark:text-secondary-100">
+                    {t('app.title')}
+                  </h1>
+                </div>
                 <div className="flex items-center space-x-4">
                   {appState !== 'home' && (
                     <Button

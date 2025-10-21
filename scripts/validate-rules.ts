@@ -103,10 +103,12 @@ function validatePackageStructure(pkg: RulePackage, filepath: string): Validatio
 
   if (!validationResult.success) {
     report.valid = false;
-    validationResult.error.errors.forEach((err: { path: (string | number)[]; message: string }) => {
-      const path = err.path.join('.');
-      report.errors.push(`${path}: ${err.message}`);
-    });
+    if ('error' in validationResult) {
+      validationResult.error.errors.forEach((err: { path: (string | number)[]; message: string }) => {
+        const path = err.path.join('.');
+        report.errors.push(`${path}: ${err.message}`);
+      });
+    }
   }
 
   // Additional validation checks
@@ -167,7 +169,7 @@ function testRule(rule: RuleDefinition): RuleTestReport {
 
   rule.testCases.forEach((testCase: { id: string; description: string; input: Record<string, unknown>; expected?: unknown; tags?: string[] }) => {
     try {
-      const result = jsonLogic.apply(rule.ruleLogic as any, testCase.input);
+      const result = jsonLogic.apply(rule.ruleLogic as unknown as ReturnType<typeof jsonLogic.apply>, testCase.input);
 
       if (testCase.expected === undefined) {
         report.warnings.push(`Test case ${testCase.id} has no expected value`);
@@ -358,9 +360,8 @@ function main(): void {
     try {
       for (const dir of ruleDirs) {
         try {
-          const files = readdirSync(dir, { recursive: true }).filter((f) =>
-            typeof f === 'string' && f.endsWith('.json')
-          );
+          const files = readdirSync(dir, { recursive: true })
+            .filter((f): f is string => typeof f === 'string' && f.endsWith('.json'));
           filesToValidate.push(...files.map((f) => join(dir, f)));
         } catch {
           // Directory doesn't exist, skip it

@@ -296,3 +296,4 @@ describe('LihtcExplanation', () => {
     expect(screen.getByText('results.lihtc.requirements.rentalHistory')).toBeInTheDocument();
   });
 });
+
