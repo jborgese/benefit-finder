@@ -10,10 +10,10 @@
 
 import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
-import { validateRulePackage } from '../src/rules/schema';
-import type { RulePackage, RuleDefinition } from '../src/rules/schema';
+import { validateRulePackage } from '../src/rules/core/schema';
+import type { RulePackage, RuleDefinition } from '../src/rules/core/schema';
 import jsonLogic from 'json-logic-js';
-import { registerBenefitOperators } from '../src/rules/evaluator';
+import { registerBenefitOperators } from '../src/rules/core/evaluator';
 
 // ============================================================================
 // TYPES
@@ -42,6 +42,7 @@ interface RuleTestReport {
   testsPassed: number;
   testsFailed: number;
   failures: TestFailure[];
+  warnings: string[];
 }
 
 interface TestFailure {
@@ -102,7 +103,7 @@ function validatePackageStructure(pkg: RulePackage, filepath: string): Validatio
 
   if (!validationResult.success) {
     report.valid = false;
-    validationResult.error.errors.forEach((err) => {
+    validationResult.error.errors.forEach((err: { path: (string | number)[]; message: string }) => {
       const path = err.path.join('.');
       report.errors.push(`${path}: ${err.message}`);
     });
@@ -114,7 +115,7 @@ function validatePackageStructure(pkg: RulePackage, filepath: string): Validatio
 
     // Check for duplicate rule IDs
     const ruleIds = new Set<string>();
-    pkg.rules.forEach((rule) => {
+    pkg.rules.forEach((rule: RuleDefinition) => {
       if (ruleIds.has(rule.id)) {
         report.errors.push(`Duplicate rule ID: ${rule.id}`);
         report.valid = false;
@@ -123,21 +124,21 @@ function validatePackageStructure(pkg: RulePackage, filepath: string): Validatio
     });
 
     // Check for missing citations
-    pkg.rules.forEach((rule) => {
+    pkg.rules.forEach((rule: RuleDefinition) => {
       if (!rule.citations || rule.citations.length === 0) {
         report.warnings.push(`Rule ${rule.id} has no citations`);
       }
     });
 
     // Check for rules without test cases
-    pkg.rules.forEach((rule) => {
+    pkg.rules.forEach((rule: RuleDefinition) => {
       if (!rule.testCases || rule.testCases.length === 0) {
         report.warnings.push(`Rule ${rule.id} has no test cases`);
       }
     });
 
     // Check for draft rules that are active
-    pkg.rules.forEach((rule) => {
+    pkg.rules.forEach((rule: RuleDefinition) => {
       if (rule.draft && rule.active) {
         report.warnings.push(`Rule ${rule.id} is marked as both draft and active`);
       }
@@ -157,15 +158,21 @@ function testRule(rule: RuleDefinition): RuleTestReport {
     testsPassed: 0,
     testsFailed: 0,
     failures: [],
+    warnings: [],
   };
 
   if (!rule.testCases || rule.testCases.length === 0) {
     return report;
   }
 
-  rule.testCases.forEach((testCase) => {
+  rule.testCases.forEach((testCase: { id: string; description: string; input: Record<string, unknown>; expected?: unknown; tags?: string[] }) => {
     try {
       const result = jsonLogic.apply(rule.ruleLogic as any, testCase.input);
+
+      if (testCase.expected === undefined) {
+        report.warnings.push(`Test case ${testCase.id} has no expected value`);
+        return;
+      }
 
       if (result === testCase.expected) {
         report.testsPassed++;
@@ -205,7 +212,7 @@ function testRulePackage(pkg: RulePackage): TestSuiteReport {
     ruleResults: [],
   };
 
-  pkg.rules.forEach((rule) => {
+  pkg.rules.forEach((rule: RuleDefinition) => {
     const ruleReport = testRule(rule);
     report.ruleResults.push(ruleReport);
     report.totalTests += ruleReport.testsPassed + ruleReport.testsFailed;
@@ -341,13 +348,27 @@ function main(): void {
   let filesToValidate: string[] = [];
 
   if (args.length === 0) {
-    // Validate all rules in examples directory
-    const examplesDir = join(process.cwd(), 'src', 'rules', 'examples');
+    // Validate all rules in federal and state directories
+    const ruleDirs = [
+      join(process.cwd(), 'src', 'rules', 'federal'),
+      join(process.cwd(), 'src', 'rules', 'state'),
+      join(process.cwd(), 'src', 'rules', 'core', 'examples'),
+    ];
+
     try {
-      const files = readdirSync(examplesDir).filter((f) => f.endsWith('.json'));
-      filesToValidate = files.map((f) => join(examplesDir, f));
+      for (const dir of ruleDirs) {
+        try {
+          const files = readdirSync(dir, { recursive: true }).filter((f) =>
+            typeof f === 'string' && f.endsWith('.json')
+          );
+          filesToValidate.push(...files.map((f) => join(dir, f)));
+        } catch {
+          // Directory doesn't exist, skip it
+          continue;
+        }
+      }
     } catch {
-      console.error(`${colors.red}Failed to read examples directory${colors.reset}`);
+      console.error(`${colors.red}Failed to read rule directories${colors.reset}`);
       process.exit(1);
     }
   } else {
