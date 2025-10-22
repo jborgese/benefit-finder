@@ -4,10 +4,10 @@
  * Provides text size management for accessibility
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { TextSize, TEXT_SIZE_ORDER, TEXT_SIZE_MULTIPLIERS } from './textSizeConstants';
+import React, { createContext, useEffect, useState } from 'react';
+import { TextSize, TEXT_SIZE_ORDER, TEXT_SIZE_MULTIPLIERS } from './textSizeContextConstants';
 
-interface TextSizeContextType {
+export interface TextSizeContextType {
   textSize: TextSize;
   setTextSize: (size: TextSize) => void;
   increaseTextSize: () => void;
@@ -26,16 +26,34 @@ export const TextSizeProvider: React.FC<TextSizeProviderProps> = ({ children }) 
   const [textSize, setTextSizeState] = useState<TextSize>(() => {
     // Get saved text size from localStorage or default to 'medium'
     const saved = localStorage.getItem('bf-text-size');
-    return (saved as TextSize) ?? 'medium';
+    // Validate that saved value is a valid TextSize
+    if (saved && TEXT_SIZE_ORDER.includes(saved as TextSize)) {
+      return saved as TextSize;
+    }
+    return 'medium';
   });
 
   // Apply text size to document
   useEffect(() => {
-    const multiplier = TEXT_SIZE_MULTIPLIERS[textSize];
-    if (multiplier !== undefined) {
-      document.documentElement.style.fontSize = `${multiplier}rem`;
-      document.documentElement.setAttribute('data-text-size', textSize);
+    let multiplier: number;
+    switch (textSize) {
+      case 'small':
+        multiplier = TEXT_SIZE_MULTIPLIERS.small;
+        break;
+      case 'medium':
+        multiplier = TEXT_SIZE_MULTIPLIERS.medium;
+        break;
+      case 'large':
+        multiplier = TEXT_SIZE_MULTIPLIERS.large;
+        break;
+      case 'extra-large':
+        multiplier = TEXT_SIZE_MULTIPLIERS['extra-large'];
+        break;
+      default:
+        multiplier = TEXT_SIZE_MULTIPLIERS.medium;
     }
+    document.documentElement.style.fontSize = `${multiplier}rem`;
+    document.documentElement.setAttribute('data-text-size', textSize);
   }, [textSize]);
 
   const setTextSize = (size: TextSize): void => {
@@ -76,10 +94,5 @@ export const TextSizeProvider: React.FC<TextSizeProviderProps> = ({ children }) 
   );
 };
 
-export const useTextSize = (): TextSizeContextType => {
-  const context = useContext(TextSizeContext);
-  if (context === undefined) {
-    throw new Error('useTextSize must be used within a TextSizeProvider');
-  }
-  return context;
-};
+// Export the context for use in the hook file
+export { TextSizeContext };

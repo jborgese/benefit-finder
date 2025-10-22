@@ -28,7 +28,7 @@ export function safeGetProperty<T extends Record<string, unknown>>(
   obj: T,
   key: string | number | symbol
 ): unknown {
-  return hasOwnProperty(obj, key) ? obj[key] : undefined;
+  return hasOwnProperty(obj, key) ? obj[key as keyof T] : undefined;
 }
 
 /**

@@ -85,7 +85,7 @@ function generateFailedCriteriaDescription(cr: CriterionResult, fieldName: strin
   const criterionType = getCriterionType(cr.criterion);
   let handler = criterionHandlers.default;
   if (hasOwnProperty(criterionHandlers, criterionType)) {
-    handler = criterionHandlers[criterionType];
+    handler = criterionHandlers[criterionType as keyof typeof criterionHandlers];
   }
   return handler(fieldName, cr.met);
 }

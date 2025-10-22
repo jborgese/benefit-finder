@@ -4,11 +4,11 @@
  * Provides theme management (light/dark mode) with system preference detection
  */
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import type { Theme } from './themeConstants';
-import { THEME_STORAGE_KEY, DEFAULT_THEME } from './themeConstants';
+import React, { createContext, useEffect, useState, useCallback } from 'react';
+import type { Theme } from './themeContextConstants';
+import { THEME_STORAGE_KEY, DEFAULT_THEME } from './themeContextConstants';
 
-interface ThemeContextType {
+export interface ThemeContextType {
   theme: Theme;
   actualTheme: 'light' | 'dark'; // The resolved theme (light or dark)
   setTheme: (theme: Theme) => void;
@@ -25,7 +25,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Get saved theme from localStorage or default to 'system'
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    return (saved as Theme) || DEFAULT_THEME;
+    // Validate that saved value is a valid Theme
+    if (saved && ['light', 'dark', 'system'].includes(saved)) {
+      return saved as Theme;
+    }
+    return DEFAULT_THEME;
   });
 
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
@@ -101,10 +105,5 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   );
 };
 
-export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-};
+// Export the context for use in the hook file
+export { ThemeContext };

@@ -44,7 +44,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
       const nextIndex = event.key === 'ArrowLeft'
         ? (currentIndex - 1 + tabIds.length) % tabIds.length
         : (currentIndex + 1) % tabIds.length;
-      setActiveTab(tabIds[nextIndex] ?? 'overview');
+      setActiveTab(tabIds[nextIndex] || 'overview');
     }
   }, [activeTab, onClose]);
 
@@ -111,7 +111,9 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
   useEffect(() => {
     if (isOpen) {
       const modal = document.querySelector('[role="dialog"]') as HTMLElement;
-      modal?.focus();
+      if (modal) {
+        modal.focus();
+      }
     }
   }, [isOpen]);
 

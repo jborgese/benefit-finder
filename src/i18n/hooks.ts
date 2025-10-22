@@ -1,11 +1,20 @@
 import { useTranslation } from 'react-i18next';
 import type { i18n as I18nInstance } from 'i18next';
-import { hasOwnProperty } from '../utils/safePropertyAccess';
 
 /**
  * RTL (Right-to-Left) language codes
  */
 const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur', 'ku', 'dv'];
+
+/**
+ * Safely get language metadata
+ */
+const getLanguageMetadata = (lng: string): typeof LANGUAGE_METADATA[keyof typeof LANGUAGE_METADATA] | undefined => {
+  const normalizedLng = lng.split('-')[0];
+  if (normalizedLng === 'en') return LANGUAGE_METADATA.en;
+  if (normalizedLng === 'es') return LANGUAGE_METADATA.es;
+  return undefined;
+};
 
 /**
  * Language metadata for display and formatting
@@ -84,48 +93,44 @@ export const useI18n = (): {
    * Get language display name
    */
   const getLanguageDisplayName = (lng: string): string => {
-    // Normalize language code (handle cases like 'en-US' -> 'en')
-    const normalizedLng = lng.split('-')[0];
-    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
-      ? LANGUAGE_METADATA[normalizedLng]
-      : undefined;
-    return metadata?.name ?? normalizedLng;
+    const metadata = getLanguageMetadata(lng);
+    if (metadata) {
+      return metadata.name;
+    }
+    return lng.split('-')[0];
   };
 
   /**
    * Get language native name
    */
   const getLanguageNativeName = (lng: string): string => {
-    // Normalize language code (handle cases like 'en-US' -> 'en')
-    const normalizedLng = lng.split('-')[0];
-    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
-      ? LANGUAGE_METADATA[normalizedLng]
-      : undefined;
-    return metadata?.nativeName ?? normalizedLng;
+    const metadata = getLanguageMetadata(lng);
+    if (metadata) {
+      return metadata.nativeName;
+    }
+    return lng.split('-')[0];
   };
 
   /**
    * Get language flag emoji
    */
   const getLanguageFlag = (lng: string): string => {
-    // Normalize language code (handle cases like 'en-US' -> 'en')
-    const normalizedLng = lng.split('-')[0];
-    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
-      ? LANGUAGE_METADATA[normalizedLng]
-      : undefined;
-    return metadata?.flag ?? '🌐';
+    const metadata = getLanguageMetadata(lng);
+    if (metadata) {
+      return metadata.flag;
+    }
+    return '🌐';
   };
 
   /**
    * Check if a language is right-to-left
    */
   const isRightToLeft = (lng: string): boolean => {
-    // Normalize language code (handle cases like 'en-US' -> 'en')
-    const normalizedLng = lng.split('-')[0];
-    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
-      ? LANGUAGE_METADATA[normalizedLng]
-      : undefined;
-    return RTL_LANGUAGES.includes(normalizedLng) || (metadata?.isRTL ?? false);
+    const metadata = getLanguageMetadata(lng);
+    if (metadata) {
+      return metadata.isRTL;
+    }
+    return RTL_LANGUAGES.includes(lng.split('-')[0]);
   };
 
   /**
@@ -139,13 +144,15 @@ export const useI18n = (): {
    * Format currency for current locale
    */
   const formatCurrency = (amount: number, currency?: string): string => {
-    const metadata = hasOwnProperty(LANGUAGE_METADATA, currentLanguage)
-      ? LANGUAGE_METADATA[currentLanguage]
-      : undefined;
-    const localeCurrency = currency ?? (metadata?.currency ?? 'USD');
+    let localeCurrency = 'USD';
+    const metadata = getLanguageMetadata(currentLanguage);
+    if (metadata) {
+      localeCurrency = metadata.currency;
+    }
+    const finalCurrency = currency ?? localeCurrency;
     return new Intl.NumberFormat(currentLanguage, {
       style: 'currency',
-      currency: localeCurrency,
+      currency: finalCurrency,
     }).format(amount);
   };
 

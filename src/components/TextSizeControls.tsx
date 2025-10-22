@@ -29,6 +29,13 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
     lg: 'h-12 px-4 text-lg',
   } as const;
 
+  // Helper function to get size class without nested ternary
+  const getSizeClass = (size: 'sm' | 'md' | 'lg', sizeClasses: typeof sizeClasses) => {
+    if (size === 'sm') return sizeClasses.sm;
+    if (size === 'lg') return sizeClasses.lg;
+    return sizeClasses.md;
+  };
+
   const variantClasses = {
     default: 'bg-white dark:bg-secondary-800 border border-gray-300 dark:border-secondary-600 shadow-sm hover:bg-gray-50 dark:hover:bg-secondary-700 focus:bg-white dark:focus:bg-secondary-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-secondary-200',
     minimal: 'bg-transparent border-none hover:bg-white/10 dark:hover:bg-white/10 focus:bg-white/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-white',
@@ -52,7 +59,7 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
         disabled={isMinSize}
         aria-label="Decrease text size"
         className={`
-          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${getSizeClass(size, sizeClasses)}
           ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
@@ -74,7 +81,7 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
         disabled={isMaxSize}
         aria-label="Increase text size"
         className={`
-          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${getSizeClass(size, sizeClasses)}
           ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
@@ -91,7 +98,7 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
         onClick={resetTextSize}
         aria-label="Reset text size to default"
         className={`
-          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${getSizeClass(size, sizeClasses)}
           ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none

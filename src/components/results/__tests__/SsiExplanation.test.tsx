@@ -48,7 +48,7 @@ vi.mock('../../i18n/hooks', () => ({
         ['results.ssi.resources.localOffice', 'Find your local Social Security office at ssa.gov/locator'],
         ['results.ssi.resources.advocacy', 'Get help from disability advocacy organizations']
       ]);
-      return translations.get(key) || key;
+      return translations.get(key) ?? key;
     }
   })
 }));

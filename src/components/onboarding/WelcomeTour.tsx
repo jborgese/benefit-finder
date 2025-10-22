@@ -90,7 +90,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
     const step = tourSteps[currentStep] ?? tourSteps[0];
     const element = document.querySelector(step.target) as HTMLElement;
 
-    if (element && element.offsetParent !== null) {
+    if (element?.offsetParent !== null) {
       setHighlightedElement(element);
 
       // Scroll element into view

@@ -35,26 +35,38 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
 
   // Helper function to get status color classes
   const getStatusColor = (status: EligibilityStatus): string => {
-    const colorMap: Record<EligibilityStatus, string> = {
-      'qualified': 'text-green-700 bg-green-50 border-green-200',
-      'likely': 'text-blue-700 bg-blue-50 border-blue-200',
-      'maybe': 'text-yellow-700 bg-yellow-50 border-yellow-200',
-      'unlikely': 'text-orange-700 bg-orange-50 border-orange-200',
-      'not-qualified': 'text-gray-700 bg-gray-50 border-gray-200'
-    };
-    return colorMap[status] || colorMap['not-qualified'];
+    switch (status) {
+      case 'qualified':
+        return 'text-green-700 bg-green-50 border-green-200';
+      case 'likely':
+        return 'text-blue-700 bg-blue-50 border-blue-200';
+      case 'maybe':
+        return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+      case 'unlikely':
+        return 'text-orange-700 bg-orange-50 border-orange-200';
+      case 'not-qualified':
+        return 'text-gray-700 bg-gray-50 border-gray-200';
+      default:
+        return 'text-gray-700 bg-gray-50 border-gray-200';
+    }
   };
 
   // Helper function to get status icon
   const getStatusIcon = (status: EligibilityStatus): string => {
-    const iconMap: Record<EligibilityStatus, string> = {
-      'qualified': '✅',
-      'likely': '✔️',
-      'maybe': '❓',
-      'unlikely': '⚠️',
-      'not-qualified': '❌'
-    };
-    return iconMap[status] || iconMap['not-qualified'];
+    switch (status) {
+      case 'qualified':
+        return '✅';
+      case 'likely':
+        return '✔️';
+      case 'maybe':
+        return '❓';
+      case 'unlikely':
+        return '⚠️';
+      case 'not-qualified':
+        return '❌';
+      default:
+        return '❌';
+    }
   };
 
   // Get benefits based on user profile

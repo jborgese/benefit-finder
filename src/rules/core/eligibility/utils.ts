@@ -108,7 +108,7 @@ function processFieldForBreakdown(
   breakdown: CriteriaBreakdownItem[]
 ): void {
   const fieldValue = hasOwnProperty(data, field)
-    ? data[field]
+    ? data[field as keyof JsonLogicData]
     : undefined;
   const fieldDescription = formatFieldName(field);
   const { criterionMet, status } = determineCriterionStatus(fieldValue);

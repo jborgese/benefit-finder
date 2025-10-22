@@ -53,7 +53,7 @@ const normalizeLanguageCode = (language: string): string => {
   // Return mapped language or just the first part (before hyphen)
   // Use safe property access to avoid security warnings
   if (hasOwnProperty(languageMap, language)) {
-    return languageMap[language];
+    return languageMap[language as keyof typeof languageMap];
   }
   return language.split('-')[0];
 };

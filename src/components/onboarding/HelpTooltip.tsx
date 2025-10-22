@@ -33,14 +33,36 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
     lg: 'text-base px-4 py-3 max-w-md',
   };
 
-  // Map position prop to Radix UI side
-  const sideMap = {
-    top: 'top' as const,
-    bottom: 'bottom' as const,
-    left: 'left' as const,
-    right: 'right' as const,
+  // Helper function to get size class without object injection
+  const getSizeClass = (size: 'sm' | 'md' | 'lg') => {
+    switch (size) {
+      case 'sm':
+        return sizeClasses.sm;
+      case 'md':
+        return sizeClasses.md;
+      case 'lg':
+        return sizeClasses.lg;
+      default:
+        return sizeClasses.md;
+    }
   };
-  const side = sideMap[position];
+
+  // Map position prop to Radix UI side
+  const getSide = (position: 'top' | 'bottom' | 'left' | 'right') => {
+    switch (position) {
+      case 'top':
+        return 'top' as const;
+      case 'bottom':
+        return 'bottom' as const;
+      case 'left':
+        return 'left' as const;
+      case 'right':
+        return 'right' as const;
+      default:
+        return 'top' as const;
+    }
+  };
+  const side = getSide(position);
 
   // Map position to align for better positioning
   const align = position === 'top' || position === 'bottom' ? 'center' : 'center';
@@ -56,7 +78,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
         <Tooltip.Portal>
           <Tooltip.Content
             className={`
-              ${sizeClasses[size]}
+              ${getSizeClass(size)}
               bg-gray-900 dark:bg-gray-800
               text-white dark:text-gray-100
               rounded-md

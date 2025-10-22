@@ -34,6 +34,19 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
     lg: 'w-5 h-5',
   };
 
+  // Helper functions to avoid nested ternary expressions
+  const getSizeClass = (size: 'sm' | 'md' | 'lg') => {
+    if (size === 'sm') return sizeClasses.sm;
+    if (size === 'lg') return sizeClasses.lg;
+    return sizeClasses.md;
+  };
+
+  const getIconSizeClass = (size: 'sm' | 'md' | 'lg') => {
+    if (size === 'sm') return iconSizeClasses.sm;
+    if (size === 'lg') return iconSizeClasses.lg;
+    return iconSizeClasses.md;
+  };
+
   const variantClasses = {
     default: 'bg-white dark:bg-secondary-800 border border-gray-300 dark:border-secondary-600 shadow-sm hover:bg-gray-50 dark:hover:bg-secondary-700 focus:bg-white dark:focus:bg-secondary-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-secondary-200',
     minimal: 'bg-transparent border-none hover:bg-white/10 dark:hover:bg-white/10 focus:bg-white/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-white',
@@ -52,7 +65,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       <Select.Trigger
         className={`
           inline-flex items-center justify-between rounded-md
-          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${getSizeClass(size)}
           ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
@@ -72,7 +85,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           </span>
         </Select.Value>
         <Select.Icon className={variant === 'minimal' ? 'text-gray-500 dark:text-white/70' : 'text-gray-500 dark:text-secondary-400'}>
-          <ChevronDownIcon className={size === 'sm' ? iconSizeClasses.sm : size === 'lg' ? iconSizeClasses.lg : iconSizeClasses.md} />
+          <ChevronDownIcon className={getIconSizeClass(size)} />
         </Select.Icon>
       </Select.Trigger>
 

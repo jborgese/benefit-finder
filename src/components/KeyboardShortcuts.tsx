@@ -101,7 +101,7 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
   };
 
   // Helper function to handle Ctrl/Cmd + key combinations
-  const handleCtrlKeyCombination = (key: string, event: KeyboardEvent): boolean => {
+  const handleCtrlKeyCombination = useCallback((key: string, event: KeyboardEvent): boolean => {
     const { ctrlKey, metaKey } = event;
     const isCtrlOrCmd = ctrlKey || metaKey;
 
@@ -139,10 +139,10 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
       default:
         return false;
     }
-  };
+  }, [onStartQuestionnaire, toggleTheme, increaseTextSize, decreaseTextSize, resetTextSize, onGoHome, onViewResults]);
 
   // Helper function to handle function key combinations
-  const handleFunctionKey = (key: string, event: KeyboardEvent): boolean => {
+  const handleFunctionKey = useCallback((key: string, event: KeyboardEvent): boolean => {
     switch (key) {
       case 'F1':
         event.preventDefault();
@@ -159,7 +159,7 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
       default:
         return false;
     }
-  };
+  }, [onToggleTour, onTogglePrivacy, onToggleGuide]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     // Don't trigger shortcuts if user is typing in an input
@@ -176,18 +176,7 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 
     // Try function keys
     handleFunctionKey(key, event);
-  }, [
-    onStartQuestionnaire,
-    toggleTheme,
-    increaseTextSize,
-    decreaseTextSize,
-    resetTextSize,
-    onGoHome,
-    onViewResults,
-    onToggleTour,
-    onTogglePrivacy,
-    onToggleGuide,
-  ]);
+  }, [handleCtrlKeyCombination, handleFunctionKey]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);

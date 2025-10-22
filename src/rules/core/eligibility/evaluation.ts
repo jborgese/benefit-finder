@@ -376,7 +376,7 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
   debugLog('Checking missing fields', { requiredFields, data });
   for (const field of requiredFields) {
     // Safely check for field existence
-    const fieldValue = hasOwnProperty(data, field) ? data[field] : undefined;
+    const fieldValue = hasOwnProperty(data, field) ? data[field as keyof JsonLogicData] : undefined;
     if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
       missing.push(field);
     }
@@ -461,7 +461,7 @@ function normalizeStateToCode(stateValue: string): string {
   // Safely access the mapping
   let code: string | undefined;
   if (hasOwnProperty(stateNameToCode, normalizedName)) {
-    code = stateNameToCode[normalizedName];
+    code = stateNameToCode[normalizedName as keyof typeof stateNameToCode];
   }
 
   if (code) {
