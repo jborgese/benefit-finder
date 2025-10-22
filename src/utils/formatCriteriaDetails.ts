@@ -85,7 +85,8 @@ function generateFailedCriteriaDescription(cr: CriterionResult, fieldName: strin
   const criterionType = getCriterionType(cr.criterion);
   let handler = criterionHandlers.default;
   if (hasOwnProperty(criterionHandlers, criterionType)) {
-    handler = criterionHandlers[criterionType as keyof typeof criterionHandlers];
+    // eslint-disable-next-line security/detect-object-injection
+    handler = criterionHandlers[criterionType];
   }
   return handler(fieldName, cr.met);
 }

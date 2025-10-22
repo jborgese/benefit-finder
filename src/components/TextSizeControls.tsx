@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { useTextSize } from '../contexts/TextSizeContext';
+import { useTextSize } from '../contexts/useTextSize';
 import { Button } from './Button';
 
 interface TextSizeControlsProps {
@@ -30,7 +30,7 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
   } as const;
 
   // Helper function to get size class without nested ternary
-  const getSizeClass = (size: 'sm' | 'md' | 'lg', sizeClasses: typeof sizeClasses) => {
+  const getSizeClass = (size: 'sm' | 'md' | 'lg', sizeClasses: typeof sizeClasses): string => {
     if (size === 'sm') return sizeClasses.sm;
     if (size === 'lg') return sizeClasses.lg;
     return sizeClasses.md;

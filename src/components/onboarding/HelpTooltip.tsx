@@ -34,7 +34,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
   };
 
   // Helper function to get size class without object injection
-  const getSizeClass = (size: 'sm' | 'md' | 'lg') => {
+  const getSizeClass = (size: 'sm' | 'md' | 'lg'): string => {
     switch (size) {
       case 'sm':
         return sizeClasses.sm;
@@ -48,7 +48,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
   };
 
   // Map position prop to Radix UI side
-  const getSide = (position: 'top' | 'bottom' | 'left' | 'right') => {
+  const getSide = (position: 'top' | 'bottom' | 'left' | 'right'): 'top' | 'bottom' | 'left' | 'right' => {
     switch (position) {
       case 'top':
         return 'top' as const;

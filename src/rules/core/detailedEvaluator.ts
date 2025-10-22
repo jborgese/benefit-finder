@@ -317,7 +317,8 @@ function isVariableReference(operand: unknown): boolean {
 function getVariableValue(varName: string, data: JsonLogicData): unknown {
   // Safely check for property existence and return value
   if (hasOwnProperty(data, varName)) {
-    return data[varName as keyof JsonLogicData];
+    // eslint-disable-next-line security/detect-object-injection
+    return data[varName];
   }
   return undefined;
 }

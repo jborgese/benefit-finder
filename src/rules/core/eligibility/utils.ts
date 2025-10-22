@@ -108,7 +108,8 @@ function processFieldForBreakdown(
   breakdown: CriteriaBreakdownItem[]
 ): void {
   const fieldValue = hasOwnProperty(data, field)
-    ? data[field as keyof JsonLogicData]
+    // eslint-disable-next-line security/detect-object-injection
+    ? data[field]
     : undefined;
   const fieldDescription = formatFieldName(field);
   const { criterionMet, status } = determineCriterionStatus(fieldValue);

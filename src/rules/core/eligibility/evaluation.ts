@@ -302,6 +302,7 @@ export function buildEvaluationResult(
 
   if (import.meta.env.DEV) {
     detailedResult.criteriaResults?.forEach((cr, i) => {
+      // eslint-disable-next-line security/detect-object-injection
       const outputResult = criteriaResults && i < criteriaResults.length ? criteriaResults[i] : undefined;
       debugLog(`buildEvaluationResult [${i}]`, { input: cr, output: outputResult });
       console.log(`evaluation.ts - buildEvaluationResult -  [${i}] Input:`, {
@@ -376,7 +377,8 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
   debugLog('Checking missing fields', { requiredFields, data });
   for (const field of requiredFields) {
     // Safely check for field existence
-    const fieldValue = hasOwnProperty(data, field) ? data[field as keyof JsonLogicData] : undefined;
+    // eslint-disable-next-line security/detect-object-injection
+    const fieldValue = hasOwnProperty(data, field) ? data[field] : undefined;
     if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
       missing.push(field);
     }
@@ -461,7 +463,8 @@ function normalizeStateToCode(stateValue: string): string {
   // Safely access the mapping
   let code: string | undefined;
   if (hasOwnProperty(stateNameToCode, normalizedName)) {
-    code = stateNameToCode[normalizedName as keyof typeof stateNameToCode];
+    // eslint-disable-next-line security/detect-object-injection
+    code = stateNameToCode[normalizedName];
   }
 
   if (code) {

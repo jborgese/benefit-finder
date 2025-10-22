@@ -5,8 +5,8 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useTextSize } from '../contexts/TextSizeContext';
+import { useTheme } from '../contexts/useTheme';
+import { useTextSize } from '../contexts/useTextSize';
 
 interface KeyboardShortcutsProps {
   onStartQuestionnaire?: () => void;

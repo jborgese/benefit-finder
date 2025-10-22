@@ -90,7 +90,8 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
     const step = tourSteps[currentStep] ?? tourSteps[0];
     const element = document.querySelector(step.target) as HTMLElement;
 
-    if (element?.offsetParent !== null) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (element && element.offsetParent !== null) {
       setHighlightedElement(element);
 
       // Scroll element into view

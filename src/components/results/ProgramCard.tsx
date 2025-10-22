@@ -63,7 +63,21 @@ const getStatusBadgeConfig = (status: string, t: (key: string) => string): { cla
     }
   };
 
-  return badgeConfigs[status as keyof typeof badgeConfigs] ?? badgeConfigs['not-qualified'];
+  // Use a safer approach to avoid object injection
+  switch (status) {
+    case 'qualified':
+      return badgeConfigs.qualified;
+    case 'likely':
+      return badgeConfigs.likely;
+    case 'maybe':
+      return badgeConfigs.maybe;
+    case 'unlikely':
+      return badgeConfigs.unlikely;
+    case 'not-qualified':
+      return badgeConfigs['not-qualified'];
+    default:
+      return badgeConfigs['not-qualified'];
+  }
 };
 
 // Helper function to render status badge
@@ -93,23 +107,34 @@ const getExplanationComponent = (programId: string, result: ProgramEligibilityRe
     onClose
   };
 
-  const componentMap: Record<string, React.ComponentType<{
-    programName: string;
-    status: string;
-    explanation: string;
-    userProfile: unknown;
-    onClose: () => void;
-  }>> = {
-    'wic-federal': WicExplanation,
-    'medicaid-federal': MedicaidExplanation,
-    'snap-federal': SnapExplanation,
-    'tanf-federal': TanfExplanation,
-    'ssi-federal': SsiExplanation,
-    'section8-federal': Section8Explanation,
-    'lihtc-federal': LihtcExplanation
-  };
-
-  const Component = componentMap[programId] ?? WhyExplanation;
+  // Use a safer approach to avoid object injection
+  let Component = WhyExplanation;
+  switch (programId) {
+    case 'wic-federal':
+      Component = WicExplanation;
+      break;
+    case 'medicaid-federal':
+      Component = MedicaidExplanation;
+      break;
+    case 'snap-federal':
+      Component = SnapExplanation;
+      break;
+    case 'tanf-federal':
+      Component = TanfExplanation;
+      break;
+    case 'ssi-federal':
+      Component = SsiExplanation;
+      break;
+    case 'section8-federal':
+      Component = Section8Explanation;
+      break;
+    case 'lihtc-federal':
+      Component = LihtcExplanation;
+      break;
+    default:
+      Component = WhyExplanation;
+      break;
+  }
   return <Component {...commonProps} />;
 };
 
@@ -263,7 +288,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
         )}
 
         {/* Additional Information */}
-        {(result.processingTime || result.applicationDeadline) && (
+        {(result.processingTime ?? result.applicationDeadline) && (
           <Accordion.Item value="info">
             <Accordion.Header>
               <Accordion.Trigger className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors print:bg-transparent print:p-4">
