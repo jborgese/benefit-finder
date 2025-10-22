@@ -7,6 +7,7 @@
 
 import jsonLogic from 'json-logic-js';
 import { getSNAPGrossIncomeLimit } from '../../utils/benefitThresholds';
+import { hasOwnProperty } from '../../utils/safePropertyAccess';
 import type { JsonLogicRule, JsonLogicData, RuleEvaluationResult } from './types';
 
 /**
@@ -315,7 +316,7 @@ function isVariableReference(operand: unknown): boolean {
  */
 function getVariableValue(varName: string, data: JsonLogicData): unknown {
   // Safely check for property existence and return value
-  if (Object.prototype.hasOwnProperty.call(data, varName)) {
+  if (hasOwnProperty(data, varName)) {
     return data[varName];
   }
   return undefined;

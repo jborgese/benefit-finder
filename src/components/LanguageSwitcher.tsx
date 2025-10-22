@@ -56,20 +56,20 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   }, [currentLanguage, changeLanguage, i18n.language]);
 
   // Size-based styling
-  const sizeClasses: Record<string, string> = {
+  const sizeClasses = {
     sm: 'h-8 px-2 text-sm',
     md: 'h-10 px-3 text-base',
     lg: 'h-12 px-4 text-lg',
   } as const;
 
-  const iconSizeClasses: Record<string, string> = {
+  const iconSizeClasses = {
     sm: 'w-3 h-3',
     md: 'w-4 h-4',
     lg: 'w-5 h-5',
   } as const;
 
   // Variant-based styling
-  const variantClasses: Record<string, string> = {
+  const variantClasses = {
     default: 'bg-white dark:bg-secondary-800 border border-gray-300 dark:border-secondary-600 shadow-sm hover:bg-gray-50 dark:hover:bg-secondary-700 focus:bg-white dark:focus:bg-secondary-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-secondary-200',
     minimal: 'bg-transparent border-none hover:bg-white/10 dark:hover:bg-white/10 focus:bg-white/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-white',
   } as const;
@@ -86,8 +86,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <Select.Trigger
         className={`
           inline-flex items-center justify-between rounded-md
-          ${sizeClasses[size] ?? sizeClasses.md}
-          ${variantClasses[variant] ?? variantClasses.default}
+          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -106,7 +106,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           </span>
         </Select.Value>
         <Select.Icon className={variant === 'minimal' ? 'text-gray-500 dark:text-white/70' : 'text-gray-500 dark:text-secondary-400'}>
-          <ChevronDownIcon className={iconSizeClasses[size] ?? iconSizeClasses.md} />
+          <ChevronDownIcon className={size === 'sm' ? iconSizeClasses.sm : size === 'lg' ? iconSizeClasses.lg : iconSizeClasses.md} />
         </Select.Icon>
       </Select.Trigger>
 

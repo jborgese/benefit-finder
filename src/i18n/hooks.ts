@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { i18n as I18nInstance } from 'i18next';
+import { hasOwnProperty } from '../utils/safePropertyAccess';
 
 /**
  * RTL (Right-to-Left) language codes
@@ -85,7 +86,7 @@ export const useI18n = (): {
   const getLanguageDisplayName = (lng: string): string => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    const metadata = Object.prototype.hasOwnProperty.call(LANGUAGE_METADATA, normalizedLng)
+    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
       ? LANGUAGE_METADATA[normalizedLng]
       : undefined;
     return metadata?.name ?? normalizedLng;
@@ -97,7 +98,7 @@ export const useI18n = (): {
   const getLanguageNativeName = (lng: string): string => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    const metadata = Object.prototype.hasOwnProperty.call(LANGUAGE_METADATA, normalizedLng)
+    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
       ? LANGUAGE_METADATA[normalizedLng]
       : undefined;
     return metadata?.nativeName ?? normalizedLng;
@@ -109,7 +110,7 @@ export const useI18n = (): {
   const getLanguageFlag = (lng: string): string => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    const metadata = Object.prototype.hasOwnProperty.call(LANGUAGE_METADATA, normalizedLng)
+    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
       ? LANGUAGE_METADATA[normalizedLng]
       : undefined;
     return metadata?.flag ?? '🌐';
@@ -121,7 +122,7 @@ export const useI18n = (): {
   const isRightToLeft = (lng: string): boolean => {
     // Normalize language code (handle cases like 'en-US' -> 'en')
     const normalizedLng = lng.split('-')[0];
-    const metadata = Object.prototype.hasOwnProperty.call(LANGUAGE_METADATA, normalizedLng)
+    const metadata = hasOwnProperty(LANGUAGE_METADATA, normalizedLng)
       ? LANGUAGE_METADATA[normalizedLng]
       : undefined;
     return RTL_LANGUAGES.includes(normalizedLng) || (metadata?.isRTL ?? false);
@@ -138,7 +139,7 @@ export const useI18n = (): {
    * Format currency for current locale
    */
   const formatCurrency = (amount: number, currency?: string): string => {
-    const metadata = Object.prototype.hasOwnProperty.call(LANGUAGE_METADATA, currentLanguage)
+    const metadata = hasOwnProperty(LANGUAGE_METADATA, currentLanguage)
       ? LANGUAGE_METADATA[currentLanguage]
       : undefined;
     const localeCurrency = currency ?? (metadata?.currency ?? 'USD');

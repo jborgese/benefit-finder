@@ -6,6 +6,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { Theme } from './themeConstants';
+import { THEME_STORAGE_KEY, DEFAULT_THEME } from './themeConstants';
 
 interface ThemeContextType {
   theme: Theme;
@@ -23,8 +24,8 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Get saved theme from localStorage or default to 'system'
-    const saved = localStorage.getItem('bf-theme');
-    return saved as Theme ?? 'system';
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    return (saved as Theme) || DEFAULT_THEME;
   });
 
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
@@ -78,7 +79,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const setTheme = (newTheme: Theme): void => {
     setThemeState(newTheme);
-    localStorage.setItem('bf-theme', newTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, newTheme);
   };
 
   const toggleTheme = (): void => {

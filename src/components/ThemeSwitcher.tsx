@@ -52,8 +52,8 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       <Select.Trigger
         className={`
           inline-flex items-center justify-between rounded-md
-          ${sizeClasses[size as keyof typeof sizeClasses]}
-          ${variantClasses[variant as keyof typeof variantClasses]}
+          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -72,7 +72,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           </span>
         </Select.Value>
         <Select.Icon className={variant === 'minimal' ? 'text-gray-500 dark:text-white/70' : 'text-gray-500 dark:text-secondary-400'}>
-          <ChevronDownIcon className={iconSizeClasses[size as keyof typeof iconSizeClasses]} />
+          <ChevronDownIcon className={size === 'sm' ? iconSizeClasses.sm : size === 'lg' ? iconSizeClasses.lg : iconSizeClasses.md} />
         </Select.Icon>
       </Select.Trigger>
 

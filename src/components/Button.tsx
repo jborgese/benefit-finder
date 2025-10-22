@@ -97,7 +97,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${disabledClasses} ${className}`}
+      className={`${baseClasses} ${sizeClasses[size] ?? sizeClasses.md} ${variantClasses[variant] ?? variantClasses.primary} ${disabledClasses} ${className}`}
       aria-label={ariaLabel}
       aria-disabled={disabled || loading}
     >

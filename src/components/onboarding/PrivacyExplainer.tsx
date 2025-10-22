@@ -44,7 +44,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
       const nextIndex = event.key === 'ArrowLeft'
         ? (currentIndex - 1 + tabIds.length) % tabIds.length
         : (currentIndex + 1) % tabIds.length;
-      setActiveTab(tabIds[nextIndex]);
+      setActiveTab(tabIds[nextIndex] ?? 'overview');
     }
   }, [activeTab, onClose]);
 
@@ -84,7 +84,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [database]);
+  }, [database, isDbInitialized]);
 
   // Handle data deletion
   const handleDeleteData = useCallback(async () => {
@@ -105,15 +105,13 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [database]);
+  }, [database, isDbInitialized]);
 
   // Focus management
   useEffect(() => {
     if (isOpen) {
       const modal = document.querySelector('[role="dialog"]') as HTMLElement;
-      if (modal) {
-        modal.focus();
-      }
+      modal?.focus();
     }
   }, [isOpen]);
 

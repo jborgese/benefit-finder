@@ -7,6 +7,7 @@
 import { getDatabase } from '../../../db/database';
 import { registerBenefitOperators } from '../evaluator';
 import { evaluateRuleWithDetails, type DetailedEvaluationResult } from '../detailedEvaluator';
+import { hasOwnProperty } from '../../../utils/safePropertyAccess';
 import type { EligibilityRuleDocument, UserProfileDocument } from '../../../db/schemas';
 import type { JsonLogicData, JsonLogicRule, RuleEvaluationResult } from '../types';
 import type {
@@ -375,7 +376,7 @@ function checkMissingFields(data: JsonLogicData, requiredFields: string[]): stri
   debugLog('Checking missing fields', { requiredFields, data });
   for (const field of requiredFields) {
     // Safely check for field existence
-    const fieldValue = Object.prototype.hasOwnProperty.call(data, field) ? data[field] : undefined;
+    const fieldValue = hasOwnProperty(data, field) ? data[field] : undefined;
     if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
       missing.push(field);
     }
@@ -459,7 +460,7 @@ function normalizeStateToCode(stateValue: string): string {
   const normalizedName = stateValue.trim();
   // Safely access the mapping
   let code: string | undefined;
-  if (Object.prototype.hasOwnProperty.call(stateNameToCode, normalizedName)) {
+  if (hasOwnProperty(stateNameToCode, normalizedName)) {
     code = stateNameToCode[normalizedName];
   }
 

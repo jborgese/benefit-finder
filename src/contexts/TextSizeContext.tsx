@@ -26,13 +26,13 @@ export const TextSizeProvider: React.FC<TextSizeProviderProps> = ({ children }) 
   const [textSize, setTextSizeState] = useState<TextSize>(() => {
     // Get saved text size from localStorage or default to 'medium'
     const saved = localStorage.getItem('bf-text-size');
-    return saved as TextSize || 'medium';
+    return (saved as TextSize) ?? 'medium';
   });
 
   // Apply text size to document
   useEffect(() => {
     const multiplier = TEXT_SIZE_MULTIPLIERS[textSize];
-    if (multiplier) {
+    if (multiplier !== undefined) {
       document.documentElement.style.fontSize = `${multiplier}rem`;
       document.documentElement.setAttribute('data-text-size', textSize);
     }
@@ -83,5 +83,3 @@ export const useTextSize = (): TextSizeContextType => {
   }
   return context;
 };
-
-export default TextSizeContext;

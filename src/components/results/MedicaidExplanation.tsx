@@ -41,11 +41,11 @@ function getMedicaidStatusMessage(status: EligibilityStatus, userProfile?: { isP
       return t('results.medicaid.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.isPregnant) {
-        return t('results.medicaid.statusMessages.notQualified') + ' Contact your state Medicaid office to discuss your pregnancy and health coverage needs.';
+        return `${t('results.medicaid.statusMessages.notQualified')} Contact your state Medicaid office to discuss your pregnancy and health coverage needs.`;
       } else if (userProfile?.hasChildren) {
-        return t('results.medicaid.statusMessages.notQualified') + ' Contact your state Medicaid office to discuss your children and health coverage needs.';
+        return `${t('results.medicaid.statusMessages.notQualified')} Contact your state Medicaid office to discuss your children and health coverage needs.`;
       } else if (userProfile?.age && userProfile.age >= 65) {
-        return t('results.medicaid.statusMessages.notQualified') + ' You may be eligible for Medicare instead. Contact your state Medicaid office to discuss.';
+        return `${t('results.medicaid.statusMessages.notQualified')} You may be eligible for Medicare instead. Contact your state Medicaid office to discuss.`;
       }
       return t('results.medicaid.statusMessages.notQualified');
     default:
@@ -144,7 +144,7 @@ function getMedicaidRequirementsExplanation(userProfile?: { isPregnant?: boolean
 export const MedicaidExplanation: React.FC<MedicaidExplanationProps> = ({
   programName,
   status,
-  explanation,
+  explanation: _explanation,
   userProfile,
   onClose,
 }) => {

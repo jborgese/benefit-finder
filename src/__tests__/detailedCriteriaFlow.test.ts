@@ -8,7 +8,7 @@ beforeAll(() => {
 });
 
 describe('Detailed Criteria Flow', () => {
-  it('should capture detailed comparison data for SNAP income rule', async () => {
+  it('should capture detailed comparison data for SNAP income rule', () => {
     // SNAP income rule structure (from the logs)
     const snapRule: JsonLogicRule = {
       "snap_income_eligible": [
@@ -58,7 +58,7 @@ describe('Detailed Criteria Flow', () => {
     console.log('Size result:', sizeResult);
   });
 
-  it('should capture detailed comparison data for standard operators', async () => {
+  it('should capture detailed comparison data for standard operators', () => {
     // Standard comparison rule (like Medicaid income limit)
     const medicaidRule: JsonLogicRule = {
       "<=": [

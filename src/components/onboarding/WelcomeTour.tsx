@@ -4,7 +4,7 @@
  * Interactive guided tour for new users introducing key features
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Button } from '../Button';
 import { useI18n } from '../../i18n/hooks';
 
@@ -38,7 +38,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
   const [highlightedElement, setHighlightedElement] = useState<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const tourSteps: TourStep[] = [
+  const tourSteps: TourStep[] = useMemo(() => [
     {
       id: 'welcome',
       target: 'body',
@@ -80,16 +80,17 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
         },
       },
     },
-  ];
+  ], [t, onStartAssessment]);
 
   // Highlight the current step's target element
   useEffect(() => {
     if (!isOpen) return;
 
+    // eslint-disable-next-line security/detect-object-injection
     const step = tourSteps[currentStep] ?? tourSteps[0];
     const element = document.querySelector(step.target) as HTMLElement;
 
-    if (element?.offsetParent !== null) {
+    if (element && element.offsetParent !== null) {
       setHighlightedElement(element);
 
       // Scroll element into view
@@ -145,6 +146,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
   }, [onClose]);
 
   const handleActionClick = useCallback((): void => {
+    // eslint-disable-next-line security/detect-object-injection
     const step = tourSteps[currentStep] ?? tourSteps[0];
     if (step.action) {
       step.action.onClick();
@@ -154,6 +156,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
 
   if (!isOpen) return null;
 
+  // eslint-disable-next-line security/detect-object-injection
   const currentStepData = tourSteps[currentStep] ?? tourSteps[0];
   const progress = ((currentStep + 1) / tourSteps.length) * 100;
 

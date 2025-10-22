@@ -8,6 +8,7 @@
 import type { EligibilityRuleDocument } from '../../../db/schemas';
 import type { JsonLogicData, RuleEvaluationResult } from '../types';
 import type { CriteriaBreakdownItem, FieldNameMapping } from './types';
+import { hasOwnProperty } from '../../../utils/safePropertyAccess';
 
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
@@ -67,7 +68,7 @@ export const FIELD_NAME_MAPPINGS: FieldNameMapping = {
  */
 export function formatFieldName(fieldName: string): string {
   debugLog('Formatting field name', fieldName);
-  if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
+  if (hasOwnProperty(FIELD_NAME_MAPPINGS, fieldName)) {
     const mapping = FIELD_NAME_MAPPINGS[fieldName as keyof FieldNameMapping];
     debugLog('Field mapping found', fieldName, mapping);
     return mapping;
@@ -106,7 +107,7 @@ function processFieldForBreakdown(
   data: JsonLogicData,
   breakdown: CriteriaBreakdownItem[]
 ): void {
-  const fieldValue = Object.prototype.hasOwnProperty.call(data, field)
+  const fieldValue = hasOwnProperty(data, field)
     ? data[field]
     : undefined;
   const fieldDescription = formatFieldName(field);

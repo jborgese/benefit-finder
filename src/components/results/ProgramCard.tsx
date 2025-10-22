@@ -63,6 +63,7 @@ const getStatusBadgeConfig = (status: string, t: (key: string) => string): { cla
     }
   };
 
+  // eslint-disable-next-line security/detect-object-injection
   return badgeConfigs[status as keyof typeof badgeConfigs] ?? badgeConfigs['not-qualified'];
 };
 
@@ -109,6 +110,7 @@ const getExplanationComponent = (programId: string, result: ProgramEligibilityRe
     'lihtc-federal': LihtcExplanation
   };
 
+  // eslint-disable-next-line security/detect-object-injection
   const Component = componentMap[programId] ?? WhyExplanation;
   return <Component {...commonProps} />;
 };
@@ -137,6 +139,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
       'US-TX': '⭐ Texas',
       'US-FL': '🌴 Florida',
     };
+    // eslint-disable-next-line security/detect-object-injection
     const jurisdiction = jurisdictionMap[result.jurisdiction] ?? result.jurisdiction;
 
     // Memoize benefit formatting

@@ -62,6 +62,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
     },
   ];
 
+  // eslint-disable-next-line security/detect-object-injection
   const currentStepData = steps[currentStep] ?? steps[0];
   const progress = ((currentStep + 1) / steps.length) * 100;
 

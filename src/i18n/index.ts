@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import type { InitOptions } from 'i18next';
+import { hasOwnProperty } from '../utils/safePropertyAccess';
 
 // Import translation files
 import en from './locales/en.json';
@@ -50,8 +51,8 @@ const normalizeLanguageCode = (language: string): string => {
   };
 
   // Return mapped language or just the first part (before hyphen)
-  // Use Object.prototype.hasOwnProperty.call for safe property access
-  if (Object.prototype.hasOwnProperty.call(languageMap, language)) {
+  // Use safe property access to avoid security warnings
+  if (hasOwnProperty(languageMap, language)) {
     return languageMap[language];
   }
   return language.split('-')[0];

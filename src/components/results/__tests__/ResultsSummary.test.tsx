@@ -54,7 +54,7 @@ const mockResults: EligibilityResults = {
 };
 
 describe('ResultsSummary', () => {
-  const renderWithI18n = (component: React.ReactElement) => {
+  const renderWithI18n = (component: React.ReactElement): ReturnType<typeof render> => {
     return render(
       <I18nextProvider i18n={i18n}>
         {component}

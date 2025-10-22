@@ -21,7 +21,7 @@ interface HelpTooltipProps {
 export const HelpTooltip: React.FC<HelpTooltipProps> = ({
   content,
   title,
-  trigger = 'hover',
+  trigger: _trigger = 'hover',
   position = 'top',
   size = 'md',
   children,
@@ -34,9 +34,13 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
   };
 
   // Map position prop to Radix UI side
-  const side = position === 'top' ? 'top' :
-    position === 'bottom' ? 'bottom' :
-      position === 'left' ? 'left' : 'right';
+  const sideMap = {
+    top: 'top' as const,
+    bottom: 'bottom' as const,
+    left: 'left' as const,
+    right: 'right' as const,
+  };
+  const side = sideMap[position];
 
   // Map position to align for better positioning
   const align = position === 'top' || position === 'bottom' ? 'center' : 'center';
@@ -69,7 +73,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
             align={align}
             sideOffset={6}
             alignOffset={0}
-            avoidCollisions={true}
+            avoidCollisions
             collisionBoundary={undefined}
             collisionPadding={16}
             hideWhenDetached={false}

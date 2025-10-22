@@ -27,12 +27,12 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
     sm: 'h-8 px-2 text-sm',
     md: 'h-10 px-3 text-base',
     lg: 'h-12 px-4 text-lg',
-  };
+  } as const;
 
   const variantClasses = {
     default: 'bg-white dark:bg-secondary-800 border border-gray-300 dark:border-secondary-600 shadow-sm hover:bg-gray-50 dark:hover:bg-secondary-700 focus:bg-white dark:focus:bg-secondary-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-secondary-200',
     minimal: 'bg-transparent border-none hover:bg-white/10 dark:hover:bg-white/10 focus:bg-white/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-white',
-  };
+  } as const;
 
   const isMaxSize = textSize === 'extra-large';
   const isMinSize = textSize === 'small';
@@ -52,8 +52,8 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
         disabled={isMinSize}
         aria-label="Decrease text size"
         className={`
-          ${sizeClasses[size]}
-          ${variantClasses[variant]}
+          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -74,8 +74,8 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
         disabled={isMaxSize}
         aria-label="Increase text size"
         className={`
-          ${sizeClasses[size]}
-          ${variantClasses[variant]}
+          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -91,8 +91,8 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
         onClick={resetTextSize}
         aria-label="Reset text size to default"
         className={`
-          ${sizeClasses[size]}
-          ${variantClasses[variant]}
+          ${size === 'sm' ? sizeClasses.sm : size === 'lg' ? sizeClasses.lg : sizeClasses.md}
+          ${variant === 'minimal' ? variantClasses.minimal : variantClasses.default}
           transition-colors duration-200
           focus:outline-none
           ml-1

@@ -2,6 +2,7 @@ import { CriterionResult } from '../types/eligibility';
 import { getSNAPGrossIncomeLimit, formatIncomeThreshold } from './benefitThresholds';
 import { formatFieldName } from './fieldNameMappings';
 import { formatComparison, formatCriteriaValue } from './formatCriteriaValues';
+import { hasOwnProperty } from './safePropertyAccess';
 
 /**
  * Handle SNAP income criteria formatting
@@ -83,7 +84,7 @@ function getCriterionType(criterion: string): keyof typeof criterionHandlers {
 function generateFailedCriteriaDescription(cr: CriterionResult, fieldName: string): string {
   const criterionType = getCriterionType(cr.criterion);
   let handler = criterionHandlers.default;
-  if (Object.prototype.hasOwnProperty.call(criterionHandlers, criterionType)) {
+  if (hasOwnProperty(criterionHandlers, criterionType)) {
     handler = criterionHandlers[criterionType];
   }
   return handler(fieldName, cr.met);

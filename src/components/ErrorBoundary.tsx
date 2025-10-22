@@ -119,7 +119,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             <div className="mt-6 text-sm text-secondary-500">
               <p>
-                If this problem persists, you can try clearing your browser's local storage
+                If this problem persists, you can try clearing your browser&apos;s local storage
                 or contact support for assistance.
               </p>
             </div>

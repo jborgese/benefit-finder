@@ -34,7 +34,9 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
   const { toggleTheme } = useTheme();
   const { increaseTextSize, decreaseTextSize, resetTextSize } = useTextSize();
 
-  const shortcuts: Shortcut[] = [
+  // Shortcuts are defined but not used in this component
+  // They're kept for potential future use in a help modal
+  const _shortcuts: Shortcut[] = [
     {
       key: 'Ctrl + Enter',
       description: 'Start questionnaire',
@@ -87,52 +89,93 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
     },
   ];
 
+  // Helper function to check if user is typing in an input
+  const isTypingInInput = (target: EventTarget | null): boolean => {
+    if (!target) return false;
+    return (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement ||
+      (target as HTMLElement).contentEditable === 'true'
+    );
+  };
+
+  // Helper function to handle Ctrl/Cmd + key combinations
+  const handleCtrlKeyCombination = (key: string, event: KeyboardEvent): boolean => {
+    const { ctrlKey, metaKey } = event;
+    const isCtrlOrCmd = ctrlKey || metaKey;
+
+    if (!isCtrlOrCmd) return false;
+
+    switch (key) {
+      case 'Enter':
+        event.preventDefault();
+        onStartQuestionnaire?.();
+        return true;
+      case 't':
+        event.preventDefault();
+        toggleTheme();
+        return true;
+      case '+':
+        event.preventDefault();
+        increaseTextSize();
+        return true;
+      case '-':
+        event.preventDefault();
+        decreaseTextSize();
+        return true;
+      case '0':
+        event.preventDefault();
+        resetTextSize();
+        return true;
+      case 'h':
+        event.preventDefault();
+        onGoHome?.();
+        return true;
+      case 'r':
+        event.preventDefault();
+        onViewResults?.();
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  // Helper function to handle function key combinations
+  const handleFunctionKey = (key: string, event: KeyboardEvent): boolean => {
+    switch (key) {
+      case 'F1':
+        event.preventDefault();
+        onToggleTour?.();
+        return true;
+      case 'F2':
+        event.preventDefault();
+        onTogglePrivacy?.();
+        return true;
+      case 'F3':
+        event.preventDefault();
+        onToggleGuide?.();
+        return true;
+      default:
+        return false;
+    }
+  };
+
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     // Don't trigger shortcuts if user is typing in an input
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement ||
-      event.target instanceof HTMLSelectElement ||
-      (event.target as HTMLElement)?.contentEditable === 'true'
-    ) {
+    if (isTypingInInput(event.target)) {
       return;
     }
 
-    const { key, ctrlKey, metaKey, shiftKey } = event;
-    const isCtrlOrCmd = ctrlKey || metaKey;
+    const { key } = event;
 
-    // Handle different shortcut combinations
-    if (isCtrlOrCmd && key === 'Enter') {
-      event.preventDefault();
-      onStartQuestionnaire?.();
-    } else if (isCtrlOrCmd && key.toLowerCase() === 't') {
-      event.preventDefault();
-      toggleTheme();
-    } else if (isCtrlOrCmd && key === '+') {
-      event.preventDefault();
-      increaseTextSize();
-    } else if (isCtrlOrCmd && key === '-') {
-      event.preventDefault();
-      decreaseTextSize();
-    } else if (isCtrlOrCmd && key === '0') {
-      event.preventDefault();
-      resetTextSize();
-    } else if (isCtrlOrCmd && key.toLowerCase() === 'h') {
-      event.preventDefault();
-      onGoHome?.();
-    } else if (isCtrlOrCmd && key.toLowerCase() === 'r') {
-      event.preventDefault();
-      onViewResults?.();
-    } else if (key === 'F1') {
-      event.preventDefault();
-      onToggleTour?.();
-    } else if (key === 'F2') {
-      event.preventDefault();
-      onTogglePrivacy?.();
-    } else if (key === 'F3') {
-      event.preventDefault();
-      onToggleGuide?.();
+    // Try Ctrl/Cmd combinations first
+    if (handleCtrlKeyCombination(key.toLowerCase(), event)) {
+      return;
     }
+
+    // Try function keys
+    handleFunctionKey(key, event);
   }, [
     onStartQuestionnaire,
     toggleTheme,

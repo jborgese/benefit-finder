@@ -13,35 +13,35 @@ import { EligibilityStatus, EligibilityExplanation } from '../types';
 vi.mock('../../../i18n/hooks', () => ({
   useI18n: () => ({
     t: (key: string) => {
-      const translations: Record<string, string> = {
-        'results.tanf.benefits.title': 'What TANF provides:',
-        'results.tanf.benefits.cashAssistance': 'Temporary cash assistance for families with children',
-        'results.tanf.benefits.familySupport': 'Family support services and case management',
-        'results.tanf.benefits.childcare': 'Childcare assistance for work or education',
-        'results.tanf.requirements.title': 'TANF requirements:',
-        'results.tanf.requirements.citizenship': 'Must be a U.S. citizen or qualified immigrant',
-        'results.tanf.requirements.residence': 'Must live in the state where you apply',
-        'results.tanf.requirements.income': 'Must meet income guidelines (varies by state and household size)',
-        'results.tanf.requirements.children': 'Must have children under 18 (or 19 if still in high school)',
-        'results.tanf.nextSteps.title': 'Next steps:',
-        'results.tanf.nextSteps.contact': 'Contact your local TANF office to apply',
-        'results.tanf.nextSteps.schedule': 'Schedule an appointment for application and interview',
-        'results.tanf.nextSteps.documents': 'Gather required documents (ID, proof of income, proof of children)',
-        'results.tanf.howToApply.title': 'How to apply for TANF:',
-        'results.tanf.howToApply.findOffice': 'Find your local TANF office or apply online',
-        'results.tanf.howToApply.schedule': 'Schedule an appointment for application and interview',
-        'results.tanf.howToApply.bringDocuments': 'Bring required documents (ID, proof of income, proof of children)',
-        'results.tanf.howToApply.interview': 'Complete application and participate in interview',
-        'results.tanf.howToApply.workPlan': 'Develop and agree to work plan and requirements',
-        'results.tanf.howToApply.receiveBenefits': 'Receive benefits and participate in required activities',
-        'results.tanf.resources.title': 'Additional resources:',
-        'results.tanf.resources.website': 'TANF website: acf.hhs.gov/ofa',
-        'results.tanf.resources.hotline': 'TANF hotline: Contact your local office for assistance',
-        'results.tanf.resources.workServices': 'Work support services and job training programs',
-        'results.tanf.resources.childcare': 'Childcare assistance programs',
-        'results.tanf.resources.statePrograms': 'State-specific TANF programs and services'
-      };
-      return translations[key] || key;
+      const translations = new Map<string, string>([
+        ['results.tanf.benefits.title', 'What TANF provides:'],
+        ['results.tanf.benefits.cashAssistance', 'Temporary cash assistance for families with children'],
+        ['results.tanf.benefits.familySupport', 'Family support services and case management'],
+        ['results.tanf.benefits.childcare', 'Childcare assistance for work or education'],
+        ['results.tanf.requirements.title', 'TANF requirements:'],
+        ['results.tanf.requirements.citizenship', 'Must be a U.S. citizen or qualified immigrant'],
+        ['results.tanf.requirements.residence', 'Must live in the state where you apply'],
+        ['results.tanf.requirements.income', 'Must meet income guidelines (varies by state and household size)'],
+        ['results.tanf.requirements.children', 'Must have children under 18 (or 19 if still in high school)'],
+        ['results.tanf.nextSteps.title', 'Next steps:'],
+        ['results.tanf.nextSteps.contact', 'Contact your local TANF office to apply'],
+        ['results.tanf.nextSteps.schedule', 'Schedule an appointment for application and interview'],
+        ['results.tanf.nextSteps.documents', 'Gather required documents (ID, proof of income, proof of children)'],
+        ['results.tanf.howToApply.title', 'How to apply for TANF:'],
+        ['results.tanf.howToApply.findOffice', 'Find your local TANF office or apply online'],
+        ['results.tanf.howToApply.schedule', 'Schedule an appointment for application and interview'],
+        ['results.tanf.howToApply.bringDocuments', 'Bring required documents (ID, proof of income, proof of children)'],
+        ['results.tanf.howToApply.interview', 'Complete application and participate in interview'],
+        ['results.tanf.howToApply.workPlan', 'Develop and agree to work plan and requirements'],
+        ['results.tanf.howToApply.receiveBenefits', 'Receive benefits and participate in required activities'],
+        ['results.tanf.resources.title', 'Additional resources:'],
+        ['results.tanf.resources.website', 'TANF website: acf.hhs.gov/ofa'],
+        ['results.tanf.resources.hotline', 'TANF hotline: Contact your local office for assistance'],
+        ['results.tanf.resources.workServices', 'Work support services and job training programs'],
+        ['results.tanf.resources.childcare', 'Childcare assistance programs'],
+        ['results.tanf.resources.statePrograms', 'State-specific TANF programs and services']
+      ]);
+      return translations.get(key) || key;
     }
   })
 }));
