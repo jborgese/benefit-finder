@@ -283,7 +283,8 @@ export function buildEvaluationResult(
   evalResult: RuleEvaluationResult,
   detailedResult: DetailedEvaluationResult,
   missingFields: string[],
-  executionTime: number
+  executionTime: number,
+  estimatedBenefit?: { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string }
 ): EligibilityEvaluationResult {
   debugLog('Building eligibility evaluation result', {
     profileId, programId, ruleId: rule.id, evalResult, missingFields, executionTime
@@ -337,6 +338,7 @@ export function buildEvaluationResult(
       where: undefined,
       required: true,
     })),
+    estimatedBenefit,
     evaluatedAt: Date.now(),
     executionTime,
     ruleVersion: rule.version,

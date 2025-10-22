@@ -7,6 +7,8 @@
 
 import { getDatabase } from '../../db/database';
 import type { DetailedEvaluationResult } from './detailedEvaluator';
+import { evaluateRuleWithDetails } from './detailedEvaluator';
+import type { JsonLogicRule } from './types';
 
 // Import types
 import type {
@@ -117,6 +119,33 @@ export async function evaluateEligibility(
 
     debugLog('Result rule selected', { resultRule, combinedEvalResult });
 
+    // Process benefit amount rules if eligible
+    let estimatedBenefit: { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string } | undefined;
+    if (overallEligible) {
+      const benefitAmountRules = rules.filter(rule => rule.ruleType === 'benefit_amount');
+      debugLog('Processing benefit amount rules', { benefitAmountRulesCount: benefitAmountRules.length });
+
+      for (const benefitRule of benefitAmountRules) {
+        try {
+          const benefitResult = evaluateRuleWithDetails(
+            benefitRule.ruleLogic as JsonLogicRule,
+            data
+          );
+
+          if (benefitResult.success && benefitResult.result && typeof benefitResult.result === 'object') {
+            const benefitInfo = benefitResult.result as { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string };
+            if (benefitInfo.amount && benefitInfo.frequency) {
+              estimatedBenefit = benefitInfo;
+              debugLog('Benefit amount calculated', { ruleId: benefitRule.id, estimatedBenefit });
+              break; // Use the first matching benefit amount rule
+            }
+          }
+        } catch (error) {
+          debugLog('Error evaluating benefit amount rule', { ruleId: benefitRule.id, error });
+        }
+      }
+    }
+
     const resultRuleDetails = ruleResults.find(r => r.rule.id === resultRule.id)?.detailedResult;
 
     if (import.meta.env.DEV) {
@@ -146,7 +175,8 @@ export async function evaluateEligibility(
       combinedEvalResult,
       resultRuleDetails ? (resultRuleDetails as DetailedEvaluationResult) : fallbackDetailedResult,
       finalMissingFields,
-      executionTime
+      executionTime,
+      estimatedBenefit
     );
 
     debugLog('Final built result', result);

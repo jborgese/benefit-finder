@@ -147,6 +147,8 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
     findRulesByProgram(this: RxCollection<EligibilityRule>, programId: string): Promise<EligibilityRuleDocument[]> {
       const now = Date.now();
 
+      console.log(`🔍 [DEBUG] findRulesByProgram: Searching for rules with programId: ${programId}`);
+
       return this.find({
         selector: {
           programId,
@@ -156,7 +158,13 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
             { effectiveDate: { $lte: now } },
           ],
         },
-      }).exec();
+      }).exec().then(rules => {
+        console.log(`🔍 [DEBUG] findRulesByProgram: Found ${rules.length} rules for programId: ${programId}`);
+        rules.forEach((rule, index) => {
+          console.log(`  ${index + 1}. ${rule.id} (${rule.ruleType})`);
+        });
+        return rules;
+      });
     },
   },
 };

@@ -624,6 +624,21 @@ export const BENEFIT_OPERATORS = {
 
     return isEligible;
   },
+
+  /**
+   * Calculate WIC benefit amount
+   * @param benefitInfo Object containing amount, frequency, and description
+   * @returns The benefit amount information
+   */
+  wic_benefit_amount: (benefitInfo: { amount: number; frequency: string; description?: string }) => {
+    const isDev = isDevelopmentEnv();
+
+    if (isDev) {
+      console.warn(`🔍 [DEBUG] WIC Benefit Amount Calculation:`, benefitInfo);
+    }
+
+    return benefitInfo;
+  },
 };
 
 /**

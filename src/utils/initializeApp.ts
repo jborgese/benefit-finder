@@ -41,6 +41,12 @@ export async function initializeApp(): Promise<void> {
 
     // Check if we already have programs loaded
     const existingPrograms = await db.benefit_programs.find().exec();
+    if (import.meta.env.DEV) {
+      console.warn(`[DEBUG] initializeApp: Found ${existingPrograms.length} existing programs`);
+      if (existingPrograms.length > 0) {
+        console.warn('[DEBUG] initializeApp: Database already initialized, skipping import');
+      }
+    }
     if (existingPrograms.length > 0) {
       isInitializing = false;
       return; // Already initialized

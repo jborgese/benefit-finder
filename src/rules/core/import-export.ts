@@ -110,9 +110,11 @@ export async function importRule(
 
     // Import rule (unless dry run)
     if (!opts.dryRun) {
+      console.log(`🔍 [DEBUG] importRule: Saving rule to database: ${rule.id} (${rule.ruleType})`);
       await saveRuleToDatabase(rule, opts.mode);
       result.imported = 1;
       result.success = true;
+      console.log(`🔍 [DEBUG] importRule: Successfully imported rule: ${rule.id}`);
     } else {
       result.imported = 1;
       result.success = true;
@@ -224,6 +226,11 @@ export async function importRulePackage(
     }
 
     // Import all rules in package
+    console.log(`🔍 [DEBUG] importRulePackage: Importing ${pkg.rules.length} rules from package: ${pkg.metadata.name}`);
+    pkg.rules.forEach((rule, index) => {
+      console.log(`  ${index + 1}. ${rule.id} (${rule.ruleType})`);
+    });
+
     const importResult = await importRules(pkg.rules, options);
 
     return {
