@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
+import type React from 'react';
 
 export interface KeyboardNavigationOptions {
   /** Total number of options */
@@ -72,13 +73,43 @@ export function useKeyboardNavigation({
     };
   }, []);
 
+  // Helper function to navigate to a specific index
+  const navigateToIndex = useCallback((index: number) => {
+    if (index >= 0 && index < itemCount) {
+      setFocusedIndex(index);
+      focusItem(index);
+      onSelectionChange?.(index);
+    }
+  }, [itemCount, focusItem, onSelectionChange]);
+
+  // Helper function to handle ArrowDown navigation
+  const handleArrowDown = useCallback(() => {
+    const nextIndex = focusedIndex + 1;
+    if (nextIndex < itemCount) {
+      navigateToIndex(nextIndex);
+    } else if (wrap && itemCount > 0) {
+      navigateToIndex(0);
+    }
+  }, [focusedIndex, itemCount, wrap, navigateToIndex]);
+
+  // Helper function to handle ArrowUp navigation
+  const handleArrowUp = useCallback(() => {
+    const prevIndex = focusedIndex - 1;
+    if (prevIndex >= 0) {
+      navigateToIndex(prevIndex);
+    } else if (wrap && itemCount > 0) {
+      const lastIndex = itemCount - 1;
+      navigateToIndex(lastIndex);
+    }
+  }, [focusedIndex, itemCount, wrap, navigateToIndex]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (!enabled) return;
 
     const { key } = e;
 
     switch (key) {
-      case 'Enter':
+      case 'Enter': {
         e.preventDefault();
         if (focusedIndex >= 0 && focusedIndex < itemCount) {
           onItemSelect?.(focusedIndex);
@@ -86,56 +117,38 @@ export function useKeyboardNavigation({
           onEnterKey?.();
         }
         break;
+      }
 
-      case 'ArrowDown':
+      case 'ArrowDown': {
         e.preventDefault();
-        const nextIndex = focusedIndex + 1;
-        if (nextIndex < itemCount) {
-          setFocusedIndex(nextIndex);
-          focusItem(nextIndex);
-          onSelectionChange?.(nextIndex);
-        } else if (wrap && itemCount > 0) {
-          setFocusedIndex(0);
-          focusItem(0);
-          onSelectionChange?.(0);
-        }
+        handleArrowDown();
         break;
+      }
 
-      case 'ArrowUp':
+      case 'ArrowUp': {
         e.preventDefault();
-        const prevIndex = focusedIndex - 1;
-        if (prevIndex >= 0) {
-          setFocusedIndex(prevIndex);
-          focusItem(prevIndex);
-          onSelectionChange?.(prevIndex);
-        } else if (wrap && itemCount > 0) {
-          const lastIndex = itemCount - 1;
-          setFocusedIndex(lastIndex);
-          focusItem(lastIndex);
-          onSelectionChange?.(lastIndex);
-        }
+        handleArrowUp();
         break;
+      }
 
-      case 'Home':
+      case 'Home': {
         e.preventDefault();
         if (itemCount > 0) {
-          setFocusedIndex(0);
-          focusItem(0);
-          onSelectionChange?.(0);
+          navigateToIndex(0);
         }
         break;
+      }
 
-      case 'End':
+      case 'End': {
         e.preventDefault();
         if (itemCount > 0) {
           const lastIndex = itemCount - 1;
-          setFocusedIndex(lastIndex);
-          focusItem(lastIndex);
-          onSelectionChange?.(lastIndex);
+          navigateToIndex(lastIndex);
         }
         break;
+      }
     }
-  }, [enabled, focusedIndex, itemCount, wrap, onItemSelect, onEnterKey, onSelectionChange, focusItem]);
+  }, [enabled, focusedIndex, itemCount, onItemSelect, onEnterKey, handleArrowDown, handleArrowUp, navigateToIndex]);
 
   return {
     focusedIndex,

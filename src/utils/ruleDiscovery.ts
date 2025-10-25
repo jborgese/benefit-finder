@@ -7,7 +7,7 @@
 
 import { getDatabase } from '../db';
 import { importRulePackage } from '../rules/core/import-export';
-import type { BenefitProgram } from '../db/schemas';
+// Removed unused import: BenefitProgram
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
@@ -33,7 +33,7 @@ interface DiscoveredRuleFile {
   /** File path */
   path: string;
   /** Imported rule package */
-  rulePackage: any;
+  rulePackage: Record<string, unknown>;
   /** Program metadata extracted from rule package */
   programInfo: {
     id: string;
@@ -79,7 +79,7 @@ async function discoverRuleFiles(config: RuleDiscoveryConfig): Promise<Discovere
     for (const [filePath, importFn] of Object.entries(ruleFiles)) {
       try {
         // Use dynamic import instead of eager loading
-        const module = await (importFn as () => Promise<any>)();
+        const module = await (importFn as () => Promise<Record<string, unknown>>)();
         const rulePackage = module.default;
 
         if (!rulePackage?.metadata?.programs?.length) {
@@ -114,8 +114,19 @@ async function discoverRuleFiles(config: RuleDiscoveryConfig): Promise<Discovere
 /**
  * Extract program information from rule package metadata
  */
-function extractProgramInfo(rulePackage: any, config: RuleDiscoveryConfig) {
-  const metadata = rulePackage.metadata;
+function extractProgramInfo(rulePackage: Record<string, unknown>, config: RuleDiscoveryConfig): {
+  id: string;
+  name: string;
+  shortName: string;
+  description: string;
+  category: string;
+  jurisdiction: string;
+  website?: string;
+  phoneNumber?: string;
+  applicationUrl?: string;
+  tags: string[];
+} {
+  const { metadata } = rulePackage;
   const programId = metadata.programs?.[0]; // Use first program ID
 
   if (!programId) {
@@ -141,11 +152,11 @@ function extractProgramInfo(rulePackage: any, config: RuleDiscoveryConfig) {
     shortName,
     description,
     category,
-    jurisdiction: metadata.jurisdiction || config.defaultJurisdiction,
+    jurisdiction: (metadata.jurisdiction as string) ?? config.defaultJurisdiction,
     website,
     phoneNumber,
     applicationUrl,
-    tags: metadata.tags || [],
+    tags: (metadata.tags as string[]) ?? [],
   };
 }
 
@@ -165,7 +176,7 @@ function extractProgramName(ruleName: string, programId: string): string {
   };
 
   // Check if we have a direct mapping
-  if (programNameMap[programId]) {
+  if (programId in programNameMap) {
     return programNameMap[programId];
   }
 
@@ -206,12 +217,12 @@ function extractProgramDescription(programId: string, ruleDescription?: string):
   };
 
   // Check if we have a direct mapping
-  if (descriptionMap[programId]) {
+  if (programId in descriptionMap) {
     return descriptionMap[programId];
   }
 
   // Fallback to rule description or default
-  return ruleDescription || `Federal ${programId.replace(/-federal$/, '')} program`;
+  return ruleDescription ?? `Federal ${programId.replace(/-federal$/, '')} program`;
 }
 
 /**
@@ -230,7 +241,7 @@ function extractShortName(programName: string, programId: string): string {
   };
 
   // Check if we have a direct mapping
-  if (shortNameMap[programId]) {
+  if (programId in shortNameMap) {
     return shortNameMap[programId];
   }
 
@@ -286,7 +297,7 @@ function extractWebsite(programId: string): string {
     'lihtc-federal': 'https://www.hud.gov/program_offices/housing/mfh/htsf/lihtc',
   };
 
-  return websites[programId] || 'https://www.benefits.gov';
+  return websites[programId] ?? 'https://www.benefits.gov';
 }
 
 /**
@@ -303,7 +314,7 @@ function extractPhoneNumber(programId: string): string {
     'lihtc-federal': '1-800-955-2232',
   };
 
-  return phoneNumbers[programId] || '1-800-318-2596';
+  return phoneNumbers[programId] ?? '1-800-318-2596';
 }
 
 /**
@@ -320,7 +331,7 @@ function extractApplicationUrl(programId: string): string {
     'lihtc-federal': 'https://www.hud.gov/program_offices/housing/mfh/htsf/lihtc',
   };
 
-  return applicationUrls[programId] || 'https://www.benefits.gov';
+  return applicationUrls[programId] ?? 'https://www.benefits.gov';
 }
 
 /**
@@ -336,7 +347,7 @@ async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise
       name: programInfo.name,
       shortName: programInfo.shortName,
       description: programInfo.description,
-      category: programInfo.category as any,
+      category: programInfo.category as 'food' | 'healthcare' | 'housing' | 'financial' | 'other',
       jurisdiction: programInfo.jurisdiction,
       jurisdictionLevel: 'federal',
       website: programInfo.website,

@@ -35,13 +35,19 @@ export interface ProgramMaybeReasons {
 }
 
 /**
+ * Constants for repeated string literals
+ */
+const CITIZENSHIP_MESSAGE = 'You indicated you are not a U.S. citizen or qualified immigrant';
+const ELIGIBLE_CITIZENSHIP_STATUSES = ['us_citizen', 'permanent_resident', 'refugee', 'asylee'];
+
+/**
  * Generic specific reasons that apply to most programs
  */
 const genericReasons: SpecificReason[] = [
   {
     key: 'citizenship',
-    message: 'You indicated you are not a U.S. citizen or qualified immigrant',
-    condition: (profile) => profile.citizenship && !['us_citizen', 'permanent_resident', 'refugee', 'asylee'].includes(profile.citizenship)
+    message: CITIZENSHIP_MESSAGE,
+    condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
   },
   {
     key: 'incomeTooHigh',
@@ -110,8 +116,8 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant',
-      condition: (profile) => profile.citizenship && !['us_citizen', 'permanent_resident', 'refugee', 'asylee'].includes(profile.citizenship)
+      message: CITIZENSHIP_MESSAGE,
+      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     }
   ],
   'snap-federal': [
@@ -131,8 +137,8 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant',
-      condition: (profile) => profile.citizenship && !['us_citizen', 'permanent_resident', 'refugee', 'asylee'].includes(profile.citizenship)
+      message: CITIZENSHIP_MESSAGE,
+      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     },
     {
       key: 'ageRestriction',
@@ -165,8 +171,8 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant',
-      condition: (profile) => profile.citizenship && !['us_citizen', 'permanent_resident', 'refugee', 'asylee'].includes(profile.citizenship)
+      message: CITIZENSHIP_MESSAGE,
+      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     }
   ],
   'ssi-federal': [
@@ -191,8 +197,8 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant',
-      condition: (profile) => profile.citizenship && !['us_citizen', 'permanent_resident', 'refugee', 'asylee'].includes(profile.citizenship)
+      message: CITIZENSHIP_MESSAGE,
+      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     }
   ],
   'section8-federal': [
@@ -208,7 +214,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: 'You indicated you are not a U.S. citizen or eligible immigrant',
-      condition: (profile) => profile.citizenship && !['us_citizen', 'permanent_resident', 'refugee', 'asylee'].includes(profile.citizenship)
+      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     },
     {
       key: 'ageRestriction',
@@ -237,7 +243,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: 'You indicated you are not a U.S. citizen or eligible immigrant',
-      condition: (profile) => profile.citizenship && !['us_citizen', 'permanent_resident', 'refugee', 'asylee'].includes(profile.citizenship)
+      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     },
     {
       key: 'ageRestriction',
@@ -273,7 +279,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'nutritionalRisk',
       message: 'Complete nutritional risk assessment - WIC requires documented nutritional need',
-      condition: (profile) => true // Always show this as it requires professional assessment
+      condition: (_profile) => true // Always show this as it requires professional assessment
     }
   ],
   'medicaid-federal': [
@@ -312,7 +318,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'expenseDeductions',
       message: 'Document allowable expenses - SNAP considers housing, utilities, and medical costs in eligibility',
-      condition: (profile) => true // Always relevant for SNAP
+      condition: (_profile) => true // Always relevant for SNAP
     },
     {
       key: 'citizenshipVerification',
@@ -339,7 +345,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'timeLimits',
       message: 'Check lifetime limits - TANF has 60-month lifetime limit in most states',
-      condition: (profile) => true // Always relevant for TANF
+      condition: (_profile) => true // Always relevant for TANF
     }
   ],
   'ssi-federal': [
@@ -378,12 +384,12 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'criminalBackground',
       message: 'Complete criminal background check - Section 8 requires clean criminal history',
-      condition: (profile) => true // Always relevant for Section 8
+      condition: (_profile) => true // Always relevant for Section 8
     },
     {
       key: 'rentalHistory',
       message: 'Provide rental history and references - Section 8 requires good rental record',
-      condition: (profile) => true // Always relevant for Section 8
+      condition: (_profile) => true // Always relevant for Section 8
     }
   ],
   'lihtc-federal': [
@@ -405,7 +411,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'waitingList',
       message: 'Get on waiting lists immediately - LIHTC properties have long waiting lists',
-      condition: (profile) => true // Always relevant for LIHTC
+      condition: (_profile) => true // Always relevant for LIHTC
     }
   ]
 };
@@ -430,7 +436,7 @@ export function getSpecificReasons(
   const reasons: string[] = [];
 
   // Get program-specific reasons
-  const programReasons = programSpecificReasons[programId] || [];
+  const programReasons = programSpecificReasons[programId] ?? [];
 
   // Get generic reasons
   const allReasons = [...genericReasons, ...programReasons];
@@ -470,7 +476,7 @@ export function getMaybeReasons(
   const reasons: string[] = [];
 
   // Get program-specific maybe reasons
-  const programMaybeReasonsList = programMaybeReasons[programId] || [];
+  const programMaybeReasonsList = programMaybeReasons[programId] ?? [];
 
   // Check each reason condition
   for (const reason of programMaybeReasonsList) {

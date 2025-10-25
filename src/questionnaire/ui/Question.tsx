@@ -101,14 +101,14 @@ export const Question: React.FC<QuestionProps> = ({
       setErrors([]);
       onValidationChange?.(true, []);
     }
-  }, [touched, onValidationChange]);
+  }, [touched, onValidationChange, validateValue, value]);
 
   // Validate when value changes, but only if field has been touched
   React.useEffect(() => {
     if (touched) {
       validateValue(value);
     }
-  }, [value, touched]);
+  }, [value, touched, validateValue]);
 
   // Validate on change
   const handleChange = (newValue: unknown): void => {
@@ -129,6 +129,96 @@ export const Question: React.FC<QuestionProps> = ({
   const handleBlur = (): void => {
     setTouched(true);
     validateValue(value);
+  };
+
+  // Helper function to render state selector
+  const renderStateSelector = (commonProps: any): React.ReactNode => {
+    return (
+      <EnhancedStateSelector
+        {...commonProps}
+        value={value as string}
+        placeholder="Search for your state..."
+        showPopularFirst
+        groupByRegion={!deviceInfo.isMobile}
+        enableSearch
+        mobileOptimized={deviceInfo.isMobile}
+        enableAutoDetection
+        maxHeight={deviceInfo.isMobile ? '60vh' : '300px'}
+      />
+    );
+  };
+
+  // Helper function to extract state value from answer
+  const extractStateValue = (stateAnswer: unknown): string | null => {
+    if (typeof stateAnswer === 'string') {
+      return stateAnswer;
+    }
+
+    if (stateAnswer && typeof stateAnswer === 'object') {
+      const stateObj = stateAnswer as Record<string, unknown>;
+      if ('value' in stateObj) {
+        return stateObj.value as string;
+      }
+
+      if ('label' in stateObj) {
+        const stateLabel = stateObj.label as string;
+        const stateOptions = [
+          { value: 'AL', label: 'Alabama' }, { value: 'AK', label: 'Alaska' }, { value: 'AZ', label: 'Arizona' },
+          { value: 'AR', label: 'Arkansas' }, { value: 'CA', label: 'California' }, { value: 'CO', label: 'Colorado' },
+          { value: 'CT', label: 'Connecticut' }, { value: 'DE', label: 'Delaware' }, { value: 'FL', label: 'Florida' },
+          { value: 'GA', label: 'Georgia' }, { value: 'HI', label: 'Hawaii' }, { value: 'ID', label: 'Idaho' },
+          { value: 'IL', label: 'Illinois' }, { value: 'IN', label: 'Indiana' }, { value: 'IA', label: 'Iowa' },
+          { value: 'KS', label: 'Kansas' }, { value: 'KY', label: 'Kentucky' }, { value: 'LA', label: 'Louisiana' },
+          { value: 'ME', label: 'Maine' }, { value: 'MD', label: 'Maryland' }, { value: 'MA', label: 'Massachusetts' },
+          { value: 'MI', label: 'Michigan' }, { value: 'MN', label: 'Minnesota' }, { value: 'MS', label: 'Mississippi' },
+          { value: 'MO', label: 'Missouri' }, { value: 'MT', label: 'Montana' }, { value: 'NE', label: 'Nebraska' },
+          { value: 'NV', label: 'Nevada' }, { value: 'NH', label: 'New Hampshire' }, { value: 'NJ', label: 'New Jersey' },
+          { value: 'NM', label: 'New Mexico' }, { value: 'NY', label: 'New York' }, { value: 'NC', label: 'North Carolina' },
+          { value: 'ND', label: 'North Dakota' }, { value: 'OH', label: 'Ohio' }, { value: 'OK', label: 'Oklahoma' },
+          { value: 'OR', label: 'Oregon' }, { value: 'PA', label: 'Pennsylvania' }, { value: 'RI', label: 'Rhode Island' },
+          { value: 'SC', label: 'South Carolina' }, { value: 'SD', label: 'South Dakota' }, { value: 'TN', label: 'Tennessee' },
+          { value: 'TX', label: 'Texas' }, { value: 'UT', label: 'Utah' }, { value: 'VT', label: 'Vermont' },
+          { value: 'VA', label: 'Virginia' }, { value: 'WA', label: 'Washington' }, { value: 'WV', label: 'West Virginia' },
+          { value: 'WI', label: 'Wisconsin' }, { value: 'WY', label: 'Wyoming' }
+        ];
+        const matchingState = stateOptions.find(state => state.label === stateLabel);
+        return matchingState?.value ?? null;
+      }
+    }
+
+    return null;
+  };
+
+  // Helper function to render county selector
+  const renderCountySelector = (commonProps: any): React.ReactNode => {
+    const stateAnswer = store.answers?.get('state');
+    const selectedState = extractStateValue(stateAnswer);
+
+    console.log('🔍 Question: Rendering EnhancedCountySelector', {
+      questionId: question.id,
+      questionText: question.text,
+      fieldName: question.fieldName,
+      rawStateAnswer: stateAnswer,
+      selectedState,
+      hasSelectedState: !!selectedState,
+      allAnswers: Object.fromEntries(store.answers ?? new Map()),
+      value,
+      hasOptions: question.options?.length ?? 0
+    });
+
+    return (
+      <EnhancedCountySelector
+        {...commonProps}
+        value={value as string | null}
+        selectedState={selectedState}
+        placeholder={question.placeholder ?? 'Search for your county...'}
+        showPopularFirst
+        showStateContext
+        enableSearch
+        mobileOptimized={deviceInfo.isMobile}
+        maxHeight={deviceInfo.isMobile ? '60vh' : '300px'}
+      />
+    );
   };
 
   // Render appropriate input component
@@ -157,23 +247,9 @@ export const Question: React.FC<QuestionProps> = ({
 
       case 'select':
       case 'radio':
-        // Use enhanced state selector for state questions
         if (question.fieldName === 'state' || question.text.toLowerCase().includes('state')) {
-          return (
-            <EnhancedStateSelector
-              {...commonProps}
-              value={value as string}
-              placeholder="Search for your state..."
-              showPopularFirst={true}
-              groupByRegion={!deviceInfo.isMobile}
-              enableSearch={true}
-              mobileOptimized={deviceInfo.isMobile}
-              enableAutoDetection={true}
-              maxHeight={deviceInfo.isMobile ? '60vh' : '300px'}
-            />
-          );
+          return renderStateSelector(commonProps);
         }
-
         return (
           <SelectInput
             {...commonProps}
@@ -184,73 +260,9 @@ export const Question: React.FC<QuestionProps> = ({
         );
 
       case 'searchable-select':
-        // Use enhanced county selector for county questions
         if (question.fieldName === 'county' || question.text.toLowerCase().includes('county')) {
-          const stateAnswer = store?.answers?.get('state');
-
-          // Extract the actual state value - handle both string and object cases
-          let selectedState: string | null = null;
-          if (typeof stateAnswer === 'string') {
-            selectedState = stateAnswer;
-          } else if (stateAnswer && typeof stateAnswer === 'object') {
-            // Handle object format - could be { value: 'GA', label: 'Georgia' } or similar
-            if ('value' in stateAnswer) {
-              selectedState = (stateAnswer as any).value;
-            } else if ('label' in stateAnswer) {
-              // If we only have the label, we need to find the corresponding state code
-              const stateLabel = (stateAnswer as any).label;
-              // Try to find the state code from the label
-              const stateOptions = [
-                { value: 'AL', label: 'Alabama' }, { value: 'AK', label: 'Alaska' }, { value: 'AZ', label: 'Arizona' },
-                { value: 'AR', label: 'Arkansas' }, { value: 'CA', label: 'California' }, { value: 'CO', label: 'Colorado' },
-                { value: 'CT', label: 'Connecticut' }, { value: 'DE', label: 'Delaware' }, { value: 'FL', label: 'Florida' },
-                { value: 'GA', label: 'Georgia' }, { value: 'HI', label: 'Hawaii' }, { value: 'ID', label: 'Idaho' },
-                { value: 'IL', label: 'Illinois' }, { value: 'IN', label: 'Indiana' }, { value: 'IA', label: 'Iowa' },
-                { value: 'KS', label: 'Kansas' }, { value: 'KY', label: 'Kentucky' }, { value: 'LA', label: 'Louisiana' },
-                { value: 'ME', label: 'Maine' }, { value: 'MD', label: 'Maryland' }, { value: 'MA', label: 'Massachusetts' },
-                { value: 'MI', label: 'Michigan' }, { value: 'MN', label: 'Minnesota' }, { value: 'MS', label: 'Mississippi' },
-                { value: 'MO', label: 'Missouri' }, { value: 'MT', label: 'Montana' }, { value: 'NE', label: 'Nebraska' },
-                { value: 'NV', label: 'Nevada' }, { value: 'NH', label: 'New Hampshire' }, { value: 'NJ', label: 'New Jersey' },
-                { value: 'NM', label: 'New Mexico' }, { value: 'NY', label: 'New York' }, { value: 'NC', label: 'North Carolina' },
-                { value: 'ND', label: 'North Dakota' }, { value: 'OH', label: 'Ohio' }, { value: 'OK', label: 'Oklahoma' },
-                { value: 'OR', label: 'Oregon' }, { value: 'PA', label: 'Pennsylvania' }, { value: 'RI', label: 'Rhode Island' },
-                { value: 'SC', label: 'South Carolina' }, { value: 'SD', label: 'South Dakota' }, { value: 'TN', label: 'Tennessee' },
-                { value: 'TX', label: 'Texas' }, { value: 'UT', label: 'Utah' }, { value: 'VT', label: 'Vermont' },
-                { value: 'VA', label: 'Virginia' }, { value: 'WA', label: 'Washington' }, { value: 'WV', label: 'West Virginia' },
-                { value: 'WI', label: 'Wisconsin' }, { value: 'WY', label: 'Wyoming' }
-              ];
-              const matchingState = stateOptions.find(state => state.label === stateLabel);
-              selectedState = matchingState?.value || null;
-            }
-          }
-
-          console.log('🔍 Question: Rendering EnhancedCountySelector', {
-            questionId: question.id,
-            questionText: question.text,
-            fieldName: question.fieldName,
-            rawStateAnswer: stateAnswer,
-            selectedState,
-            hasSelectedState: !!selectedState,
-            allAnswers: Object.fromEntries(store?.answers || new Map()),
-            value,
-            hasOptions: question.options?.length || 0
-          });
-
-          return (
-            <EnhancedCountySelector
-              {...commonProps}
-              value={value as string | null}
-              selectedState={selectedState}
-              placeholder={question.placeholder || 'Search for your county...'}
-              showPopularFirst={true}
-              showStateContext={true}
-              enableSearch={true}
-              mobileOptimized={deviceInfo.isMobile}
-              maxHeight={deviceInfo.isMobile ? '60vh' : '300px'}
-            />
-          );
+          return renderCountySelector(commonProps);
         }
-
         return (
           <SearchableSelectInput
             {...commonProps}
@@ -272,7 +284,6 @@ export const Question: React.FC<QuestionProps> = ({
         );
 
       case 'date':
-        // Use enhanced DateOfBirthInput for birth date questions
         if (question.fieldName.toLowerCase().includes('birth') ||
           question.fieldName.toLowerCase().includes('dob') ||
           question.text.toLowerCase().includes('birth')) {
