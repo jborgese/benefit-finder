@@ -140,7 +140,9 @@
             "no-children"
           ]
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "tanf-federal-income-test",
@@ -235,7 +237,9 @@
             "high-income"
           ]
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "tanf-federal-work-requirements",
@@ -353,7 +357,9 @@
             "young-child"
           ]
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "tanf-federal-citizenship",
@@ -454,7 +460,9 @@
             "non-citizen"
           ]
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "tanf-federal-residence",
@@ -533,7 +541,9 @@
             "non-resident"
           ]
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "tanf-federal-time-limit",
@@ -616,7 +626,9 @@
             "exceeded-limits"
           ]
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     }
   ]
 }

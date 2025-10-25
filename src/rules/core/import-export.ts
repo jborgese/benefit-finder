@@ -74,8 +74,16 @@ export async function importRule(
 
   try {
     // Validate structure
+    // Simplified logging
+
     const validation = validateRuleDefinition(ruleData);
+
     if (!validation.success) {
+      console.log('❌ [IMPORT] Schema validation failed:', validation.error?.issues?.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message
+      })));
+
       result.errors.push({
         message: 'Invalid rule structure',
         code: IMPORT_ERROR_CODES.INVALID_FORMAT,
@@ -87,11 +95,20 @@ export async function importRule(
     const rule = validation.data;
 
     // Validate logic and run tests
+    console.log(`🔍 [VALIDATE] ${rule.id} (${rule.ruleType})`);
+
     const validationSuccess = await performRuleValidationAndTests(
       rule,
       { validate: opts.validate, skipTests: opts.skipTests },
       result
     );
+
+    if (validationSuccess) {
+      console.log(`✅ [VALIDATE] ${rule.id} passed`);
+    } else {
+      console.log(`❌ [VALIDATE] ${rule.id} failed`);
+    }
+
     if (!validationSuccess) {
       result.failed = 1;
       return result;
@@ -110,11 +127,11 @@ export async function importRule(
 
     // Import rule (unless dry run)
     if (!opts.dryRun) {
-      console.log(`🔍 [DEBUG] importRule: Saving rule to database: ${rule.id} (${rule.ruleType})`);
+      console.log(`💾 [SAVE] ${rule.id}`);
       await saveRuleToDatabase(rule, opts.mode);
       result.imported = 1;
       result.success = true;
-      console.log(`🔍 [DEBUG] importRule: Successfully imported rule: ${rule.id}`);
+      console.log(`✅ [SAVE] ${rule.id} completed`);
     } else {
       result.imported = 1;
       result.success = true;
@@ -156,6 +173,8 @@ export async function importRules(
     dryRun: options.dryRun ?? false,
   };
 
+  console.log(`🔍 [IMPORT] Starting import of ${rules.length} rules`);
+
   for (const ruleData of rules) {
     const result = await importRule(ruleData, options);
 
@@ -169,6 +188,8 @@ export async function importRules(
       aggregateResult.success = false;
     }
   }
+
+  console.log(`📊 [IMPORT] Complete: ${aggregateResult.imported} imported, ${aggregateResult.failed} failed, ${aggregateResult.errors.length} errors`);
 
   return aggregateResult;
 }
@@ -364,52 +385,6 @@ export async function exportProgramRules(
 // HELPER FUNCTIONS
 // ============================================================================
 
-/**
- * Perform validation and testing on a rule
- */
-async function performRuleValidationAndTests(
-  rule: RuleDefinition,
-  opts: { validate: boolean; skipTests: boolean },
-  result: RuleImportResult
-): Promise<boolean> {
-  // Validate logic if requested
-  if (opts.validate) {
-    const logicValidation = validateRuleLogic(rule);
-    if (!logicValidation.valid) {
-      result.errors.push(...logicValidation.errors.map((e) => ({
-        ruleId: rule.id,
-        message: e.message,
-        code: e.code,
-      })));
-      return false;
-    }
-
-    if (logicValidation.warnings.length > 0) {
-      result.warnings.push(...logicValidation.warnings.map((w) => ({
-        ruleId: rule.id,
-        message: w.message,
-      })));
-    }
-  }
-
-  // Run tests if included and not skipped
-  if (!opts.skipTests && rule.testCases && rule.testCases.length > 0) {
-    const testResult = await runRuleTests(rule);
-    if (!testResult.success) {
-      result.errors.push({
-        ruleId: rule.id,
-        message: `Tests failed: ${testResult.failed}/${testResult.total}`,
-        code: IMPORT_ERROR_CODES.TEST_FAILED,
-      });
-      result.warnings.push({
-        ruleId: rule.id,
-        message: 'Continuing import despite test failures',
-      });
-    }
-  }
-
-  return true;
-}
 
 /**
  * Check for existing rule and handle conflicts
@@ -461,6 +436,19 @@ async function checkExistingRuleConflicts(
 function validateRuleLogic(
   rule: RuleDefinition
 ): RuleSchemaValidationResult {
+  console.log('🔍 [RULE LOGIC VALIDATION DEBUG] Starting rule logic validation', {
+    ruleId: rule.id,
+    programId: rule.programId,
+    ruleName: rule.name,
+    ruleType: rule.ruleType,
+    hasRuleLogic: !!rule.ruleLogic,
+    ruleLogicType: typeof rule.ruleLogic,
+    ruleLogicKeys: rule.ruleLogic && typeof rule.ruleLogic === 'object' ? Object.keys(rule.ruleLogic) : 'not an object',
+    requiredFields: rule.requiredFields,
+    requiredFieldsType: typeof rule.requiredFields,
+    requiredFieldsLength: Array.isArray(rule.requiredFields) ? rule.requiredFields.length : 'not an array'
+  });
+
   const errors: Array<{
     field?: string;
     message: string;
@@ -475,9 +463,43 @@ function validateRuleLogic(
   }> = [];
 
   // Validate JSON Logic rule
+  console.log('🔍 [RULE LOGIC VALIDATION DEBUG] Validating JSON Logic rule', {
+    ruleId: rule.id,
+    ruleLogic: rule.ruleLogic,
+    ruleLogicStringified: JSON.stringify(rule.ruleLogic, null, 2)
+  });
+
   const logicValidation = validateRule(rule.ruleLogic);
 
+  console.log('🔍 [RULE LOGIC VALIDATION DEBUG] JSON Logic validation result', {
+    ruleId: rule.id,
+    valid: logicValidation.valid,
+    errorCount: logicValidation.errors.length,
+    warningCount: logicValidation.warnings.length,
+    errors: logicValidation.errors.map(e => ({
+      message: e.message,
+      code: e.code,
+      severity: e.severity
+    })),
+    warnings: logicValidation.warnings.map(w => ({
+      message: w.message,
+      code: w.code
+    }))
+  });
+
   if (!logicValidation.valid) {
+    console.log('🔍 [RULE LOGIC VALIDATION DEBUG] JSON Logic validation failed - detailed error analysis', {
+      ruleId: rule.id,
+      ruleLogic: rule.ruleLogic,
+      errors: logicValidation.errors,
+      errorDetails: logicValidation.errors.map(e => ({
+        message: e.message,
+        code: e.code,
+        severity: e.severity,
+        field: e.field
+      }))
+    });
+
     errors.push(...logicValidation.errors.map((e) => ({
       field: 'ruleLogic',
       message: e.message,
@@ -538,6 +560,56 @@ async function runRuleTests(rule: RuleDefinition): Promise<{
 }
 
 /**
+ * Perform rule validation and tests
+ */
+async function performRuleValidationAndTests(
+  rule: RuleDefinition,
+  options: { validate: boolean; skipTests: boolean },
+  result: RuleImportResult
+): Promise<boolean> {
+  if (!options.validate) {
+    return true;
+  }
+
+  // Validate rule logic
+  const logicValidation = validateRuleLogic(rule);
+
+  if (!logicValidation.valid) {
+    result.errors.push(...logicValidation.errors.map((e) => ({
+      ruleId: rule.id,
+      message: e.message,
+      code: e.code,
+    })));
+  }
+
+  if (logicValidation.warnings.length > 0) {
+    result.warnings.push(...logicValidation.warnings.map((w) => ({
+      ruleId: rule.id,
+      message: w.message,
+    })));
+  }
+
+  // Run tests if not skipped
+  if (!options.skipTests && rule.testCases && rule.testCases.length > 0) {
+    const testResult = await runRuleTests(rule);
+
+    if (!testResult.success) {
+      result.errors.push({
+        ruleId: rule.id,
+        message: `Tests failed: ${testResult.failed}/${testResult.total}`,
+        code: IMPORT_ERROR_CODES.TEST_FAILED,
+      });
+      result.warnings.push({
+        ruleId: rule.id,
+        message: 'Continuing import despite test failures',
+      });
+    }
+  }
+
+  return logicValidation.valid;
+}
+
+/**
  * Save rule to database
  */
 async function saveRuleToDatabase(
@@ -545,6 +617,8 @@ async function saveRuleToDatabase(
   mode: string
 ): Promise<void> {
   const db = getDatabase();
+
+  // Simplified logging
 
   const dbRule: Partial<EligibilityRule> = {
     id: rule.id,
@@ -575,10 +649,22 @@ async function saveRuleToDatabase(
     createdBy: rule.createdBy,
   };
 
-  if (mode === 'create') {
-    await db.eligibility_rules.insert(dbRule as EligibilityRule);
-  } else {
-    await db.eligibility_rules.upsert(dbRule as EligibilityRule);
+  try {
+    if (mode === 'create') {
+      await db.eligibility_rules.insert(dbRule as EligibilityRule);
+    } else {
+      await db.eligibility_rules.upsert(dbRule as EligibilityRule);
+    }
+
+    // Verify the rule was actually saved
+    const savedRule = await db.eligibility_rules.findOne({ selector: { id: rule.id } }).exec();
+
+    // Also check by programId to see if there are any rules for this program
+    const programRules = await db.eligibility_rules.find({ selector: { programId: rule.programId } }).exec();
+
+  } catch (dbError) {
+    console.log(`❌ [SAVE] Database error for ${rule.id}:`, dbError instanceof Error ? dbError.message : 'Unknown error');
+    throw dbError;
   }
 }
 

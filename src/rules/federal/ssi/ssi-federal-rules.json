@@ -52,16 +52,19 @@
           }
         ]
       },
-      "explanation": {
-        "qualified": "You meet the age, blindness, or disability requirement for SSI.",
-        "notQualified": "You must be 65 or older, blind, or have a qualifying disability to be eligible for SSI."
-      },
+      "explanation": "You must be 65 or older, blind, or have a qualifying disability to be eligible for SSI.",
+      "ruleType": "eligibility",
+      "version": "1.0.0",
+      "active": true,
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
       "requiredFields": [
         "age",
         "isBlind",
         "hasDisability"
       ],
-      "weight": 1.0
+      "priority": 10,
+      "weight": 1
     },
     {
       "id": "ssi-federal-income-eligibility",
@@ -96,15 +99,18 @@
           }
         ]
       },
-      "explanation": {
-        "qualified": "Your income is within SSI limits.",
-        "notQualified": "Your income exceeds SSI limits. The maximum monthly income is $943 for individuals and $1,415 for couples in 2024."
-      },
+      "explanation": "Your income must be within SSI limits. The maximum monthly income is $943 for individuals and $1,415 for couples in 2024.",
+      "ruleType": "eligibility",
+      "version": "1.0.0",
+      "active": true,
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
       "requiredFields": [
         "householdIncome",
         "isMarried"
       ],
-      "weight": 1.0
+      "priority": 20,
+      "weight": 1
     },
     {
       "id": "ssi-federal-asset-eligibility",
@@ -127,15 +133,18 @@
           }
         ]
       },
-      "explanation": {
-        "qualified": "Your assets are within SSI limits.",
-        "notQualified": "Your assets exceed SSI limits. The maximum resources are $2,000 for individuals and $3,000 for couples in 2024."
-      },
+      "explanation": "Your assets exceed SSI limits. The maximum resources are $2,000 for individuals and $3,000 for couples in 2024.",
       "requiredFields": [
         "totalAssets",
         "isMarried"
       ],
-      "weight": 1.0
+      "priority": 15,
+      "weight": 1,
+      "ruleType": "eligibility",
+      "version": "1.0.0",
+      "active": true,
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "ssi-federal-citizenship-eligibility",
@@ -152,15 +161,18 @@
           }
         ]
       },
-      "explanation": {
-        "qualified": "You meet the citizenship or immigration status requirement for SSI.",
-        "notQualified": "You must be a U.S. citizen or qualified immigrant to be eligible for SSI."
-      },
+      "explanation": "You must be a U.S. citizen or qualified immigrant to be eligible for SSI.",
       "requiredFields": [
         "isUSCitizen",
         "isQualifiedImmigrant"
       ],
-      "weight": 1.0
+      "priority": 12,
+      "weight": 1,
+      "ruleType": "eligibility",
+      "version": "1.0.0",
+      "active": true,
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "ssi-federal-residence-eligibility",
@@ -170,14 +182,17 @@
       "ruleLogic": {
         "var": "livesInUS"
       },
-      "explanation": {
-        "qualified": "You meet the residence requirement for SSI.",
-        "notQualified": "You must live in the United States or Northern Mariana Islands to be eligible for SSI."
-      },
+      "explanation": "You must live in the United States or Northern Mariana Islands to be eligible for SSI.",
       "requiredFields": [
         "livesInUS"
       ],
-      "weight": 1.0
+      "priority": 8,
+      "weight": 1,
+      "ruleType": "eligibility",
+      "version": "1.0.0",
+      "active": true,
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "ssi-federal-disability-eligibility",
@@ -209,17 +224,20 @@
           }
         ]
       },
-      "explanation": {
-        "qualified": "You meet the disability requirement for SSI.",
-        "notQualified": "If you are under 65 and not blind, you must have a qualifying disability that prevents you from working to be eligible for SSI."
-      },
+      "explanation": "If you are under 65 and not blind, you must have a qualifying disability that prevents you from working to be eligible for SSI.",
       "requiredFields": [
         "age",
         "isBlind",
         "hasDisability",
         "disabilityPreventsWork"
       ],
-      "weight": 0.8
+      "priority": 18,
+      "weight": 0.8,
+      "ruleType": "eligibility",
+      "version": "1.0.0",
+      "active": true,
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     }
   ],
   "requiredFields": [

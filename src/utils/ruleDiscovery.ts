@@ -347,8 +347,17 @@ async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise
   const db = getDatabase();
   const { programInfo } = discoveredFile;
 
+  console.log('🔍 [PROGRAM CREATION DEBUG] Starting program creation', {
+    programId: programInfo.id,
+    programName: programInfo.name,
+    shortName: programInfo.shortName,
+    category: programInfo.category,
+    jurisdiction: programInfo.jurisdiction,
+    tags: programInfo.tags
+  });
+
   try {
-    await db.benefit_programs.insert({
+    const programData = {
       id: programInfo.id,
       name: programInfo.name,
       shortName: programInfo.shortName,
@@ -363,12 +372,63 @@ async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise
       tags: programInfo.tags,
       lastUpdated: Date.now(),
       createdAt: Date.now(),
+    };
+
+    console.log('🔍 [PROGRAM CREATION DEBUG] Prepared program data', {
+      programId: programData.id,
+      programName: programData.name,
+      isActive: programData.active,
+      category: programData.category,
+      jurisdiction: programData.jurisdiction
+    });
+
+    const insertResult = await db.benefit_programs.insert(programData);
+    console.log('🔍 [PROGRAM CREATION DEBUG] Program insert result', {
+      programId: programInfo.id,
+      insertResult,
+      insertedId: insertResult.id,
+      insertedName: insertResult.name
+    });
+
+    // Verify the program was actually saved
+    console.log('🔍 [PROGRAM CREATION DEBUG] Verifying program was saved', { programId: programInfo.id });
+    const savedProgram = await db.benefit_programs.findOne({ selector: { id: programInfo.id } }).exec();
+    console.log('🔍 [PROGRAM CREATION DEBUG] Program verification result', {
+      programId: programInfo.id,
+      found: !!savedProgram,
+      savedProgramId: savedProgram?.id,
+      savedProgramName: savedProgram?.name,
+      savedProgramActive: savedProgram?.active
+    });
+
+    // Also check all programs in database
+    const allPrograms = await db.benefit_programs.find({}).exec();
+    console.log('🔍 [PROGRAM CREATION DEBUG] All programs in database after creation', {
+      totalPrograms: allPrograms.length,
+      programIds: allPrograms.map(p => p.id),
+      activePrograms: allPrograms.filter(p => p.active).length
+    });
+
+    // Re-verify program persistence
+    console.log('🔍 [PROGRAM CREATION DEBUG] Re-verifying program persistence', { programId: programInfo.id });
+    const recheckProgram = await db.benefit_programs.findOne({ selector: { id: programInfo.id } }).exec();
+    console.log('🔍 [PROGRAM CREATION DEBUG] Program re-verification result', {
+      programId: programInfo.id,
+      found: !!recheckProgram,
+      recheckProgramId: recheckProgram?.id,
+      recheckProgramActive: recheckProgram?.active
     });
 
     if (import.meta.env.DEV) {
       console.warn(`[DEBUG] Rule Discovery: Created benefit program ${programInfo.id}`);
     }
   } catch (error) {
+    console.log('🔍 [PROGRAM CREATION DEBUG] Error creating program', {
+      programId: programInfo.id,
+      error: error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
     console.error(`[DEBUG] Rule Discovery: Error creating program ${programInfo.id}:`, error);
     throw error;
   }
@@ -378,13 +438,34 @@ async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise
  * Import rules for a discovered rule file
  */
 async function importRulesForProgram(discoveredFile: DiscoveredRuleFile): Promise<void> {
+  console.log('🔍 [RULE IMPORT DEBUG] Starting rule import for program', {
+    programId: discoveredFile.programInfo.id,
+    rulePackageId: discoveredFile.rulePackage.metadata.id,
+    ruleCount: discoveredFile.rulePackage.rules.length,
+    ruleIds: discoveredFile.rulePackage.rules.map(r => r.id)
+  });
+
   try {
-    await importRulePackage(discoveredFile.rulePackage);
+    const importResult = await importRulePackage(discoveredFile.rulePackage);
+    console.log('🔍 [RULE IMPORT DEBUG] Rule import result', {
+      programId: discoveredFile.programInfo.id,
+      importResult,
+      success: importResult.success,
+      imported: importResult.imported,
+      failed: importResult.failed,
+      errors: importResult.errors
+    });
 
     if (import.meta.env.DEV) {
       console.warn(`[DEBUG] Rule Discovery: Imported rules for program ${discoveredFile.programInfo.id}`);
     }
   } catch (error) {
+    console.log('🔍 [RULE IMPORT DEBUG] Error importing rules', {
+      programId: discoveredFile.programInfo.id,
+      error: error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
     console.error(`[DEBUG] Rule Discovery: Error importing rules for ${discoveredFile.programInfo.id}:`, error);
     throw error;
   }

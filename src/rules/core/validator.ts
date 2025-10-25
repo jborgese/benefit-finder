@@ -32,6 +32,8 @@ export const STANDARD_OPERATORS = [
   'map', 'filter', 'reduce', 'all', 'some', 'none', 'merge', 'in',
   // String
   'cat', 'substr',
+  // Control flow
+  'switch',
   // Misc
   'var', 'missing', 'missing_some', 'log',
 ] as const;
@@ -232,18 +234,22 @@ export function validateRule(
   rule: unknown,
   options: Partial<RuleValidationOptions> = {}
 ): RuleValidationResult {
+  // Simplified logging - only log essential info
+  console.log('🔍 [VALIDATOR] Starting rule validation');
+
   const opts = { ...DEFAULT_VALIDATION_OPTIONS, ...options };
   const errors: RuleValidationError[] = [];
   const warnings: RuleValidationWarning[] = [];
 
   try {
     const validatedRule = validateRuleStructure(rule, errors);
+
     if (!validatedRule) {
+      console.log('❌ [VALIDATOR] Rule structure validation failed');
       return { valid: false, errors, warnings };
     }
 
     const complexity = validateRuleMetrics(validatedRule, opts, errors, warnings);
-
     const operators = extractOperators(validatedRule);
     const variables = extractVariables(validatedRule);
 
@@ -258,7 +264,7 @@ export function validateRule(
       });
     }
 
-    return {
+    const finalResult = {
       valid: errors.length === 0,
       errors,
       warnings,
@@ -266,6 +272,14 @@ export function validateRule(
       operators: [...new Set(operators)],
       variables: [...new Set(variables)],
     };
+
+    if (finalResult.valid) {
+      console.log('✅ [VALIDATOR] Rule validation passed');
+    } else {
+      console.log('❌ [VALIDATOR] Rule validation failed:', finalResult.errors);
+    }
+
+    return finalResult;
 
   } catch (error) {
     errors.push({

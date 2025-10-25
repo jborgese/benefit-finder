@@ -44,6 +44,7 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
     citizenship: 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other';
     employmentStatus: 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student';
     state: string;
+    county: string;
     hasDisability: boolean;
     isPregnant: boolean;
     hasChildren: boolean;
@@ -64,6 +65,7 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
   const householdSize = answers.householdSize as number;
   const dateOfBirth = answers.dateOfBirth as string;
   const state = answers.state as string;
+  const county = answers.county as string;
   const citizenship = answers.citizenship as string;
   const employmentStatus = answers.employmentStatus as string;
 
@@ -84,6 +86,7 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
       citizenship: citizenship as 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other',
       employmentStatus: employmentStatus as 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student',
       state,
+      county,
       hasDisability: hasQualifyingDisability,
       isPregnant,
       hasChildren,
@@ -559,8 +562,40 @@ function App(): React.ReactElement {
         }));
 
       // Handle ineligible results based on confidence and completeness
+      // Check for income hard stops first - these should always be "not-qualified"
+      const incomeHardStopResults = evaluationResults
+        .filter((result: EligibilityEvaluationResult) => {
+          if (!result.eligible) {
+            // Check if this is an income hard stop by looking at the reason
+            const isIncomeHardStop = result.reason?.includes('income') ||
+              result.reason?.includes('Income') ||
+              result.reason?.includes('hard stop') ||
+              result.reason?.includes('disqualified due to income');
+            return isIncomeHardStop;
+          }
+          return false;
+        })
+        .map((result: EligibilityEvaluationResult) => ({
+          ...createResultFromEvaluation(result, programRulesMap),
+          status: 'not-qualified' as const,
+          confidence: 'high' as const,
+        }));
+
       const maybeResults = evaluationResults
-        .filter((result: EligibilityEvaluationResult) => !result.eligible && ((result.incomplete ?? false) || result.confidence < 70))
+        .filter((result: EligibilityEvaluationResult) => {
+          if (!result.eligible) {
+            // Skip income hard stops (already handled above)
+            const isIncomeHardStop = result.reason?.includes('income') ||
+              result.reason?.includes('Income') ||
+              result.reason?.includes('hard stop') ||
+              result.reason?.includes('disqualified due to income');
+            if (isIncomeHardStop) return false;
+
+            // Other ineligible results go to maybe if incomplete or low confidence
+            return (result.incomplete ?? false) || result.confidence < 70;
+          }
+          return false;
+        })
         .map((result: EligibilityEvaluationResult) => ({
           ...createResultFromEvaluation(result, programRulesMap),
           status: 'maybe' as const,
@@ -568,7 +603,20 @@ function App(): React.ReactElement {
         }));
 
       const notQualifiedResults = evaluationResults
-        .filter((result: EligibilityEvaluationResult) => !result.eligible && !result.incomplete && result.confidence >= 70)
+        .filter((result: EligibilityEvaluationResult) => {
+          if (!result.eligible) {
+            // Skip income hard stops (already handled above)
+            const isIncomeHardStop = result.reason?.includes('income') ||
+              result.reason?.includes('Income') ||
+              result.reason?.includes('hard stop') ||
+              result.reason?.includes('disqualified due to income');
+            if (isIncomeHardStop) return false;
+
+            // Other ineligible results go to not-qualified if complete and high confidence
+            return !result.incomplete && result.confidence >= 70;
+          }
+          return false;
+        })
         .map((result: EligibilityEvaluationResult) => ({
           ...createResultFromEvaluation(result, programRulesMap),
           status: 'not-qualified' as const,
@@ -579,7 +627,7 @@ function App(): React.ReactElement {
         qualified: qualifiedResults,
         likely: [], // No "likely" category - either qualified, maybe, or not qualified
         maybe: maybeResults,
-        notQualified: notQualifiedResults,
+        notQualified: [...incomeHardStopResults, ...notQualifiedResults],
         totalPrograms: evaluationResults.length,
         evaluatedAt: new Date()
       };

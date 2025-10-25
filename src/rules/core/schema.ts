@@ -381,11 +381,27 @@ export function incrementVersion(
 export function validateRuleDefinition(
   rule: unknown
 ): { success: true; data: RuleDefinition } | { success: false; error: z.ZodError } {
+  // Simplified logging - only log essential info
+  const ruleId = rule && typeof rule === 'object' && 'id' in rule ? rule.id : 'unknown';
+  console.log(`🔍 [SCHEMA] Validating rule: ${ruleId}`);
+
   const result = RuleDefinitionSchema.safeParse(rule);
 
   if (result.success) {
+    console.log(`✅ [SCHEMA] Rule ${ruleId} validation passed`);
     return { success: true, data: result.data };
   }
+
+  // Only log validation errors - they're important for debugging
+  console.log(`❌ [SCHEMA] Rule ${ruleId} validation failed:`, {
+    errorCount: result.error.issues.length,
+    errors: result.error.issues.map(issue => ({
+      field: issue.path.join('.'),
+      message: issue.message,
+      expected: issue.expected,
+      received: issue.received
+    }))
+  });
 
   return { success: false, error: result.error };
 }

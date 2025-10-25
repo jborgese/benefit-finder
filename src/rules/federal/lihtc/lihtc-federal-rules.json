@@ -122,7 +122,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "lihtc-federal-family-size",
@@ -216,7 +218,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "lihtc-federal-citizenship-status",
@@ -304,7 +308,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "lihtc-federal-background-check",
@@ -394,7 +400,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "lihtc-federal-rental-history",
@@ -493,7 +501,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     }
   ],
   "testCases": [
@@ -571,4 +581,3 @@
     }
   ]
 }
-

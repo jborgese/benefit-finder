@@ -366,7 +366,32 @@ export async function evaluateAllPrograms(
   const db = getDatabase();
 
   // Get all active programs
+  console.log('🔍 [PROGRAM RETRIEVAL DEBUG] Retrieving all active programs');
   const programs = await db.benefit_programs.findActivePrograms();
+  console.log('🔍 [PROGRAM RETRIEVAL DEBUG] Active programs retrieved', {
+    programsFound: programs.length,
+    programIds: programs.map(p => p.id),
+    programNames: programs.map(p => p.name)
+  });
+
+  // Re-check if we have fewer programs than expected
+  if (programs.length < 7) {
+    console.log('🔍 [PROGRAM RETRIEVAL DEBUG] Fewer programs than expected, re-checking database');
+    const allProgramsRecheck = await db.benefit_programs.find({}).exec();
+    console.log('🔍 [PROGRAM RETRIEVAL DEBUG] All programs in database', {
+      totalPrograms: allProgramsRecheck.length,
+      programIds: allProgramsRecheck.map(p => p.id),
+      activePrograms: allProgramsRecheck.filter(p => p.active).length
+    });
+
+    // Use all active programs if we found more
+    const activePrograms = allProgramsRecheck.filter(p => p.active);
+    if (activePrograms.length > programs.length) {
+      console.log('🔍 [PROGRAM RETRIEVAL DEBUG] Using all active programs found');
+      programs.splice(0, programs.length, ...activePrograms);
+    }
+  }
+
   debugLog('Active programs retrieved.', { programsFound: programs.length, programIds: programs.map(p => p.id) });
   const programIds = programs.map((p) => p.id);
 

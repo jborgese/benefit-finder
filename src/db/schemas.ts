@@ -273,7 +273,7 @@ export const EligibilityRuleZodSchema = z.object({
   // Test Cases (for validation)
   testCases: z.array(z.object({
     input: z.record(z.unknown()),
-    expectedOutput: z.boolean(),
+    expectedOutput: z.union([z.boolean(), z.record(z.unknown())]),
     description: z.string().max(200),
   })).optional().describe('Test cases for rule validation'),
 
@@ -314,7 +314,12 @@ export const eligibilityRuleSchema: RxJsonSchema<EligibilityRule> = {
         type: 'object',
         properties: {
           input: { type: 'object' },
-          expectedOutput: { type: 'boolean' },
+          expectedOutput: {
+            oneOf: [
+              { type: 'boolean' },
+              { type: 'object' }
+            ]
+          },
           description: { type: 'string', maxLength: 200 },
         },
         required: ['input', 'expectedOutput', 'description'],

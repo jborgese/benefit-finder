@@ -91,11 +91,39 @@ export async function getEvaluationEntities(
   }
 
   // Get program
+  console.log('🔍 [PROGRAM LOOKUP DEBUG] Looking up program', { programId });
   const program = await db.benefit_programs.findOne(programId).exec();
   if (!program) {
+    console.log('🔍 [PROGRAM LOOKUP DEBUG] Program not found, checking all programs', { programId });
+
+    // Debug: Check what programs exist
+    const allPrograms = await db.benefit_programs.find({}).exec();
+    console.log('🔍 [PROGRAM LOOKUP DEBUG] All programs in database', {
+      totalPrograms: allPrograms.length,
+      programIds: allPrograms.map(p => p.id),
+      programNames: allPrograms.map(p => p.name),
+      activePrograms: allPrograms.filter(p => p.active).length
+    });
+
+    // Re-check all programs to see if they exist
+    console.log('🔍 [PROGRAM LOOKUP DEBUG] Re-checking all programs', { programId });
+    const allProgramsRecheck = await db.benefit_programs.find({}).exec();
+    console.log('🔍 [PROGRAM LOOKUP DEBUG] Programs on re-check', {
+      totalPrograms: allProgramsRecheck.length,
+      programIds: allProgramsRecheck.map(p => p.id),
+      activePrograms: allProgramsRecheck.filter(p => p.active).length
+    });
+
     debugLog('Benefit program not found', { programId });
     throw new Error(`Program ${programId} not found`);
   }
+
+  console.log('🔍 [PROGRAM LOOKUP DEBUG] Program found', {
+    programId: program.id,
+    programName: program.name,
+    isActive: program.active,
+    category: program.category
+  });
 
   // Get active rules for program
   const rules: EligibilityRuleDocument[] = await db.eligibility_rules.findRulesByProgram(programId);
@@ -207,9 +235,14 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
     'snap_income_eligible',
     'householdIncome',
     'income-limit',
+    'income-limits',
     'income_eligible',
+    'gross-income',
+    'net-income',
     'fpl',
-    'poverty'
+    'poverty',
+    'ami',
+    'threshold'
   ];
   const ruleId = rule.id.toLowerCase();
   const ruleName = rule.name.toLowerCase();
@@ -687,10 +720,10 @@ async function getAMIDataForContext(
   } catch (error) {
     debugLog('Failed to load AMI data', { error, state: stateCode, county });
     return {
-      areaMedianIncome: 100000,
-      ami50: 50000,
-      ami60: 60000,
-      ami80: 80000
+      areaMedianIncome: 50000,
+      ami50: 25000,
+      ami60: 30000,
+      ami80: 40000
     };
   }
 }
@@ -810,10 +843,12 @@ async function addStateSpecificVariables(
 
   // Add Area Median Income (AMI) data for housing programs
   let amiData = {};
-  if (processedData.county && processedData.householdSize) {
+  if (processedData.householdSize) {
+    // Use default county if not provided
+    const county = processedData.county as string || 'default';
     amiData = await getAMIDataForContext(
       stateCode,
-      processedData.county as string,
+      county,
       processedData.householdSize as number
     );
   }

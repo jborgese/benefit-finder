@@ -304,44 +304,12 @@ export function evaluateRuleSync<T = boolean>(
   try {
     const startTime = performance.now();
 
-    // Add comprehensive debugging for JSON Logic evaluation
-    const isDev = isDevelopmentEnv();
-
-    if (isDev) {
-      console.warn('🔍 [DEBUG] JSON Logic Evaluation:', {
-        rule: JSON.stringify(rule, null, 2),
-        data: JSON.stringify(data, null, 2),
-      });
-    }
 
     // json-logic-js types don't match our stricter types, but the library handles JsonLogicRule correctly
     const result = jsonLogic.apply(rule as unknown as ReturnType<typeof jsonLogic.apply>, data) as T;
     const endTime = performance.now();
 
-    if (isDev) {
-      console.warn('🔍 [DEBUG] JSON Logic Result:', {
-        result,
-        executionTime: endTime - startTime,
-      });
-    }
 
-    // Add specific debugging for SNAP income rules
-    if (typeof rule === 'object' && rule !== null && !Array.isArray(rule)) {
-      const ruleKeys = Object.keys(rule);
-      if (ruleKeys.includes('<=') && data.householdIncome !== undefined && data.householdSize !== undefined && data.householdSize !== null) {
-        const threshold = Number(data.householdSize) * 1500;
-        if (isDev) {
-          console.warn('🔍 [DEBUG] SNAP Income Rule Debug:', {
-            householdIncome: data.householdIncome,
-            householdSize: data.householdSize,
-            ruleStructure: rule,
-            calculatedThreshold: threshold,
-            comparison: `${data.householdIncome} <= ${threshold}`,
-            result,
-          });
-        }
-      }
-    }
 
     return {
       result,
@@ -638,6 +606,41 @@ export const BENEFIT_OPERATORS = {
     }
 
     return benefitInfo;
+  },
+
+  /**
+   * Switch operator for conditional logic
+   * Handles the structure: ["switch", value, {default: x}, {case: 1, do: y}, {case: 2, do: z}]
+   * JSON Logic calls this as: switch(value, {default: x}, {case: 1, do: y}, {case: 2, do: z})
+   * @param value The value to switch on
+   * @param ...cases Rest parameters for all case objects
+   * @returns The result of the matching case or default
+   */
+  switch: (value: unknown, ...cases: Array<{ case?: unknown; do?: unknown; default?: unknown }>): unknown => {
+    const isDev = isDevelopmentEnv();
+
+    if (isDev) {
+      console.warn(`🔍 [DEBUG] Switch operator:`, { value, cases });
+    }
+
+    // Find default case first
+    let defaultCase: unknown = undefined;
+    for (const caseItem of cases) {
+      if (caseItem.default !== undefined) {
+        defaultCase = caseItem.default;
+        break;
+      }
+    }
+
+    // Find matching case
+    for (const caseItem of cases) {
+      if (caseItem.case !== undefined && caseItem.case === value) {
+        return caseItem.do;
+      }
+    }
+
+    // Return default case if no match found
+    return defaultCase;
   },
 };
 

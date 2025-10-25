@@ -122,7 +122,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "section8-federal-citizenship-status",
@@ -210,7 +212,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "section8-federal-housing-need",
@@ -334,7 +338,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "section8-federal-family-composition",
@@ -447,7 +453,9 @@
           },
           "expected": true
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     },
     {
       "id": "section8-federal-background-check",
@@ -537,7 +545,9 @@
           },
           "expected": false
         }
-      ]
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000
     }
   ],
   "testCases": [

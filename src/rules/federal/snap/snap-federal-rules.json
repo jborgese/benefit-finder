@@ -138,11 +138,7 @@
           "priority": "high"
         }
       ],
-      "version": {
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-      },
+      "version": "1.0.0",
       "citations": [
         {
           "title": "SNAP Eligibility Requirements",
@@ -337,11 +333,7 @@
           "where": "Landlord, utility companies, childcare providers, healthcare providers"
         }
       ],
-      "version": {
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-      },
+      "version": "1.0.0",
       "citations": [
         {
           "title": "SNAP Net Income Eligibility Standard",
@@ -443,11 +435,7 @@
           "priority": "high"
         }
       ],
-      "version": {
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-      },
+      "version": "1.0.0",
       "citations": [
         {
           "title": "SNAP Non-Citizen Eligibility",
@@ -593,11 +581,7 @@
           "estimatedTime": "1-2 days"
         }
       ],
-      "version": {
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-      },
+      "version": "1.0.0",
       "citations": [
         {
           "title": "SNAP Resource Limits",
@@ -749,11 +733,7 @@
           "estimatedTime": "Varies by program"
         }
       ],
-      "version": {
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-      },
+      "version": "1.0.0",
       "citations": [
         {
           "title": "SNAP Employment and Training",
@@ -895,11 +875,7 @@
           "estimatedTime": "Same day to apply, 2-4 weeks to receive card"
         }
       ],
-      "version": {
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-      },
+      "version": "1.0.0",
       "citations": [
         {
           "title": "SNAP Application Requirements",
@@ -989,11 +965,7 @@
           "where": "Utility company, landlord, or shelter"
         }
       ],
-      "version": {
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-      },
+      "version": "1.0.0",
       "citations": [
         {
           "title": "SNAP Eligibility - Residency",

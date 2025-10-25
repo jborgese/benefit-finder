@@ -147,23 +147,57 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
     findRulesByProgram(this: RxCollection<EligibilityRule>, programId: string): Promise<EligibilityRuleDocument[]> {
       const now = Date.now();
 
-      console.log(`🔍 [DEBUG] findRulesByProgram: Searching for rules with programId: ${programId}`);
+      console.log(`🔍 [RULE QUERY DEBUG] findRulesByProgram: Searching for rules with programId: ${programId}`);
 
-      return this.find({
-        selector: {
-          programId,
-          active: true,
-          $or: [
-            { effectiveDate: { $exists: false } },
-            { effectiveDate: { $lte: now } },
-          ],
-        },
-      }).exec().then(rules => {
-        console.log(`🔍 [DEBUG] findRulesByProgram: Found ${rules.length} rules for programId: ${programId}`);
-        rules.forEach((rule, index) => {
-          console.log(`  ${index + 1}. ${rule.id} (${rule.ruleType})`);
+      // First, let's see what rules exist in the database at all
+      return this.find({}).exec().then(allRules => {
+        console.log(`🔍 [RULE QUERY DEBUG] Total rules in database: ${allRules.length}`);
+        console.log(`🔍 [RULE QUERY DEBUG] All program IDs in database:`, [...new Set(allRules.map(r => r.programId))]);
+        console.log(`🔍 [RULE QUERY DEBUG] All rule IDs in database:`, allRules.map(r => r.id));
+
+        // Check if there are any rules for this specific program
+        const programRules = allRules.filter(r => r.programId === programId);
+        console.log(`🔍 [RULE QUERY DEBUG] Rules for program ${programId}: ${programRules.length}`);
+        programRules.forEach((rule, index) => {
+          console.log(`  ${index + 1}. ${rule.id} (${rule.ruleType}) - Active: ${rule.active}, Effective: ${rule.effectiveDate}, Expiration: ${rule.expirationDate}`);
         });
-        return rules;
+
+        // Now run the actual query
+        return this.find({
+          selector: {
+            programId,
+            active: true,
+            $or: [
+              { effectiveDate: { $exists: false } },
+              { effectiveDate: { $lte: now } },
+            ],
+          },
+        }).exec().then(rules => {
+          console.log(`🔍 [RULE QUERY DEBUG] Query result: Found ${rules.length} active rules for programId: ${programId}`);
+          rules.forEach((rule, index) => {
+            console.log(`  ${index + 1}. ${rule.id} (${rule.ruleType}) - Priority: ${rule.priority}`);
+          });
+
+          // If no rules found, let's debug why
+          if (rules.length === 0) {
+            console.log(`🔍 [RULE QUERY DEBUG] No rules found. Debugging query conditions:`);
+            console.log(`  - programId: ${programId}`);
+            console.log(`  - active: true`);
+            console.log(`  - effectiveDate: ${now} or not set`);
+
+            // Check each condition separately
+            const byProgram = allRules.filter(r => r.programId === programId);
+            console.log(`  - Rules with matching programId: ${byProgram.length}`);
+
+            const byActive = byProgram.filter(r => r.active);
+            console.log(`  - Rules that are active: ${byActive.length}`);
+
+            const byEffective = byActive.filter(r => !r.effectiveDate || r.effectiveDate <= now);
+            console.log(`  - Rules that are effective: ${byEffective.length}`);
+          }
+
+          return rules;
+        });
       });
     },
   },
