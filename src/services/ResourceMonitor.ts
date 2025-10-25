@@ -43,9 +43,7 @@ export class ResourceMonitor {
   private constructor() {}
 
   public static getInstance(): ResourceMonitor {
-    if (ResourceMonitor.instance === undefined) {
-      ResourceMonitor.instance = new ResourceMonitor();
-    }
+    ResourceMonitor.instance ??= new ResourceMonitor();
     return ResourceMonitor.instance;
   }
 

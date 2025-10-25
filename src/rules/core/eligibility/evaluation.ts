@@ -259,10 +259,26 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
 
   // Check short keywords with word boundaries
   const matchesShortKeyword = shortKeywords.some(keyword => {
-    // Escape special regex characters to prevent injection
-    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
-    return regex.test(ruleId) || regex.test(ruleName);
+    // Use string methods instead of regex for security
+    const lowerRuleId = ruleId.toLowerCase();
+    const lowerRuleName = ruleName.toLowerCase();
+    const lowerKeyword = keyword.toLowerCase();
+
+    // Check for word boundaries manually
+    const hasWordBoundary = (text: string, keyword: string) => {
+      const index = text.indexOf(keyword);
+      if (index === -1) return false;
+
+      // Check if it's at the beginning or after a non-word character
+      const beforeChar = index === 0 ? '' : text[index - 1];
+      const afterChar = index + keyword.length >= text.length ? '' : text[index + keyword.length];
+
+      const isWordChar = (char: string) => /[a-zA-Z0-9_]/.test(char);
+
+      return (!isWordChar(beforeChar) && !isWordChar(afterChar));
+    };
+
+    return hasWordBoundary(lowerRuleId, lowerKeyword) || hasWordBoundary(lowerRuleName, lowerKeyword);
   });
 
   const isIncome = matchesKeyword || matchesShortKeyword;
@@ -275,10 +291,26 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
       matchedKeyword: incomeKeywords.find(keyword =>
         ruleId.includes(keyword) || ruleName.includes(keyword)
       ) ?? shortKeywords.find(keyword => {
-        // Escape special regex characters to prevent injection
-        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
-        return regex.test(ruleId) || regex.test(ruleName);
+        // Use string methods instead of regex for security
+        const lowerRuleId = ruleId.toLowerCase();
+        const lowerRuleName = ruleName.toLowerCase();
+        const lowerKeyword = keyword.toLowerCase();
+
+        // Check for word boundaries manually
+        const hasWordBoundary = (text: string, keyword: string) => {
+          const index = text.indexOf(keyword);
+          if (index === -1) return false;
+
+          // Check if it's at the beginning or after a non-word character
+          const beforeChar = index === 0 ? '' : text[index - 1];
+          const afterChar = index + keyword.length >= text.length ? '' : text[index + keyword.length];
+
+          const isWordChar = (char: string) => /[a-zA-Z0-9_]/.test(char);
+
+          return (!isWordChar(beforeChar) && !isWordChar(afterChar));
+        };
+
+        return hasWordBoundary(lowerRuleId, lowerKeyword) || hasWordBoundary(lowerRuleName, lowerKeyword);
       })
     });
   }

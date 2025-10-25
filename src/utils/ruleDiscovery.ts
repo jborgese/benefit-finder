@@ -750,9 +750,9 @@ function logSnapSsiSuccess(discoveredFile: DiscoveredRuleFile): void {
 }
 
 /**
- * Log SNAP/SSI error debug information
+ * Log SNAP/SSI processing error debug information
  */
-function logSnapSsiError(discoveredFile: DiscoveredRuleFile, error: unknown): void {
+function logSnapSsiProcessingError(discoveredFile: DiscoveredRuleFile, error: unknown): void {
   if (discoveredFile.programInfo.id === SNAP_FEDERAL_ID || discoveredFile.programInfo.id === SSI_FEDERAL_ID) {
     console.log(`❌ [SNAP/SSI MAIN DEBUG] Error processing ${discoveredFile.programInfo.id}:`, {
       programId: discoveredFile.programInfo.id,
@@ -789,7 +789,7 @@ async function processDiscoveredFile(discoveredFile: DiscoveredRuleFile): Promis
     const errorMsg = `Failed to process ${discoveredFile.path}: ${error}`;
     console.error(`[DEBUG] Rule Discovery: ${errorMsg}`);
 
-    logSnapSsiError(discoveredFile, error);
+    logSnapSsiProcessingError(discoveredFile, error);
 
     return { created: false, imported: false, error: errorMsg };
   }
