@@ -220,6 +220,187 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
 }
 
 /**
+ * Evaluate a single rule and return the result
+ */
+function evaluateSingleRule(
+  rule: EligibilityRuleDocument,
+  data: JsonLogicData,
+  profileId: string,
+  programId: string,
+  allMissingFields: Set<string>
+): RuleEvaluationWithDetails {
+  // Check for missing fields for this rule
+  const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
+  debugLog('🔍 [DEBUG] Missing fields for rule', {
+    ruleId: rule.id,
+    missingFields,
+    requiredFields: rule.requiredFields,
+    dataKeys: Object.keys(data)
+  });
+  missingFields.forEach(field => allMissingFields.add(field));
+
+  // Add debugging for rule evaluation
+  logRuleEvaluation(profileId, programId, rule.id, rule.ruleLogic, data);
+
+  // Use detailed evaluator to capture comparison values
+  const detailedResult = evaluateRuleWithDetails(
+    rule.ruleLogic as JsonLogicRule,
+    data
+  );
+
+  // Convert to standard evaluation result format
+  const evalResult: RuleEvaluationResult = {
+    result: detailedResult.result,
+    success: detailedResult.success,
+    executionTime: detailedResult.executionTime,
+    error: detailedResult.error,
+    context: detailedResult.context
+  };
+
+  logRuleResult(rule.id, evalResult.success, evalResult.result, evalResult.error);
+
+  return { rule, evalResult, missingFields, detailedResult };
+}
+
+/**
+ * Create placeholder results for skipped rules
+ */
+function createSkippedRuleResults(
+  rules: EligibilityRuleDocument[],
+  reason: string
+): RuleEvaluationWithDetails[] {
+  return rules.map(rule => ({
+    rule,
+    evalResult: {
+      result: false,
+      success: true,
+      executionTime: 0,
+      error: undefined,
+      context: { skipped: true, reason }
+    },
+    missingFields: [],
+    detailedResult: {
+      result: false,
+      success: true,
+      executionTime: 0,
+      error: undefined,
+      context: { skipped: true, reason },
+      comparisons: []
+    }
+  }));
+}
+
+/**
+ * Evaluate income rules and handle hard stops
+ */
+function evaluateIncomeRules(
+  incomeRules: EligibilityRuleDocument[],
+  data: JsonLogicData,
+  profileId: string,
+  programId: string,
+  allMissingFields: Set<string>,
+  ruleResults: RuleEvaluationWithDetails[]
+): { overallEligible: boolean; firstFailedRule: EligibilityRuleDocument | null; firstFailedResult: RuleEvaluationResult | null } {
+  let overallEligible = true;
+  let firstFailedRule: EligibilityRuleDocument | null = null;
+  let firstFailedResult: RuleEvaluationResult | null = null;
+
+  for (const rule of incomeRules) {
+    debugLog('🔍 [DEBUG] Evaluating income rule', {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      ruleType: rule.ruleType,
+      priority: rule.priority,
+      requiredFields: rule.requiredFields
+    });
+
+    const ruleResult = evaluateSingleRule(rule, data, profileId, programId, allMissingFields);
+    ruleResults.push(ruleResult);
+
+    // Check if this income rule passed
+    const rulePassedResult = ruleResult.evalResult.success ? Boolean(ruleResult.evalResult.result) : false;
+    debugLog('🔍 [DEBUG] Income rule evaluation outcome', {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      rulePassedResult,
+      success: ruleResult.evalResult.success,
+      result: ruleResult.evalResult.result,
+      error: ruleResult.evalResult.error,
+      executionTime: ruleResult.evalResult.executionTime
+    });
+
+    if (!rulePassedResult) {
+      // Income rule failed - this is a hard stop
+      overallEligible = false;
+      firstFailedRule = rule;
+      firstFailedResult = ruleResult.evalResult;
+      debugLog('🚨 [INCOME HARD STOP] Income rule failed - user disqualified due to income', {
+        ruleId: rule.id,
+        ruleName: rule.name,
+        reason: 'Income rule evaluation failed - hard stop'
+      });
+      break; // Exit the income rules loop
+    }
+  }
+
+  return { overallEligible, firstFailedRule, firstFailedResult };
+}
+
+/**
+ * Evaluate non-income rules
+ */
+function evaluateNonIncomeRules(
+  nonIncomeRules: EligibilityRuleDocument[],
+  data: JsonLogicData,
+  profileId: string,
+  programId: string,
+  allMissingFields: Set<string>,
+  ruleResults: RuleEvaluationWithDetails[]
+): { overallEligible: boolean; firstFailedRule: EligibilityRuleDocument | null; firstFailedResult: RuleEvaluationResult | null } {
+  let overallEligible = true;
+  let firstFailedRule: EligibilityRuleDocument | null = null;
+  let firstFailedResult: RuleEvaluationResult | null = null;
+
+  for (const rule of nonIncomeRules) {
+    debugLog('🔍 [DEBUG] Evaluating non-income rule', {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      ruleType: rule.ruleType,
+      priority: rule.priority,
+      requiredFields: rule.requiredFields
+    });
+
+    const ruleResult = evaluateSingleRule(rule, data, profileId, programId, allMissingFields);
+    ruleResults.push(ruleResult);
+
+    // Check if this rule passed
+    const rulePassedResult = ruleResult.evalResult.success ? Boolean(ruleResult.evalResult.result) : false;
+    debugLog('🔍 [DEBUG] Non-income rule evaluation outcome', {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      rulePassedResult,
+      success: ruleResult.evalResult.success,
+      result: ruleResult.evalResult.result,
+      error: ruleResult.evalResult.error,
+      executionTime: ruleResult.evalResult.executionTime
+    });
+
+    if (!rulePassedResult && overallEligible) {
+      overallEligible = false;
+      firstFailedRule = rule;
+      firstFailedResult = ruleResult.evalResult;
+      debugLog('🔍 [DEBUG] First failed non-income rule', {
+        ruleId: rule.id,
+        ruleName: rule.name,
+        reason: 'Non-income rule evaluation failed'
+      });
+    }
+  }
+
+  return { overallEligible, firstFailedRule, firstFailedResult };
+}
+
+/**
  * Evaluate all rules for eligibility
  */
 export function evaluateAllRules(
@@ -230,10 +411,6 @@ export function evaluateAllRules(
 ): AllRulesEvaluationResult {
   debugLog('Beginning evaluation of all rules', { profileId, programId, ruleCount: rules.length });
   const ruleResults: RuleEvaluationWithDetails[] = [];
-
-  let overallEligible = true;
-  let firstFailedRule: EligibilityRuleDocument | null = null;
-  let firstFailedResult: RuleEvaluationResult | null = null;
   const allMissingFields = new Set<string>();
 
   // First pass: Check for income rule failures (hard stops)
@@ -247,173 +424,30 @@ export function evaluateAllRules(
   });
 
   // Evaluate income rules first
-  for (const rule of incomeRules) {
-    debugLog('🔍 [DEBUG] Evaluating income rule', {
-      ruleId: rule.id,
-      ruleName: rule.name,
-      ruleType: rule.ruleType,
-      priority: rule.priority,
-      requiredFields: rule.requiredFields
+  const incomeResult = evaluateIncomeRules(incomeRules, data, profileId, programId, allMissingFields, ruleResults);
+
+  let { overallEligible, firstFailedRule, firstFailedResult } = incomeResult;
+
+  // If income rules failed, add placeholder results for skipped non-income rules
+  if (!overallEligible) {
+    debugLog('🔍 [DEBUG] Skipping non-income rules due to income failure', {
+      skippedRulesCount: nonIncomeRules.length,
+      skippedRuleIds: nonIncomeRules.map(r => r.id)
     });
 
-    // Check for missing fields for this rule
-    const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
-    debugLog('🔍 [DEBUG] Missing fields for income rule', {
-      ruleId: rule.id,
-      missingFields,
-      requiredFields: rule.requiredFields,
-      dataKeys: Object.keys(data)
-    });
-    missingFields.forEach(field => allMissingFields.add(field));
-
-    // Add debugging for rule evaluation
-    logRuleEvaluation(profileId, programId, rule.id, rule.ruleLogic, data);
-
-    // Use detailed evaluator to capture comparison values
-    const detailedResult = evaluateRuleWithDetails(
-      rule.ruleLogic as JsonLogicRule,
-      data
-    );
-
-    // Convert to standard evaluation result format
-    const evalResult: RuleEvaluationResult = {
-      result: detailedResult.result,
-      success: detailedResult.success,
-      executionTime: detailedResult.executionTime,
-      error: detailedResult.error,
-      context: detailedResult.context
-    };
-
-    logRuleResult(rule.id, evalResult.success, evalResult.result, evalResult.error);
-
-    ruleResults.push({ rule, evalResult, missingFields, detailedResult });
-
-    // Check if this income rule passed
-    const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
-    debugLog('🔍 [DEBUG] Income rule evaluation outcome', {
-      ruleId: rule.id,
-      ruleName: rule.name,
-      rulePassedResult,
-      success: evalResult.success,
-      result: evalResult.result,
-      error: evalResult.error,
-      executionTime: evalResult.executionTime
-    });
-
-    if (!rulePassedResult) {
-      // Income rule failed - this is a hard stop
-      overallEligible = false;
-      firstFailedRule = rule;
-      firstFailedResult = evalResult;
-      debugLog('🚨 [INCOME HARD STOP] Income rule failed - user disqualified due to income', {
-        ruleId: rule.id,
-        ruleName: rule.name,
-        reason: 'Income rule evaluation failed - hard stop'
-      });
-
-      // Skip evaluating non-income rules since income failed
-      debugLog('🔍 [DEBUG] Skipping non-income rules due to income failure', {
-        skippedRulesCount: nonIncomeRules.length,
-        skippedRuleIds: nonIncomeRules.map(r => r.id)
-      });
-
-      // Add placeholder results for skipped rules
-      for (const skippedRule of nonIncomeRules) {
-        ruleResults.push({
-          rule: skippedRule,
-          evalResult: {
-            result: false,
-            success: true,
-            executionTime: 0,
-            error: undefined,
-            context: { skipped: true, reason: 'Income rule failed - hard stop' }
-          },
-          missingFields: [],
-          detailedResult: {
-            result: false,
-            success: true,
-            executionTime: 0,
-            error: undefined,
-            context: { skipped: true, reason: 'Income rule failed - hard stop' },
-            comparisons: []
-          }
-        });
-      }
-
-      break; // Exit the income rules loop
-    }
-  }
-
-  // Second pass: Evaluate non-income rules only if income rules passed
-  if (overallEligible) {
+    const skippedResults = createSkippedRuleResults(nonIncomeRules, 'Income rule failed - hard stop');
+    ruleResults.push(...skippedResults);
+  } else {
+    // Second pass: Evaluate non-income rules only if income rules passed
     debugLog('🔍 [DEBUG] Income rules passed - evaluating non-income rules', {
       nonIncomeRulesCount: nonIncomeRules.length,
       nonIncomeRuleIds: nonIncomeRules.map(r => r.id)
     });
 
-    for (const rule of nonIncomeRules) {
-      debugLog('🔍 [DEBUG] Evaluating non-income rule', {
-        ruleId: rule.id,
-        ruleName: rule.name,
-        ruleType: rule.ruleType,
-        priority: rule.priority,
-        requiredFields: rule.requiredFields
-      });
+    const nonIncomeResult = evaluateNonIncomeRules(nonIncomeRules, data, profileId, programId, allMissingFields, ruleResults);
 
-      // Check for missing fields for this rule
-      const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
-      debugLog('🔍 [DEBUG] Missing fields for non-income rule', {
-        ruleId: rule.id,
-        missingFields,
-        requiredFields: rule.requiredFields,
-        dataKeys: Object.keys(data)
-      });
-      missingFields.forEach(field => allMissingFields.add(field));
-
-      // Add debugging for rule evaluation
-      logRuleEvaluation(profileId, programId, rule.id, rule.ruleLogic, data);
-
-      // Use detailed evaluator to capture comparison values
-      const detailedResult = evaluateRuleWithDetails(
-        rule.ruleLogic as JsonLogicRule,
-        data
-      );
-
-      // Convert to standard evaluation result format
-      const evalResult: RuleEvaluationResult = {
-        result: detailedResult.result,
-        success: detailedResult.success,
-        executionTime: detailedResult.executionTime,
-        error: detailedResult.error,
-        context: detailedResult.context
-      };
-
-      logRuleResult(rule.id, evalResult.success, evalResult.result, evalResult.error);
-
-      ruleResults.push({ rule, evalResult, missingFields, detailedResult });
-
-      // Check if this rule passed
-      const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
-      debugLog('🔍 [DEBUG] Non-income rule evaluation outcome', {
-        ruleId: rule.id,
-        ruleName: rule.name,
-        rulePassedResult,
-        success: evalResult.success,
-        result: evalResult.result,
-        error: evalResult.error,
-        executionTime: evalResult.executionTime
-      });
-
-      if (!rulePassedResult && overallEligible) {
-        overallEligible = false;
-        firstFailedRule = rule;
-        firstFailedResult = evalResult;
-        debugLog('🔍 [DEBUG] First failed non-income rule', {
-          ruleId: rule.id,
-          ruleName: rule.name,
-          reason: 'Non-income rule evaluation failed'
-        });
-      }
+    if (!nonIncomeResult.overallEligible) {
+      ({ overallEligible, firstFailedRule, firstFailedResult } = nonIncomeResult);
     }
   }
 
@@ -706,46 +740,32 @@ function normalizeStateToCode(stateValue: string): string {
 }
 
 /**
- * Prepare data context from user profile
+ * Calculate age from date of birth
  */
-export async function prepareDataContext(profile: UserProfileDocument): Promise<JsonLogicData> {
-  debugLog('Preparing data context from user profile', profile.id);
-  const data = profile.toJSON();
+function calculateAgeFromDateOfBirth(dateOfBirth: string): number {
+  // Parse the ISO date string and create a date object in local timezone
+  // This prevents timezone shift issues when calculating age
+  const [year, month, day] = dateOfBirth.split('-').map(Number);
+  const birthDate = new Date(year, month - 1, day); // month is 0-indexed
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
 
-  // Add computed fields
-  const processedData: Record<string, unknown> = {
-    ...data,
-    // Add any derived fields here
-    _timestamp: Date.now(),
-  };
-
-  // Calculate age from dateOfBirth
-  if (processedData.dateOfBirth && typeof processedData.dateOfBirth === 'string') {
-    // Parse the ISO date string and create a date object in local timezone
-    // This prevents timezone shift issues when calculating age
-    const [year, month, day] = processedData.dateOfBirth.split('-').map(Number);
-    const birthDate = new Date(year, month - 1, day); // month is 0-indexed
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-
-    processedData.age = age;
-
-    debugLog('Calculated age from dateOfBirth', {
-      dateOfBirth: processedData.dateOfBirth,
-      calculatedAge: age
-    });
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
   }
 
-  // Convert annual income to monthly
+  return age;
+}
+
+/**
+ * Convert annual income to monthly
+ */
+function convertAnnualIncomeToMonthly(processedData: Record<string, unknown>): Record<string, unknown> {
   if (processedData.householdIncome && typeof processedData.householdIncome === 'number') {
     const originalAnnualIncome = processedData.householdIncome;
     const monthlyIncome = Math.round(processedData.householdIncome / 12);
-    processedData.householdIncome = monthlyIncome;
+    const updatedData = { ...processedData, householdIncome: monthlyIncome };
 
     debugLog('Converted annual income to monthly', {
       originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
@@ -762,56 +782,70 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
         citizenship: processedData.citizenship
       });
     }
+
+    return updatedData;
+  }
+  return processedData;
+}
+
+/**
+ * Add state-specific variables to processed data
+ */
+async function addStateSpecificVariables(
+  processedData: Record<string, unknown>,
+  stateValue: string
+): Promise<Record<string, unknown>> {
+  // Normalize state value to 2-character code
+  const stateCode = normalizeStateToCode(stateValue);
+
+  // Create new object with state-specific variables
+  const stateVariables = {
+    stateHasExpanded: isMedicaidExpansionState(stateCode),
+    livesInState: true,
+    livesInGeorgia: stateCode === 'GA',
+    livesInCalifornia: stateCode === 'CA',
+    livesInTexas: stateCode === 'TX',
+    livesInFlorida: stateCode === 'FL'
+  };
+
+  // Add Area Median Income (AMI) data for housing programs
+  let amiData = {};
+  if (processedData.county && processedData.householdSize) {
+    amiData = await getAMIDataForContext(
+      stateCode,
+      processedData.county as string,
+      processedData.householdSize as number
+    );
   }
 
-  // Add state-specific variables for benefit eligibility
-  const stateValue = processedData.state as string;
-  if (stateValue) {
-    // Normalize state value to 2-character code
-    const stateCode = normalizeStateToCode(stateValue);
+  const updatedData = { ...processedData, ...stateVariables, ...amiData };
 
-    // Medicaid expansion status
-    processedData.stateHasExpanded = isMedicaidExpansionState(stateCode);
+  debugLog('Added state-specific variables', {
+    originalState: stateValue,
+    normalizedStateCode: stateCode,
+    stateHasExpanded: stateVariables.stateHasExpanded,
+    livesInState: stateVariables.livesInState,
+    livesInGeorgia: stateVariables.livesInGeorgia
+  });
 
-    // State residence (always true if state is provided)
-    processedData.livesInState = true;
-
-    // State-specific residence checks
-    processedData.livesInGeorgia = stateCode === 'GA';
-    processedData.livesInCalifornia = stateCode === 'CA';
-    processedData.livesInTexas = stateCode === 'TX';
-    processedData.livesInFlorida = stateCode === 'FL';
-
-    // Add Area Median Income (AMI) data for housing programs
-    if (processedData.county && processedData.householdSize) {
-      const amiData = await getAMIDataForContext(
-        stateCode,
-        processedData.county as string,
-        processedData.householdSize as number
-      );
-      Object.assign(processedData, amiData);
-    }
-
-    debugLog('Added state-specific variables', {
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] prepareDataContext: State-specific variables:', {
       originalState: stateValue,
       normalizedStateCode: stateCode,
-      stateHasExpanded: processedData.stateHasExpanded,
-      livesInState: processedData.livesInState,
-      livesInGeorgia: processedData.livesInGeorgia
+      stateHasExpanded: stateVariables.stateHasExpanded,
+      livesInState: stateVariables.livesInState,
+      livesInGeorgia: stateVariables.livesInGeorgia,
+      isExpansionState: isMedicaidExpansionState(stateCode)
     });
-
-    if (import.meta.env.DEV) {
-      console.warn('🔍 [DEBUG] prepareDataContext: State-specific variables:', {
-        originalState: stateValue,
-        normalizedStateCode: stateCode,
-        stateHasExpanded: processedData.stateHasExpanded,
-        livesInState: processedData.livesInState,
-        livesInGeorgia: processedData.livesInGeorgia,
-        isExpansionState: isMedicaidExpansionState(stateCode)
-      });
-    }
   }
 
+  return updatedData;
+}
+
+/**
+ * Log final processed data for debugging
+ */
+function logFinalProcessedData(processedData: Record<string, unknown>): void {
   debugLog('🔍 [DEBUG] Final processed data context', {
     householdIncome: processedData.householdIncome,
     householdSize: processedData.householdSize,
@@ -859,8 +893,47 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
       allKeys: Object.keys(processedData)
     });
   }
+}
 
-  return processedData;
+/**
+ * Prepare data context from user profile
+ */
+export async function prepareDataContext(profile: UserProfileDocument): Promise<JsonLogicData> {
+  debugLog('Preparing data context from user profile', profile.id);
+  const data = profile.toJSON();
+
+  // Add computed fields
+  const processedData: Record<string, unknown> = {
+    ...data,
+    // Add any derived fields here
+    _timestamp: Date.now(),
+  };
+
+  // Calculate age from dateOfBirth
+  if (processedData.dateOfBirth && typeof processedData.dateOfBirth === 'string') {
+    const age = calculateAgeFromDateOfBirth(processedData.dateOfBirth);
+    processedData.age = age;
+
+    debugLog('Calculated age from dateOfBirth', {
+      dateOfBirth: processedData.dateOfBirth,
+      calculatedAge: age
+    });
+  }
+
+  // Convert annual income to monthly
+  const dataWithIncome = convertAnnualIncomeToMonthly(processedData);
+
+  // Add state-specific variables for benefit eligibility
+  const stateValue = dataWithIncome.state as string;
+  if (stateValue) {
+    const finalData = await addStateSpecificVariables(dataWithIncome, stateValue);
+    logFinalProcessedData(finalData);
+    return finalData;
+  }
+
+  // Log final processed data for debugging (no state case)
+  logFinalProcessedData(dataWithIncome);
+  return dataWithIncome;
 }
 
 /**

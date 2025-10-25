@@ -61,11 +61,10 @@ export const CountySelectorDemo: React.FC = () => {
   };
 
   const toggleConfig = (key: keyof typeof demoConfig): void => {
-    setDemoConfig(prev => {
-      const newConfig = { ...prev };
-      newConfig[key] = !prev[key];
-      return newConfig;
-    });
+    setDemoConfig(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
   return (

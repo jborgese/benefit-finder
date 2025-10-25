@@ -27,7 +27,7 @@ const demoQuestion: DemoQuestion = {
 
 export const CountySelectorFixDemo: React.FC = () => {
   const [selectedCounty, setSelectedCounty] = useState<string | null>(null);
-  const [selectedState, setSelectedState] = useState<string>('GA'); // Default to Georgia for testing
+  const [selectedState] = useState<string>('GA'); // Default to Georgia for testing
 
   const handleCountyChange = (value: string | null): void => {
     setSelectedCounty(value);
@@ -66,9 +66,9 @@ export const CountySelectorFixDemo: React.FC = () => {
           onChange={handleCountyChange}
           selectedState={selectedState}
           placeholder="Search for your county..."
-          showPopularFirst={true}
-          showStateContext={true}
-          enableSearch={true}
+          showPopularFirst
+          showStateContext
+          enableSearch
           mobileOptimized={false}
           maxHeight="300px"
         />

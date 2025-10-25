@@ -29,7 +29,7 @@ import { MIAMI_LIHTC_PROGRAM } from '../sources/programs/lihtc/city/miami';
  * Singleton service for managing benefit program data with caching and validation.
  */
 export class ProgramDataService {
-  private static instance: ProgramDataService;
+  private static instance: ProgramDataService | undefined;
   private cache = new Map<string, unknown>();
   private programs: BenefitProgram[] = [];
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour

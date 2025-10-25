@@ -21,7 +21,7 @@ vi.mock('@/services/ami-data', () => ({
           const ami = {
             '1': 65400, '2': 74700, '3': 84000, '4': 93300,
             '5': 100800, '6': 108300, '7': 115800, '8': 123300
-          }[householdSize.toString()] || 123300;
+          }[householdSize.toString()] ?? 123300;
           return Promise.resolve({
             state, county, householdSize, year: 2024, amiAmount: ami,
             incomeLimit50: Math.floor(ami * 0.5),
@@ -66,7 +66,7 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
     flowEngine.setContext(householdProfile);
   });
 
-  it('should collect all required LIHTC data points', async () => {
+  it('should collect all required LIHTC data points', () => {
     // Simulate answering all questions in the enhanced flow
     const answers = [
       { questionId: 'household-size', fieldName: 'householdSize', value: 2 },
@@ -200,7 +200,7 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
   });
 
   it('should handle missing county data gracefully', async () => {
-    const profileWithoutCounty: LIHTCProfile = {
+    const _profileWithoutCounty: LIHTCProfile = {
       ...householdProfile,
       county: undefined, // Missing county
       hasCriminalHistory: false,
@@ -213,7 +213,7 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
     await expect(amiService.getAMIForHousehold('GA', '', 2)).rejects.toThrow();
   });
 
-  it('should validate income verification methods', async () => {
+  it('should validate income verification methods', () => {
     const profileWithVerification: LIHTCProfile = {
       ...householdProfile,
       hasCriminalHistory: false,

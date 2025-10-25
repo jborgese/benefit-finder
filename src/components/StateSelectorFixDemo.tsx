@@ -54,9 +54,9 @@ export const StateSelectorFixDemo: React.FC = () => {
           value={selectedState}
           onChange={handleStateChange}
           placeholder="Search for your state..."
-          showPopularFirst={true}
-          groupByRegion={true}
-          enableSearch={true}
+          showPopularFirst
+          groupByRegion
+          enableSearch
           enableAutoDetection={false}
           mobileOptimized={false}
           maxHeight="300px"
