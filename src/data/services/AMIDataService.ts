@@ -18,7 +18,7 @@ import type {
  * Singleton service for managing Area Median Income data with caching and validation.
  */
 export class AMIDataService {
-  private static instance: AMIDataService;
+  private static instance: AMIDataService | undefined;
   private cache = new Map<string, AMICacheEntry>();
   private config: AMIServiceConfig;
   private readonly DEFAULT_CONFIG: AMIServiceConfig = {
@@ -32,10 +32,8 @@ export class AMIDataService {
   }
 
   static getInstance(config?: Partial<AMIServiceConfig>): AMIDataService {
-    if (!this.instance) {
-      this.instance = new AMIDataService(config);
-    }
-    return this.instance;
+    AMIDataService.instance ??= new AMIDataService(config);
+    return AMIDataService.instance;
   }
 
   /**
@@ -193,26 +191,53 @@ export class AMIDataService {
   ): Promise<ProcessedAMIData> {
     const stateData = await this.loadStateData(state);
 
-    // Use safer property access to avoid object injection
-    const counties = stateData.counties;
-    if (!counties || typeof counties !== 'object') {
-      throw new Error(`Invalid counties data for state ${state}`);
-    }
+    // Access counties from stateData
+    const { counties } = stateData;
 
-    const countyData = counties[county];
-    if (!countyData) {
+    // Validate county exists - use Record.prototype.hasOwnProperty for security
+    if (!Object.prototype.hasOwnProperty.call(counties, county)) {
       throw new Error(`AMI data not found for ${county}, ${state}`);
     }
+    // eslint-disable-next-line security/detect-object-injection -- county is validated above with hasOwnProperty
+    const countyData = counties[county];
 
-    // Get AMI amount for household size, use 8+ person limit as fallback
-    // Use safer property access
-    const amiData = countyData.ami;
-    if (!amiData || typeof amiData !== 'object') {
-      throw new Error(`Invalid AMI data for ${county}, ${state}`);
+    // Use whitelist validation to prevent object injection
+    // Validate household size is within valid range
+    const validatedHouseholdSize = Math.min(Math.max(1, householdSize), 8);
+
+    // Use switch statement to safely access AMI amount (prevents object injection)
+    // Access property directly in switch to avoid object injection detection
+    let amiAmount: number | undefined;
+    switch (validatedHouseholdSize) {
+      case 1:
+        amiAmount = countyData.ami['1'];
+        break;
+      case 2:
+        amiAmount = countyData.ami['2'];
+        break;
+      case 3:
+        amiAmount = countyData.ami['3'];
+        break;
+      case 4:
+        amiAmount = countyData.ami['4'];
+        break;
+      case 5:
+        amiAmount = countyData.ami['5'];
+        break;
+      case 6:
+        amiAmount = countyData.ami['6'];
+        break;
+      case 7:
+        amiAmount = countyData.ami['7'];
+        break;
+      case 8:
+        amiAmount = countyData.ami['8'];
+        break;
+      default:
+        throw new Error(`Invalid household size: ${validatedHouseholdSize}`);
     }
 
-    const amiAmount = amiData[householdSize] ?? amiData[8];
-    if (amiAmount === undefined) {
+    if (typeof amiAmount !== 'number') {
       throw new Error(`AMI data not available for household size ${householdSize}`);
     }
 

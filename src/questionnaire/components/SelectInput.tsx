@@ -79,9 +79,8 @@ export const SelectInput: React.FC<SelectProps> = ({
     onItemSelect: (index) => {
       // Validate index is within bounds to prevent object injection
       if (index >= 0 && index < filteredOptions.length) {
-        // Use safe array access with explicit bounds checking
-        const options = filteredOptions;
-        const option = options[index];
+        // Use .at() for safe array access - returns undefined if index is out of bounds
+        const option = filteredOptions.at(index);
         // Validate option exists and has required properties
         if (option && typeof option === 'object' && 'value' in option && 'disabled' in option && !option.disabled) {
           setHasUserInteracted(true);

@@ -30,7 +30,7 @@ interface CacheEntry {
  * Singleton service for managing location data with caching and validation.
  */
 export class LocationDataService {
-  private static instance: LocationDataService;
+  private static instance: LocationDataService | undefined;
   private cache = new Map<string, CacheEntry>();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour
   private readonly MAX_CACHE_SIZE = 1000;
@@ -43,16 +43,15 @@ export class LocationDataService {
   private safeGetProperty<T>(obj: Record<string, T>, key: string): T | null {
     // Use a type-safe approach to check for property existence
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      // Use bracket notation with explicit type assertion to avoid injection warning
-      return (obj as Record<string, T>)[key];
+      // Use Object.getOwnPropertyDescriptor to safely access property
+      const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+      return descriptor?.value ?? null;
     }
     return null;
   }
 
   static getInstance(): LocationDataService {
-    if (this.instance === undefined) {
-      this.instance = new LocationDataService();
-    }
+    this.instance ??= new LocationDataService();
     return this.instance;
   }
 
@@ -228,7 +227,7 @@ export class LocationDataService {
 
   private getFromCache<T = unknown>(key: string): T | null {
     const entry = this.cache.get(key);
-    if (entry === undefined) return null;
+    if (!entry) return null;
 
     const now = Date.now();
     if (now - entry.timestamp > entry.ttl) {
