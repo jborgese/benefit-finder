@@ -4,6 +4,8 @@
  * Constants used by TextSizeContext to avoid fast refresh warnings
  */
 
-import { TextSize, TEXT_SIZE_ORDER, TEXT_SIZE_MULTIPLIERS } from './textSizeConstants';
+import type { TextSize } from './textSizeConstants';
+import { TEXT_SIZE_ORDER, TEXT_SIZE_MULTIPLIERS } from './textSizeConstants';
 
-export { TextSize, TEXT_SIZE_ORDER, TEXT_SIZE_MULTIPLIERS };
+export type { TextSize };
+export { TEXT_SIZE_ORDER, TEXT_SIZE_MULTIPLIERS };

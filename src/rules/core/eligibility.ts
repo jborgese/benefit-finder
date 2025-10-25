@@ -58,6 +58,92 @@ function debugLog(...args: unknown[]): void {
 
 
 /**
+ * Process benefit amount rules for eligible programs
+ */
+function processBenefitAmountRules(
+  rules: Array<{ id: string; ruleType: string; ruleLogic: JsonLogicRule }>,
+  data: Record<string, unknown>,
+  overallEligible: boolean
+): { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string } | undefined {
+  if (!overallEligible) {
+    return undefined;
+  }
+
+  const benefitAmountRules = rules.filter(rule => rule.ruleType === 'benefit_amount');
+  debugLog('Processing benefit amount rules', { benefitAmountRulesCount: benefitAmountRules.length });
+
+  for (const benefitRule of benefitAmountRules) {
+    try {
+      const benefitResult = evaluateRuleWithDetails(
+        benefitRule.ruleLogic,
+        data
+      );
+
+      if (benefitResult.success && benefitResult.result && typeof benefitResult.result === 'object') {
+        const benefitInfo = benefitResult.result as { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string };
+        if (benefitInfo.amount > 0) {
+          debugLog('Benefit amount calculated', { ruleId: benefitRule.id, estimatedBenefit: benefitInfo });
+          return benefitInfo; // Use the first matching benefit amount rule
+        }
+      }
+    } catch (error) {
+      debugLog('Error evaluating benefit amount rule', { ruleId: benefitRule.id, error });
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Log debug information for development
+ */
+function logDebugInfo(
+  resultRule: { id: string },
+  resultRuleDetails: unknown,
+  result: EligibilityEvaluationResult,
+  ruleResults: Array<{ rule: { id: string; priority: number }; evalResult: { success: boolean; result: unknown } }>,
+  overallEligible: boolean,
+  programId: string
+): void {
+  if (!import.meta.env.DEV) {
+    return;
+  }
+
+  debugLog('DEV: Building final result for rule:', resultRule.id);
+  console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Building final result for rule:', resultRule.id);
+  console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details found:', !!resultRuleDetails);
+  console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details:', resultRuleDetails);
+
+  if (resultRuleDetails && typeof resultRuleDetails === 'object' && 'criteriaResults' in resultRuleDetails) {
+    const details = resultRuleDetails as DetailedEvaluationResult;
+    console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results count:', details.criteriaResults.length);
+    console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results:', details.criteriaResults);
+  }
+
+  console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Final built result:', {
+    ruleId: result.ruleId,
+    eligible: result.eligible,
+    criteriaResults: result.criteriaResults,
+    criteriaResultsCount: result.criteriaResults?.length ?? 0
+  });
+  console.warn(`eligibility.ts - evaluateEligibility - 🔍 [DEBUG] evaluateEligibility: Built result for ${programId}:`, {
+    eligible: result.eligible,
+    confidence: result.confidence,
+    reason: result.reason,
+    missingFields: result.missingFields,
+    ruleId: result.ruleId,
+    executionTime: result.executionTime,
+    rulesEvaluated: ruleResults.length,
+    allRulesPassed: overallEligible,
+    ruleBreakdown: ruleResults.map(r => ({
+      ruleId: r.rule.id,
+      passed: r.evalResult.success ? Boolean(r.evalResult.result) : false,
+      priority: r.rule.priority
+    }))
+  });
+}
+
+/**
  * Evaluate eligibility for a single program
  */
 export async function evaluateEligibility(
@@ -120,45 +206,9 @@ export async function evaluateEligibility(
     debugLog('Result rule selected', { resultRule, combinedEvalResult });
 
     // Process benefit amount rules if eligible
-    let estimatedBenefit: { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string } | undefined;
-    if (overallEligible) {
-      const benefitAmountRules = rules.filter(rule => rule.ruleType === 'benefit_amount');
-      debugLog('Processing benefit amount rules', { benefitAmountRulesCount: benefitAmountRules.length });
-
-      for (const benefitRule of benefitAmountRules) {
-        try {
-          const benefitResult = evaluateRuleWithDetails(
-            benefitRule.ruleLogic as JsonLogicRule,
-            data
-          );
-
-          if (benefitResult.success && benefitResult.result && typeof benefitResult.result === 'object') {
-            const benefitInfo = benefitResult.result as { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string };
-            if (benefitInfo.amount && benefitInfo.frequency) {
-              estimatedBenefit = benefitInfo;
-              debugLog('Benefit amount calculated', { ruleId: benefitRule.id, estimatedBenefit });
-              break; // Use the first matching benefit amount rule
-            }
-          }
-        } catch (error) {
-          debugLog('Error evaluating benefit amount rule', { ruleId: benefitRule.id, error });
-        }
-      }
-    }
+    const estimatedBenefit = processBenefitAmountRules(rules, data, overallEligible);
 
     const resultRuleDetails = ruleResults.find(r => r.rule.id === resultRule.id)?.detailedResult;
-
-    if (import.meta.env.DEV) {
-      debugLog('DEV: Building final result for rule:', resultRule.id);
-      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Building final result for rule:', resultRule.id);
-      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details found:', !!resultRuleDetails);
-      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Result rule details:', resultRuleDetails);
-      if (resultRuleDetails && typeof resultRuleDetails === 'object' && 'criteriaResults' in resultRuleDetails) {
-        const details = resultRuleDetails as DetailedEvaluationResult;
-        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results count:', details.criteriaResults.length);
-        console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results:', details.criteriaResults);
-      }
-    }
 
     // Create fallback detailed result if none found
     const fallbackDetailedResult: DetailedEvaluationResult = {
@@ -181,29 +231,8 @@ export async function evaluateEligibility(
 
     debugLog('Final built result', result);
 
-    if (import.meta.env.DEV) {
-      console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Final built result:', {
-        ruleId: result.ruleId,
-        eligible: result.eligible,
-        criteriaResults: result.criteriaResults,
-        criteriaResultsCount: result.criteriaResults?.length ?? 0
-      });
-      console.warn(`eligibility.ts - evaluateEligibility - 🔍 [DEBUG] evaluateEligibility: Built result for ${programId}:`, {
-        eligible: result.eligible,
-        confidence: result.confidence,
-        reason: result.reason,
-        missingFields: result.missingFields,
-        ruleId: result.ruleId,
-        executionTime: result.executionTime,
-        rulesEvaluated: ruleResults.length,
-        allRulesPassed: overallEligible,
-        ruleBreakdown: ruleResults.map(r => ({
-          ruleId: r.rule.id,
-          passed: r.evalResult.success ? Boolean(r.evalResult.result) : false,
-          priority: r.rule.priority
-        }))
-      });
-    }
+    // Log debug information
+    logDebugInfo(resultRule, resultRuleDetails, result, ruleResults, overallEligible, programId);
 
     // Add detailed breakdown if requested and no detailed results are available
     if (opts.includeBreakdown && (!result.criteriaResults || result.criteriaResults.length === 0)) {
