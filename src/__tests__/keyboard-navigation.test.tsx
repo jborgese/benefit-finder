@@ -5,6 +5,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { SelectInput } from '../questionnaire/components/SelectInput';
 import { MultiSelectInput } from '../questionnaire/components/MultiSelectInput';
 import { NumberInput } from '../questionnaire/components/NumberInput';
@@ -26,7 +27,7 @@ const mockOptions = [
 describe('Keyboard Navigation', () => {
   describe('SelectInput (Radio)', () => {
     it('navigates between options with arrow keys', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <SelectInput
           question={mockQuestion}
@@ -51,7 +52,7 @@ describe('Keyboard Navigation', () => {
     });
 
     it('selects option with Enter key', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <SelectInput
           question={mockQuestion}
@@ -70,7 +71,7 @@ describe('Keyboard Navigation', () => {
     });
 
     it('wraps navigation at boundaries', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <SelectInput
           question={mockQuestion}
@@ -96,7 +97,7 @@ describe('Keyboard Navigation', () => {
     });
 
     it('jumps to first/last with Home/End keys', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <SelectInput
           question={mockQuestion}
@@ -124,7 +125,7 @@ describe('Keyboard Navigation', () => {
 
   describe('MultiSelectInput (Checkbox)', () => {
     it('navigates between options with arrow keys', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <MultiSelectInput
           question={mockQuestion}
@@ -145,7 +146,7 @@ describe('Keyboard Navigation', () => {
     });
 
     it('toggles option with Enter key', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <MultiSelectInput
           question={mockQuestion}
@@ -166,7 +167,7 @@ describe('Keyboard Navigation', () => {
 
   describe('MultiSelectInput (Pills)', () => {
     it('navigates between pill buttons with arrow keys', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <MultiSelectInput
           question={mockQuestion}
@@ -187,7 +188,7 @@ describe('Keyboard Navigation', () => {
     });
 
     it('toggles pill with Enter key', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <MultiSelectInput
           question={mockQuestion}
@@ -208,7 +209,7 @@ describe('Keyboard Navigation', () => {
 
   describe('NumberInput', () => {
     it('increments/decrements with arrow keys', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <NumberInput
           question={mockQuestion}

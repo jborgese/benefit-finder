@@ -20,7 +20,7 @@ interface SsiExplanationProps {
 }
 
 export const SsiExplanation: React.FC<SsiExplanationProps> = ({
-  programName: _programName,
+  programName,
   status,
   explanation: _explanation,
   userProfile,
@@ -161,7 +161,7 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{t('benefits.ssi')}</p>
+          <p className="text-gray-600">{programName}</p>
         </div>
         <Dialog.Close asChild>
           <button

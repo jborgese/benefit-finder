@@ -29,7 +29,8 @@ describe('LanguageSwitcher', () => {
     render(<LanguageSwitcher variant="minimal" />);
 
     const trigger = screen.getByRole('combobox');
-    expect(trigger).toHaveClass('text-white');
+    expect(trigger).toHaveClass('text-gray-700');
+    expect(trigger).toHaveClass('dark:text-white');
     expect(trigger).toHaveClass('bg-transparent');
   });
 

@@ -89,22 +89,22 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
 
     // Answer all questions
     answers.forEach(answer => {
-      flowEngine.answerQuestion(answer.questionId, answer.fieldName, answer.value);
+      flowEngine.updateContext(answer.fieldName, answer.value);
     });
 
     // Get final answers
-    const finalAnswers = flowEngine.getAnswers();
+    const finalAnswers = flowEngine.getContext();
 
     // Verify all required LIHTC data points are collected
-    expect(finalAnswers.find(a => a.fieldName === 'householdSize')?.value).toBe(2);
-    expect(finalAnswers.find(a => a.fieldName === 'householdIncome')?.value).toBe(35000);
-    expect(finalAnswers.find(a => a.fieldName === 'state')?.value).toBe('GA');
-    expect(finalAnswers.find(a => a.fieldName === 'county')?.value).toBe('Fulton');
-    expect(finalAnswers.find(a => a.fieldName === 'citizenship')?.value).toBe('us_citizen');
-    expect(finalAnswers.find(a => a.fieldName === 'hasCriminalHistory')?.value).toBe(false);
-    expect(finalAnswers.find(a => a.fieldName === 'hasEvictionHistory')?.value).toBe(false);
-    expect(finalAnswers.find(a => a.fieldName === 'hasRentalReferences')?.value).toBe(true);
-    expect(finalAnswers.find(a => a.fieldName === 'incomeVerificationMethods')?.value).toEqual(['pay_stubs', 'tax_returns']);
+    expect(finalAnswers.householdSize).toBe(2);
+    expect(finalAnswers.householdIncome).toBe(35000);
+    expect(finalAnswers.state).toBe('GA');
+    expect(finalAnswers.county).toBe('Fulton');
+    expect(finalAnswers.citizenship).toBe('us_citizen');
+    expect(finalAnswers.hasCriminalHistory).toBe(false);
+    expect(finalAnswers.hasEvictionHistory).toBe(false);
+    expect(finalAnswers.hasRentalReferences).toBe(true);
+    expect(finalAnswers.incomeVerificationMethods).toEqual(['pay_stubs', 'tax_returns']);
   });
 
   it('should evaluate LIHTC eligibility with enhanced data', async () => {

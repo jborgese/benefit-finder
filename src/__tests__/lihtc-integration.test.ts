@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AMIDataService } from '../services/ami-data';
+import { AMIDataService } from '../data/services/AMIDataService';
 import { LIHTC_RULES } from '../rules/housing/lihtc-rules';
 import { evaluateRule } from '../rules';
 import type { LIHTCProfile, AMIData } from '../types/housing';
@@ -391,7 +391,7 @@ describe('LIHTC Integration Tests', () => {
     it('should handle missing AMI data', async () => {
       await expect(
         amiService.getAMIForHousehold('XX', 'Unknown', 3)
-      ).rejects.toThrow('AMI data not found');
+      ).rejects.toThrow('Failed to load AMI data for state XX');
     });
 
     it('should handle invalid household size', () => {

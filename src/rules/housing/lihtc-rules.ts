@@ -220,10 +220,7 @@ export const LIHTC_INCOME_VERIFICATION: RuleDefinition = {
   description: 'Income must be verifiable through documentation',
   ruleType: 'document_requirements',
   ruleLogic: {
-    and: [
-      { var: 'householdIncome' },
-      { '>': [{ var: 'householdIncome' }, 0] }
-    ]
+    '>': [{ var: 'householdIncome' }, 0]
   },
   explanation: 'You must provide documentation to verify your household income',
   requiredFields: ['householdIncome'],
@@ -251,10 +248,7 @@ export const LIHTC_BACKGROUND_CHECK: RuleDefinition = {
   description: 'Must pass background check requirements',
   ruleType: 'eligibility',
   ruleLogic: {
-    and: [
-      { var: 'hasCriminalHistory' },
-      { '==': [{ var: 'hasCriminalHistory' }, false] }
-    ]
+    '==': [{ var: 'hasCriminalHistory' }, false]
   },
   explanation: 'You must pass a background check to qualify for LIHTC housing',
   requiredFields: ['hasCriminalHistory'],

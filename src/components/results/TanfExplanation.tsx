@@ -129,7 +129,7 @@ function getTanfRequirementsExplanation(userProfile?: { hasChildren?: boolean; h
 }
 
 export const TanfExplanation: React.FC<TanfExplanationProps> = ({
-  programName: _programName,
+  programName,
   status,
   explanation: _explanation,
   userProfile,
@@ -183,7 +183,7 @@ export const TanfExplanation: React.FC<TanfExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{t('benefits.tanf')}</p>
+          <p className="text-gray-600">{programName}</p>
         </div>
         <Dialog.Close asChild>
           <button

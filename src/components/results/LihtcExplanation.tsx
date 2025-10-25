@@ -125,7 +125,7 @@ const getLihtcResources = (t: (key: string) => string): string[] => {
 };
 
 export const LihtcExplanation: React.FC<LihtcExplanationProps> = ({
-  programName: _programName,
+  programName,
   status,
   explanation: _explanation,
   userProfile,
@@ -149,7 +149,7 @@ export const LihtcExplanation: React.FC<LihtcExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{t('benefits.lihtc')}</p>
+          <p className="text-gray-600">{programName}</p>
         </div>
         <Dialog.Close asChild>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close explanation">
