@@ -1,0 +1,580 @@
+{
+  "metadata": {
+    "id": "medi-cal-pregnancy-rules-2024",
+    "name": "California Medi-Cal Pregnancy Coverage Rules (2024)",
+    "description": "California-specific Medi-Cal rules for pregnant women, including higher income limits than federal minimums and extended postpartum coverage. California provides comprehensive maternal health coverage through Medi-Cal.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-CA",
+    "programs": [
+      "medi-cal-pregnancy",
+      "medi-cal-postpartum"
+    ],
+    "tags": [
+      "medi-cal",
+      "pregnancy",
+      "maternal-health",
+      "california",
+      "2024",
+      "postpartum"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medi-cal-ca-pregnancy-322-percent",
+      "programId": "medi-cal-pregnancy",
+      "name": "Medi-Cal for Pregnant Women (322% FPL)",
+      "description": "Pregnant women qualify for Medi-Cal with income up to 322% FPL (higher than federal minimum)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4768
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California covers pregnant women through Medi-Cal if household income is at or below 322% of the federal poverty level. This is much higher than the federal minimum (200% FPL). For 2024, this means: 1 person = $4,768/month, 2 people = $6,456/month, 3 people = $8,144/month. Coverage includes prenatal care, delivery, and postpartum care for 12 months after pregnancy ends (extended from federal 60 days).",
+      "requiredFields": [
+        "livesInCalifornia",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ca",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ca",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "California offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Pregnant Women",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California covers pregnant women up to 322% FPL with 12-month postpartum coverage"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ca-pregnant-eligible",
+          "description": "Pregnant woman under 322% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "322-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ca-pregnant-high-income",
+          "description": "Pregnant woman over 322% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": true,
+            "householdIncome": 6000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ca-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": false,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "322-percent-fpl",
+        "12-month-postpartum"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-pregnancy-immigrant",
+      "programId": "medi-cal-pregnancy",
+      "name": "Medi-Cal for Pregnant Immigrants",
+      "description": "California provides Medi-Cal to pregnant immigrants regardless of immigration status",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4768
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California provides Medi-Cal to ALL pregnant women, regardless of immigration status, if household income is at or below 322% of the federal poverty level. This includes undocumented immigrants. For 2024 at 322% FPL: 1 person = $4,768/month, 2 people = $6,456/month, 3 people = $8,144/month. This is unique to California and provides coverage to many immigrant women who would otherwise be ineligible.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-immigrant",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-immigrant",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Contact an immigration-friendly community health center for assistance",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Pregnant Immigrants",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California provides Medi-Cal to all pregnant women regardless of immigration status"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 27,
+      "testCases": [
+        {
+          "id": "test-immigrant-pregnant-eligible",
+          "description": "Pregnant immigrant with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "immigrant",
+            "322-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-immigrant-pregnant-high-income",
+          "description": "Pregnant immigrant with income above 322% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": true,
+            "householdIncome": 6000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-immigrant-not-pregnant",
+          "description": "Immigrant not pregnant",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": false,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "immigrants",
+        "322-percent-fpl",
+        "all-immigration-statuses"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-postpartum-12-months",
+      "programId": "medi-cal-postpartum",
+      "name": "Medi-Cal Postpartum Coverage (12 Months)",
+      "description": "California provides 12 months of postpartum coverage (extended from federal 60 days)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "var": "isPostpartum"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4768
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California provides 12 months of postpartum coverage through Medi-Cal, extended from the federal minimum of 60 days. This covers postpartum care, mental health services, and other health needs for 12 months after pregnancy ends. For 2024 at 322% FPL: 1 person = $4,768/month, 2 people = $6,456/month, 3 people = $8,144/month. This is unique to California and provides extended coverage for new mothers.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "isPostpartum",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-postpartum-status",
+          "name": "Proof of Postpartum Status",
+          "description": "Doctor's note, hospital records, or birth certificate",
+          "required": true,
+          "alternatives": [
+            "Hospital discharge records",
+            "Birth certificate",
+            "Medical provider statement"
+          ],
+          "where": "Healthcare provider or hospital"
+        },
+        {
+          "id": "proof-income-postpartum",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Postpartum coverage is automatically extended for 12 months if you were covered during pregnancy",
+          "priority": "high"
+        },
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com if not already covered",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal Postpartum Coverage",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California provides 12 months of postpartum coverage"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 26,
+      "testCases": [
+        {
+          "id": "test-postpartum-eligible",
+          "description": "Postpartum woman with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "isPostpartum": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "postpartum",
+            "12-months"
+          ]
+        },
+        {
+          "id": "test-postpartum-high-income",
+          "description": "Postpartum woman with income above 322% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "isPostpartum": true,
+            "householdIncome": 6000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-not-postpartum",
+          "description": "Not postpartum",
+          "input": {
+            "livesInCalifornia": true,
+            "isPostpartum": false,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-postpartum"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "postpartum",
+        "12-months",
+        "maternal-health"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-presumptive-eligibility",
+      "programId": "medi-cal-pregnancy",
+      "name": "Medi-Cal Presumptive Eligibility for Pregnant Women",
+      "description": "California provides immediate temporary coverage for pregnant women while application is processed",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "var": "isPregnant"
+          }
+        ]
+      },
+      "ruleType": "conditional",
+      "explanation": "California provides presumptive eligibility for pregnant women, which means immediate temporary coverage while the full Medi-Cal application is being processed. This ensures pregnant women can get care right away without waiting for application approval. Coverage typically lasts for 60 days or until the full application is processed, whichever comes first.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "isPregnant"
+      ],
+      "nextSteps": [
+        {
+          "step": "Ask about presumptive eligibility at your healthcare provider or clinic",
+          "priority": "high"
+        },
+        {
+          "step": "Complete the full Medi-Cal application to maintain coverage beyond 60 days",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal Presumptive Eligibility",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California provides presumptive eligibility for pregnant women"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-presumptive-eligible",
+          "description": "Pregnant woman eligible for presumptive eligibility",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "presumptive",
+            "pregnant"
+          ]
+        },
+        {
+          "id": "test-presumptive-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "presumptive-eligibility",
+        "pregnant",
+        "immediate-coverage"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-CA"
+    }
+  ]
+}

@@ -56,7 +56,9 @@ interface Section8ExplanationProps {
 }
 
 const getSection8StatusMessage = (status: EligibilityStatus, t: (key: string) => string): string => {
-  return t(`results.section8.statusMessages.${status}`);
+  // Convert kebab-case status to camelCase for localization key
+  const statusKey = status === 'not-qualified' ? 'notQualified' : status;
+  return t(`results.section8.statusMessages.${statusKey}`);
 };
 
 const getSection8BenefitInfo = (t: (key: string) => string, userProfile?: Section8ExplanationProps['userProfile']): string[] => {
@@ -146,7 +148,7 @@ export const Section8Explanation: React.FC<Section8ExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{programName}</p>
+          <p className="text-gray-600">{t('benefits.section8')}</p>
         </div>
         <Dialog.Close asChild>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close explanation">

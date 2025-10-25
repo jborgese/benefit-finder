@@ -189,7 +189,7 @@ export const WicExplanation: React.FC<WicExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{programName}</p>
+          <p className="text-gray-600">{t('benefits.wic')}</p>
         </div>
         <Dialog.Close asChild>
           <button

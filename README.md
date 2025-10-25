@@ -24,7 +24,7 @@ To empower individuals to access the support they're already entitled to — thr
 - **Eligibility Engine** — JSON-logic based rule evaluation for program criteria
 - **Plain-Language Results** — Detailed explanations with next steps and document checklists
 - **Visual Flow Diagrams** — Interactive eligibility flow visualization using ReactFlow
-- **Offline-First Architecture** — Works without internet; perfect for field workers and outreach programs
+- **Offline-First Architecture** — Works without internet
 - **Local Data Only** — RxDB with AES-GCM encryption ensures all data stays private
 - **Import/Export** — Save and share eligibility results securely
 - **Multi-Jurisdiction Support** — Rules organized by country/state/year with versioning
@@ -362,14 +362,7 @@ We welcome contributions! Here's how you can help:
 - [ ] Enhanced accessibility features
 - [ ] User preferences and customization
 
-### Phase 3: Field Deployment
-- [ ] Device-to-device sync via Wi-Fi Direct
-- [ ] Offline rule updates
-- [ ] Field worker dashboard
-- [ ] Bulk screening mode
-- [ ] Print-friendly result summaries
-
-### Phase 4: Expansion
+### Phase 3: Expansion (in progress)
 - [ ] Additional state jurisdictions
 - [ ] More benefit programs (housing, childcare, utilities)
 - [ ] Document checklist generator

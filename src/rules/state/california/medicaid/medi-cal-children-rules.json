@@ -1,0 +1,446 @@
+{
+  "metadata": {
+    "id": "medi-cal-children-rules-2024",
+    "name": "California Medi-Cal Children's Coverage Rules (2024)",
+    "description": "California-specific Medi-Cal rules for children, including higher income limits than federal minimums and year-round enrollment. California provides comprehensive health coverage for children through Medi-Cal and Healthy Families programs.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-CA",
+    "programs": [
+      "medi-cal-children",
+      "healthy-families"
+    ],
+    "tags": [
+      "medi-cal",
+      "children",
+      "pediatric",
+      "california",
+      "2024",
+      "year-round-enrollment"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medi-cal-ca-children-266-percent",
+      "programId": "medi-cal-children",
+      "name": "Medi-Cal for Children (266% FPL)",
+      "description": "Children under 19 qualify for Medi-Cal with income up to 266% FPL (higher than federal minimum)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3938
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California covers children under age 19 in families with incomes up to 266% of the federal poverty level through Medi-Cal. This is higher than the federal minimum (200% FPL). For 2024 at 266% FPL: 1 child = $3,938/month, 2 children = $5,333/month, 3 children = $6,728/month. Children can enroll year-round, not just during open enrollment periods. No asset test for children.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ca",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ca",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        },
+        {
+          "step": "Contact your local county social services office for assistance",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Children",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California children covered up to 266% FPL with year-round enrollment"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ca-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 10,
+            "householdIncome": 3000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "266-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ca-child-high-income",
+          "description": "Child with family income above 266% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 12,
+            "householdIncome": 8000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ca-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "266-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-children-immigrant",
+      "programId": "medi-cal-children",
+      "name": "Medi-Cal for Immigrant Children",
+      "description": "California provides Medi-Cal to immigrant children regardless of immigration status",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3938
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California provides Medi-Cal to ALL children under age 19, regardless of immigration status, if household income is at or below 266% of the federal poverty level. This includes undocumented children. For 2024 at 266% FPL: 1 child = $3,938/month, 2 children = $5,333/month, 3 children = $6,728/month. This is unique to California and provides coverage to many immigrant children who would otherwise be ineligible.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-immigrant",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-immigrant",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Contact an immigration-friendly community health center for assistance",
+          "priority": "high"
+        },
+        {
+          "step": "Children can enroll year-round regardless of immigration status",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Immigrant Children",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California provides Medi-Cal to all children regardless of immigration status"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-immigrant-child-eligible",
+          "description": "Immigrant child with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 8,
+            "householdIncome": 3000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "immigrant-child",
+            "266-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-immigrant-child-high-income",
+          "description": "Immigrant child with family income above 266% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 12,
+            "householdIncome": 8000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-immigrant-child-age-limit",
+          "description": "Immigrant age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "immigrants",
+        "266-percent-fpl",
+        "all-immigration-statuses"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-children-year-round",
+      "programId": "medi-cal-children",
+      "name": "Medi-Cal Children Year-Round Enrollment",
+      "description": "Children can enroll in Medi-Cal year-round, not just during open enrollment",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          }
+        ]
+      },
+      "ruleType": "conditional",
+      "explanation": "Children can enroll in Medi-Cal year-round, not just during open enrollment periods. This means families can apply for coverage for their children at any time of the year. Coverage typically begins the first day of the month after application is approved. This is different from marketplace plans for adults, which generally require enrollment during open enrollment periods.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "age"
+      ],
+      "nextSteps": [
+        {
+          "step": "Children can apply for Medi-Cal at any time - no waiting for open enrollment",
+          "priority": "high"
+        },
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal Year-Round Enrollment",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "Children can enroll in Medi-Cal year-round"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-year-round-child",
+          "description": "Child under 19 can enroll year-round",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 10
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "year-round",
+            "child"
+          ]
+        },
+        {
+          "id": "test-year-round-adult",
+          "description": "Adult not eligible for year-round enrollment under children's rules",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 25
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "adult",
+            "use-adult-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "year-round",
+        "children",
+        "enrollment"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-CA"
+    }
+  ]
+}

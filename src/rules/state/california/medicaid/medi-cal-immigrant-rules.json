@@ -1,0 +1,462 @@
+{
+  "metadata": {
+    "id": "medi-cal-immigrant-rules-2024",
+    "name": "California Medi-Cal Immigrant Coverage Rules (2024)",
+    "description": "California-specific Medi-Cal rules for immigrants, including state-funded coverage for DACA recipients and other immigrants ineligible for federal Medicaid. California is unique in providing comprehensive health coverage to immigrants using state funds.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-CA",
+    "programs": [
+      "medi-cal-immigrants",
+      "medi-cal-daca",
+      "medi-cal-lawfully-present"
+    ],
+    "tags": [
+      "medi-cal",
+      "immigrants",
+      "daca",
+      "state-funded",
+      "california",
+      "2024",
+      "healthcare"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medi-cal-ca-daca-coverage",
+      "programId": "medi-cal-daca",
+      "name": "Medi-Cal for DACA Recipients",
+      "description": "California provides state-funded Medi-Cal to DACA recipients who are ineligible for federal Medicaid",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "==": [
+              {
+                "var": "immigration_status"
+              },
+              "daca"
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California provides state-funded Medi-Cal to DACA recipients with household income up to 138% of the federal poverty level. This is unique to California - DACA recipients are not eligible for federal Medicaid in most states. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month. California has NO asset test for most adults, including DACA recipients.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "immigration_status",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-daca-status",
+          "name": "Proof of DACA Status",
+          "description": "DACA approval notice or Employment Authorization Document (I-766)",
+          "required": true,
+          "alternatives": [
+            "DACA renewal notice",
+            "I-94 with DACA status"
+          ],
+          "where": "USCIS"
+        },
+        {
+          "id": "proof-income-daca",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Covered California (recommended)",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply at BenefitsCal.com",
+          "url": "https://www.benefitscal.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Contact an immigration-friendly community health center for assistance",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for DACA Recipients",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California provides state-funded Medi-Cal to DACA recipients"
+        },
+        {
+          "title": "California Health Access - DACA Coverage",
+          "url": "https://www.health-access.org/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 35,
+      "testCases": [
+        {
+          "id": "test-daca-eligible",
+          "description": "DACA recipient with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "daca",
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "daca",
+            "state-funded"
+          ]
+        },
+        {
+          "id": "test-daca-high-income",
+          "description": "DACA recipient with income above 138% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "daca",
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-daca-outside-ca",
+          "description": "DACA recipient outside California",
+          "input": {
+            "livesInCalifornia": false,
+            "immigration_status": "daca",
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "outside-california"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "daca",
+        "state-funded",
+        "california-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-lawfully-present",
+      "programId": "medi-cal-lawfully-present",
+      "name": "Medi-Cal for Lawfully Present Immigrants",
+      "description": "California provides state-funded Medi-Cal to lawfully present immigrants regardless of 5-year waiting period",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "==": [
+              {
+                "var": "immigration_status"
+              },
+              "lawfully_present"
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California provides state-funded Medi-Cal to lawfully present immigrants with household income up to 138% of the federal poverty level, regardless of how long they've been in the U.S. This bypasses the federal 5-year waiting period for most immigrants. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month. This is unique to California and provides coverage to many immigrants who would otherwise be ineligible.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "immigration_status",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-lawful-presence",
+          "name": "Proof of Lawful Presence",
+          "description": "Employment Authorization Document, I-94, or other immigration document",
+          "required": true,
+          "alternatives": [
+            "I-766 Employment Authorization",
+            "I-94 Arrival/Departure Record",
+            "I-94W Visa Waiver"
+          ],
+          "where": "USCIS or CBP"
+        },
+        {
+          "id": "proof-income-lawful",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Covered California (recommended)",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply at BenefitsCal.com",
+          "url": "https://www.benefitscal.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Contact an immigration-friendly community health center for assistance",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Lawfully Present Immigrants",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California provides state-funded Medi-Cal to lawfully present immigrants without 5-year wait"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 33,
+      "testCases": [
+        {
+          "id": "test-lawful-present-eligible",
+          "description": "Lawfully present immigrant with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "lawfully_present",
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "lawfully-present",
+            "state-funded"
+          ]
+        },
+        {
+          "id": "test-lawful-present-high-income",
+          "description": "Lawfully present immigrant with income above 138% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "lawfully_present",
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-lawful-present-outside-ca",
+          "description": "Lawfully present immigrant outside California",
+          "input": {
+            "livesInCalifornia": false,
+            "immigration_status": "lawfully_present",
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "outside-california"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "lawfully-present",
+        "state-funded",
+        "no-5-year-wait",
+        "california-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-emergency-coverage",
+      "programId": "medi-cal-immigrants",
+      "name": "Emergency Medi-Cal for All Immigrants",
+      "description": "Emergency Medi-Cal covers emergency medical conditions for all immigrants regardless of status",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "var": "hasEmergencyMedicalCondition"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Emergency Medi-Cal covers emergency medical conditions for ALL immigrants in California, regardless of immigration status. This includes undocumented immigrants. Emergency conditions include: labor and delivery, emergency room visits, emergency surgery, and other life-threatening conditions. This is a federal requirement that all states must provide, but California has streamlined the process.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "hasEmergencyMedicalCondition"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-emergency-condition",
+          "name": "Proof of Emergency Medical Condition",
+          "description": "Doctor's note, hospital records, or medical documentation",
+          "required": true,
+          "alternatives": [
+            "Emergency room records",
+            "Hospital admission records",
+            "Medical provider statement"
+          ],
+          "where": "Healthcare provider or hospital"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Emergency Medi-Cal can be applied for at the hospital or emergency room",
+          "priority": "high"
+        },
+        {
+          "step": "Contact your local county social services office for assistance",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Emergency Medi-Cal",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/EmergencyMedi-Cal.aspx",
+          "date": "2024-10-01",
+          "notes": "Emergency Medi-Cal covers emergency conditions for all immigrants"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 40,
+      "testCases": [
+        {
+          "id": "test-emergency-eligible",
+          "description": "Immigrant with emergency medical condition",
+          "input": {
+            "livesInCalifornia": true,
+            "hasEmergencyMedicalCondition": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "emergency",
+            "all-immigrants"
+          ]
+        },
+        {
+          "id": "test-emergency-not-emergency",
+          "description": "No emergency medical condition",
+          "input": {
+            "livesInCalifornia": true,
+            "hasEmergencyMedicalCondition": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-emergency"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "emergency",
+        "all-immigrants",
+        "undocumented"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    }
+  ]
+}

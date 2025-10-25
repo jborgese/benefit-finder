@@ -183,7 +183,7 @@ export const TanfExplanation: React.FC<TanfExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{programName}</p>
+          <p className="text-gray-600">{t('benefits.tanf')}</p>
         </div>
         <Dialog.Close asChild>
           <button

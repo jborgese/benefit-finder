@@ -16,8 +16,7 @@ This roadmap outlines the development phases for BenefitFinder, a privacy-preser
 |-------|--------|----------|--------------|
 | **Phase 1: Core MVP** | ✅ Complete | 100% | Questionnaire, Rules Engine, Results Display, Testing, Documentation |
 | **Phase 2: Enhanced Features** | ✅ Complete | 100% | PWA ✅, Import/Export ✅, Visual Flows ✅, Multi-language ✅, UI/UX ✅ |
-| **Phase 3: Field Deployment** | 📋 Planned | 0% | Device Sync, Offline Updates, Field Dashboard, Bulk Screening |
-| **Phase 4: Expansion** | 📋 Planned | 0% | Geographic Expansion, Program Expansion, Advanced Features |
+| **Phase 3: Expansion** | 📋 Planned | 0% | Geographic Expansion, Program Expansion, Advanced Features |
 
 **Legend:** ✅ Complete | 🚧 In Progress | 📋 Planned | ⏳ Not Started
 
@@ -402,134 +401,13 @@ Every feature must satisfy:
 
 ---
 
-## Phase 3: Field Deployment 📋 (Weeks 17-24) — PLANNED
-
-**Goal:** Enable field workers and NGOs to use the tool for community outreach.
-
-**Status:** 📋 **PLANNED** — Phase 3 features are planned for future development.
-
-### 3.1 Device-to-Device Sync (Week 17-19)
-
-#### Sync Architecture
-- [ ] Implement CouchDB replication protocol
-- [ ] Set up RxDB sync plugin
-- [ ] Create peer discovery mechanism (local network only)
-- [ ] Build conflict resolution strategy
-
-#### Wi-Fi Direct Implementation
-- [ ] Research Web Bluetooth / WebRTC for peer connection
-- [ ] Implement device pairing flow
-- [ ] Create sync initiation UI
-- [ ] Add sync progress indicator
-
-#### Security
-- [ ] Implement end-to-end encryption for sync
-- [ ] Add device authentication
-- [ ] Create sync permission system
-- [ ] Audit sync for privacy leaks
-
-**Deliverables:**
-- Working device-to-device sync
-- No server dependencies [[memory:8456495]]
-- Secure peer connections
-- Sync documentation for field workers
-
----
-
-### 3.2 Offline Rule Updates (Week 19-20)
-
-#### Rule Distribution
-- [ ] Create rule package format (.bfrules)
-- [ ] Build rule import interface
-- [ ] Add rule versioning and changelog
-- [ ] Implement rule signing for verification
-
-#### Update Mechanisms
-- [ ] Manual rule package import
-- [ ] Sync rules via device-to-device
-- [ ] Show available vs. installed rules
-- [ ] Add rule update notifications
-
-#### Rule Management
-- [ ] List installed rule packages
-- [ ] Show rule metadata (version, jurisdiction, date)
-- [ ] Enable/disable rule sets
-- [ ] Rollback to previous rule versions
-
-**Deliverables:**
-- Rule update system
-- Rule package format
-- Rule management UI
-
----
-
-### 3.3 Field Worker Dashboard (Week 20-22)
-
-#### Dashboard Features
-- [ ] Aggregated statistics (anonymized)
-- [ ] Most-requested programs
-- [ ] Common eligibility patterns
-- [ ] Session history (without PII)
-
-#### Screening Tools
-- [ ] Quick screening mode
-- [ ] Batch profile comparison
-- [ ] Print queue management
-- [ ] Follow-up reminders
-
-#### Field Worker Tools
-- [ ] Notes and annotations (local only)
-- [ ] Checklist for required documents
-- [ ] Office locator (pre-loaded data)
-- [ ] Resource library
-
-#### Privacy
-- [ ] Ensure no PII in dashboard stats
-- [ ] Add data retention controls
-- [ ] Create session clear functionality
-- [ ] Document privacy safeguards
-
-**Deliverables:**
-- Field worker dashboard
-- Privacy-preserving analytics
-- Screening workflow tools
-
----
-
-### 3.4 Bulk Screening Mode (Week 22-24)
-
-#### Bulk Operations
-- [ ] Import multiple profiles (CSV format)
-- [ ] Batch eligibility evaluation
-- [ ] Export bulk results
-- [ ] Progress tracking for large batches
-
-#### Screening Events
-- [ ] Event mode for community screening
-- [ ] Session management
-- [ ] Quick profile creation
-- [ ] Batch printing
-
-#### Performance
-- [ ] Optimize for 100+ profiles
-- [ ] Add background processing
-- [ ] Implement queue system
-- [ ] Cache evaluation results
-
-**Deliverables:**
-- Bulk screening capability
-- Event mode for NGOs
-- Performance optimizations
-
----
-
-## Phase 4: Expansion 📋 (Weeks 25+) — PLANNED
+## Phase 3: Expansion 📋 (Ongoing) — PLANNED
 
 **Goal:** Scale to more jurisdictions, programs, and advanced features.
 
-**Status:** 📋 **PLANNED** — Phase 4 features are planned for long-term expansion.
+**Status:** 📋 **PLANNED** — Phase 3 features are planned for long-term expansion.
 
-### 4.1 Geographic Expansion (Ongoing)
+### 3.1 Geographic Expansion (Ongoing)
 
 #### Additional States (Priority Order)
 1. [ ] Texas (SNAP, Medicaid, CHIP)
@@ -553,7 +431,7 @@ Every feature must satisfy:
 
 ---
 
-### 4.2 Program Expansion (Ongoing)
+### 3.2 Program Expansion (Ongoing)
 
 #### Federal Programs
 - [ ] SSI (Supplemental Security Income)
@@ -579,7 +457,7 @@ Every feature must satisfy:
 
 ---
 
-### 4.3 Document Management (Week 25-26)
+### 3.3 Document Management (Ongoing)
 
 #### Document Checklist Generator
 - [ ] Dynamic checklist based on programs
@@ -599,7 +477,7 @@ Every feature must satisfy:
 
 ---
 
-### 4.4 Application Tracking (Week 27-28)
+### 3.4 Application Tracking (Ongoing)
 
 #### Deadline Tracker
 - [ ] Track application deadlines
@@ -623,7 +501,7 @@ Every feature must satisfy:
 
 ---
 
-### 4.5 Advanced Features (Week 29+)
+### 3.5 Advanced Features (Ongoing)
 
 #### Argdown Integration
 - [ ] Argument mapping for policy advocacy
@@ -714,11 +592,10 @@ Every feature must satisfy:
 
 ### Version 1.0 (End of Phase 3) — TARGET: Q2-Q3 2026
 - [ ] Production-ready release
-- [ ] Field worker features
 - [ ] 10+ states, 10+ programs
 - [ ] Full security audit
 
-### Version 2.0 (End of Phase 4) — TARGET: Q4 2026+
+### Version 2.0 (Future) — TARGET: Q4 2026+
 - [ ] Nationwide coverage
 - [ ] 50 states, 20+ programs
 - [ ] Advanced optimization features
@@ -767,8 +644,6 @@ Each upcoming phase must pass:
 - [x] **Usability Testing Guide** — Testing procedures (6 scenarios)
 
 ### Documentation to Create (Future)
-- [ ] Field Worker Manual (Phase 3)
-- [ ] API Documentation for sync (Phase 3)
 - [ ] Privacy Policy (formal legal document)
 - [ ] Third-party Security Audit Report (v1.0)
 

@@ -197,7 +197,7 @@ export const SnapExplanation: React.FC<SnapExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{programName}</p>
+          <p className="text-gray-600">{t('benefits.snap')}</p>
         </div>
         <Dialog.Close asChild>
           <button
@@ -240,6 +240,7 @@ export const SnapExplanation: React.FC<SnapExplanationProps> = ({
           programId="snap-federal"
           status={status}
           userProfile={userProfile}
+          evaluationResult={_explanation}
         />
 
         {/* What SNAP Provides */}

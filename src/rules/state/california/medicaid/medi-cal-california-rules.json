@@ -1,0 +1,1008 @@
+{
+  "metadata": {
+    "id": "medi-cal-california-rules-2024",
+    "name": "California Medi-Cal Eligibility Rules (2024)",
+    "description": "California-specific Medi-Cal eligibility rules for 2024. California has expanded Medicaid under the ACA and provides additional state-funded coverage for immigrants. These rules reflect California's comprehensive Medi-Cal program including adult expansion, children's coverage, and immigrant eligibility.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-CA",
+    "programs": [
+      "medi-cal-california",
+      "medi-cal-children",
+      "medi-cal-pregnancy",
+      "medi-cal-immigrants"
+    ],
+    "tags": [
+      "medi-cal",
+      "medicaid",
+      "healthcare",
+      "california",
+      "2024",
+      "state-specific",
+      "immigrant-coverage",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medi-cal-ca-adult-expansion",
+      "programId": "medi-cal-california",
+      "name": "Medi-Cal Adult Expansion (138% FPL)",
+      "description": "California expanded Medi-Cal covers adults under 65 with income up to 138% FPL with no asset test",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "!": {
+              "var": "isPregnant"
+            }
+          },
+          {
+            "!": {
+              "var": "hasQualifyingDisability"
+            }
+          },
+          {
+            "!": {
+              "var": "hasChildren"
+            }
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California expanded Medi-Cal covers adults under age 65 with household income up to 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. California has NO asset test for most adults, unlike some other states. This covers the 'coverage gap' that exists in non-expansion states.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "age",
+        "isPregnant",
+        "hasQualifyingDisability",
+        "hasChildren",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-medi-cal",
+          "name": "Proof of Income",
+          "description": "Recent pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2 forms",
+            "1099 forms",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer, IRS, bank, or your own records"
+        },
+        {
+          "id": "proof-identity-medi-cal",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Tribal ID",
+            "School ID with photo"
+          ],
+          "where": "DMV, State Department, or issuing agency"
+        },
+        {
+          "id": "proof-residence-ca",
+          "name": "Proof of California Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing California address",
+          "required": true,
+          "alternatives": [
+            "California driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
+          "where": "Varies by document type"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Covered California (recommended - fastest)",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply at BenefitsCal.com (state benefits portal)",
+          "url": "https://www.benefitscal.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Find local assistance at a county office or community organization",
+          "url": "https://www.coveredca.com/help/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal Eligibility",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California Medi-Cal adult expansion: 138% FPL, no asset test"
+        },
+        {
+          "title": "Covered California",
+          "url": "https://www.coveredca.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-ca-adult-eligible",
+          "description": "Adult under 65 with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 35,
+            "isPregnant": false,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "adult",
+            "expansion"
+          ]
+        },
+        {
+          "id": "test-ca-adult-high-income",
+          "description": "Adult with income above 138% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 40,
+            "isPregnant": false,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ca-pregnant-adult",
+          "description": "Pregnant adult (covered under pregnancy rules, not this rule)",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 30,
+            "isPregnant": true,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "use-pregnancy-rules"
+          ]
+        },
+        {
+          "id": "test-ca-disabled-adult",
+          "description": "Disabled adult (covered under disability rules, not this rule)",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 45,
+            "isPregnant": false,
+            "hasQualifyingDisability": true,
+            "hasChildren": false,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "use-disability-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "adult-expansion",
+        "138-percent-fpl",
+        "no-asset-test",
+        "california-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-children",
+      "programId": "medi-cal-children",
+      "name": "Medi-Cal for Children",
+      "description": "Children under 19 qualify for Medi-Cal with income up to 266% FPL (higher than federal minimum)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3938
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California covers children under age 19 in families with incomes up to 266% of the federal poverty level through Medi-Cal. This is higher than the federal minimum (200% FPL). For 2024 at 266% FPL: 1 child = $3,938/month, 2 children = $5,333/month, 3 children = $6,728/month. Children can enroll year-round, not just during open enrollment periods.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ca",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ca",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Children",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California children covered up to 266% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ca-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 10,
+            "householdIncome": 3000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "266-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ca-child-high-income",
+          "description": "Child with family income above 266% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 12,
+            "householdIncome": 8000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ca-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInCalifornia": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "266-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-pregnant-women",
+      "programId": "medi-cal-pregnancy",
+      "name": "Medi-Cal for Pregnant Women",
+      "description": "Pregnant women qualify for Medi-Cal with income up to 322% FPL (higher than federal minimum)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4768
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California covers pregnant women through Medi-Cal if household income is at or below 322% of the federal poverty level. This is much higher than the federal minimum (200% FPL). For 2024, this means: 1 person = $4,768/month, 2 people = $6,456/month, 3 people = $8,144/month. Coverage includes prenatal care, delivery, and postpartum care for 12 months after pregnancy ends (extended from federal 60 days).",
+      "requiredFields": [
+        "livesInCalifornia",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ca",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ca",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "California offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Pregnant Women",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California covers pregnant women up to 322% FPL with 12-month postpartum coverage"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ca-pregnant-eligible",
+          "description": "Pregnant woman under 322% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "322-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ca-pregnant-high-income",
+          "description": "Pregnant woman over 322% FPL",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": true,
+            "householdIncome": 6000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ca-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInCalifornia": true,
+            "isPregnant": false,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "322-percent-fpl",
+        "12-month-postpartum"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-immigrant-expansion",
+      "programId": "medi-cal-immigrants",
+      "name": "Medi-Cal Immigrant Coverage Expansion",
+      "description": "California provides state-funded Medi-Cal to immigrants ineligible for federal Medicaid",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "or": [
+              {
+                "in": [
+                  {
+                    "var": "immigration_status"
+                  },
+                  [
+                    "us_citizen",
+                    "permanent_resident",
+                    "refugee",
+                    "asylee",
+                    "trafficking_victim"
+                  ]
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "in": [
+                      {
+                        "var": "immigration_status"
+                      },
+                      [
+                        "daca",
+                        "lawfully_present",
+                        "other_qualified"
+                      ]
+                    ]
+                  },
+                  {
+                    "var": "inCalifornia"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "California expanded Medi-Cal to immigrants beyond federal Medicaid eligibility using state funds. This includes: U.S. citizens and green card holders (federal eligibility), PLUS state-funded coverage for: DACA recipients, lawfully present immigrants (regardless of 5-year wait), and certain other immigrants who would otherwise be ineligible for federal Medicaid. This is unique to California and provides coverage to hundreds of thousands of immigrants.",
+      "requiredFields": [
+        "livesInCalifornia",
+        "immigration_status",
+        "inCalifornia"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-immigration-status-ca",
+          "name": "Proof of Immigration Status",
+          "description": "Immigration documents showing status",
+          "required": true,
+          "alternatives": [
+            "Green Card (I-551)",
+            "Employment Authorization (I-766)",
+            "I-94 Arrival/Departure Record",
+            "Refugee documentation",
+            "DACA approval notice"
+          ],
+          "where": "USCIS"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply even if you're not sure about eligibility - California has expanded rules for immigrants",
+          "priority": "high"
+        },
+        {
+          "step": "Contact an immigration-friendly community health center for assistance",
+          "priority": "high"
+        },
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for Immigrants",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01",
+          "notes": "California provides state-funded Medi-Cal to immigrants ineligible for federal Medicaid"
+        },
+        {
+          "title": "California Health Access - Immigrant Coverage",
+          "url": "https://www.health-access.org/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 32,
+      "testCases": [
+        {
+          "id": "test-ca-citizen",
+          "description": "U.S. citizen (federal Medi-Cal eligible)",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "us_citizen",
+            "inCalifornia": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "citizen",
+            "federal-medi-cal"
+          ]
+        },
+        {
+          "id": "test-ca-daca",
+          "description": "DACA recipient (state-funded Medi-Cal)",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "daca",
+            "inCalifornia": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "daca",
+            "state-funded",
+            "california-specific"
+          ]
+        },
+        {
+          "id": "test-ca-lawfully-present",
+          "description": "Lawfully present immigrant (state-funded Medi-Cal)",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "lawfully_present",
+            "inCalifornia": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "immigrant",
+            "state-funded",
+            "california-specific"
+          ]
+        },
+        {
+          "id": "test-ca-undocumented",
+          "description": "Undocumented immigrant (not eligible)",
+          "input": {
+            "livesInCalifornia": true,
+            "immigration_status": "undocumented",
+            "inCalifornia": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "undocumented"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "immigration",
+        "daca",
+        "state-funded",
+        "expanded-eligibility",
+        "california-specific"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-disability",
+      "programId": "medi-cal-california",
+      "name": "Medi-Cal for People with Disabilities",
+      "description": "People with disabilities may qualify for Medi-Cal with income up to 138% FPL or through SSI",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInCalifornia"
+          },
+          {
+            "var": "hasQualifyingDisability"
+          },
+          {
+            "or": [
+              {
+                "var": "receivesSSI"
+              },
+              {
+                "<=": [
+                  {
+                    "var": "householdIncome"
+                  },
+                  {
+                    "*": [
+                      {
+                        "var": "householdSize"
+                      },
+                      2040
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "People with disabilities qualify for Medi-Cal if they: 1) Receive SSI (automatic eligibility), OR 2) Have income below 138% FPL ($2,040/month for individual in 2024). California has no asset test for most disabled adults. Many people with disabilities also qualify for Medicare and can have both Medicare and Medi-Cal (dual eligibility).",
+      "requiredFields": [
+        "livesInCalifornia",
+        "hasQualifyingDisability",
+        "receivesSSI",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-ssi-ca",
+          "name": "Proof of SSI (if applicable)",
+          "description": "SSI award letter or benefit verification",
+          "required": false,
+          "alternatives": [
+            "Social Security benefit statement",
+            "Bank deposits"
+          ],
+          "where": "Social Security Administration"
+        },
+        {
+          "id": "proof-disability-ca",
+          "name": "Proof of Disability",
+          "description": "Medical records, SSA disability determination, or doctor's certification",
+          "required": true,
+          "alternatives": [
+            "Medicare card",
+            "Doctor's certification",
+            "Functional assessment"
+          ],
+          "where": "SSA or healthcare provider"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you receive SSI, you should be automatically enrolled in Medi-Cal",
+          "priority": "high"
+        },
+        {
+          "step": "Apply online at Covered California or BenefitsCal.com",
+          "url": "https://www.coveredca.com/",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Medi-Cal for People with Disabilities",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/Medi-CalEligibility.aspx",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 22,
+      "testCases": [
+        {
+          "id": "test-ca-ssi-recipient",
+          "description": "Receives SSI - automatic eligibility",
+          "input": {
+            "livesInCalifornia": true,
+            "hasQualifyingDisability": true,
+            "receivesSSI": true,
+            "householdIncome": 900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "ssi",
+            "automatic"
+          ]
+        },
+        {
+          "id": "test-ca-disabled-low-income",
+          "description": "Disabled with qualifying income",
+          "input": {
+            "livesInCalifornia": true,
+            "hasQualifyingDisability": true,
+            "receivesSSI": false,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "disabled",
+            "low-income"
+          ]
+        },
+        {
+          "id": "test-ca-disabled-high-income",
+          "description": "Disabled but income too high",
+          "input": {
+            "livesInCalifornia": true,
+            "hasQualifyingDisability": true,
+            "receivesSSI": false,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "disability",
+        "ssi",
+        "medicare-medi-cal"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CA"
+    },
+    {
+      "id": "medi-cal-ca-application-process",
+      "programId": "medi-cal-california",
+      "name": "Medi-Cal Application Process and Assistance",
+      "description": "Information about applying for Medi-Cal in California with multiple application methods and language support",
+      "ruleLogic": {
+        "var": "livesInCalifornia"
+      },
+      "ruleType": "conditional",
+      "explanation": "California offers multiple ways to apply for Medi-Cal: 1) **Covered California** (primary application portal, also handles marketplace plans), 2) **BenefitsCal.com** (state benefits portal), 3) **In-person assistance** at county offices or community organizations, 4) **Phone applications** with language support. California provides extensive language access including Spanish, Chinese, Vietnamese, and other languages. Most applications are processed within 45 days, with expedited processing for urgent medical needs.",
+      "requiredFields": [
+        "livesInCalifornia"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Covered California (recommended - handles both Medi-Cal and marketplace plans)",
+          "url": "https://www.coveredca.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply at BenefitsCal.com (state benefits portal)",
+          "url": "https://www.benefitscal.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Find local assistance at a county office or community organization",
+          "url": "https://www.coveredca.com/help/",
+          "priority": "medium"
+        },
+        {
+          "step": "Call Covered California for phone application: 1-800-300-1506",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Medi-Cal",
+          "url": "https://www.dhcs.ca.gov/services/medi-cal/Pages/HowtoApplyforMedi-Cal.aspx",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Covered California",
+          "url": "https://www.coveredca.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ca-resident",
+          "description": "Lives in California - can apply",
+          "input": {
+            "livesInCalifornia": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "california-resident"
+          ]
+        },
+        {
+          "id": "test-ca-non-resident",
+          "description": "Does not live in California",
+          "input": {
+            "livesInCalifornia": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "covered-california",
+        "benefitscal",
+        "language-access"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-CA"
+    }
+  ]
+}

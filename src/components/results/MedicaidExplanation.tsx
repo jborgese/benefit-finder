@@ -198,7 +198,7 @@ export const MedicaidExplanation: React.FC<MedicaidExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{programName}</p>
+          <p className="text-gray-600">{t('benefits.medicaid')}</p>
         </div>
         <Dialog.Close asChild>
           <button
@@ -241,6 +241,7 @@ export const MedicaidExplanation: React.FC<MedicaidExplanationProps> = ({
           programId="medicaid-federal"
           status={status}
           userProfile={userProfile}
+          evaluationResult={_explanation}
         />
 
         {/* What Medicaid Provides */}

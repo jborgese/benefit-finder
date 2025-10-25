@@ -30,8 +30,9 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
 
   // Helper function to get status-specific message
   const getStatusMessage = (status: EligibilityStatus): string => {
-    const statusKey = `results.ssi.statusMessages.${status}`;
-    return t(statusKey);
+    // Convert kebab-case status to camelCase for localization key
+    const statusKey = status === 'not-qualified' ? 'notQualified' : status;
+    return t(`results.ssi.statusMessages.${statusKey}`);
   };
 
   // Helper function to get status color classes
@@ -160,7 +161,7 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
           <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
             Why this result?
           </Dialog.Title>
-          <p className="text-gray-600">{programName}</p>
+          <p className="text-gray-600">{t('benefits.ssi')}</p>
         </div>
         <Dialog.Close asChild>
           <button

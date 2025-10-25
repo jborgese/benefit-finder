@@ -1,12 +1,13 @@
 /**
  * Specific Reasons Section Component
  *
- * Generic component for displaying specific disqualification reasons
- * that can be used across all benefit program explanations.
+ * Displays specific disqualification reasons based on actual evaluation results
+ * and user assessment data, providing personalized explanations.
  */
 
 import React from 'react';
 import { getSpecificReasons, getMaybeReasons, type UserProfile } from '../../utils/specificReasons';
+import { generateEvaluationBasedReasons, type EvaluationResult } from '../../utils/evaluationBasedReasons';
 import { EligibilityStatus } from './types';
 import { useI18n } from '../../i18n/hooks';
 
@@ -14,16 +15,26 @@ interface SpecificReasonsSectionProps {
   programId: string;
   status: EligibilityStatus;
   userProfile?: UserProfile;
+  evaluationResult?: EvaluationResult;
 }
 
 export const SpecificReasonsSection: React.FC<SpecificReasonsSectionProps> = ({
   programId,
   status,
   userProfile,
+  evaluationResult,
 }) => {
   const { t } = useI18n();
 
-  const specificReasons = getSpecificReasons(programId, status, userProfile);
+  // Use evaluation-based reasons if available, otherwise fall back to generic reasons
+  const evaluationBasedReasons = evaluationResult
+    ? generateEvaluationBasedReasons(programId, status, evaluationResult, userProfile)
+    : [];
+
+  const specificReasons = evaluationBasedReasons.length > 0
+    ? evaluationBasedReasons.map(reason => reason.message)
+    : getSpecificReasons(programId, status, userProfile);
+
   const maybeReasons = getMaybeReasons(programId, status, userProfile);
 
   // Don't render if no reasons for either status
