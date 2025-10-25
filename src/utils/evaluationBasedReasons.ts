@@ -425,18 +425,25 @@ function generateDisabilityRuleReason(programId: string, _userProfile?: UserProf
  * Get program display name
  */
 function getProgramDisplayName(programId: string): string {
-  const programNames: Record<string, string> = {
-    'wic-federal': 'WIC',
-    'medicaid-federal': 'Medicaid',
-    'snap-federal': 'SNAP',
-    'tanf-federal': 'TANF',
-    'ssi-federal': 'SSI',
-    'section8-federal': 'Section 8',
-    'lihtc-federal': 'LIHTC'
-  };
-
-  // Use direct property access with fallback for safe property access
-  return programNames[programId] ?? programId;
+  // Use a switch statement to avoid object injection warnings
+  switch (programId) {
+    case 'wic-federal':
+      return 'WIC';
+    case 'medicaid-federal':
+      return 'Medicaid';
+    case 'snap-federal':
+      return 'SNAP';
+    case 'tanf-federal':
+      return 'TANF';
+    case 'ssi-federal':
+      return 'SSI';
+    case 'section8-federal':
+      return 'Section 8';
+    case 'lihtc-federal':
+      return 'LIHTC';
+    default:
+      return programId;
+  }
 }
 
 /**

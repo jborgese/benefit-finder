@@ -253,10 +253,10 @@ export const californiaQuestions: FlowNode[] = [
 // Helper function to get California questions with proper linking
 export function getCaliforniaQuestions(): FlowNode[] {
   return californiaQuestions.map((node, index) => {
-    const nextNode = californiaQuestions[index + 1];
+    const hasNext = index + 1 < californiaQuestions.length;
     return {
       ...node,
-      nextId: nextNode ? nextNode.id : undefined,
+      nextId: hasNext ? californiaQuestions[index + 1].id : undefined,
       previousId: index > 0 ? californiaQuestions[index - 1].id : undefined
     };
   });

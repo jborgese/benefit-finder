@@ -154,9 +154,10 @@ export function getNextQuestionId(
     const currentIndex = californiaQuestionIds.indexOf(currentNodeId);
     const nextIndex = currentIndex + 1;
 
-    if (nextIndex < californiaQuestionIds.length) {
-      const nextQuestionId = californiaQuestionIds[nextIndex];
-      return nextQuestionId || DISABILITY_STATUS_NODE_ID;
+    if (nextIndex < californiaQuestionIds.length && nextIndex >= 0) {
+      // Use find method to safely get the next question
+      const nextQuestionId = californiaQuestionIds.find((_, idx) => idx === nextIndex);
+      return nextQuestionId ?? DISABILITY_STATUS_NODE_ID;
     } else {
       // Last California question, go to disability status
       return DISABILITY_STATUS_NODE_ID;
@@ -200,9 +201,10 @@ export function getPreviousQuestionId(
     const currentIndex = californiaQuestionIds.indexOf(currentNodeId);
     const prevIndex = currentIndex - 1;
 
-    if (prevIndex >= 0) {
-      const prevQuestionId = californiaQuestionIds[prevIndex];
-      return prevQuestionId || 'state';
+    if (prevIndex >= 0 && prevIndex < californiaQuestionIds.length) {
+      // Use find method to safely get the previous question
+      const prevQuestionId = californiaQuestionIds.find((_, idx) => idx === prevIndex);
+      return prevQuestionId ?? 'state';
     } else {
       // First California question, go back to state
       return 'state';
