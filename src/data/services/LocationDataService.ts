@@ -38,9 +38,7 @@ export class LocationDataService {
   private constructor() {}
 
   static getInstance(): LocationDataService {
-    if (!this.instance) {
-      this.instance = new LocationDataService();
-    }
+    this.instance ??= new LocationDataService();
     return this.instance;
   }
 
@@ -70,8 +68,9 @@ export class LocationDataService {
     if (cached) return cached;
 
     // Use type guard to prevent object injection
-    const stateData = (statesCountiesData.states as Record<string, { name: string; counties: string[] }>)[stateCode];
-    if (stateData === undefined) {
+    const states = statesCountiesData.states as Record<string, { name: string; counties: string[] }>;
+    const stateData = Object.prototype.hasOwnProperty.call(states, stateCode) ? states[stateCode] : undefined;
+    if (!stateData) {
       return [];
     }
 
@@ -89,8 +88,9 @@ export class LocationDataService {
    */
   getStateName(stateCode: string): string | null {
     // Use type guard to prevent object injection
-    const stateData = (statesCountiesData.states as Record<string, { name: string; counties: string[] }>)[stateCode];
-    return stateData?.name ?? null;
+    const states = statesCountiesData.states as Record<string, { name: string; counties: string[] }>;
+    const stateData = Object.prototype.hasOwnProperty.call(states, stateCode) ? states[stateCode] : undefined;
+    return stateData?.name || null;
   }
 
   /**
@@ -136,7 +136,8 @@ export class LocationDataService {
     }
 
     // Use type guard to prevent object injection
-    const stateData = (statesCountiesData.states as Record<string, { name: string; counties: string[] }>)[stateCode];
+    const states = statesCountiesData.states as Record<string, { name: string; counties: string[] }>;
+    const stateData = Object.prototype.hasOwnProperty.call(states, stateCode) ? states[stateCode] : undefined;
     if (!stateData) {
       errors.push(`Invalid state code: ${stateCode}`);
       return { isValid: false, errors };

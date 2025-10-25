@@ -42,8 +42,13 @@ interface EnhancedCountySelectorProps {
   searchPlaceholder?: string;
 }
 
+interface CountyOption {
+  value: string;
+  label: string;
+}
+
 // Helper function to get counties for a state
-const useCountiesForState = (selectedState: string | undefined) => {
+const useCountiesForState = (selectedState: string | undefined): CountyOption[] => {
   return useMemo(() => {
     if (!selectedState) return [];
     return getCountiesForState(selectedState);
@@ -51,10 +56,10 @@ const useCountiesForState = (selectedState: string | undefined) => {
 };
 
 // Helper function to get popular counties
-const usePopularCounties = (selectedState: string | undefined, allCounties: any[], showPopularFirst: boolean) => {
+const usePopularCounties = (selectedState: string | undefined, allCounties: CountyOption[], showPopularFirst: boolean): CountyOption[] => {
   return useMemo(() => {
     if (!selectedState || !showPopularFirst) return [];
-    const popular = POPULAR_COUNTIES[selectedState as keyof typeof POPULAR_COUNTIES] || [];
+    const popular = selectedState in POPULAR_COUNTIES ? POPULAR_COUNTIES[selectedState] ?? [] : [];
     return allCounties.filter(county =>
       popular.some(popularName =>
         county.label.toLowerCase().includes(popularName.toLowerCase()) ||
@@ -66,12 +71,12 @@ const usePopularCounties = (selectedState: string | undefined, allCounties: any[
 
 // Helper function to process counties based on search
 const useProcessedCounties = (
-  allCounties: any[],
+  allCounties: CountyOption[],
   searchQuery: string,
   selectedState: string | undefined,
   showPopularFirst: boolean,
-  popularCounties: any[]
-) => {
+  popularCounties: CountyOption[]
+): CountyOption[] => {
   return useMemo(() => {
     let counties = allCounties;
 
@@ -93,10 +98,11 @@ const useProcessedCounties = (
 };
 
 // Helper function to handle click outside
-const useClickOutside = (containerRef: React.RefObject<HTMLDivElement>, isOpen: boolean, setIsOpen: (open: boolean) => void, setSearchQuery: (query: string) => void) => {
+const useClickOutside = (containerRef: React.RefObject<HTMLDivElement>, isOpen: boolean, setIsOpen: (open: boolean) => void, setSearchQuery: (query: string) => void): void => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node | null;
+      if (containerRef.current && target && !containerRef.current.contains(target)) {
         setIsOpen(false);
         setSearchQuery('');
       }
@@ -107,6 +113,160 @@ const useClickOutside = (containerRef: React.RefObject<HTMLDivElement>, isOpen: 
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isOpen, containerRef, setIsOpen, setSearchQuery]);
+};
+
+// Helper function to render county list item
+const renderCountyItem = (
+  county: CountyOption,
+  value: string | null,
+  handleCountySelect: (countyValue: string) => void,
+  isPopular: boolean
+): React.JSX.Element => {
+  return (
+    <button
+      key={county.value}
+      type="button"
+      onClick={() => handleCountySelect(county.value)}
+      className={`
+        w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600
+        ${value === county.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
+      `}
+    >
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{county.label}</span>
+        {isPopular && (
+          <span className="text-xs text-primary-500 dark:text-primary-400">Popular</span>
+        )}
+      </div>
+    </button>
+  );
+};
+
+// Helper function to render county list
+const renderCountyList = (
+  processedCounties: CountyOption[],
+  value: string | null,
+  handleCountySelect: (countyValue: string) => void,
+  searchQuery: string,
+  showPopularFirst: boolean,
+  popularCounties: CountyOption[],
+  noResultsText: string
+): React.JSX.Element => {
+  if (processedCounties.length > 0) {
+    return (
+      <>
+        {showPopularFirst && !searchQuery && popularCounties.length > 0 && (
+          <div className="px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide">
+            Popular Counties
+          </div>
+        )}
+        {processedCounties.map((county) => {
+          const isPopular = popularCounties.some(p => p.value === county.value);
+          return renderCountyItem(county, value, handleCountySelect, isPopular);
+        })}
+      </>
+    );
+  }
+
+  return (
+    <div className="px-3 py-4 text-center text-secondary-500 dark:text-secondary-400">
+      <div className="text-4xl mb-2">🔍</div>
+      <p className="text-sm">{noResultsText}</p>
+      {searchQuery && (
+        <p className="text-xs mt-1">Try a different search term</p>
+      )}
+    </div>
+  );
+};
+
+// Helper function to render label section
+const renderLabelSection = (
+  question: QuestionDefinition,
+  id: string,
+  descId: string
+): React.JSX.Element => {
+  return (
+    <>
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
+      >
+        {question.text}
+        {question.required && (
+          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
+            *
+          </span>
+        )}
+      </label>
+
+      {question.description && (
+        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
+          {question.description}
+        </p>
+      )}
+    </>
+  );
+};
+
+// Helper function to render state context banner
+const renderStateContext = (stateName: string | null, showStateContext: boolean): React.JSX.Element | null => {
+  if (!showStateContext || !stateName) return null;
+
+  return (
+    <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+      <p className="text-sm text-blue-800 dark:text-blue-200">
+        <span className="font-medium">State:</span> {stateName}
+      </p>
+    </div>
+  );
+};
+
+// Helper function to render desktop state context
+const renderDesktopStateContext = (stateName: string | null, showStateContext: boolean): React.JSX.Element | null => {
+  if (!showStateContext || !stateName) return null;
+
+  return (
+    <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+      <div className="flex items-center">
+        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          <span className="font-medium">Selected State:</span> {stateName}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Helper function to render error messages
+const renderErrors = (errorId: string, errors: string[]): React.JSX.Element => {
+  return (
+    <div
+      id={errorId}
+      role="alert"
+      aria-live="polite"
+      className="mt-2"
+    >
+      {errors.map((err, idx) => (
+        <p key={idx} className="text-sm text-red-600 dark:text-red-400">
+          {err}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+// Helper function to render help text
+const renderHelpText = (question: QuestionDefinition, showError: boolean): React.JSX.Element | null => {
+  if (!question.helpText || showError) return null;
+
+  return (
+    <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
+      {question.helpText}
+    </p>
+  );
 };
 
 export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
@@ -147,9 +307,20 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
     setHasUserInteracted(false);
   }, [question.id]);
 
+  // Helper function to normalize errors array
+  const normalizeErrors = (errorValue: string | string[] | undefined): string[] => {
+    if (Array.isArray(errorValue)) {
+      return errorValue;
+    }
+    if (errorValue) {
+      return [errorValue];
+    }
+    return [];
+  };
+
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
-  const errors: string[] = Array.isArray(error) ? error : error ? [error] : [];
+  const errors: string[] = normalizeErrors(error);
 
   // Use helper hooks
   const allCounties = useCountiesForState(selectedState);
@@ -249,31 +420,9 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   if (mobileOptimized || deviceInfo.isMobile) {
     return (
       <div ref={containerRef} className="enhanced-county-selector-mobile">
-        <label
-          htmlFor={id}
-          className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
-        >
-          {question.text}
-          {question.required && (
-            <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
-              *
-            </span>
-          )}
-        </label>
+        {renderLabelSection(question, id, descId)}
 
-        {question.description && (
-          <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
-            {question.description}
-          </p>
-        )}
-
-        {showStateContext && stateName && (
-          <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              <span className="font-medium">State:</span> {stateName}
-            </p>
-          </div>
-        )}
+        {renderStateContext(stateName, showStateContext)}
 
         <button
           type="button"
@@ -332,68 +481,13 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
             )}
 
             <div className="max-h-60 overflow-y-auto">
-              {processedCounties.length > 0 ? (
-                <>
-                  {showPopularFirst && !searchQuery && popularCounties.length > 0 && (
-                    <div className="px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide">
-                      Popular Counties
-                    </div>
-                  )}
-                  {processedCounties.map((county) => {
-                    const isPopular = popularCounties.some(p => p.value === county.value);
-                    return (
-                      <button
-                        key={county.value}
-                        type="button"
-                        onClick={() => handleCountySelect(county.value)}
-                        className={`
-                          w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600
-                          ${value === county.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
-                        `}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{county.label}</span>
-                          {isPopular && (
-                            <span className="text-xs text-primary-500 dark:text-primary-400">Popular</span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </>
-              ) : (
-                <div className="px-3 py-4 text-center text-secondary-500 dark:text-secondary-400">
-                  <div className="text-4xl mb-2">🔍</div>
-                  <p className="text-sm">{noResultsText}</p>
-                  {searchQuery && (
-                    <p className="text-xs mt-1">Try a different search term</p>
-                  )}
-                </div>
-              )}
+              {renderCountyList(processedCounties, value, handleCountySelect, searchQuery, showPopularFirst, popularCounties, noResultsText)}
             </div>
           </div>
         )}
 
-        {question.helpText && !showError && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
-            {question.helpText}
-          </p>
-        )}
-
-        {showError && (
-          <div
-            id={errorId}
-            role="alert"
-            aria-live="polite"
-            className="mt-2"
-          >
-            {errors.map((err, idx) => (
-              <p key={idx} className="text-sm text-red-600 dark:text-red-400">
-                {err}
-              </p>
-            ))}
-          </div>
-        )}
+        {renderHelpText(question, showError)}
+        {renderErrors(errorId, errors)}
       </div>
     );
   }
@@ -401,37 +495,9 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   // Desktop-optimized render
   return (
     <div ref={containerRef} className="enhanced-county-selector-desktop relative">
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
-      >
-        {question.text}
-        {question.required && (
-          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
-            *
-          </span>
-        )}
-      </label>
+      {renderLabelSection(question, id, descId)}
 
-      {question.description && (
-        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
-          {question.description}
-        </p>
-      )}
-
-      {showStateContext && stateName && (
-        <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <div className="flex items-center">
-            <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              <span className="font-medium">Selected State:</span> {stateName}
-            </p>
-          </div>
-        </div>
-      )}
+      {renderDesktopStateContext(stateName, showStateContext)}
 
       <div className="relative">
         <button
@@ -503,69 +569,14 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
             )}
 
             <div className="max-h-60 overflow-y-auto">
-              {processedCounties.length > 0 ? (
-                <>
-                  {showPopularFirst && !searchQuery && popularCounties.length > 0 && (
-                    <div className="px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide">
-                      Popular Counties
-                    </div>
-                  )}
-                  {processedCounties.map((county) => {
-                    const isPopular = popularCounties.some(p => p.value === county.value);
-                    return (
-                      <button
-                        key={county.value}
-                        type="button"
-                        onClick={() => handleCountySelect(county.value)}
-                        className={`
-                          w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600
-                          ${value === county.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
-                        `}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{county.label}</span>
-                          {isPopular && (
-                            <span className="text-xs text-primary-500 dark:text-primary-400">Popular</span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </>
-              ) : (
-                <div className="px-3 py-4 text-center text-secondary-500 dark:text-secondary-400">
-                  <div className="text-4xl mb-2">🔍</div>
-                  <p className="text-sm">{noResultsText}</p>
-                  {searchQuery && (
-                    <p className="text-xs mt-1">Try a different search term</p>
-                  )}
-                </div>
-              )}
+              {renderCountyList(processedCounties, value, handleCountySelect, searchQuery, showPopularFirst, popularCounties, noResultsText)}
             </div>
           </div>
         )}
       </div>
 
-      {question.helpText && !showError && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
-          {question.helpText}
-        </p>
-      )}
-
-      {showError && (
-        <div
-          id={errorId}
-          role="alert"
-          aria-live="polite"
-          className="mt-2"
-        >
-          {errors.map((err, idx) => (
-            <p key={idx} className="text-sm text-red-600 dark:text-red-400">
-              {err}
-            </p>
-          ))}
-        </div>
-      )}
+      {renderHelpText(question, showError)}
+      {renderErrors(errorId, errors)}
     </div>
   );
 };

@@ -1,9 +1,6 @@
 import { initializeDatabase, getDatabase, clearDatabase } from '../db';
 import { discoverAndSeedAllRules, checkForNewRuleFiles } from './ruleDiscovery';
 
-// Constants
-const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
-
 // Flag to prevent multiple simultaneous initializations
 let isInitializing = false;
 

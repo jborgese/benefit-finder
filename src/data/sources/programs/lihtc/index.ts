@@ -32,7 +32,7 @@ export const LIHTC_PROGRAMS: BenefitProgram[] = [
 /**
  * LIHTC Program by Jurisdiction Level
  */
-export const LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL = {
+export const LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL: Record<'federal' | 'state' | 'city', BenefitProgram[]> = {
   federal: [FEDERAL_LIHTC_PROGRAM],
   state: [GEORGIA_LIHTC_PROGRAM, CALIFORNIA_LIHTC_PROGRAM, FLORIDA_LIHTC_PROGRAM],
   city: [ATLANTA_LIHTC_PROGRAM, LOS_ANGELES_LIHTC_PROGRAM, MIAMI_LIHTC_PROGRAM]
@@ -41,7 +41,7 @@ export const LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL = {
 /**
  * LIHTC Program by State
  */
-export const LIHTC_PROGRAMS_BY_STATE = {
+export const LIHTC_PROGRAMS_BY_STATE: Record<string, BenefitProgram[]> = {
   'GA': [GEORGIA_LIHTC_PROGRAM, ATLANTA_LIHTC_PROGRAM],
   'CA': [CALIFORNIA_LIHTC_PROGRAM, LOS_ANGELES_LIHTC_PROGRAM],
   'FL': [FLORIDA_LIHTC_PROGRAM, MIAMI_LIHTC_PROGRAM]
@@ -51,14 +51,14 @@ export const LIHTC_PROGRAMS_BY_STATE = {
  * Get LIHTC programs by state code
  */
 export function getLIHTCProgramsByState(stateCode: string): BenefitProgram[] {
-  return LIHTC_PROGRAMS_BY_STATE[stateCode as keyof typeof LIHTC_PROGRAMS_BY_STATE] || [];
+  return LIHTC_PROGRAMS_BY_STATE[stateCode] || [];
 }
 
 /**
  * Get LIHTC programs by jurisdiction level
  */
 export function getLIHTCProgramsByLevel(level: 'federal' | 'state' | 'city'): BenefitProgram[] {
-  return LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL[level] || [];
+  return LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL[level];
 }
 
 /**

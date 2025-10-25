@@ -40,9 +40,7 @@ export class ProgramDataService {
   }
 
   static getInstance(): ProgramDataService {
-    if (ProgramDataService.instance === undefined) {
-      ProgramDataService.instance = new ProgramDataService();
-    }
+    ProgramDataService.instance ??= new ProgramDataService();
     return ProgramDataService.instance;
   }
 
