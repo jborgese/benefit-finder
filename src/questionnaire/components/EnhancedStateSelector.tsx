@@ -10,6 +10,11 @@ import { useGeolocation, coordinatesToState, coordinatesToCounty } from '../hook
 import { useQuestionFlowStore } from '../store';
 import type { SelectProps } from './types';
 
+// Type for store with answerQuestion method
+interface StoreWithAnswerQuestion {
+  answerQuestion: (questionId: string, fieldName: string, value: unknown) => void;
+}
+
 // Enhanced state data with priority and region information
 const US_STATES_ENHANCED = [
   // Most populous states (high priority)
@@ -91,7 +96,7 @@ const processLocationResult = (
   detectedState: string | null,
   value: string,
   onChange: (value: string) => void,
-  store: any,
+  store: StoreWithAnswerQuestion,
   setDetectedState: (state: string | null) => void,
   setLocationDetected: (detected: boolean) => void
 ): void => {

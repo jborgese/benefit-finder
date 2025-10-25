@@ -152,11 +152,11 @@ function extractProgramInfo(rulePackage: Record<string, unknown>, config: RuleDi
     shortName,
     description,
     category,
-    jurisdiction: (metadata.jurisdiction as string) ?? config.defaultJurisdiction,
+    jurisdiction: (metadata.jurisdiction as string) || config.defaultJurisdiction,
     website,
     phoneNumber,
     applicationUrl,
-    tags: (metadata.tags as string[]) ?? [],
+    tags: (metadata.tags as string[]) || [],
   };
 }
 
@@ -177,7 +177,7 @@ function extractProgramName(ruleName: string, programId: string): string {
 
   // Check if we have a direct mapping
   if (programId in programNameMap) {
-    return programNameMap[programId];
+    return programNameMap[programId] as string;
   }
 
   // Fallback: try to extract from rule name
@@ -218,7 +218,7 @@ function extractProgramDescription(programId: string, ruleDescription?: string):
 
   // Check if we have a direct mapping
   if (programId in descriptionMap) {
-    return descriptionMap[programId];
+    return descriptionMap[programId] as string;
   }
 
   // Fallback to rule description or default
@@ -242,7 +242,7 @@ function extractShortName(programName: string, programId: string): string {
 
   // Check if we have a direct mapping
   if (programId in shortNameMap) {
-    return shortNameMap[programId];
+    return shortNameMap[programId] as string;
   }
 
   // Try to extract acronym from program name
@@ -297,7 +297,7 @@ function extractWebsite(programId: string): string {
     'lihtc-federal': 'https://www.hud.gov/program_offices/housing/mfh/htsf/lihtc',
   };
 
-  return websites[programId] ?? 'https://www.benefits.gov';
+  return websites[programId] || 'https://www.benefits.gov';
 }
 
 /**
@@ -314,7 +314,7 @@ function extractPhoneNumber(programId: string): string {
     'lihtc-federal': '1-800-955-2232',
   };
 
-  return phoneNumbers[programId] ?? '1-800-318-2596';
+  return phoneNumbers[programId] || '1-800-318-2596';
 }
 
 /**
@@ -331,7 +331,7 @@ function extractApplicationUrl(programId: string): string {
     'lihtc-federal': 'https://www.hud.gov/program_offices/housing/mfh/htsf/lihtc',
   };
 
-  return applicationUrls[programId] ?? 'https://www.benefits.gov';
+  return applicationUrls[programId] || 'https://www.benefits.gov';
 }
 
 /**

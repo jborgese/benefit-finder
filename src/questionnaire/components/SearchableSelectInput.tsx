@@ -15,7 +15,6 @@ export interface SearchableSelectInputProps {
   onChange: (value: string | null) => void;
   error?: string[];
   disabled?: boolean;
-  autoFocus?: boolean;
   onEnterKey?: () => void;
   options: QuestionOption[];
   searchPlaceholder?: string;
@@ -29,13 +28,12 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
   onChange,
   error,
   disabled = false,
-  autoFocus = false,
   onEnterKey,
   options,
   searchPlaceholder = 'Search...',
   noResultsText = 'No results found',
   maxHeight = 200
-}) => {
+}): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -67,8 +65,10 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
     switch (e.key) {
       case 'Enter':
         e.preventDefault();
-        if (isOpen && highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
-          handleSelect(filteredOptions[highlightedIndex]);
+        if (isOpen && highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
+          // eslint-disable-next-line security/detect-object-injection
+          const selectedOption = filteredOptions[highlightedIndex];
+          handleSelect(selectedOption);
         } else if (!isOpen) {
           setIsOpen(true);
           inputRef.current?.focus();
@@ -113,7 +113,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
   }, [disabled, isOpen, highlightedIndex, filteredOptions, handleSelect, onEnterKey]);
 
   // Handle search input change
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchTerm(e.target.value);
     setHighlightedIndex(-1);
     if (!isOpen) {
@@ -132,7 +132,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
   // Handle click outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setSearchTerm('');
@@ -148,14 +148,13 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
   // Scroll highlighted option into view
   useEffect(() => {
-    if (highlightedIndex >= 0 && listRef.current) {
+    if (highlightedIndex >= 0 && listRef.current && highlightedIndex < listRef.current.children.length) {
+      // eslint-disable-next-line security/detect-object-injection
       const highlightedElement = listRef.current.children[highlightedIndex] as HTMLElement;
-      if (highlightedElement) {
-        highlightedElement.scrollIntoView({
-          block: 'nearest',
-          behavior: 'smooth'
-        });
-      }
+      highlightedElement?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth'
+      });
     }
   }, [highlightedIndex]);
 
@@ -175,7 +174,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
       <input
         type="hidden"
         name={question.fieldName}
-        value={value || ''}
+        value={value ?? ''}
       />
 
       {/* Main input field */}
@@ -200,7 +199,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={question.ariaLabel || question.text}
+        aria-label={question.ariaLabel ?? question.text}
         aria-describedby={hasError ? `${question.id}-error` : undefined}
       >
         <div className="flex-1 min-w-0">
@@ -210,7 +209,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
             </span>
           ) : (
             <span className="block truncate text-gray-500">
-              {question.placeholder || 'Select an option...'}
+              {question.placeholder ?? 'Select an option...'}
             </span>
           )}
         </div>

@@ -214,7 +214,7 @@ describe('Keyboard Navigation', () => {
           question={mockQuestion}
           value={5}
           onChange={onChange}
-          showSteppers
+          showSteppers={true}
         />
       );
 

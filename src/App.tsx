@@ -32,6 +32,181 @@ import { sampleFlow } from './questionnaire/sampleFlow';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
+const NAVIGATION_HOME_KEY = 'navigation.home';
+
+// Helper functions to reduce cognitive complexity
+const convertAnswersToProfileData = (answers: Record<string, unknown>): {
+  profileData: {
+    householdSize: number;
+    householdIncome: number;
+    incomePeriod: 'monthly' | 'annual';
+    dateOfBirth: string;
+    citizenship: 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other';
+    employmentStatus: 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student';
+    state: string;
+    hasDisability: boolean;
+    isPregnant: boolean;
+    hasChildren: boolean;
+  };
+  userProfile: {
+    state: string;
+    householdSize: number;
+    householdIncome: number;
+    citizenship: string;
+    employmentStatus: string;
+    hasDisability: boolean;
+    isPregnant: boolean;
+    hasChildren: boolean;
+  };
+} => {
+  const householdIncome = answers.householdIncome as number;
+  const incomePeriod = answers.incomePeriod as string;
+  const householdSize = answers.householdSize as number;
+  const dateOfBirth = answers.dateOfBirth as string;
+  const state = answers.state as string;
+  const citizenship = answers.citizenship as string;
+  const employmentStatus = answers.employmentStatus as string;
+
+  // Convert string boolean values to actual booleans
+  const hasQualifyingDisability = answers.hasQualifyingDisability === 'true' || answers.hasQualifyingDisability === true;
+  const isPregnant = answers.isPregnant === 'true' || answers.isPregnant === true;
+  const hasChildren = answers.hasChildren === 'true' || answers.hasChildren === true;
+
+  // Convert income to annual amount based on user's selection
+  const annualIncome = incomePeriod === 'monthly' ? householdIncome * 12 : householdIncome;
+
+  return {
+    profileData: {
+      householdSize,
+      householdIncome: annualIncome,
+      incomePeriod: incomePeriod as 'monthly' | 'annual',
+      dateOfBirth,
+      citizenship: citizenship as 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other',
+      employmentStatus: employmentStatus as 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student',
+      state,
+      hasDisability: hasQualifyingDisability,
+      isPregnant,
+      hasChildren,
+    },
+    userProfile: {
+      state,
+      householdSize,
+      householdIncome: annualIncome,
+      citizenship,
+      employmentStatus,
+      hasDisability: hasQualifyingDisability,
+      isPregnant,
+      hasChildren
+    }
+  };
+};
+
+const importRulesWithLogging = async (state?: string): Promise<void> => {
+  console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to import federal rules...');
+  const importStartTime = Date.now();
+
+  try {
+    const importResult = await importFederalRules();
+    const importDuration = Date.now() - importStartTime;
+    console.log(`🔍 [DEBUG] handleCompleteQuestionnaire: Import duration: ${importDuration}ms`);
+    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Import result:', importResult);
+  } catch (error) {
+    const importDuration = Date.now() - importStartTime;
+    console.error(`🔍 [DEBUG] handleCompleteQuestionnaire: Federal rules import failed after ${importDuration}ms`);
+    console.error('🔍 [DEBUG] handleCompleteQuestionnaire: Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      name: error instanceof Error ? error.name : 'Unknown error type'
+    });
+    throw error;
+  }
+
+  if (state) {
+    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Importing state-specific rules for:', state);
+    await importStateSpecificRules(state);
+    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: State-specific rules import completed');
+  } else {
+    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: No state provided, skipping state-specific rules');
+  }
+};
+
+const createResultFromEvaluation = (result: EligibilityEvaluationResult, programRulesMap: Map<string, string[]>): {
+  programId: string;
+  programName: string;
+  programDescription: string;
+  jurisdiction: string;
+  confidenceScore: number;
+  explanation: {
+    reason: string;
+    details: string[];
+    rulesCited: string[];
+  };
+  requiredDocuments: Array<{
+    id: string;
+    name: string;
+    required: boolean;
+    description?: string;
+    where?: string;
+  }>;
+  nextSteps: Array<{
+    step: string;
+    url?: string;
+    priority: 'low' | 'medium' | 'high';
+  }>;
+  evaluatedAt: Date;
+  rulesVersion: string;
+  estimatedBenefit?: {
+    amount: number;
+    frequency: 'monthly' | 'annual' | 'one-time';
+    description?: string;
+  };
+} => {
+  const baseResult = {
+    programId: result.programId,
+    programName: getProgramName(result.programId),
+    programDescription: getProgramDescription(result.programId),
+    jurisdiction: US_FEDERAL_JURISDICTION,
+    confidenceScore: result.confidence,
+    explanation: {
+      reason: result.reason,
+      details: formatCriteriaDetails(result.criteriaResults, result.eligible, result.programId),
+      rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
+    },
+    requiredDocuments: result.requiredDocuments?.map(doc => ({
+      id: `doc-${Math.random().toString(36).substr(2, 9)}`,
+      name: doc.document,
+      required: true,
+      description: doc.description,
+      where: doc.where
+    })) ?? [],
+    nextSteps: result.nextSteps?.map(step => ({
+      step: step.step,
+      url: step.url,
+      priority: step.priority ?? 'medium' as const
+    })) ?? [],
+    evaluatedAt: new Date(result.evaluatedAt),
+    rulesVersion: result.ruleVersion ?? '1.0.0'
+  };
+
+  if (result.estimatedBenefit) {
+    return {
+      ...baseResult,
+      estimatedBenefit: {
+        amount: result.estimatedBenefit.amount ?? 0,
+        frequency: ((): 'monthly' | 'annual' | 'one-time' => {
+          const freq = result.estimatedBenefit.frequency;
+          if (freq === 'one_time') return 'one-time';
+          if (freq === 'quarterly') return 'monthly';
+          if (freq === 'annual') return 'annual';
+          return 'monthly';
+        })(),
+        description: result.estimatedBenefit.description
+      }
+    };
+  }
+
+  return baseResult;
+};
 
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 
@@ -53,7 +228,7 @@ async function importFederalRules(): Promise<void> {
       overwriteExisting: true
     });
     console.log(`[DEBUG] SNAP federal rules import result:`, snapResult);
-    console.log(`[DEBUG] SNAP rules imported:`, snapResult.imported, 'errors:', snapResult.errors?.length || 0);
+    console.log(`[DEBUG] SNAP rules imported:`, snapResult.imported, 'errors:', snapResult.errors.length || 0);
 
     // Import SSI federal rules
     const { default: ssiFederalRules } = await import('./rules/federal/ssi/ssi-federal-rules.json');
@@ -64,7 +239,7 @@ async function importFederalRules(): Promise<void> {
       overwriteExisting: true
     });
     console.log(`[DEBUG] SSI federal rules import result:`, ssiResult);
-    console.log(`[DEBUG] SSI rules imported:`, ssiResult.imported, 'errors:', ssiResult.errors?.length || 0);
+    console.log(`[DEBUG] SSI rules imported:`, ssiResult.imported, 'errors:', ssiResult.errors.length || 0);
 
     // Import Section 8 federal rules
     const { default: section8FederalRules } = await import('./rules/federal/section8/section8-federal-rules.json');
@@ -75,7 +250,7 @@ async function importFederalRules(): Promise<void> {
       overwriteExisting: true
     });
     console.log(`[DEBUG] Section 8 federal rules import result:`, section8Result);
-    console.log(`[DEBUG] Section 8 rules imported:`, section8Result.imported, 'errors:', section8Result.errors?.length || 0);
+    console.log(`[DEBUG] Section 8 rules imported:`, section8Result.imported, 'errors:', section8Result.errors.length || 0);
 
     // Import LIHTC federal rules
     const { default: lihtcFederalRules } = await import('./rules/federal/lihtc/lihtc-federal-rules.json');
@@ -86,7 +261,7 @@ async function importFederalRules(): Promise<void> {
       overwriteExisting: true
     });
     console.log(`[DEBUG] LIHTC federal rules import result:`, lihtcResult);
-    console.log(`[DEBUG] LIHTC rules imported:`, lihtcResult.imported, 'errors:', lihtcResult.errors?.length || 0);
+    console.log(`[DEBUG] LIHTC rules imported:`, lihtcResult.imported, 'errors:', lihtcResult.errors.length || 0);
 
     // Import TANF federal rules
     const { default: tanfFederalRules } = await import('./rules/federal/tanf/tanf-federal-rules.json');
@@ -97,7 +272,7 @@ async function importFederalRules(): Promise<void> {
       overwriteExisting: true
     });
     console.log(`[DEBUG] TANF federal rules import result:`, tanfResult);
-    console.log(`[DEBUG] TANF rules imported:`, tanfResult.imported, 'errors:', tanfResult.errors?.length || 0);
+    console.log(`[DEBUG] TANF rules imported:`, tanfResult.imported, 'errors:', tanfResult.errors.length || 0);
 
     console.log(`🔍 [DEBUG] importFederalRules: All federal rules imported successfully`);
     return; // Explicit return to ensure function completes
@@ -304,6 +479,7 @@ function App(): React.ReactElement {
 
   const handleCompleteQuestionnaire = async (answers: Record<string, unknown>): Promise<void> => {
     console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Function called with answers:', answers);
+
     try {
       // Immediately transition to results UI; perform work in background
       console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Setting app state to results');
@@ -315,8 +491,6 @@ function App(): React.ReactElement {
       await initializeApp();
     } catch (dbError) {
       console.error('Database initialization failed:', dbError);
-
-      // Show error message to user instead of continuing with broken state
       setErrorMessage('Unable to initialize the application database. Please try refreshing the page or contact support if the issue persists.');
       setIsProcessingResults(false);
       setAppState('error');
@@ -325,37 +499,8 @@ function App(): React.ReactElement {
 
     try {
       // Convert questionnaire answers to user profile format
-      const householdIncome = answers.householdIncome as number;
-      const incomePeriod = answers.incomePeriod as string;
-      const householdSize = answers.householdSize as number;
-      const dateOfBirth = answers.dateOfBirth as string;
-      const state = answers.state as string;
-      const citizenship = answers.citizenship as string;
-      const employmentStatus = answers.employmentStatus as string;
-      // Convert string boolean values to actual booleans
-      const hasQualifyingDisability = answers.hasQualifyingDisability === 'true' || answers.hasQualifyingDisability === true;
-      const isPregnant = answers.isPregnant === 'true' || answers.isPregnant === true;
-      const hasChildren = answers.hasChildren === 'true' || answers.hasChildren === true;
-
-      // Convert income to annual amount based on user's selection
-      const annualIncome = incomePeriod === 'monthly' ? householdIncome * 12 : householdIncome;
-
-      // Create user profile from answers
-      const profileData = {
-        householdSize,
-        householdIncome: annualIncome,
-        incomePeriod: incomePeriod as 'monthly' | 'annual',
-        // Use the date of birth directly from the questionnaire
-        dateOfBirth,
-        citizenship: citizenship as 'us_citizen' | 'permanent_resident' | 'refugee' | 'asylee' | 'other',
-        employmentStatus: employmentStatus as 'employed' | 'unemployed' | 'self_employed' | 'retired' | 'disabled' | 'student',
-        // Include state field - this is critical for state-specific eligibility
-        state,
-        // Include other collected fields
-        hasDisability: hasQualifyingDisability,
-        isPregnant,
-        hasChildren,
-      };
+      const { profileData, userProfile } = convertAnswersToProfileData(answers);
+      const { state } = profileData;
 
       // Create user profile and evaluate eligibility
       let profile;
@@ -372,66 +517,16 @@ function App(): React.ReactElement {
         });
 
         // Store current user profile for passing to components
-        setCurrentUserProfile({
-          state,
-          householdSize,
-          householdIncome: annualIncome,
-          citizenship,
-          employmentStatus,
-          hasDisability: hasQualifyingDisability,
-          isPregnant,
-          hasChildren
-        });
+        setCurrentUserProfile(userProfile);
 
-        // Import federal rules first (apply to all states)
-        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to import federal rules...');
-        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: importFederalRules function exists:', typeof importFederalRules);
-        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Current profile data:', {
-          profileId: profile.id,
-          householdIncome: profile.householdIncome,
-          householdSize: profile.householdSize,
-          state: profile.state
-        });
-
-        const importStartTime = Date.now();
-        try {
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Calling importFederalRules()...');
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to call importFederalRules function');
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: importFederalRules function type:', typeof importFederalRules);
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Calling importFederalRules now...');
-          const importResult = await importFederalRules();
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: importFederalRules returned:', importResult);
-          const importDuration = Date.now() - importStartTime;
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Federal rules import completed successfully');
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Import duration:', importDuration + 'ms');
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Import result:', importResult);
-        } catch (error) {
-          const importDuration = Date.now() - importStartTime;
-          console.error('🔍 [DEBUG] handleCompleteQuestionnaire: Federal rules import failed after', importDuration + 'ms');
-          console.error('🔍 [DEBUG] handleCompleteQuestionnaire: Error details:', {
-            message: error instanceof Error ? error.message : 'Unknown error',
-            stack: error instanceof Error ? error.stack : 'No stack trace',
-            name: error instanceof Error ? error.name : 'Unknown error type'
-          });
-          throw error; // Re-throw to ensure we don't continue with missing rules
-        }
-
-        // Import state-specific rules if state is provided
-        if (state) {
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Importing state-specific rules for:', state);
-          await importStateSpecificRules(state);
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: State-specific rules import completed');
-        } else {
-          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: No state provided, skipping state-specific rules');
-        }
+        // Import rules with logging
+        await importRulesWithLogging(state);
 
         console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to evaluate all programs for profile:', profile.id);
         batchResult = await evaluateAllPrograms(profile.id);
         console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Program evaluation completed');
       } catch (dbError) {
         console.error('Database operations failed:', dbError);
-
-        // Show error message to user instead of fallback results
         setErrorMessage('Unable to calculate eligibility results at this time. Please try refreshing the page or contact support if the issue persists.');
         setIsProcessingResults(false);
         setAppState('error');
@@ -442,7 +537,6 @@ function App(): React.ReactElement {
 
       // Convert batch results to array for easier processing
       const evaluationResults = Array.from(batchResult.programResults.values());
-
       console.log('[DEBUG] App.tsx - evaluationResults', evaluationResults);
 
       // Get all program rules for each program (for comprehensive requirements display)
@@ -453,113 +547,32 @@ function App(): React.ReactElement {
           programRulesMap.set(result.programId, allRules);
         }
       }
-
       console.log('[DEBUG] App.tsx - programRulesMap', programRulesMap);
 
       // Convert evaluation results to the expected format
       const qualifiedResults = evaluationResults
         .filter((result: EligibilityEvaluationResult) => result.eligible)
         .map((result: EligibilityEvaluationResult) => ({
-          programId: result.programId,
-          programName: getProgramName(result.programId),
-          programDescription: getProgramDescription(result.programId),
-          jurisdiction: US_FEDERAL_JURISDICTION,
+          ...createResultFromEvaluation(result, programRulesMap),
           status: 'qualified' as const,
           confidence: result.confidence > 80 ? 'high' as const : 'medium' as const,
-          confidenceScore: result.confidence,
-          explanation: {
-            reason: result.reason,
-            details: formatCriteriaDetails(result.criteriaResults, result.eligible, result.programId),
-            rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
-          },
-          requiredDocuments: result.requiredDocuments?.map(doc => ({
-            id: `doc-${Math.random().toString(36).substr(2, 9)}`,
-            name: doc.document,
-            required: true, // All documents from the rule engine are required
-            description: doc.description,
-            where: doc.where
-          })) ?? [],
-          nextSteps: result.nextSteps?.map(step => ({
-            step: step.step,
-            url: step.url,
-            priority: step.priority ?? 'medium' as const
-          })) ?? [],
-          estimatedBenefit: result.estimatedBenefit ? {
-            amount: result.estimatedBenefit.amount ?? 0,
-            frequency: ((): 'monthly' | 'annual' | 'one-time' => {
-              const freq = result.estimatedBenefit.frequency;
-              if (freq === 'one_time') return 'one-time';
-              if (freq === 'quarterly') return 'monthly';
-              if (freq === 'annual') return 'annual';
-              return 'monthly';
-            })(),
-            description: result.estimatedBenefit.description
-          } : undefined,
-          evaluatedAt: new Date(result.evaluatedAt),
-          rulesVersion: result.ruleVersion ?? '1.0.0'
         }));
 
       // Handle ineligible results based on confidence and completeness
       const maybeResults = evaluationResults
         .filter((result: EligibilityEvaluationResult) => !result.eligible && ((result.incomplete ?? false) || result.confidence < 70))
         .map((result: EligibilityEvaluationResult) => ({
-          programId: result.programId,
-          programName: getProgramName(result.programId),
-          programDescription: getProgramDescription(result.programId),
-          jurisdiction: US_FEDERAL_JURISDICTION,
+          ...createResultFromEvaluation(result, programRulesMap),
           status: 'maybe' as const,
           confidence: result.confidence < 50 ? 'low' as const : 'medium' as const,
-          confidenceScore: result.confidence,
-          explanation: {
-            reason: result.reason,
-            details: formatCriteriaDetails(result.criteriaResults, result.eligible, result.programId),
-            rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
-          },
-          requiredDocuments: result.requiredDocuments?.map(doc => ({
-            id: `doc-${Math.random().toString(36).substr(2, 9)}`,
-            name: doc.document,
-            required: true,
-            description: doc.description,
-            where: doc.where
-          })) ?? [],
-          nextSteps: result.nextSteps?.map(step => ({
-            step: step.step,
-            url: step.url,
-            priority: step.priority ?? 'medium' as const
-          })) ?? [],
-          evaluatedAt: new Date(result.evaluatedAt),
-          rulesVersion: result.ruleVersion ?? '1.0.0'
         }));
 
       const notQualifiedResults = evaluationResults
         .filter((result: EligibilityEvaluationResult) => !result.eligible && !result.incomplete && result.confidence >= 70)
         .map((result: EligibilityEvaluationResult) => ({
-          programId: result.programId,
-          programName: getProgramName(result.programId),
-          programDescription: getProgramDescription(result.programId),
-          jurisdiction: US_FEDERAL_JURISDICTION,
+          ...createResultFromEvaluation(result, programRulesMap),
           status: 'not-qualified' as const,
           confidence: result.confidence >= 90 ? 'high' as const : 'medium' as const,
-          confidenceScore: result.confidence,
-          explanation: {
-            reason: result.reason,
-            details: formatCriteriaDetails(result.criteriaResults, result.eligible, result.programId),
-            rulesCited: programRulesMap.get(result.programId) ?? [result.ruleId]
-          },
-          requiredDocuments: result.requiredDocuments?.map(doc => ({
-            id: `doc-${Math.random().toString(36).substr(2, 9)}`,
-            name: doc.document,
-            required: true,
-            description: doc.description,
-            where: doc.where
-          })) ?? [],
-          nextSteps: result.nextSteps?.map(step => ({
-            step: step.step,
-            url: step.url,
-            priority: step.priority ?? 'medium' as const
-          })) ?? [],
-          evaluatedAt: new Date(result.evaluatedAt),
-          rulesVersion: result.ruleVersion ?? '1.0.0'
         }));
 
       const results = {
@@ -669,10 +682,10 @@ function App(): React.ReactElement {
                         variant="ghost"
                         size="sm"
                         onClick={handleBackToHome}
-                        aria-label={t('navigation.home')}
+                        aria-label={t(NAVIGATION_HOME_KEY)}
                         className="animate-slide-in-right"
                       >
-                        {t('navigation.home')}
+                        {t(NAVIGATION_HOME_KEY)}
                       </Button>
                     )}
 
@@ -772,10 +785,10 @@ function App(): React.ReactElement {
                         variant="ghost"
                         size="sm"
                         onClick={handleBackToHome}
-                        aria-label={t('navigation.home')}
+                        aria-label={t(NAVIGATION_HOME_KEY)}
                         className="animate-slide-in-right flex-shrink-0 text-xs px-2"
                       >
-                        {t('navigation.home')}
+                        {t(NAVIGATION_HOME_KEY)}
                       </Button>
                     )}
 
@@ -874,10 +887,10 @@ function App(): React.ReactElement {
                         variant="ghost"
                         size="sm"
                         onClick={handleBackToHome}
-                        aria-label={t('navigation.home')}
+                        aria-label={t(NAVIGATION_HOME_KEY)}
                         className="animate-slide-in-right"
                       >
-                        {t('navigation.home')}
+                        {t(NAVIGATION_HOME_KEY)}
                       </Button>
                     )}
 
