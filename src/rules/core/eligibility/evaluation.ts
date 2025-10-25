@@ -185,6 +185,27 @@ function logRuleResult(
 }
 
 /**
+ * Determines if a rule is an income-based rule
+ */
+function isIncomeRule(rule: EligibilityRuleDocument): boolean {
+  const incomeKeywords = [
+    'income',
+    'snap_income_eligible',
+    'householdIncome',
+    'income-limit',
+    'income_eligible',
+    'fpl',
+    'poverty'
+  ];
+  const ruleId = rule.id.toLowerCase();
+  const ruleName = rule.name.toLowerCase();
+
+  return incomeKeywords.some(keyword =>
+    ruleId.includes(keyword) || ruleName.includes(keyword)
+  );
+}
+
+/**
  * Evaluate all rules for eligibility
  */
 export function evaluateAllRules(
@@ -201,8 +222,19 @@ export function evaluateAllRules(
   let firstFailedResult: RuleEvaluationResult | null = null;
   const allMissingFields = new Set<string>();
 
-  for (const rule of rules) {
-    debugLog('🔍 [DEBUG] Evaluating rule', {
+  // First pass: Check for income rule failures (hard stops)
+  const incomeRules = rules.filter(rule => isIncomeRule(rule));
+  const nonIncomeRules = rules.filter(rule => !isIncomeRule(rule));
+
+  debugLog('🔍 [DEBUG] Income hard stops: Evaluating income rules first', {
+    incomeRulesCount: incomeRules.length,
+    nonIncomeRulesCount: nonIncomeRules.length,
+    incomeRuleIds: incomeRules.map(r => r.id)
+  });
+
+  // Evaluate income rules first
+  for (const rule of incomeRules) {
+    debugLog('🔍 [DEBUG] Evaluating income rule', {
       ruleId: rule.id,
       ruleName: rule.name,
       ruleType: rule.ruleType,
@@ -212,7 +244,7 @@ export function evaluateAllRules(
 
     // Check for missing fields for this rule
     const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
-    debugLog('🔍 [DEBUG] Missing fields for rule', {
+    debugLog('🔍 [DEBUG] Missing fields for income rule', {
       ruleId: rule.id,
       missingFields,
       requiredFields: rule.requiredFields,
@@ -242,9 +274,9 @@ export function evaluateAllRules(
 
     ruleResults.push({ rule, evalResult, missingFields, detailedResult });
 
-    // Check if this rule passed
+    // Check if this income rule passed
     const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
-    debugLog('🔍 [DEBUG] Rule evaluation outcome', {
+    debugLog('🔍 [DEBUG] Income rule evaluation outcome', {
       ruleId: rule.id,
       ruleName: rule.name,
       rulePassedResult,
@@ -254,15 +286,120 @@ export function evaluateAllRules(
       executionTime: evalResult.executionTime
     });
 
-    if (!rulePassedResult && overallEligible) {
+    if (!rulePassedResult) {
+      // Income rule failed - this is a hard stop
       overallEligible = false;
       firstFailedRule = rule;
       firstFailedResult = evalResult;
-      debugLog('🔍 [DEBUG] First failed rule', {
+      debugLog('🚨 [INCOME HARD STOP] Income rule failed - user disqualified due to income', {
         ruleId: rule.id,
         ruleName: rule.name,
-        reason: 'Rule evaluation failed'
+        reason: 'Income rule evaluation failed - hard stop'
       });
+
+      // Skip evaluating non-income rules since income failed
+      debugLog('🔍 [DEBUG] Skipping non-income rules due to income failure', {
+        skippedRulesCount: nonIncomeRules.length,
+        skippedRuleIds: nonIncomeRules.map(r => r.id)
+      });
+
+      // Add placeholder results for skipped rules
+      for (const skippedRule of nonIncomeRules) {
+        ruleResults.push({
+          rule: skippedRule,
+          evalResult: {
+            result: false,
+            success: true,
+            executionTime: 0,
+            error: undefined,
+            context: { skipped: true, reason: 'Income rule failed - hard stop' }
+          },
+          missingFields: [],
+          detailedResult: {
+            result: false,
+            success: true,
+            executionTime: 0,
+            error: undefined,
+            context: { skipped: true, reason: 'Income rule failed - hard stop' },
+            comparisons: []
+          }
+        });
+      }
+
+      break; // Exit the income rules loop
+    }
+  }
+
+  // Second pass: Evaluate non-income rules only if income rules passed
+  if (overallEligible) {
+    debugLog('🔍 [DEBUG] Income rules passed - evaluating non-income rules', {
+      nonIncomeRulesCount: nonIncomeRules.length,
+      nonIncomeRuleIds: nonIncomeRules.map(r => r.id)
+    });
+
+    for (const rule of nonIncomeRules) {
+      debugLog('🔍 [DEBUG] Evaluating non-income rule', {
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.ruleType,
+        priority: rule.priority,
+        requiredFields: rule.requiredFields
+      });
+
+      // Check for missing fields for this rule
+      const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
+      debugLog('🔍 [DEBUG] Missing fields for non-income rule', {
+        ruleId: rule.id,
+        missingFields,
+        requiredFields: rule.requiredFields,
+        dataKeys: Object.keys(data)
+      });
+      missingFields.forEach(field => allMissingFields.add(field));
+
+      // Add debugging for rule evaluation
+      logRuleEvaluation(profileId, programId, rule.id, rule.ruleLogic, data);
+
+      // Use detailed evaluator to capture comparison values
+      const detailedResult = evaluateRuleWithDetails(
+        rule.ruleLogic as JsonLogicRule,
+        data
+      );
+
+      // Convert to standard evaluation result format
+      const evalResult: RuleEvaluationResult = {
+        result: detailedResult.result,
+        success: detailedResult.success,
+        executionTime: detailedResult.executionTime,
+        error: detailedResult.error,
+        context: detailedResult.context
+      };
+
+      logRuleResult(rule.id, evalResult.success, evalResult.result, evalResult.error);
+
+      ruleResults.push({ rule, evalResult, missingFields, detailedResult });
+
+      // Check if this rule passed
+      const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
+      debugLog('🔍 [DEBUG] Non-income rule evaluation outcome', {
+        ruleId: rule.id,
+        ruleName: rule.name,
+        rulePassedResult,
+        success: evalResult.success,
+        result: evalResult.result,
+        error: evalResult.error,
+        executionTime: evalResult.executionTime
+      });
+
+      if (!rulePassedResult && overallEligible) {
+        overallEligible = false;
+        firstFailedRule = rule;
+        firstFailedResult = evalResult;
+        debugLog('🔍 [DEBUG] First failed non-income rule', {
+          ruleId: rule.id,
+          ruleName: rule.name,
+          reason: 'Non-income rule evaluation failed'
+        });
+      }
     }
   }
 

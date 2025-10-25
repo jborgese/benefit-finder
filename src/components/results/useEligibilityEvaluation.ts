@@ -153,7 +153,7 @@ function evaluateProgram(
   const evaluationData = evaluateRules(rules, profile);
 
   // Determine eligibility status
-  const statusData = determineStatus(evaluationData.passedRules, evaluationData.totalRules);
+  const statusData = determineStatus(evaluationData.passedRules, evaluationData.totalRules, evaluationData.hasIncomeFailure);
 
   // Gather program information
   const programInfo = gatherProgramInfo(rulePackage, programId);
@@ -391,6 +391,28 @@ function logRuleDebug(rule: RuleDefinition, evaluationResult: { success: boolean
 }
 
 /**
+ * Determines if a rule is an income-based rule
+ */
+function isIncomeRule(rule: RuleDefinition): boolean {
+  const incomeKeywords = [
+    'income',
+    'snap_income_eligible',
+    'householdIncome',
+    'income-limit',
+    'income-limit',
+    'income_eligible',
+    'fpl',
+    'poverty'
+  ];
+  const ruleId = rule.id.toLowerCase();
+  const ruleName = rule.name.toLowerCase();
+
+  return incomeKeywords.some(keyword =>
+    ruleId.includes(keyword) || ruleName.includes(keyword)
+  );
+}
+
+/**
  * Evaluates all rules and returns evaluation data
  */
 function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
@@ -399,17 +421,21 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
   rulesCited: string[];
   details: string[];
   calculations: Array<{ label: string; value: string | number; comparison?: string }>;
+  hasIncomeFailure: boolean;
 } {
   let passedRules = 0;
   let totalRules = 0;
+  let hasIncomeFailure = false;
   const rulesCited: string[] = [];
   const details: string[] = [];
   const calculations: Array<{ label: string; value: string | number; comparison?: string }> = [];
 
   logEvaluationStart(profile);
 
+  // First pass: Check for income rule failures (hard stops)
   for (const rule of rules) {
     if (rule.ruleType !== 'eligibility') continue;
+    if (!isIncomeRule(rule)) continue;
 
     totalRules++;
 
@@ -417,6 +443,44 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
       const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
       logRuleDebug(rule, evaluationResult);
       debugSnapIncomeRule(rule, profile, evaluationResult);
+
+      const ruleCalculation = generateRuleCalculation(rule, profile);
+      if (ruleCalculation) {
+        calculations.push(ruleCalculation);
+      }
+
+      if (processRuleResult(rule, evaluationResult, details, profile)) {
+        passedRules++;
+      } else {
+        // Income rule failed - this is a hard stop
+        hasIncomeFailure = true;
+        if (import.meta.env.DEV) {
+          console.warn(`🚨 [INCOME HARD STOP] Rule ${rule.id} failed - user disqualified due to income`);
+        }
+      }
+
+      rulesCited.push(rule.id);
+    } catch (err) {
+      console.error(`🚨 [ERROR] Error evaluating income rule ${rule.id}:`, err);
+    }
+  }
+
+  // If income rules failed, skip other rules and return early
+  if (hasIncomeFailure) {
+    logEvaluationSummary(passedRules, totalRules, rulesCited);
+    return { passedRules, totalRules, rulesCited, details, calculations, hasIncomeFailure };
+  }
+
+  // Second pass: Evaluate non-income rules only if income rules passed
+  for (const rule of rules) {
+    if (rule.ruleType !== 'eligibility') continue;
+    if (isIncomeRule(rule)) continue; // Skip income rules (already evaluated)
+
+    totalRules++;
+
+    try {
+      const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
+      logRuleDebug(rule, evaluationResult);
 
       const ruleCalculation = generateRuleCalculation(rule, profile);
       if (ruleCalculation) {
@@ -435,17 +499,22 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
 
   logEvaluationSummary(passedRules, totalRules, rulesCited);
 
-  return { passedRules, totalRules, rulesCited, details, calculations };
+  return { passedRules, totalRules, rulesCited, details, calculations, hasIncomeFailure };
 }
 
 /**
- * Determines eligibility status based on pass rate
+ * Determines eligibility status based on pass rate and income failures
  */
-function determineStatus(passedRules: number, totalRules: number): {
+function determineStatus(passedRules: number, totalRules: number, hasIncomeFailure: boolean): {
   status: EligibilityStatus;
   confidence: ConfidenceLevel;
   confidenceScore: number;
 } {
+  // Income failure is a hard stop - immediate disqualification
+  if (hasIncomeFailure) {
+    return { status: 'not-qualified', confidence: 'high', confidenceScore: 95 };
+  }
+
   const passRate = totalRules > 0 ? passedRules / totalRules : 0;
 
   if (passRate >= 1.0) {

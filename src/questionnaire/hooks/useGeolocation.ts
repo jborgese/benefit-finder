@@ -257,12 +257,50 @@ export const coordinatesToState = (coordinates: GeolocationCoordinates): string 
 
 /**
  * Utility to get county from coordinates
- * This is a placeholder - in production you'd want to use a proper
- * reverse geocoding service
+ * Simplified county detection for major counties in Georgia
  */
 export const coordinatesToCounty = (coordinates: GeolocationCoordinates): string | null => {
-  // This would require a comprehensive county boundary dataset
-  // For now, return null to indicate county detection is not available
+  const { latitude, longitude } = coordinates;
+
+  console.log(`🏘️ Converting coordinates to county: lat=${latitude}, lon=${longitude}`);
+
+  // Simplified county boundaries for Georgia (approximate)
+  const georgiaCounties = [
+    // Major counties around Atlanta area
+    { name: 'Cobb', minLat: 33.7, maxLat: 34.0, minLon: -84.8, maxLon: -84.3 },
+    { name: 'Fulton', minLat: 33.6, maxLat: 34.0, minLon: -84.6, maxLon: -84.2 },
+    { name: 'Gwinnett', minLat: 33.8, maxLat: 34.2, minLon: -84.2, maxLon: -83.8 },
+    { name: 'DeKalb', minLat: 33.6, maxLat: 34.0, minLon: -84.4, maxLon: -84.0 },
+    { name: 'Clayton', minLat: 33.4, maxLat: 33.7, minLon: -84.5, maxLon: -84.1 },
+    { name: 'Cherokee', minLat: 34.0, maxLat: 34.4, minLon: -84.6, maxLon: -84.2 },
+    { name: 'Forsyth', minLat: 34.1, maxLat: 34.4, minLon: -84.3, maxLon: -83.9 },
+    { name: 'Henry', minLat: 33.3, maxLat: 33.7, minLon: -84.3, maxLon: -83.9 },
+    { name: 'Douglas', minLat: 33.6, maxLat: 34.0, minLon: -84.9, maxLon: -84.5 },
+    { name: 'Paulding', minLat: 33.7, maxLat: 34.1, minLon: -85.0, maxLon: -84.6 },
+    // Other major Georgia counties
+    { name: 'Richmond', minLat: 33.2, maxLat: 33.6, minLon: -82.2, maxLon: -81.8 }, // Augusta
+    { name: 'Chatham', minLat: 31.8, maxLat: 32.2, minLon: -81.2, maxLon: -80.8 }, // Savannah
+    { name: 'Muscogee', minLat: 32.3, maxLat: 32.7, minLon: -85.0, maxLon: -84.6 }, // Columbus
+    { name: 'Bibb', minLat: 32.7, maxLat: 33.1, minLon: -83.8, maxLon: -83.4 }, // Macon
+    { name: 'Houston', minLat: 32.4, maxLat: 32.8, minLon: -83.8, maxLon: -83.4 },
+    { name: 'Hall', minLat: 34.1, maxLat: 34.5, minLon: -83.9, maxLon: -83.5 }, // Gainesville
+  ];
+
+  for (const county of georgiaCounties) {
+    const isInBounds = latitude >= county.minLat &&
+                      latitude <= county.maxLat &&
+                      longitude >= county.minLon &&
+                      longitude <= county.maxLon;
+
+    console.log(`🔍 Checking ${county.name}: lat ${latitude} in [${county.minLat}, ${county.maxLat}] = ${latitude >= county.minLat && latitude <= county.maxLat}, lon ${longitude} in [${county.minLon}, ${county.maxLon}] = ${longitude >= county.minLon && longitude <= county.maxLon}, match: ${isInBounds}`);
+
+    if (isInBounds) {
+      console.log(`✅ Found matching county: ${county.name} for coordinates (${latitude}, ${longitude})`);
+      return county.name;
+    }
+  }
+
+  console.log(`❌ No county found for coordinates (${latitude}, ${longitude})`);
   return null;
 };
 
@@ -317,8 +355,10 @@ if (typeof window !== 'undefined') {
       speed: null,
     } as GeolocationCoordinates;
 
-    const result = coordinatesToState(mockCoords);
-    console.log(`Result for user coordinates: ${result}`);
-    return result;
+    const stateResult = coordinatesToState(mockCoords);
+    const countyResult = coordinatesToCounty(mockCoords);
+    console.log(`State result: ${stateResult}`);
+    console.log(`County result: ${countyResult}`);
+    return { state: stateResult, county: countyResult };
   };
 }

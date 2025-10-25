@@ -66,18 +66,21 @@ async function discoverRuleFiles(config: RuleDiscoveryConfig): Promise<Discovere
   const discoveredFiles: DiscoveredRuleFile[] = [];
 
   try {
-    // Get all rule files dynamically using import.meta.glob
+    // Use dynamic imports instead of static imports to avoid conflicts with App.tsx
     // This will find all files matching the pattern in the specified directory
-    const ruleFiles = import.meta.glob('../rules/federal/**/*-federal-rules.json', { eager: true });
+    const ruleFiles = import.meta.glob('../rules/federal/**/*-federal-rules.json');
 
     if (import.meta.env.DEV) {
       console.warn('[DEBUG] Rule Discovery: Found rule files:', Object.keys(ruleFiles));
       console.warn('[DEBUG] Rule Discovery: Federal rule files found:', Object.keys(ruleFiles).filter(f => f.includes('federal')));
     }
 
-    for (const [filePath, module] of Object.entries(ruleFiles)) {
+    // Process each rule file with dynamic import
+    for (const [filePath, importFn] of Object.entries(ruleFiles)) {
       try {
-        const rulePackage = (module as any).default;
+        // Use dynamic import instead of eager loading
+        const module = await (importFn as () => Promise<any>)();
+        const rulePackage = module.default;
 
         if (!rulePackage?.metadata?.programs?.length) {
           console.warn(`[DEBUG] Rule Discovery: Skipping ${filePath} - no programs defined`);
