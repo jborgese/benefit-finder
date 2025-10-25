@@ -19,7 +19,7 @@ test.describe('Questionnaire Flow', () => {
     await waitForPageReady(page);
 
     // Click start assessment to begin questionnaire
-    const startButton = page.locator('button', { hasText: /Start Assessment/i });
+    const startButton = page.locator('button', { hasText: /Eligibility Questionnaire/i });
     if (await startButton.isVisible()) {
       await startButton.click();
       await page.waitForTimeout(500);
@@ -29,7 +29,7 @@ test.describe('Questionnaire Flow', () => {
   test.describe('Basic Question Navigation', () => {
     test('should display first question on flow start', async ({ page }) => {
       // Wait for questionnaire to be ready (started by beforeEach)
-      const question = page.locator('[role="group"][aria-label*="Question"]').first();
+      const question = page.locator('.question-wrapper').first();
       await expect(question).toBeVisible({ timeout: 10000 });
     });
 

@@ -721,9 +721,9 @@ function App(): React.ReactElement {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200"
-                      aria-label="Visit frootsnoops.com"
+                      aria-label="Visit frootsnoops.com - a frootsnoops site"
                     >
-                      <div className="w-10 h-10 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
+                      <div className="w-11 h-11 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
                         <img
                           src="/frootsnoops_mascot.png"
                           alt="Frootsnoops mascot"
@@ -817,15 +817,15 @@ function App(): React.ReactElement {
                 {/* Tablet/Desktop Portrait Layout */}
                 <div className="hidden md:flex lg:hidden items-center justify-between px-2">
                   <div className="flex items-center gap-1 min-w-0 flex-shrink">
-                    <h1 className="text-base font-display font-semibold text-secondary-900 dark:text-secondary-100 truncate">
+                    <h2 className="text-base font-display font-semibold text-secondary-900 dark:text-secondary-100 truncate">
                       {t('app.title')}
-                    </h1>
+                    </h2>
                     <a
                       href="https://frootsnoops.com"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
-                      aria-label="Visit frootsnoops.com"
+                      aria-label="Visit frootsnoops.com - a frootsnoops site"
                     >
                       <div className="w-5 h-5 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
                         <img
@@ -921,17 +921,17 @@ function App(): React.ReactElement {
                 {/* Mobile Layout */}
                 <div className="flex md:hidden items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-display font-semibold text-secondary-900 dark:text-secondary-100">
+                    <h2 className="text-lg font-display font-semibold text-secondary-900 dark:text-secondary-100">
                       {t('app.title')}
-                    </h1>
+                    </h2>
                     <a
                       href="https://frootsnoops.com"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center hover:opacity-80 transition-opacity duration-200"
-                      aria-label="Visit frootsnoops.com"
+                      aria-label="Visit frootsnoops.com - a frootsnoops site"
                     >
-                      <div className="w-8 h-8 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
+                      <div className="w-11 h-11 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
                         <img
                           src="/frootsnoops_mascot.png"
                           alt="Frootsnoops mascot"

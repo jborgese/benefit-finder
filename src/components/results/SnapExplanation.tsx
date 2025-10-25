@@ -332,7 +332,7 @@ export const SnapExplanation: React.FC<SnapExplanationProps> = ({
             {t('results.snap.resources.title')}
           </h4>
           <ul className="space-y-1 text-sm text-gray-700">
-            <li>• {t('results.snap.resources.website')}: <a href="https://www.fns.usda.gov/snap" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">fns.usda.gov/snap</a></li>
+            <li>• {t('results.snap.resources.website')}: <a href="https://www.fns.usda.gov/snap" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Visit USDA SNAP program website">fns.usda.gov/snap</a></li>
             <li>• {t('results.snap.resources.hotline')}</li>
             <li>• {t('results.snap.resources.nutrition')}</li>
             <li>• {t('results.snap.resources.ebt')}</li>

@@ -333,7 +333,7 @@ export const MedicaidExplanation: React.FC<MedicaidExplanationProps> = ({
             {t('results.medicaid.resources.title')}
           </h4>
           <ul className="space-y-1 text-sm text-gray-700">
-            <li>• {t('results.medicaid.resources.website')}: <a href="https://www.medicaid.gov" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">medicaid.gov</a></li>
+            <li>• {t('results.medicaid.resources.website')}: <a href="https://www.medicaid.gov" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Visit Medicaid.gov official website">medicaid.gov</a></li>
             <li>• {t('results.medicaid.resources.stateOffice')}</li>
             <li>• {t('results.medicaid.resources.healthcare')}</li>
             <li>• {t('results.medicaid.resources.coverage')}</li>

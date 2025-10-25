@@ -319,7 +319,7 @@ export const WicExplanation: React.FC<WicExplanationProps> = ({
             {t('results.wic.resources.title')}
           </h4>
           <ul className="space-y-1 text-sm text-gray-700">
-            <li>• {t('results.wic.resources.website')}: <a href="https://www.fns.usda.gov/wic" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">fns.usda.gov/wic</a></li>
+            <li>• {t('results.wic.resources.website')}: <a href="https://www.fns.usda.gov/wic" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Visit USDA WIC program website">fns.usda.gov/wic</a></li>
             <li>• {t('results.wic.resources.hotline')}</li>
             <li>• {t('results.wic.resources.education')}</li>
             <li>• {t('results.wic.resources.locations')}</li>

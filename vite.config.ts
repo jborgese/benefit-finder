@@ -22,13 +22,45 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Manual chunks will be configured when features are integrated into the app
-        // For now, let Vite handle automatic code splitting
+        // Manual chunks for better development experience
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react/jsx-runtime'],
+          'react-vendor': ['react', 'react-dom', 'react/jsx-runtime', 'react-router-dom'],
+          'radix-ui': [
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-alert-dialog',
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-icons',
+            '@radix-ui/react-label',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-progress',
+            '@radix-ui/react-select',
+            '@radix-ui/react-slider',
+            '@radix-ui/react-switch',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
+          ],
+          'database': ['rxdb', 'dexie'],
+          'state': ['zustand', 'immer'],
+          'utils': ['zod', 'nanoid', 'crypto-js', 'json-logic-js'],
         }
       }
     },
     chunkSizeWarningLimit: 1500
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'json-logic-js',
+      'zustand',
+      'zod',
+      'nanoid',
+      'crypto-js',
+      'dexie',
+      'rxdb'
+    ]
   }
 });

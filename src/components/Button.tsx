@@ -43,7 +43,7 @@ export function Button({
   const getSizeClasses = (size: 'sm' | 'md' | 'lg'): string => {
     switch (size) {
       case 'sm':
-        return 'px-4 py-2 text-sm min-h-[36px]';
+        return 'px-4 py-2 text-sm min-h-[44px]'; // Updated to meet WCAG 2.1 AA requirement
       case 'lg':
         return 'px-8 py-4 text-lg min-h-[52px]';
       default:
@@ -65,7 +65,7 @@ export function Button({
         return getPrimaryClasses();
       case 'secondary':
         return `
-          bg-secondary-700 dark:bg-secondary-600 text-secondary-100
+          bg-secondary-700 dark:bg-secondary-600 text-white
           hover:bg-secondary-600 dark:hover:bg-secondary-500 hover:shadow-md hover:shadow-secondary-600/25
           focus:ring-secondary-500 dark:focus:ring-secondary-400
           active:bg-secondary-800 dark:active:bg-secondary-700

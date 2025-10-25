@@ -317,7 +317,7 @@ export const TanfExplanation: React.FC<TanfExplanationProps> = ({
             {t('results.tanf.resources.title')}
           </h4>
           <ul className="space-y-1 text-sm text-gray-700">
-            <li>• {t('results.tanf.resources.website')}: <a href="https://www.acf.hhs.gov/ofa" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">acf.hhs.gov/ofa</a></li>
+            <li>• {t('results.tanf.resources.website')}: <a href="https://www.acf.hhs.gov/ofa" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Visit ACF Office of Family Assistance website">acf.hhs.gov/ofa</a></li>
             <li>• {t('results.tanf.resources.hotline')}</li>
             <li>• {t('results.tanf.resources.workServices')}</li>
             <li>• {t('results.tanf.resources.childcare')}</li>

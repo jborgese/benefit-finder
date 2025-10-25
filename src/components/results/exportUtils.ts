@@ -150,7 +150,7 @@ function buildProgramHTML(program: ProgramEligibilityResult): string {
             ${program.nextSteps.map(s => `
               <li>
                 ${s.step}
-                ${s.url ? `<br><a href="${s.url}" style="color: #2563eb; font-size: 9pt;">${s.url}</a>` : ''}
+                ${s.url ? `<br><a href="${s.url}" style="color: #2563eb; font-size: 9pt;" aria-label="Visit website for ${s.step}">${s.url}</a>` : ''}
               </li>
             `).join('')}
           </ol>

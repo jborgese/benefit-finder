@@ -24,8 +24,8 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
   const { textSize, increaseTextSize, decreaseTextSize, resetTextSize } = useTextSize();
 
   const sizeClasses = {
-    sm: 'h-8 px-2 text-sm',
-    md: 'h-10 px-3 text-base',
+    sm: 'h-11 px-2 text-sm', // Updated to meet WCAG 2.1 AA requirement (44px)
+    md: 'h-11 px-3 text-base', // Updated to meet WCAG 2.1 AA requirement (44px)
     lg: 'h-12 px-4 text-lg',
   } as const;
 

@@ -198,7 +198,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
               disabled={disabled || !canDecrement}
               aria-label="Decrease value"
               className={`
-                w-8 h-8 flex items-center justify-center
+                w-11 h-11 flex items-center justify-center
                 ${isDecrementing
                   ? 'bg-blue-200 dark:bg-blue-600 border-blue-400 dark:border-blue-400'
                   : 'bg-gray-100 dark:bg-secondary-700 border-gray-300 dark:border-secondary-600'
@@ -236,7 +236,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
               disabled={disabled || !canIncrement}
               aria-label="Increase value"
               className={`
-                w-8 h-8 flex items-center justify-center
+                w-11 h-11 flex items-center justify-center
                 ${isIncrementing
                   ? 'bg-blue-200 dark:bg-blue-600 border-blue-400 dark:border-blue-400'
                   : 'bg-gray-100 dark:bg-secondary-700 border-gray-300 dark:border-secondary-600'

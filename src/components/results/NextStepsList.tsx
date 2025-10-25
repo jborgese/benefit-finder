@@ -116,7 +116,7 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
               <div className="flex items-start gap-3">
                 {/* Step Number & Checkbox */}
                 <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border-2 border-blue-700">
+                  <div className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border-2 border-blue-700">
                     {index + 1}
                   </div>
                   <div className="text-xs text-gray-500 font-medium">Step {index + 1}</div>
@@ -163,6 +163,7 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mt-2"
+                      aria-label={`Visit website for ${step.step}`}
                     >
                       <span>Visit website</span>
                       <svg
