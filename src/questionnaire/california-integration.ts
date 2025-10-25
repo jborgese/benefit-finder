@@ -83,7 +83,7 @@ export function createCaliforniaQuestionnaireFlow(baseFlow: QuestionFlow): Quest
 
   try {
     return addCaliforniaQuestionsToFlow(baseFlow, stateNodeId);
-  } catch (error) {
+  } catch {
     console.warn('Could not find state node, inserting California questions at end of flow');
     // Fallback: add at the end
     const lastNode = Array.from(baseFlow.nodes.values()).find(node => !node.nextId);
@@ -100,7 +100,7 @@ export function createCaliforniaQuestionnaireFlow(baseFlow: QuestionFlow): Quest
  * @param answers - Current questionnaire answers
  * @returns Array of California question IDs that should be shown
  */
-export function getVisibleCaliforniaQuestions(answers: Map<string, any>): string[] {
+export function getVisibleCaliforniaQuestions(answers: Map<string, unknown>): string[] {
   const state = answers.get('state');
   if (state !== 'CA') {
     return [];
@@ -110,7 +110,7 @@ export function getVisibleCaliforniaQuestions(answers: Map<string, any>): string
   const visibleQuestions: string[] = [];
 
   californiaQuestions.forEach(node => {
-    const question = node.question;
+    const { question } = node;
 
     // Check if question should be shown based on showIf condition
     if (question.showIf) {
@@ -158,7 +158,7 @@ export function getCaliforniaFieldMappings(): Record<string, string> {
  * @param answers - Current questionnaire answers
  * @returns Array of validation errors
  */
-export function validateCaliforniaAnswers(answers: Map<string, any>): string[] {
+export function validateCaliforniaAnswers(answers: Map<string, unknown>): string[] {
   const errors: string[] = [];
   const state = answers.get('state');
 
@@ -193,7 +193,7 @@ export function validateCaliforniaAnswers(answers: Map<string, any>): string[] {
  * @param answers - Current questionnaire answers
  * @returns Array of next steps for California residents
  */
-export function getCaliforniaNextSteps(answers: Map<string, any>): string[] {
+export function getCaliforniaNextSteps(answers: Map<string, unknown>): string[] {
   const steps: string[] = [];
   const state = answers.get('state');
 

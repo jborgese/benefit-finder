@@ -51,37 +51,10 @@ export function generateEvaluationBasedReasons(
 
   const reasons: EvaluationBasedReason[] = [];
 
-  // Process criteria results to find specific failures
-  if (evaluationResult.criteriaResults) {
-    for (const criterion of evaluationResult.criteriaResults) {
-      if (!criterion.met) {
-        const reason = generateReasonFromCriterion(criterion, programId, userProfile);
-        if (reason) {
-          reasons.push(reason);
-        }
-      }
-    }
-  }
-
-  // Process calculations to find income/asset issues
-  if (evaluationResult.calculations) {
-    for (const calc of evaluationResult.calculations) {
-      const reason = generateReasonFromCalculation(calc, programId, userProfile);
-      if (reason) {
-        reasons.push(reason);
-      }
-    }
-  }
-
-  // Process rules cited to find specific rule failures
-  if (evaluationResult.rulesCited) {
-    for (const ruleId of evaluationResult.rulesCited) {
-      const reason = generateReasonFromRule(ruleId, programId, userProfile);
-      if (reason) {
-        reasons.push(reason);
-      }
-    }
-  }
+  // Process all evaluation components
+  processCriteriaResults(evaluationResult, programId, userProfile, reasons);
+  processCalculations(evaluationResult, programId, userProfile, reasons);
+  processRulesCited(evaluationResult, programId, userProfile, reasons);
 
   // If no specific reasons found, add generic fallback
   if (reasons.length === 0) {
@@ -97,12 +70,77 @@ export function generateEvaluationBasedReasons(
 }
 
 /**
+ * Process criteria results to find specific failures
+ */
+function processCriteriaResults(
+  evaluationResult: EvaluationResult,
+  programId: string,
+  userProfile: UserProfile | undefined,
+  reasons: EvaluationBasedReason[]
+): void {
+  if (!evaluationResult.criteriaResults) {
+    return;
+  }
+
+  for (const criterion of evaluationResult.criteriaResults) {
+    if (!criterion.met) {
+      const reason = generateReasonFromCriterion(criterion, programId, userProfile);
+      if (reason) {
+        reasons.push(reason);
+      }
+    }
+  }
+}
+
+/**
+ * Process calculations to find income/asset issues
+ */
+function processCalculations(
+  evaluationResult: EvaluationResult,
+  programId: string,
+  userProfile: UserProfile | undefined,
+  reasons: EvaluationBasedReason[]
+): void {
+  if (!evaluationResult.calculations) {
+    return;
+  }
+
+  for (const calc of evaluationResult.calculations) {
+    const reason = generateReasonFromCalculation(calc, programId, userProfile);
+    if (reason) {
+      reasons.push(reason);
+    }
+  }
+}
+
+/**
+ * Process rules cited to find specific rule failures
+ */
+function processRulesCited(
+  evaluationResult: EvaluationResult,
+  programId: string,
+  userProfile: UserProfile | undefined,
+  reasons: EvaluationBasedReason[]
+): void {
+  if (!evaluationResult.rulesCited) {
+    return;
+  }
+
+  for (const ruleId of evaluationResult.rulesCited) {
+    const reason = generateReasonFromRule(ruleId, programId, userProfile);
+    if (reason) {
+      reasons.push(reason);
+    }
+  }
+}
+
+/**
  * Generate reason from a failed criterion
  */
 function generateReasonFromCriterion(
   criterion: { criterion: string; met: boolean; value?: unknown; threshold?: unknown; comparison?: string; message?: string },
   programId: string,
-  userProfile?: UserProfile
+  _userProfile?: UserProfile
 ): EvaluationBasedReason | null {
   const { criterion: criterionName, value, threshold, comparison, message } = criterion;
 
@@ -176,8 +214,8 @@ function generateReasonFromCriterion(
  */
 function generateReasonFromCalculation(
   calc: { label: string; value: string | number; comparison?: string },
-  programId: string,
-  userProfile?: UserProfile
+  _programId: string,
+  _userProfile?: UserProfile
 ): EvaluationBasedReason | null {
   const { label, value, comparison } = calc;
 
@@ -185,7 +223,7 @@ function generateReasonFromCalculation(
   if (label.toLowerCase().includes('income')) {
     return {
       key: 'income_calculation',
-      message: `Your ${label.toLowerCase()} ($${formatNumber(value)}) ${comparison || 'exceeds'} the program limit`,
+      message: `Your ${label.toLowerCase()} ($${formatNumber(value)}) ${comparison ?? 'exceeds'} the program limit`,
       severity: 'critical',
       actionable: true,
       suggestion: 'Income limits vary by household size and may include deductions for certain expenses'
@@ -196,7 +234,7 @@ function generateReasonFromCalculation(
   if (label.toLowerCase().includes('asset')) {
     return {
       key: 'asset_calculation',
-      message: `Your ${label.toLowerCase()} ($${formatNumber(value)}) ${comparison || 'exceeds'} the program limit`,
+      message: `Your ${label.toLowerCase()} ($${formatNumber(value)}) ${comparison ?? 'exceeds'} the program limit`,
       severity: 'critical',
       actionable: true,
       suggestion: 'Some assets may be excluded from eligibility calculations'
@@ -212,7 +250,7 @@ function generateReasonFromCalculation(
 function generateReasonFromRule(
   ruleId: string,
   programId: string,
-  userProfile?: UserProfile
+  _userProfile?: UserProfile
 ): EvaluationBasedReason | null {
   // Parse rule ID to understand what failed
   const ruleParts = ruleId.toLowerCase().split('-');
@@ -378,7 +416,7 @@ function generateAgeRuleReason(programId: string, userProfile?: UserProfile): st
 /**
  * Generate disability rule reason
  */
-function generateDisabilityRuleReason(programId: string, userProfile?: UserProfile): string {
+function generateDisabilityRuleReason(programId: string, _userProfile?: UserProfile): string {
   const programName = getProgramDisplayName(programId);
   return `You indicated you don't have a qualifying disability. ${programName} requires documented disability status for eligibility.`;
 }
@@ -397,7 +435,12 @@ function getProgramDisplayName(programId: string): string {
     'lihtc-federal': 'LIHTC'
   };
 
-  return programNames[programId] || programId;
+  // Use Object.prototype.hasOwnProperty.call for safe property access
+  if (Object.prototype.hasOwnProperty.call(programNames, programId)) {
+    return programNames[programId];
+  }
+
+  return programId;
 }
 
 /**

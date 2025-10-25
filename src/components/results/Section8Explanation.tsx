@@ -124,7 +124,7 @@ const getSection8Resources = (t: (key: string) => string): string[] => {
 };
 
 export const Section8Explanation: React.FC<Section8ExplanationProps> = ({
-  programName,
+  programName: _programName,
   status,
   explanation: _explanation,
   userProfile,

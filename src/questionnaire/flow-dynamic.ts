@@ -8,6 +8,9 @@
 import type { QuestionFlow, FlowNode, QuestionContext } from './types';
 import { getCaliforniaQuestions } from './california-questions';
 
+// Constants
+const DISABILITY_STATUS_NODE_ID = 'disability-status';
+
 /**
  * Update flow based on state selection
  *
@@ -33,7 +36,7 @@ export function updateFlowForState(
  */
 function addCaliforniaQuestionsToFlow(
   flow: QuestionFlow,
-  context: QuestionContext
+  _context: QuestionContext
 ): QuestionFlow {
   const californiaQuestions = getCaliforniaQuestions();
 
@@ -54,7 +57,7 @@ function addCaliforniaQuestionsToFlow(
     const updatedNode: FlowNode = {
       ...node,
       previousId: index === 0 ? 'state' : californiaQuestions[index - 1].id,
-      nextId: index === californiaQuestions.length - 1 ? 'disability-status' : californiaQuestions[index + 1].id
+      nextId: index === californiaQuestions.length - 1 ? DISABILITY_STATUS_NODE_ID : californiaQuestions[index + 1].id
     };
 
     updatedFlow.nodes.set(node.id, updatedNode);
@@ -68,13 +71,13 @@ function addCaliforniaQuestionsToFlow(
   updatedFlow.nodes.set('state', updatedStateNode);
 
   // Update disability status to point back from last California question
-  const disabilityNode = updatedFlow.nodes.get('disability-status');
+  const disabilityNode = updatedFlow.nodes.get(DISABILITY_STATUS_NODE_ID);
   if (disabilityNode) {
     const updatedDisabilityNode = {
       ...disabilityNode,
       previousId: californiaQuestions[californiaQuestions.length - 1].id
     };
-    updatedFlow.nodes.set('disability-status', updatedDisabilityNode);
+    updatedFlow.nodes.set(DISABILITY_STATUS_NODE_ID, updatedDisabilityNode);
   }
 
   return updatedFlow;
@@ -99,12 +102,12 @@ function removeCaliforniaQuestionsFromFlow(flow: QuestionFlow): QuestionFlow {
 
   // Update state node to point directly to disability status
   const stateNode = updatedFlow.nodes.get('state');
-  const disabilityNode = updatedFlow.nodes.get('disability-status');
+  const disabilityNode = updatedFlow.nodes.get(DISABILITY_STATUS_NODE_ID);
 
   if (stateNode && disabilityNode) {
     const updatedStateNode = {
       ...stateNode,
-      nextId: 'disability-status'
+      nextId: DISABILITY_STATUS_NODE_ID
     };
     const updatedDisabilityNode = {
       ...disabilityNode,
@@ -112,7 +115,7 @@ function removeCaliforniaQuestionsFromFlow(flow: QuestionFlow): QuestionFlow {
     };
 
     updatedFlow.nodes.set('state', updatedStateNode);
-    updatedFlow.nodes.set('disability-status', updatedDisabilityNode);
+    updatedFlow.nodes.set(DISABILITY_STATUS_NODE_ID, updatedDisabilityNode);
   }
 
   return updatedFlow;
@@ -123,23 +126,23 @@ function removeCaliforniaQuestionsFromFlow(flow: QuestionFlow): QuestionFlow {
  *
  * @param currentNodeId - Current question ID
  * @param state - Selected state
- * @param answers - Current answers
+ * @param _answers - Current answers
  * @returns Next question ID
  */
 export function getNextQuestionId(
   currentNodeId: string,
   state: string,
-  answers: Map<string, any>
+  _answers: Map<string, unknown>
 ): string | null {
   // Handle state selection
   if (currentNodeId === 'state') {
     if (state === 'CA') {
       // Return first California question
       const californiaQuestions = getCaliforniaQuestions();
-      return californiaQuestions[0]?.id || 'disability-status';
+      return californiaQuestions[0]?.id || DISABILITY_STATUS_NODE_ID;
     } else {
       // Skip California questions, go to disability status
-      return 'disability-status';
+      return DISABILITY_STATUS_NODE_ID;
     }
   }
 
@@ -155,7 +158,7 @@ export function getNextQuestionId(
       return californiaQuestionIds[nextIndex];
     } else {
       // Last California question, go to disability status
-      return 'disability-status';
+      return DISABILITY_STATUS_NODE_ID;
     }
   }
 
@@ -168,16 +171,16 @@ export function getNextQuestionId(
  *
  * @param currentNodeId - Current question ID
  * @param state - Selected state
- * @param answers - Current answers
+ * @param _answers - Current answers
  * @returns Previous question ID
  */
 export function getPreviousQuestionId(
   currentNodeId: string,
   state: string,
-  answers: Map<string, any>
+  _answers: Map<string, unknown>
 ): string | null {
   // Handle disability status
-  if (currentNodeId === 'disability-status') {
+  if (currentNodeId === DISABILITY_STATUS_NODE_ID) {
     if (state === 'CA') {
       // Return last California question
       const californiaQuestions = getCaliforniaQuestions();
@@ -213,13 +216,13 @@ export function getPreviousQuestionId(
  *
  * @param questionId - Question ID to check
  * @param state - Selected state
- * @param answers - Current answers
+ * @param _answers - Current answers
  * @returns True if question should be visible
  */
 export function shouldShowQuestion(
   questionId: string,
   state: string,
-  answers: Map<string, any>
+  _answers: Map<string, unknown>
 ): boolean {
   const californiaQuestions = getCaliforniaQuestions();
   const californiaQuestionIds = californiaQuestions.map(node => node.id);
@@ -238,13 +241,13 @@ export function shouldShowQuestion(
  *
  * @param flow - The questionnaire flow
  * @param state - Selected state
- * @param answers - Current answers
+ * @param _answers - Current answers
  * @returns Array of visible question IDs
  */
 export function getVisibleQuestions(
   flow: QuestionFlow,
   state: string,
-  answers: Map<string, any>
+  _answers: Map<string, unknown>
 ): string[] {
   const visibleQuestions: string[] = [];
 

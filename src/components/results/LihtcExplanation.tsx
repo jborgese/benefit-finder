@@ -125,7 +125,7 @@ const getLihtcResources = (t: (key: string) => string): string[] => {
 };
 
 export const LihtcExplanation: React.FC<LihtcExplanationProps> = ({
-  programName,
+  programName: _programName,
   status,
   explanation: _explanation,
   userProfile,

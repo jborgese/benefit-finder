@@ -23,7 +23,13 @@ import type { QuestionContext } from './types';
 /**
  * Example: Using California questions in the questionnaire
  */
-export function demonstrateCaliforniaIntegration() {
+export function demonstrateCaliforniaIntegration(): {
+  flow: ReturnType<typeof updateFlowForState>;
+  visibleQuestions: string[];
+  shouldShowImmigration: boolean;
+  nextQuestion: string | null;
+  prevQuestion: string | null;
+} {
   // Create the enhanced flow with California questions
   const flow = createEnhancedFlow();
 
@@ -70,7 +76,11 @@ export function demonstrateCaliforniaIntegration() {
 /**
  * Example: California-specific validation and next steps
  */
-export function demonstrateCaliforniaValidation() {
+export function demonstrateCaliforniaValidation(): {
+  validationErrors: string[];
+  nextSteps: string[];
+  fieldMappings: Record<string, string>;
+} {
   // Example answers for a California resident
   const answers = new Map([
     ['state', 'CA'],
@@ -107,7 +117,7 @@ export function demonstrateCaliforniaValidation() {
 /**
  * Example: Handling state changes in the questionnaire
  */
-export function demonstrateStateChanges() {
+export function demonstrateStateChanges(): ReturnType<typeof updateFlowForState> {
   const flow = createEnhancedFlow();
 
   // User initially selects Georgia
@@ -143,8 +153,8 @@ export function demonstrateStateChanges() {
 /**
  * Example: California-specific question flow
  */
-export function demonstrateCaliforniaFlow() {
-  const flow = createEnhancedFlow();
+export function demonstrateCaliforniaFlow(): string[] {
+  const _flow = createEnhancedFlow();
   const answers = new Map([
     ['state', 'CA'],
     ['householdSize', 1],
@@ -169,7 +179,7 @@ export function demonstrateCaliforniaFlow() {
   let currentQuestion = 'state';
 
   // Navigate through California questions
-  for (const questionId of californiaQuestions) {
+  for (const _questionId of californiaQuestions) {
     const nextQuestion = getNextQuestionId(currentQuestion, 'CA', answers);
     if (nextQuestion) {
       flowPath.push(nextQuestion);

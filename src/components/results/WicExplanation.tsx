@@ -135,7 +135,7 @@ function getWicRequirementsExplanation(userProfile?: { isPregnant?: boolean; has
 
 
 export const WicExplanation: React.FC<WicExplanationProps> = ({
-  programName,
+  programName: _programName,
   status,
   explanation: _explanation,
   userProfile,

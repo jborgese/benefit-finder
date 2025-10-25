@@ -60,7 +60,7 @@ const INCOME_THRESHOLDS = {
 const genericReasons: SpecificReason[] = [
   {
     key: 'citizenship',
-    message: 'You indicated you are not a U.S. citizen or qualified immigrant. Most benefit programs require U.S. citizenship or eligible immigration status.',
+    message: `${CITIZENSHIP_MESSAGE}. Most benefit programs require U.S. citizenship or eligible immigration status.`,
     condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
   },
   {
@@ -129,7 +129,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant. Medicaid requires U.S. citizenship or eligible immigration status.',
+      message: `${CITIZENSHIP_MESSAGE}. Medicaid requires U.S. citizenship or eligible immigration status.`,
       condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     }
   ],
@@ -150,7 +150,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant. SNAP requires U.S. citizenship or eligible immigration status.',
+      message: `${CITIZENSHIP_MESSAGE}. SNAP requires U.S. citizenship or eligible immigration status.`,
       condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     },
     {
@@ -184,7 +184,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant. TANF requires U.S. citizenship or eligible immigration status.',
+      message: `${CITIZENSHIP_MESSAGE}. TANF requires U.S. citizenship or eligible immigration status.`,
       condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     }
   ],
@@ -210,7 +210,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or qualified immigrant. SSI requires U.S. citizenship or eligible immigration status.',
+      message: `${CITIZENSHIP_MESSAGE}. SSI requires U.S. citizenship or eligible immigration status.`,
       condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     }
   ],
@@ -226,7 +226,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or eligible immigrant. Section 8 requires U.S. citizenship or eligible immigration status.',
+      message: `${CITIZENSHIP_MESSAGE}. Section 8 requires U.S. citizenship or eligible immigration status.`,
       condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     },
     {
@@ -255,7 +255,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     },
     {
       key: 'citizenship',
-      message: 'You indicated you are not a U.S. citizen or eligible immigrant. LIHTC requires U.S. citizenship or eligible immigration status.',
+      message: `${CITIZENSHIP_MESSAGE}. LIHTC requires U.S. citizenship or eligible immigration status.`,
       condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
     },
     {

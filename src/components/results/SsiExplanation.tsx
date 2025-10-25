@@ -20,7 +20,7 @@ interface SsiExplanationProps {
 }
 
 export const SsiExplanation: React.FC<SsiExplanationProps> = ({
-  programName,
+  programName: _programName,
   status,
   explanation: _explanation,
   userProfile,

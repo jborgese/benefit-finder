@@ -7,6 +7,9 @@
 import type { QuestionFlow, FlowNode } from './types';
 import { getCaliforniaQuestions } from './california-questions';
 
+// Constants for flow node IDs
+const DISABILITY_STATUS_ID = 'disability-status';
+
 // US States list for the state selection question
 const US_STATES = [
   { value: 'AL', label: 'Alabama' },
@@ -176,9 +179,9 @@ const nodes: FlowNode[] = [
 
   // Continue with regular flow after California questions
   {
-    id: 'disability-status',
+    id: DISABILITY_STATUS_ID,
     question: {
-      id: 'disability-status',
+      id: DISABILITY_STATUS_ID,
       text: 'Do you have a disability that affects your ability to work?',
       description: 'This may qualify you for additional programs and benefits.',
       inputType: 'boolean',
@@ -198,7 +201,7 @@ const nodes: FlowNode[] = [
       fieldName: 'isPregnant',
       required: true
     },
-    previousId: 'disability-status',
+    previousId: DISABILITY_STATUS_ID,
     nextId: 'existing-benefits'
   },
   {
@@ -378,25 +381,25 @@ export function createEnhancedFlow(): QuestionFlow {
     const lastCaliforniaQuestion = californiaQuestions[californiaQuestions.length - 1];
     const lastCaliforniaNode = flow.nodes.get(lastCaliforniaQuestion.id);
     if (lastCaliforniaNode) {
-      lastCaliforniaNode.nextId = 'disability-status';
+      lastCaliforniaNode.nextId = DISABILITY_STATUS_ID;
       flow.nodes.set(lastCaliforniaQuestion.id, lastCaliforniaNode);
     }
 
     // Update disability status to point back to last California question
-    const disabilityNode = flow.nodes.get('disability-status');
+    const disabilityNode = flow.nodes.get(DISABILITY_STATUS_ID);
     if (disabilityNode) {
       disabilityNode.previousId = lastCaliforniaQuestion.id;
-      flow.nodes.set('disability-status', disabilityNode);
+      flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
     }
   } else {
     // If no California questions, link state directly to disability status
     const stateNode = flow.nodes.get('state');
-    const disabilityNode = flow.nodes.get('disability-status');
+    const disabilityNode = flow.nodes.get(DISABILITY_STATUS_ID);
     if (stateNode && disabilityNode) {
-      stateNode.nextId = 'disability-status';
+      stateNode.nextId = DISABILITY_STATUS_ID;
       disabilityNode.previousId = 'state';
       flow.nodes.set('state', stateNode);
-      flow.nodes.set('disability-status', disabilityNode);
+      flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
     }
   }
 

@@ -143,7 +143,7 @@ function getMedicaidRequirementsExplanation(userProfile?: { isPregnant?: boolean
 }
 
 export const MedicaidExplanation: React.FC<MedicaidExplanationProps> = ({
-  programName,
+  programName: _programName,
   status,
   explanation: _explanation,
   userProfile,

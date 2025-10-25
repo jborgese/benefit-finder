@@ -129,7 +129,7 @@ function getTanfRequirementsExplanation(userProfile?: { hasChildren?: boolean; h
 }
 
 export const TanfExplanation: React.FC<TanfExplanationProps> = ({
-  programName,
+  programName: _programName,
   status,
   explanation: _explanation,
   userProfile,
