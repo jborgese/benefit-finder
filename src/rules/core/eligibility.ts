@@ -9,6 +9,7 @@ import { getDatabase } from '../../db/database';
 import type { DetailedEvaluationResult } from './detailedEvaluator';
 import { evaluateRuleWithDetails } from './detailedEvaluator';
 import type { JsonLogicRule } from './types';
+import type { UserProfileDocument, EligibilityRuleDocument } from '../../db/schemas';
 
 // Import types
 import type {
@@ -170,10 +171,10 @@ function logSNAPSIDebug(
 async function performEligibilityEvaluation(
   profileId: string,
   programId: string,
-  profile: any,
-  rules: any[],
+  profile: UserProfileDocument,
+  rules: EligibilityRuleDocument[],
   startTime: number,
-  opts: any
+  opts: EligibilityEvaluationOptions
 ): Promise<EligibilityEvaluationResult> {
   // Prepare data
   const data = await prepareDataContext(profile);

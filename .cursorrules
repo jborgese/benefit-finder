@@ -193,8 +193,73 @@ BenefitFinder is a privacy-preserving, offline-first application for checking go
 - Use strict mode settings from tsconfig.json
 - Prefer explicit return types for functions
 - Use Zod schemas for runtime validation, derive TypeScript types from schemas
-- No `any` types without explicit justification in comments
+- **NEVER use `any` types - always use specific, meaningful types**
 - Use discriminated unions for variant data types
+
+### Type Safety Rules - CRITICAL
+🚨 **NEVER generate code with `any` types. Always use specific types instead.**
+
+**Prohibited Patterns:**
+```typescript
+// ❌ NEVER use these patterns
+function processData(data: any) { ... }
+const result: any = getValue();
+const items: any[] = [];
+const config: Record<string, any> = {};
+```
+
+**Required Alternatives:**
+```typescript
+// ✅ ALWAYS use specific types
+function processData(data: Record<string, unknown>) { ... }
+function processData<T>(data: T) { ... }
+const result: string | number = getValue();
+const items: string[] = [];
+const config: Record<string, unknown> = {};
+```
+
+**Type Alternatives to `any`:**
+- `unknown` - for truly unknown data that needs type checking
+- `Record<string, unknown>` - for objects with unknown structure
+- `unknown[]` - for arrays of unknown items
+- `string | number | boolean` - for primitive unions
+- `SomeSpecificInterface` - for known object structures
+- Generic types `<T>` - for reusable type-safe functions
+
+**When generating code:**
+1. **Always define specific types** for function parameters and return values
+2. **Use interfaces or types** for object structures
+3. **Prefer union types** over `any` for multiple possible types
+4. **Use generic constraints** when you need flexibility with type safety
+5. **Add JSDoc comments** explaining complex type relationships
+
+**Example Type-Safe Patterns:**
+```typescript
+// ✅ Good: Specific interface
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// ✅ Good: Union type
+type Status = 'loading' | 'success' | 'error';
+
+// ✅ Good: Generic with constraints
+function processItems<T extends { id: string }>(items: T[]): T[] {
+  return items.filter(item => item.id);
+}
+
+// ✅ Good: Record with specific value types
+const config: Record<string, string | number> = {};
+
+// ✅ Good: Optional properties
+interface ApiResponse {
+  data?: unknown;
+  error?: string;
+  status: number;
+}
+```
 
 ### React
 - Functional components only (no class components)
