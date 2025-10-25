@@ -37,7 +37,7 @@ export class ImportManager {
   private constructor() {}
 
   public static getInstance(): ImportManager {
-    if (!ImportManager.instance) {
+    if (ImportManager.instance === undefined) {
       ImportManager.instance = new ImportManager();
     }
     return ImportManager.instance;
@@ -221,14 +221,14 @@ export class ImportManager {
 
         if (attempt < maxRetries) {
           // Exponential backoff
-          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+          const delay = Math.min(1000 * (2 ** (attempt - 1)), 10000);
           console.log(`⏳ [IMPORT MANAGER] Waiting ${delay}ms before retry for ${importKey}`);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
 
-    throw lastError || new Error(`Import failed after ${maxRetries} attempts`);
+    throw lastError ?? new Error(`Import failed after ${maxRetries} attempts`);
   }
 
   /**

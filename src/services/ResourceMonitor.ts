@@ -43,7 +43,7 @@ export class ResourceMonitor {
   private constructor() {}
 
   public static getInstance(): ResourceMonitor {
-    if (!ResourceMonitor.instance) {
+    if (ResourceMonitor.instance === undefined) {
       ResourceMonitor.instance = new ResourceMonitor();
     }
     return ResourceMonitor.instance;
@@ -54,7 +54,6 @@ export class ResourceMonitor {
    */
   public startImportMonitoring(importKey: string): void {
     const memoryBefore = this.getMemoryUsage();
-    const startTime = Date.now();
 
     console.log(`📊 [RESOURCE MONITOR] Starting monitoring for ${importKey}`, {
       memoryBefore,

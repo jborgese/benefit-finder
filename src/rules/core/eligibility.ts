@@ -42,6 +42,10 @@ export type {
 // Re-export helper functions
 export { getAllProgramRuleIds, ensureSNAPRulesAreCorrect };
 
+// Constants for program IDs
+const SNAP_FEDERAL_PROGRAM = 'snap-federal';
+const SSI_FEDERAL_PROGRAM = 'ssi-federal';
+
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
   if (import.meta.env.DEV) {
@@ -144,6 +148,146 @@ function logDebugInfo(
 }
 
 /**
+ * Log enhanced debug information for SNAP and SSI programs
+ */
+function logSNAPSIDebug(
+  programId: string,
+  message: string,
+  data: Record<string, unknown>
+): void {
+  if (programId === SNAP_FEDERAL_PROGRAM || programId === SSI_FEDERAL_PROGRAM) {
+    console.log(`🔍 [SNAP/SSI DEBUG] ${message} for ${programId}:`, {
+      programId,
+      ...data,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+
+/**
+ * Handle the main evaluation logic after cache check
+ */
+async function performEligibilityEvaluation(
+  profileId: string,
+  programId: string,
+  profile: any,
+  rules: any[],
+  startTime: number,
+  opts: any
+): Promise<EligibilityEvaluationResult> {
+  // Prepare data
+  const data = await prepareDataContext(profile);
+
+  // Evaluate ALL rules - ALL must pass for eligibility
+  const {
+    ruleResults,
+    overallEligible,
+    firstFailedRule,
+    firstFailedResult,
+    allMissingFields
+  } = evaluateAllRules(rules, data, profileId, programId);
+
+  const executionTime = performance.now() - startTime;
+  const finalMissingFields = Array.from(allMissingFields);
+
+  debugLog('Summary after rule evaluation', {
+    ruleResults, overallEligible, firstFailedRule, firstFailedResult, allMissingFields: finalMissingFields, executionTime
+  });
+
+  // Enhanced debug logging for SNAP and SSI rule evaluation results
+  logSNAPSIDebug(programId, 'Rule evaluation results', {
+    overallEligible,
+    rulesEvaluated: ruleResults.length,
+    firstFailedRule: firstFailedRule?.id,
+    firstFailedResult: firstFailedResult ? {
+      success: firstFailedResult.success,
+      result: firstFailedResult.result,
+      error: firstFailedResult.error
+    } : null,
+    missingFields: finalMissingFields,
+    executionTime,
+    ruleBreakdown: ruleResults.map(r => ({
+      ruleId: r.rule.id,
+      ruleName: r.rule.name,
+      ruleType: r.rule.ruleType,
+      passed: r.evalResult.success ? Boolean(r.evalResult.result) : false,
+      success: r.evalResult.success,
+      result: r.evalResult.result,
+      error: r.evalResult.error,
+      executionTime: r.evalResult.executionTime
+    }))
+  });
+
+  // Select result rule and create combined result
+  const { resultRule, combinedEvalResult } = selectResultRule(
+    rules,
+    ruleResults,
+    overallEligible,
+    firstFailedRule,
+    firstFailedResult
+  );
+
+  debugLog('Result rule selected', { resultRule, combinedEvalResult });
+
+  // Process benefit amount rules if eligible
+  const estimatedBenefit = processBenefitAmountRules(rules, data, overallEligible);
+
+  const resultRuleDetails = ruleResults.find(r => r.rule.id === resultRule.id)?.detailedResult;
+
+  // Create fallback detailed result if none found
+  const fallbackDetailedResult: DetailedEvaluationResult = {
+    result: combinedEvalResult.result,
+    success: combinedEvalResult.success,
+    executionTime: combinedEvalResult.executionTime,
+    criteriaResults: []
+  };
+
+  const result = buildEvaluationResult(
+    profileId,
+    programId,
+    resultRule,
+    combinedEvalResult,
+    resultRuleDetails ? (resultRuleDetails as DetailedEvaluationResult) : fallbackDetailedResult,
+    finalMissingFields,
+    executionTime,
+    estimatedBenefit
+  );
+
+  debugLog('Final built result', result);
+
+  // Log debug information
+  logDebugInfo(resultRule, resultRuleDetails, result, ruleResults, overallEligible, programId);
+
+  // Add detailed breakdown if requested and no detailed results are available
+  if (opts.includeBreakdown && (!result.criteriaResults || result.criteriaResults.length === 0)) {
+    debugLog('Generating detailed criteria breakdown...');
+    result.criteriaResults = generateCriteriaBreakdown(resultRule, data, combinedEvalResult);
+  }
+
+  // Cache result if enabled
+  if (opts.cacheResult && combinedEvalResult.success) {
+    debugLog('Caching eligibility result...');
+    await cacheResult(result, opts.expiresIn);
+  }
+
+  debugLog('Returning eligibility result', result);
+
+  // Enhanced debug logging for SNAP and SSI final results
+  logSNAPSIDebug(programId, 'Final eligibility result', {
+    eligible: result.eligible,
+    confidence: result.confidence,
+    reason: result.reason,
+    ruleId: result.ruleId,
+    missingFields: result.missingFields,
+    incomplete: result.incomplete,
+    executionTime: result.executionTime,
+    criteriaResults: result.criteriaResults?.length ?? 0
+  });
+
+  return result;
+}
+
+/**
  * Evaluate eligibility for a single program
  */
 export async function evaluateEligibility(
@@ -154,14 +298,11 @@ export async function evaluateEligibility(
   debugLog('Evaluating eligibility', { profileId, programId, options });
 
   // Enhanced debug logging for SNAP and SSI
-  if (programId === 'snap-federal' || programId === 'ssi-federal') {
-    console.log(`🔍 [SNAP/SSI DEBUG] Starting eligibility evaluation for ${programId}:`, {
-      profileId,
-      programId,
-      options,
-      timestamp: new Date().toISOString()
-    });
-  }
+  logSNAPSIDebug(programId, 'Starting eligibility evaluation', {
+    profileId,
+    programId,
+    options
+  });
 
   ensureOperatorsRegistered();
 
@@ -187,153 +328,32 @@ export async function evaluateEligibility(
     const { profile, rules } = await getEvaluationEntities(profileId, programId);
 
     // Enhanced debug logging for SNAP and SSI entities
-    if (programId === 'snap-federal' || programId === 'ssi-federal') {
-      console.log(`🔍 [SNAP/SSI DEBUG] Retrieved entities for ${programId}:`, {
-        programId,
-        profileId,
-        rulesCount: rules.length,
-        ruleIds: rules.map(r => r.id),
-        ruleTypes: rules.map(r => r.ruleType),
-        activeRules: rules.filter(r => r.active).length,
-        profileData: {
-          householdSize: profile.householdSize,
-          householdIncome: profile.householdIncome,
-          incomePeriod: profile.incomePeriod,
-          state: profile.state,
-          county: profile.county
-        }
-      });
-    }
-
-    // Prepare data
-    const data = await prepareDataContext(profile);
-
-    // Evaluate ALL rules - ALL must pass for eligibility
-    const {
-      ruleResults,
-      overallEligible,
-      firstFailedRule,
-      firstFailedResult,
-      allMissingFields
-    } = evaluateAllRules(rules, data, profileId, programId);
-
-    const executionTime = performance.now() - startTime;
-    const finalMissingFields = Array.from(allMissingFields);
-
-    debugLog('Summary after rule evaluation', {
-      ruleResults, overallEligible, firstFailedRule, firstFailedResult, allMissingFields: finalMissingFields, executionTime
+    logSNAPSIDebug(programId, 'Retrieved entities', {
+      profileId,
+      rulesCount: rules.length,
+      ruleIds: rules.map(r => r.id),
+      ruleTypes: rules.map(r => r.ruleType),
+      activeRules: rules.filter(r => r.active).length,
+      profileData: {
+        householdSize: profile.householdSize,
+        householdIncome: profile.householdIncome,
+        incomePeriod: profile.incomePeriod,
+        state: profile.state,
+        county: profile.county
+      }
     });
 
-    // Enhanced debug logging for SNAP and SSI rule evaluation results
-    if (programId === 'snap-federal' || programId === 'ssi-federal') {
-      console.log(`🔍 [SNAP/SSI DEBUG] Rule evaluation results for ${programId}:`, {
-        programId,
-        overallEligible,
-        rulesEvaluated: ruleResults.length,
-        firstFailedRule: firstFailedRule?.id,
-        firstFailedResult: firstFailedResult ? {
-          success: firstFailedResult.success,
-          result: firstFailedResult.result,
-          error: firstFailedResult.error
-        } : null,
-        missingFields: finalMissingFields,
-        executionTime,
-        ruleBreakdown: ruleResults.map(r => ({
-          ruleId: r.rule.id,
-          ruleName: r.rule.name,
-          ruleType: r.rule.ruleType,
-          passed: r.evalResult.success ? Boolean(r.evalResult.result) : false,
-          success: r.evalResult.success,
-          result: r.evalResult.result,
-          error: r.evalResult.error,
-          executionTime: r.evalResult.executionTime
-        }))
-      });
-    }
-
-    // Select result rule and create combined result
-    const { resultRule, combinedEvalResult } = selectResultRule(
-      rules,
-      ruleResults,
-      overallEligible,
-      firstFailedRule,
-      firstFailedResult
-    );
-
-    debugLog('Result rule selected', { resultRule, combinedEvalResult });
-
-    // Process benefit amount rules if eligible
-    const estimatedBenefit = processBenefitAmountRules(rules, data, overallEligible);
-
-    const resultRuleDetails = ruleResults.find(r => r.rule.id === resultRule.id)?.detailedResult;
-
-    // Create fallback detailed result if none found
-    const fallbackDetailedResult: DetailedEvaluationResult = {
-      result: combinedEvalResult.result,
-      success: combinedEvalResult.success,
-      executionTime: combinedEvalResult.executionTime,
-      criteriaResults: []
-    };
-
-    const result = buildEvaluationResult(
-      profileId,
-      programId,
-      resultRule,
-      combinedEvalResult,
-      resultRuleDetails ? (resultRuleDetails as DetailedEvaluationResult) : fallbackDetailedResult,
-      finalMissingFields,
-      executionTime,
-      estimatedBenefit
-    );
-
-    debugLog('Final built result', result);
-
-    // Log debug information
-    logDebugInfo(resultRule, resultRuleDetails, result, ruleResults, overallEligible, programId);
-
-    // Add detailed breakdown if requested and no detailed results are available
-    if (opts.includeBreakdown && (!result.criteriaResults || result.criteriaResults.length === 0)) {
-      debugLog('Generating detailed criteria breakdown...');
-      result.criteriaResults = generateCriteriaBreakdown(resultRule, data, combinedEvalResult);
-    }
-
-    // Cache result if enabled
-    if (opts.cacheResult && combinedEvalResult.success) {
-      debugLog('Caching eligibility result...');
-      await cacheResult(result, opts.expiresIn);
-    }
-
-    debugLog('Returning eligibility result', result);
-
-    // Enhanced debug logging for SNAP and SSI final results
-    if (programId === 'snap-federal' || programId === 'ssi-federal') {
-      console.log(`🔍 [SNAP/SSI DEBUG] Final eligibility result for ${programId}:`, {
-        programId,
-        eligible: result.eligible,
-        confidence: result.confidence,
-        reason: result.reason,
-        ruleId: result.ruleId,
-        missingFields: result.missingFields,
-        incomplete: result.incomplete,
-        executionTime: result.executionTime,
-        criteriaResults: result.criteriaResults?.length || 0
-      });
-    }
-
-    return result;
+    return await performEligibilityEvaluation(profileId, programId, profile, rules, startTime, opts);
 
   } catch (error) {
     debugLog('Error caught during eligibility evaluation', error);
 
     // Enhanced debug logging for SNAP and SSI errors
-    if (programId === 'snap-federal' || programId === 'ssi-federal') {
-      console.log(`❌ [SNAP/SSI DEBUG] Error during eligibility evaluation for ${programId}:`, {
-        programId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        profileId
-      });
-    }
+    logSNAPSIDebug(programId, 'Error during eligibility evaluation', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      profileId
+    });
 
     const executionTime = performance.now() - startTime;
     return buildErrorResult(profileId, programId, error, executionTime);

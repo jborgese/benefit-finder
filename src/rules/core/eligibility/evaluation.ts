@@ -259,7 +259,9 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
 
   // Check short keywords with word boundaries
   const matchesShortKeyword = shortKeywords.some(keyword => {
-    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+    // Escape special regex characters to prevent injection
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
     return regex.test(ruleId) || regex.test(ruleName);
   });
 
@@ -272,8 +274,10 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
       isIncome,
       matchedKeyword: incomeKeywords.find(keyword =>
         ruleId.includes(keyword) || ruleName.includes(keyword)
-      ) || shortKeywords.find(keyword => {
-        const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+      ) ?? shortKeywords.find(keyword => {
+        // Escape special regex characters to prevent injection
+        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
         return regex.test(ruleId) || regex.test(ruleName);
       })
     });

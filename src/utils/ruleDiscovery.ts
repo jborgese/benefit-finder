@@ -92,6 +92,56 @@ function logDiscoveryDebug(ruleFiles: Record<string, () => Promise<Record<string
 }
 
 /**
+ * Log SNAP/SSI specific debug information
+ */
+function logSnapSsiDebug(filePath: string, programId?: string): void {
+  if (filePath.includes('snap') || filePath.includes('ssi')) {
+    const programType = filePath.includes('snap') ? 'SNAP' : 'SSI';
+    console.log(`🔍 [SNAP/SSI DISCOVERY DEBUG] Processing ${programType} file: ${filePath}`);
+
+    if (programId) {
+      console.log(`🔍 [SNAP/SSI DISCOVERY DEBUG] Successfully extracted program info for ${programId}`);
+    }
+  }
+}
+
+/**
+ * Log SNAP/SSI error information
+ */
+function logSnapSsiError(filePath: string, error: unknown): void {
+  if (filePath.includes('snap') || filePath.includes('ssi')) {
+    const programType = filePath.includes('snap') ? 'SNAP' : 'SSI';
+    console.log(`❌ [SNAP/SSI DISCOVERY DEBUG] Error processing ${programType} file:`, {
+      filePath,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
+  }
+}
+
+/**
+ * Validate and extract rule package from module
+ */
+function extractRulePackage(module: Record<string, unknown>, filePath: string): Record<string, unknown> | null {
+  const rulePackage = module.default;
+
+  console.log(`🔍 [RULE DISCOVERY DEBUG] Imported module for ${filePath}:`, {
+    hasDefault: !!module.default,
+    hasMetadata: !!rulePackage?.metadata,
+    hasPrograms: !!rulePackage?.metadata?.programs,
+    programCount: rulePackage?.metadata?.programs?.length ?? 0,
+    programs: rulePackage?.metadata?.programs
+  });
+
+  if (!rulePackage?.metadata?.programs?.length) {
+    console.warn(`[DEBUG] Rule Discovery: Skipping ${filePath} - no programs defined`);
+    return null;
+  }
+
+  return rulePackage;
+}
+
+/**
  * Process a single rule file
  */
 async function processRuleFile(
@@ -100,31 +150,16 @@ async function processRuleFile(
   config: RuleDiscoveryConfig
 ): Promise<DiscoveredRuleFile | null> {
   console.log(`🔍 [RULE DISCOVERY DEBUG] Processing file: ${filePath}`);
-
-  // Enhanced debug logging for SNAP and SSI
-  if (filePath.includes('snap') || filePath.includes('ssi')) {
-    console.log(`🔍 [SNAP/SSI DISCOVERY DEBUG] Processing ${filePath.includes('snap') ? 'SNAP' : 'SSI'} file: ${filePath}`);
-  }
+  logSnapSsiDebug(filePath);
 
   try {
-    // Use dynamic import instead of eager loading
     const module = await importFn();
-    const rulePackage = module.default;
+    const rulePackage = extractRulePackage(module, filePath);
 
-    console.log(`🔍 [RULE DISCOVERY DEBUG] Imported module for ${filePath}:`, {
-      hasDefault: !!module.default,
-      hasMetadata: !!rulePackage?.metadata,
-      hasPrograms: !!rulePackage?.metadata?.programs,
-      programCount: rulePackage?.metadata?.programs?.length ?? 0,
-      programs: rulePackage?.metadata?.programs
-    });
-
-    if (!rulePackage?.metadata?.programs?.length) {
-      console.warn(`[DEBUG] Rule Discovery: Skipping ${filePath} - no programs defined`);
+    if (!rulePackage) {
       return null;
     }
 
-    // Extract program information from rule metadata
     const programInfo = extractProgramInfo(rulePackage, config);
 
     console.log(`🔍 [RULE DISCOVERY DEBUG] Extracted program info for ${filePath}:`, {
@@ -134,18 +169,7 @@ async function processRuleFile(
       jurisdiction: programInfo.jurisdiction
     });
 
-    // Enhanced debug logging for SNAP and SSI program extraction
-    if (programInfo.id === SNAP_FEDERAL_ID || programInfo.id === SSI_FEDERAL_ID) {
-      console.log(`🔍 [SNAP/SSI DISCOVERY DEBUG] Successfully extracted program info for ${programInfo.id}:`, {
-        programId: programInfo.id,
-        programName: programInfo.name,
-        shortName: programInfo.shortName,
-        description: programInfo.description,
-        category: programInfo.category,
-        jurisdiction: programInfo.jurisdiction,
-        tags: programInfo.tags
-      });
-    }
+    logSnapSsiDebug(filePath, programInfo.id);
 
     const discoveredFile: DiscoveredRuleFile = {
       path: filePath,
@@ -160,15 +184,7 @@ async function processRuleFile(
     return discoveredFile;
   } catch (error) {
     console.error(`[DEBUG] Rule Discovery: Error processing ${filePath}:`, error);
-
-    // Enhanced debug logging for SNAP and SSI errors
-    if (filePath.includes('snap') || filePath.includes('ssi')) {
-      console.log(`❌ [SNAP/SSI DISCOVERY DEBUG] Error processing ${filePath.includes('snap') ? 'SNAP' : 'SSI'} file:`, {
-        filePath,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      });
-    }
+    logSnapSsiError(filePath, error);
     return null;
   }
 }
@@ -273,7 +289,7 @@ function extractProgramInfo(rulePackage: Record<string, unknown>, config: RuleDi
     shortName,
     description,
     category,
-    jurisdiction: (metadata.jurisdiction as string) ?? config.defaultJurisdiction,
+    jurisdiction: (metadata.jurisdiction as string) || config.defaultJurisdiction,
     website,
     phoneNumber,
     applicationUrl,
@@ -678,9 +694,9 @@ function logDiscoveryStart(): void {
 }
 
 /**
- * Log discovery results debug information
+ * Log main discovery results debug information
  */
-function logDiscoveryResults(discoveredFiles: DiscoveredRuleFile[]): void {
+function logMainDiscoveryResults(discoveredFiles: DiscoveredRuleFile[]): void {
   console.log('🔍 [MAIN DISCOVERY DEBUG] Rule discovery results:', {
     totalDiscovered: discoveredFiles.length,
     discoveredPrograms: discoveredFiles.map(f => f.programInfo.id),
@@ -820,7 +836,7 @@ export async function discoverAndSeedAllRules(): Promise<{
     const discoveredFiles = await discoverRuleFiles(FEDERAL_RULE_CONFIG);
     results.discovered = discoveredFiles.length;
 
-    logDiscoveryResults(discoveredFiles);
+    logMainDiscoveryResults(discoveredFiles);
     logFileProcessingStart(discoveredFiles);
 
     // Process each discovered file
