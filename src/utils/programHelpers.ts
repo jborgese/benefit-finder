@@ -6,6 +6,10 @@ export function getProgramNameKey(programId: string): string {
     ['snap-federal', 'benefits.snap'],
     ['medicaid-federal', 'benefits.medicaid'],
     ['wic-federal', 'benefits.wic'],
+    ['tanf-federal', 'benefits.tanf'],
+    ['ssi-federal', 'benefits.ssi'],
+    ['section8-federal', 'benefits.section8'],
+    ['lihtc-federal', 'benefits.lihtc'],
   ]);
   return nameKeys.get(programId) ?? `benefits.${programId}`;
 }
@@ -18,6 +22,10 @@ export function getProgramDescriptionKey(programId: string): string {
     ['snap-federal', 'benefits.descriptions.snap'],
     ['medicaid-federal', 'benefits.descriptions.medicaid'],
     ['wic-federal', 'benefits.descriptions.wic'],
+    ['tanf-federal', 'benefits.descriptions.tanf'],
+    ['ssi-federal', 'benefits.descriptions.ssi'],
+    ['section8-federal', 'benefits.descriptions.section8'],
+    ['lihtc-federal', 'benefits.descriptions.lihtc'],
   ]);
   return descriptionKeys.get(programId) ?? 'benefits.descriptions.default';
 }

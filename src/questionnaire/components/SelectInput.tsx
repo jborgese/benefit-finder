@@ -27,10 +27,35 @@ export const SelectInput: React.FC<SelectProps> = ({
   const descId = `${id}-desc`;
   const [isFocused, setIsFocused] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Debug logging for component mount
+  React.useEffect(() => {
+    if (variant === 'radio') {
+      console.log('SelectInput mounted', { questionId: question.id, variant });
+    }
+  }, [question.id, variant]);
+
+  // Reset touched state when question changes
+  React.useEffect(() => {
+    setIsTouched(false);
+    setHasUserInteracted(false);
+  }, [question.id]);
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
+
+  // Debug logging
+  if (variant === 'radio' && hasError) {
+    console.log('SelectInput Debug:', {
+      hasError,
+      isTouched,
+      showError,
+      error,
+      value
+    });
+  }
 
   // Convert error to array format
   const errors: string[] = (() => {
@@ -46,8 +71,12 @@ export const SelectInput: React.FC<SelectProps> = ({
     : options;
 
   const handleBlur = (): void => {
+    console.log('SelectInput handleBlur called', { variant, questionId: question.id, hasUserInteracted });
     setIsFocused(false);
-    setIsTouched(true);
+    // Only set touched if user has actually interacted
+    if (hasUserInteracted) {
+      setIsTouched(true);
+    }
   };
 
   const handleFocus = (): void => {
@@ -106,7 +135,12 @@ export const SelectInput: React.FC<SelectProps> = ({
                     name={id}
                     value={option.value}
                     checked={isSelected}
-                    onChange={() => !isDisabled && onChange(option.value)}
+                    onChange={() => {
+                      if (!isDisabled) {
+                        setHasUserInteracted(true);
+                        onChange(option.value);
+                      }
+                    }}
                     onBlur={handleBlur}
                     onFocus={handleFocus}
                     disabled={isDisabled}

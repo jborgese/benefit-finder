@@ -52,6 +52,13 @@ export const Question: React.FC<QuestionProps> = ({
 
   // Validate value
   const validateValue = React.useCallback((val: unknown): void => {
+    // Only validate if the field has been touched by the user
+    if (!touched) {
+      setErrors([]);
+      onValidationChange?.(true, []);
+      return;
+    }
+
     const schema = createSchemaFromQuestion(question);
     const result = validateWithSchema(schema, val);
 
@@ -63,7 +70,20 @@ export const Question: React.FC<QuestionProps> = ({
       setErrors([]);
       onValidationChange?.(true, []);
     }
-  }, [question, onValidationChange]);
+  }, [question, onValidationChange, touched]);
+
+  // Debug logging for radio buttons
+  React.useEffect(() => {
+    if (question.inputType === 'radio') {
+      console.log('Question Debug:', {
+        questionId: question.id,
+        touched,
+        errors,
+        value,
+        hasErrors: errors.length > 0
+      });
+    }
+  }, [question.id, question.inputType, touched, errors, value]);
 
   // Initialize validation state - only validate if touched
   React.useEffect(() => {
@@ -74,14 +94,14 @@ export const Question: React.FC<QuestionProps> = ({
       setErrors([]);
       onValidationChange?.(true, []);
     }
-  }, [touched, validateValue, onValidationChange, value]);
+  }, [touched, onValidationChange]);
 
-  // Validate on value change (only if touched)
+  // Validate when value changes, but only if field has been touched
   React.useEffect(() => {
     if (touched) {
       validateValue(value);
     }
-  }, [value, touched, validateValue]);
+  }, [value, touched]);
 
   // Validate on change
   const handleChange = (newValue: unknown): void => {

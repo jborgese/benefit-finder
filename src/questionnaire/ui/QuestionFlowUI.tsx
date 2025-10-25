@@ -197,7 +197,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
             onChange={handleAnswerChange}
             onValidationChange={handleValidationChange}
             onEnterKey={handleEnterKey}
-            autoFocus
+            autoFocus={false}
           />
         </div>
       </div>

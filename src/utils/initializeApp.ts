@@ -1,5 +1,5 @@
 import { initializeDatabase, getDatabase, clearDatabase } from '../db';
-import { importRulePackage } from '../rules/core/import-export';
+import { discoverAndSeedAllRules, checkForNewRuleFiles } from './ruleDiscovery';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
@@ -43,84 +43,44 @@ export async function initializeApp(): Promise<void> {
     const existingPrograms = await db.benefit_programs.find().exec();
     if (import.meta.env.DEV) {
       console.warn(`[DEBUG] initializeApp: Found ${existingPrograms.length} existing programs`);
-      if (existingPrograms.length > 0) {
-        console.warn('[DEBUG] initializeApp: Database already initialized, skipping import');
+    }
+
+    // Check if we have programs with technical names that need fixing
+    const hasTechnicalNames = existingPrograms.some(p => p.id.startsWith('benefits.') || p.name.includes('benefits.'));
+
+    if (hasTechnicalNames) {
+      if (import.meta.env.DEV) {
+        console.warn('[DEBUG] initializeApp: Found programs with technical names, clearing and reinitializing...');
+      }
+      // Clear the database to fix technical names
+      await clearDatabase();
+      // Wait a moment for the database to fully clear
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } else {
+      // Check if we need to discover and seed new rule files
+      const hasNewRuleFiles = await checkForNewRuleFiles();
+      if (existingPrograms.length > 0 && !hasNewRuleFiles) {
+        if (import.meta.env.DEV) {
+          console.warn('[DEBUG] initializeApp: Database already initialized with all available programs, skipping import');
+        }
+        isInitializing = false;
+        return; // Already initialized with all available programs
       }
     }
-    if (existingPrograms.length > 0) {
-      isInitializing = false;
-      return; // Already initialized
+
+    if (import.meta.env.DEV) {
+      console.warn('[DEBUG] initializeApp: Discovering and seeding rule files...');
     }
 
-    // Load sample benefit programs
+    // Dynamically discover and seed all available rule files
+    const discoveryResults = await discoverAndSeedAllRules();
 
-    // Create SNAP program with explicit ID to match rules
-    await db.benefit_programs.insert({
-      id: 'snap-federal',
-      name: 'Supplemental Nutrition Assistance Program (SNAP)',
-      shortName: 'SNAP',
-      description: 'SNAP helps low-income individuals and families buy food',
-      category: 'food',
-      jurisdiction: US_FEDERAL_JURISDICTION,
-      jurisdictionLevel: 'federal',
-      website: 'https://www.fns.usda.gov/snap',
-      phoneNumber: '1-800-221-5689',
-      applicationUrl: 'https://www.benefits.gov/benefit/361',
-      active: true,
-      tags: ['food', 'nutrition', 'ebt'],
-      lastUpdated: Date.now(),
-      createdAt: Date.now(),
-    });
-
-    // Create Medicaid program with explicit ID to match rules
-    await db.benefit_programs.insert({
-      id: 'medicaid-federal',
-      name: 'Medicaid',
-      shortName: 'Medicaid',
-      description: 'Health coverage for low-income individuals and families',
-      category: 'healthcare',
-      jurisdiction: US_FEDERAL_JURISDICTION,
-      jurisdictionLevel: 'federal',
-      website: 'https://www.medicaid.gov',
-      phoneNumber: '1-800-318-2596',
-      applicationUrl: 'https://www.healthcare.gov',
-      active: true,
-      tags: ['healthcare', 'insurance', 'medical'],
-      lastUpdated: Date.now(),
-      createdAt: Date.now(),
-    });
-
-    // Create WIC program with explicit ID to match rules
-    await db.benefit_programs.insert({
-      id: 'wic-federal',
-      name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
-      shortName: 'WIC',
-      description: 'Provides nutrition assistance to pregnant women, new mothers, and young children',
-      category: 'food',
-      jurisdiction: US_FEDERAL_JURISDICTION,
-      jurisdictionLevel: 'federal',
-      website: 'https://www.fns.usda.gov/wic',
-      phoneNumber: '1-800-221-5689',
-      applicationUrl: 'https://www.fns.usda.gov/wic/wic-contacts',
-      active: true,
-      tags: ['food', 'nutrition', 'maternal-health', 'children', 'infants'],
-      lastUpdated: Date.now(),
-      createdAt: Date.now(),
-    });
-
-    // Load sample rules
-
-    // Import SNAP rules
-    const snapRules = await import('../rules/federal/snap/snap-rules.json');
-    await importRulePackage(snapRules.default);
-
-    // Import Medicaid rules
-    const medicaidRules = await import('../rules/federal/medicaid/medicaid-federal-rules.json');
-    await importRulePackage(medicaidRules.default);
-
-    // Import WIC rules
-    const wicRules = await import('../rules/federal/wic/wic-federal-rules.json');
-    await importRulePackage(wicRules.default);
+    if (import.meta.env.DEV) {
+      console.warn(`[DEBUG] initializeApp: Discovery completed - ${discoveryResults.created} programs created, ${discoveryResults.imported} rule sets imported`);
+      if (discoveryResults.errors.length > 0) {
+        console.warn(`[DEBUG] initializeApp: ${discoveryResults.errors.length} errors during discovery:`, discoveryResults.errors);
+      }
+    }
 
   } catch (error) {
     console.error('[DEBUG] initializeApp: Error initializing app:', error);
@@ -145,68 +105,15 @@ export async function initializeApp(): Promise<void> {
           return; // Already initialized
         }
 
-        // Load sample data after successful initialization
-        const retryDb = getDatabase();
-        await retryDb.benefit_programs.insert({
-          id: 'snap-federal',
-          name: 'Supplemental Nutrition Assistance Program (SNAP)',
-          shortName: 'SNAP',
-          description: 'SNAP helps low-income individuals and families buy food',
-          category: 'food',
-          jurisdiction: US_FEDERAL_JURISDICTION,
-          jurisdictionLevel: 'federal',
-          website: 'https://www.fns.usda.gov/snap',
-          phoneNumber: '1-800-221-5689',
-          applicationUrl: 'https://www.benefits.gov/benefit/361',
-          active: true,
-          tags: ['food', 'nutrition', 'ebt'],
-          lastUpdated: Date.now(),
-          createdAt: Date.now(),
-        });
+        // Dynamically discover and seed all available rule files after retry
+        const retryDiscoveryResults = await discoverAndSeedAllRules();
 
-        await retryDb.benefit_programs.insert({
-          id: 'medicaid-federal',
-          name: 'Medicaid',
-          shortName: 'Medicaid',
-          description: 'Health coverage for low-income individuals and families',
-          category: 'healthcare',
-          jurisdiction: US_FEDERAL_JURISDICTION,
-          jurisdictionLevel: 'federal',
-          website: 'https://www.medicaid.gov',
-          phoneNumber: '1-800-318-2596',
-          applicationUrl: 'https://www.healthcare.gov',
-          active: true,
-          tags: ['healthcare', 'insurance', 'medical'],
-          lastUpdated: Date.now(),
-          createdAt: Date.now(),
-        });
-
-        await retryDb.benefit_programs.insert({
-          id: 'wic-federal',
-          name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
-          shortName: 'WIC',
-          description: 'Provides nutrition assistance to pregnant women, new mothers, and young children',
-          category: 'food',
-          jurisdiction: US_FEDERAL_JURISDICTION,
-          jurisdictionLevel: 'federal',
-          website: 'https://www.fns.usda.gov/wic',
-          phoneNumber: '1-800-221-5689',
-          applicationUrl: 'https://www.fns.usda.gov/wic/wic-contacts',
-          active: true,
-          tags: ['food', 'nutrition', 'maternal-health', 'children', 'infants'],
-          lastUpdated: Date.now(),
-          createdAt: Date.now(),
-        });
-
-        // Load sample rules
-        const snapRules = await import('../rules/federal/snap/snap-rules.json');
-        await importRulePackage(snapRules.default);
-
-        const medicaidRules = await import('../rules/federal/medicaid/medicaid-federal-rules.json');
-        await importRulePackage(medicaidRules.default);
-
-        const wicRules = await import('../rules/federal/wic/wic-federal-rules.json');
-        await importRulePackage(wicRules.default);
+        if (import.meta.env.DEV) {
+          console.warn(`[DEBUG] initializeApp: Retry discovery completed - ${retryDiscoveryResults.created} programs created, ${retryDiscoveryResults.imported} rule sets imported`);
+          if (retryDiscoveryResults.errors.length > 0) {
+            console.warn(`[DEBUG] initializeApp: ${retryDiscoveryResults.errors.length} errors during retry discovery:`, retryDiscoveryResults.errors);
+          }
+        }
 
         console.warn('Database initialized successfully after clearing');
         isInitializing = false;
