@@ -727,7 +727,7 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
     if (processedData.county && processedData.householdSize) {
       try {
         // Import AMI service dynamically to avoid circular dependencies
-        const { AMIDataService } = await import('../../../services/ami-data');
+        const { AMIDataService } = await import('../../../data/services/AMIDataService');
         const amiService = AMIDataService.getInstance();
         const amiData = await amiService.getAMIForHousehold(
           stateCode,
