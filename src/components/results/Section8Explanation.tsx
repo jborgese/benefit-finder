@@ -2,6 +2,7 @@ import React from 'react';
 import { EligibilityStatus, EligibilityExplanation } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../../i18n/hooks';
+import { SpecificReasonsSection } from './SpecificReasonsSection';
 // Status helper functions
 const getStatusColor = (status: EligibilityStatus): string => {
   switch (status) {
@@ -165,6 +166,13 @@ export const Section8Explanation: React.FC<Section8ExplanationProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Specific Reasons for Not Qualifying */}
+      <SpecificReasonsSection
+        programId="section8-federal"
+        status={status}
+        userProfile={userProfile}
+      />
 
       <div className="mb-6">
         <h4 className="font-semibold text-gray-900 mb-3 flex items-center">

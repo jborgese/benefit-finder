@@ -2,6 +2,7 @@ import React from 'react';
 import { EligibilityStatus, EligibilityExplanation } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../../i18n/hooks';
+import { SpecificReasonsSection } from './SpecificReasonsSection';
 
 interface SsiExplanationProps {
   programName: string;
@@ -184,6 +185,13 @@ export const SsiExplanation: React.FC<SsiExplanationProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Specific Reasons for Not Qualifying */}
+      <SpecificReasonsSection
+        programId="ssi-federal"
+        status={status}
+        userProfile={userProfile}
+      />
 
       {/* Benefits Section */}
       <div className="mb-6">

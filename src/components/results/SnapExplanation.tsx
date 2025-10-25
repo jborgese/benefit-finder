@@ -9,6 +9,7 @@ import React from 'react';
 import { EligibilityStatus, EligibilityExplanation } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../../i18n/hooks';
+import { SpecificReasonsSection } from './SpecificReasonsSection';
 
 interface SnapExplanationProps {
   programName: string;
@@ -225,6 +226,13 @@ export const SnapExplanation: React.FC<SnapExplanationProps> = ({
 
       {/* SNAP-Specific Information */}
       <div className="space-y-6">
+        {/* Specific Reasons for Not Qualifying */}
+        <SpecificReasonsSection
+          programId="snap-federal"
+          status={status}
+          userProfile={userProfile}
+        />
+
         {/* What SNAP Provides */}
         <div>
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center">

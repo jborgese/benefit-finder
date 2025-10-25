@@ -76,7 +76,7 @@
     "nextSteps": "Next Steps",
     "learnMore": "Learn More",
     "applyNow": "Apply Now",
-    "noResults": "No benefits found matching your criteria",
+    "noResultsMessage": "No benefits found matching your criteria",
     "tryAgain": "Try adjusting your answers or check back later",
     "summary": {
       "title": "Your Benefit Eligibility Results",
@@ -94,6 +94,14 @@
       "maybe": "May Qualify",
       "unlikely": "Unlikely to Qualify",
       "notQualified": "Not Qualified"
+    },
+    "specificReasons": {
+      "title": "Why you don't qualify:",
+      "generic": "You may not meet the specific eligibility requirements for this program"
+    },
+    "maybeReasons": {
+      "title": "What you need to address:",
+      "generic": "You may need to provide additional information or meet certain requirements"
     },
     "actions": {
       "newAssessment": "New Assessment",
@@ -154,6 +162,15 @@
         "alternativeFood": "Ask about alternative food assistance programs",
         "otherHealth": "Ask about other health coverage programs",
         "otherFood": "Ask about other food assistance programs"
+      },
+      "specificReasons": {
+        "title": "Why you don't qualify:",
+        "notPregnant": "You indicated you are not pregnant",
+        "noChildren": "You indicated you don't have children under 5 years old",
+        "incomeTooHigh": "Your household income may be above the WIC income guidelines (185% of federal poverty level)",
+        "notCitizen": "You indicated you are not a U.S. citizen or qualified immigrant",
+        "noNutritionalRisk": "You may not have a nutritional risk that WIC addresses",
+        "ageRestriction": "You may not meet the age requirements for WIC eligibility"
       },
       "howToApply": {
         "title": "How to apply for WIC:",
@@ -739,6 +756,175 @@
       "section8": "Rental assistance for low-income families and individuals",
       "lihtc": "Affordable housing options for low-income families",
       "default": "Government benefit program"
+    }
+  },
+  "lihtc": {
+    "title": "LIHTC Housing Assessment",
+    "subtitle": "Low-Income Housing Tax Credit Eligibility",
+    "description": "LIHTC provides affordable rental housing for low-income families and individuals through tax credits to developers.",
+    "questions": {
+      "studentStatus": {
+        "title": "Student Status",
+        "question": "Are you or any household members full-time students?",
+        "subtitle": "This affects LIHTC eligibility - full-time students are generally ineligible unless exceptions apply",
+        "helpText": "Single parents and married students may still be eligible even if they are students",
+        "options": {
+          "none": "No full-time students in household",
+          "singleParent": "Single parent student",
+          "marriedStudent": "Married student",
+          "fullTimeStudent": "Full-time student (may be ineligible)"
+        },
+        "warnings": {
+          "fullTimeStudent": "Full-time students may be ineligible for LIHTC housing"
+        }
+      },
+      "unitSize": {
+        "title": "Unit Size Preference",
+        "question": "What size unit are you looking for?",
+        "subtitle": "Choose the unit size that best fits your household needs",
+        "helpText": "LIHTC units are available in various sizes. Your household size will help determine the appropriate unit size.",
+        "options": {
+          "studio": "Studio (1 person)",
+          "1br": "1 Bedroom (1-2 people)",
+          "2br": "2 Bedroom (2-4 people)",
+          "3br": "3 Bedroom (3-6 people)",
+          "4br": "4+ Bedroom (4+ people)"
+        },
+        "recommendations": {
+          "recommended": "Recommended",
+          "tooSmall": "Too small"
+        }
+      },
+      "housingHistory": {
+        "title": "Housing History",
+        "question": "Have you or any household members lived in subsidized housing before?",
+        "subtitle": "This includes public housing, Section 8, LIHTC, or other subsidized housing",
+        "helpText": "Previous subsidized housing experience may affect eligibility for certain programs",
+        "options": {
+          "yes": "Yes, I have lived in subsidized housing",
+          "no": "No, I have not lived in subsidized housing"
+        }
+      },
+      "incomeSources": {
+        "title": "Income Sources",
+        "question": "What are your main sources of household income?",
+        "subtitle": "Select all that apply to help determine LIHTC eligibility",
+        "helpText": "Different income sources may be treated differently for LIHTC calculations",
+        "options": {
+          "wages": "Wages/Salary",
+          "benefits": "Government Benefits",
+          "childSupport": "Child Support",
+          "selfEmployment": "Self-Employment",
+          "retirement": "Retirement/Pension",
+          "other": "Other Income"
+        }
+      },
+      "rentAffordability": {
+        "title": "Rent Affordability",
+        "question": "What is the maximum monthly rent you can afford?",
+        "subtitle": "LIHTC units typically have rent caps at 30% of the applicable income limit",
+        "helpText": "This helps determine if LIHTC housing is financially appropriate for your household",
+        "maxLIHTC": "Maximum LIHTC rent (30% of 50% AMI):",
+        "yourAffordable": "Your affordable rent (30% of income):"
+      },
+      "housingPreferences": {
+        "title": "Housing Preferences",
+        "question": "Do you have any specific housing preferences or needs?",
+        "subtitle": "Select any that apply to help match you with appropriate LIHTC properties",
+        "helpText": "These preferences help identify suitable LIHTC properties in your area",
+        "options": {
+          "accessible": "Accessible/ADA Compliant",
+          "senior": "Senior Housing",
+          "family": "Family Housing",
+          "nearTransit": "Near Public Transit",
+          "nearSchools": "Near Schools",
+          "petFriendly": "Pet Friendly"
+        }
+      },
+      "contactPreferences": {
+        "title": "Contact Preferences",
+        "question": "How would you like to be contacted about LIHTC housing opportunities?",
+        "subtitle": "Select your preferred method for receiving housing information",
+        "helpText": "This helps housing authorities contact you about available LIHTC units",
+        "options": {
+          "phone": "Phone Call",
+          "email": "Email",
+          "text": "Text Message",
+          "mail": "Mail"
+        }
+      }
+    },
+    "results": {
+      "eligible": "Eligible for LIHTC Housing",
+      "notEligible": "Not Eligible for LIHTC Housing",
+      "amiInformation": "Area Median Income (AMI) Information",
+      "rentInformation": "Rent Affordability Information",
+      "eligibilityBreakdown": "Eligibility Breakdown",
+      "nextStepsLabel": "Next Steps",
+      "alternativePrograms": "Alternative Housing Programs",
+      "details": {
+        "yourIncome": "Your Income:",
+        "amiForHousehold": "AMI for {householdSize} people:",
+        "yourIncomePercentage": "Your income is:",
+        "incomeLimit50": "50% AMI Limit:",
+        "incomeLimit60": "60% AMI Limit:",
+        "incomeLimit80": "80% AMI Limit:",
+        "maxLIHTC": "Maximum LIHTC rent (30% of 50% AMI):",
+        "yourAffordable": "Your affordable rent (30% of income):",
+        "incomeEligible": "Income Eligibility",
+        "studentEligible": "Student Status",
+        "unitSizeEligible": "Unit Size Match",
+        "rentAffordable": "Rent Affordability",
+        "amiPercentage": "AMI Percentage:",
+        "maxAffordableRent": "Max Affordable Rent:"
+      },
+      "nextSteps": {
+        "contactHousing": "Contact local housing authorities for available LIHTC properties",
+        "prepareDocuments": "Prepare income verification documents (pay stubs, tax returns, bank statements)",
+        "checkWaitingLists": "Check for waiting lists in your area",
+        "considerAlternatives": "Consider other affordable housing programs if LIHTC is not available"
+      },
+      "documentRequirements": "Required Documents",
+      "requiredDocuments": "You will need to provide the following documents:",
+      "documents": {
+        "incomeVerification": "Income verification (pay stubs, tax returns, bank statements)",
+        "identification": "Government-issued photo ID (driver's license, passport, state ID)",
+        "rentalHistory": "Rental history and landlord references",
+        "backgroundCheck": "Background check authorization and results",
+        "citizenship": "Proof of citizenship or eligible immigration status",
+        "householdComposition": "Proof of household composition (birth certificates, marriage certificates)"
+      },
+      "alternatives": {
+        "section8": "Section 8 Housing Choice Voucher",
+        "publicHousing": "Public Housing",
+        "seniorHousing": "Senior Housing",
+        "disabilityHousing": "Disability Housing",
+        "descriptions": {
+          "section8": "Provides rental assistance for low-income families",
+          "publicHousing": "Government-owned affordable housing units",
+          "seniorHousing": "Age-restricted affordable housing for seniors",
+          "disabilityHousing": "Accessible affordable housing for people with disabilities"
+        }
+      }
+    },
+    "eligibility": {
+      "incomeEligible": "Income Eligibility",
+      "studentEligible": "Student Status Eligibility",
+      "unitSizeEligible": "Unit Size Match",
+      "rentAffordable": "Rent Affordability",
+      "citizenshipEligible": "Citizenship Eligibility",
+      "ageEligible": "Age Eligibility",
+      "householdSizeValid": "Household Size Validation",
+      "backgroundCheck": "Background Check",
+      "incomeVerification": "Income Verification"
+    },
+    "errors": {
+      "amiDataNotFound": "AMI data not found for your location",
+      "invalidHouseholdSize": "Invalid household size",
+      "missingIncome": "Household income is required",
+      "studentIneligible": "Full-time students are generally ineligible for LIHTC housing",
+      "incomeTooHigh": "Household income exceeds LIHTC limits",
+      "unitSizeMismatch": "Household size does not match available unit sizes"
     }
   },
   "formatting": {

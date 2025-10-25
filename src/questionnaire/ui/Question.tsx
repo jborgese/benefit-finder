@@ -14,6 +14,7 @@ import {
   MultiSelectInput,
   DateInput,
 } from '../components';
+import { SearchableSelectInput } from '../components/SearchableSelectInput';
 import { DateOfBirthInput } from '../components/DateOfBirthInput';
 import type { QuestionDefinition } from '../types';
 import { createSchemaFromQuestion, validateWithSchema } from '../validation/schemas';
@@ -156,6 +157,16 @@ export const Question: React.FC<QuestionProps> = ({
             value={value as string | number}
             options={question.options ?? []}
             variant={question.inputType === 'radio' ? 'radio' : 'dropdown'}
+          />
+        );
+
+      case 'searchable-select':
+        return (
+          <SearchableSelectInput
+            {...commonProps}
+            value={value as string | null}
+            options={question.options ?? []}
+            searchPlaceholder={question.placeholder}
           />
         );
 

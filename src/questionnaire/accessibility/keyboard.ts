@@ -87,13 +87,11 @@ export function useQuestionnaireKeyboard(handlers: {
   const shortcuts: KeyboardShortcut[] = [
     {
       key: Keys.ARROW_RIGHT,
-      altKey: true,
       description: 'Go to next question',
       action: () => handlers.onNext?.(),
     },
     {
       key: Keys.ARROW_LEFT,
-      altKey: true,
       description: 'Go to previous question',
       action: () => handlers.onPrevious?.(),
     },

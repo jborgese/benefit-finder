@@ -9,6 +9,7 @@ import React from 'react';
 import { EligibilityStatus, EligibilityExplanation } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../../i18n/hooks';
+import { SpecificReasonsSection } from './SpecificReasonsSection';
 
 interface MedicaidExplanationProps {
   programName: string;
@@ -235,6 +236,13 @@ export const MedicaidExplanation: React.FC<MedicaidExplanationProps> = ({
 
       {/* Medicaid-Specific Information */}
       <div className="space-y-6">
+        {/* Specific Reasons for Not Qualifying */}
+        <SpecificReasonsSection
+          programId="medicaid-federal"
+          status={status}
+          userProfile={userProfile}
+        />
+
         {/* What Medicaid Provides */}
         <div>
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center">

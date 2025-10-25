@@ -151,6 +151,22 @@ const nodes: FlowNode[] = [
       options: US_STATES
     },
     previousId: 'citizenship',
+    nextId: 'county'
+  },
+  {
+    id: 'county',
+    question: {
+      id: 'county',
+      text: 'What county do you live in?',
+      description: 'County information helps us provide accurate Area Median Income (AMI) data for housing programs.',
+      inputType: 'searchable-select',
+      fieldName: 'county',
+      required: true,
+      placeholder: 'Search for your county...',
+      helpText: 'This helps determine accurate income limits for LIHTC and other housing programs',
+      options: [] // Will be populated dynamically based on selected state
+    },
+    previousId: 'state',
     nextId: 'household-assets'
   },
   {
@@ -266,6 +282,74 @@ const nodes: FlowNode[] = [
       required: true
     },
     previousId: 'student-status',
+    nextId: 'criminal-background'
+  },
+
+  // LIHTC-Specific Questions
+  {
+    id: 'criminal-background',
+    question: {
+      id: 'criminal-background',
+      text: 'Do you or any household members have a criminal background?',
+      description: 'This information is required for housing programs and will be verified through background checks.',
+      inputType: 'boolean',
+      fieldName: 'hasCriminalHistory',
+      required: true,
+      helpText: 'Include any convictions, pending charges, or arrests. This information is used for housing eligibility determination.'
+    },
+    previousId: 'has-children',
+    nextId: 'rental-history'
+  },
+  {
+    id: 'rental-history',
+    question: {
+      id: 'rental-history',
+      text: 'Have you ever been evicted from housing?',
+      description: 'This includes formal evictions, lease violations, or being asked to leave housing.',
+      inputType: 'boolean',
+      fieldName: 'hasEvictionHistory',
+      required: true,
+      helpText: 'Be honest about your rental history. This information helps determine housing program eligibility.'
+    },
+    previousId: 'criminal-background',
+    nextId: 'rental-references'
+  },
+  {
+    id: 'rental-references',
+    question: {
+      id: 'rental-references',
+      text: 'Do you have rental references from previous landlords?',
+      description: 'Housing programs typically require references from previous landlords.',
+      inputType: 'boolean',
+      fieldName: 'hasRentalReferences',
+      required: true,
+      helpText: 'References from previous landlords help demonstrate good rental history.'
+    },
+    previousId: 'rental-history',
+    nextId: 'income-verification-method'
+  },
+  {
+    id: 'income-verification-method',
+    question: {
+      id: 'income-verification-method',
+      text: 'How can you verify your income?',
+      description: 'Select all methods available to you for income verification.',
+      inputType: 'multiselect',
+      fieldName: 'incomeVerificationMethods',
+      required: true,
+      options: [
+        { value: 'pay_stubs', label: 'Pay stubs (last 3 months)' },
+        { value: 'tax_returns', label: 'Tax returns (last 2 years)' },
+        { value: 'bank_statements', label: 'Bank statements (last 3 months)' },
+        { value: 'employer_letter', label: 'Employer verification letter' },
+        { value: 'ssa_benefits', label: 'Social Security award letters' },
+        { value: 'unemployment', label: 'Unemployment benefits documentation' },
+        { value: 'child_support', label: 'Child support documentation' },
+        { value: 'other', label: 'Other income verification' }
+      ],
+      helpText: 'You will need to provide documentation to verify your income for housing programs.'
+    },
+    previousId: 'rental-references',
     isTerminal: true
   }
 ];

@@ -43,32 +43,32 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
       action: () => onStartQuestionnaire?.(),
     },
     {
-      key: 'Ctrl + T',
+      key: 'Ctrl + Shift + T',
       description: 'Toggle theme',
       action: () => toggleTheme(),
     },
     {
-      key: 'Ctrl + +',
+      key: 'Ctrl + Shift + =',
       description: 'Increase text size',
       action: () => increaseTextSize(),
     },
     {
-      key: 'Ctrl + -',
+      key: 'Ctrl + Shift + -',
       description: 'Decrease text size',
       action: () => decreaseTextSize(),
     },
     {
-      key: 'Ctrl + 0',
+      key: 'Ctrl + Shift + 0',
       description: 'Reset text size',
       action: () => resetTextSize(),
     },
     {
-      key: 'Ctrl + H',
+      key: 'Ctrl + Shift + H',
       description: 'Go to home',
       action: () => onGoHome?.(),
     },
     {
-      key: 'Ctrl + R',
+      key: 'Ctrl + Shift + R',
       description: 'View results',
       action: () => onViewResults?.(),
     },
@@ -102,7 +102,7 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 
   // Helper function to handle Ctrl/Cmd + key combinations
   const handleCtrlKeyCombination = useCallback((key: string, event: KeyboardEvent): boolean => {
-    const { ctrlKey, metaKey } = event;
+    const { ctrlKey, metaKey, shiftKey } = event;
     const isCtrlOrCmd = ctrlKey || metaKey;
 
     if (!isCtrlOrCmd) return false;
@@ -113,29 +113,47 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
         onStartQuestionnaire?.();
         return true;
       case 't':
-        event.preventDefault();
-        toggleTheme();
-        return true;
-      case '+':
-        event.preventDefault();
-        increaseTextSize();
-        return true;
+        if (shiftKey) {
+          event.preventDefault();
+          toggleTheme();
+          return true;
+        }
+        return false;
+      case '=':
+        if (shiftKey) {
+          event.preventDefault();
+          increaseTextSize();
+          return true;
+        }
+        return false;
       case '-':
-        event.preventDefault();
-        decreaseTextSize();
-        return true;
+        if (shiftKey) {
+          event.preventDefault();
+          decreaseTextSize();
+          return true;
+        }
+        return false;
       case '0':
-        event.preventDefault();
-        resetTextSize();
-        return true;
+        if (shiftKey) {
+          event.preventDefault();
+          resetTextSize();
+          return true;
+        }
+        return false;
       case 'h':
-        event.preventDefault();
-        onGoHome?.();
-        return true;
+        if (shiftKey) {
+          event.preventDefault();
+          onGoHome?.();
+          return true;
+        }
+        return false;
       case 'r':
-        event.preventDefault();
-        onViewResults?.();
-        return true;
+        if (shiftKey) {
+          event.preventDefault();
+          onViewResults?.();
+          return true;
+        }
+        return false;
       default:
         return false;
     }

@@ -47,8 +47,8 @@ Comprehensive accessibility utilities for building WCAG 2.1 AA compliant questio
 
 | Shortcut | Action |
 |----------|--------|
-| `Alt + →` | Next question |
-| `Alt + ←` | Previous question |
+| `→` | Next question |
+| `←` | Previous question |
 | `Ctrl + S` | Save progress |
 | `Ctrl + /` | Show keyboard shortcuts |
 | `Ctrl + Shift + N` | Skip question (if allowed) |

@@ -16,6 +16,8 @@ import { NavigationControls, QuestionBreadcrumb } from './NavigationControls';
 import { useAutoSave } from './AutoSave';
 import { ResumeDialog, SaveProgressButton } from './SaveResume';
 import { useExitConfirmation } from './hooks';
+import { useQuestionnaireKeyboard } from '../accessibility';
+import { useDynamicCountyOptions } from '../hooks/useDynamicCountyOptions';
 import type { QuestionFlow } from '../types';
 
 export interface QuestionFlowUIProps {
@@ -76,6 +78,36 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
   useExitConfirmation(
     enableSaveResume && store.started && !store.completed
   );
+
+  // Dynamic county options
+  useDynamicCountyOptions();
+
+  // Keyboard shortcuts
+  useQuestionnaireKeyboard({
+    onNext: () => {
+      if (isCurrentQuestionValid && store.canGoForward()) {
+        store.next();
+      }
+    },
+    onPrevious: () => {
+      if (store.canGoBack()) {
+        store.previous();
+      }
+    },
+    onSave: () => {
+      // Trigger auto-save
+      store.pause(); // This will trigger auto-save
+    },
+    onHelp: () => {
+      // Show keyboard shortcuts help
+      // This could be implemented with a help modal
+    },
+    onSkip: () => {
+      if (currentQuestion) {
+        store.skipQuestion(currentQuestion.id);
+      }
+    },
+  });
 
   // Initialize flow
   useEffect(() => {

@@ -9,6 +9,7 @@ import React from 'react';
 import { EligibilityStatus, EligibilityExplanation } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../../i18n/hooks';
+import { SpecificReasonsSection } from './SpecificReasonsSection';
 
 interface TanfExplanationProps {
   programName: string;
@@ -220,6 +221,13 @@ export const TanfExplanation: React.FC<TanfExplanationProps> = ({
 
       {/* TANF-Specific Information */}
       <div className="space-y-6">
+        {/* Specific Reasons for Not Qualifying */}
+        <SpecificReasonsSection
+          programId="tanf-federal"
+          status={status}
+          userProfile={userProfile}
+        />
+
         {/* What TANF Provides */}
         <div>
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center">

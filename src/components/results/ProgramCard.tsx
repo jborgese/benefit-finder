@@ -98,7 +98,7 @@ const renderStatusBadge = (status: string, t: (key: string) => string): React.Re
 };
 
 // Helper function to get explanation component
-const getExplanationComponent = (programId: string, result: ProgramEligibilityResult, userProfile: unknown, onClose: () => void): React.ReactElement => {
+const getExplanationComponent = (programId: string, result: ProgramEligibilityResult, userProfile: { [key: string]: unknown; state?: string } | undefined, onClose: () => void): React.ReactElement => {
   const commonProps = {
     programName: result.programName,
     status: result.status,

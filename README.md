@@ -30,6 +30,7 @@ To empower individuals to access the support they're already entitled to — thr
 - **Multi-Jurisdiction Support** — Rules organized by country/state/year with versioning
 - **Comprehensive Testing** — Unit, E2E, accessibility, and performance tests included
 - **NGO-Ready Sync Option** — CouchDB replication for shared field devices (device-to-device over Wi-Fi)
+- **LIHTC Housing Assessment** — Advanced Low-Income Housing Tax Credit eligibility with real HUD data
 
 ---
 

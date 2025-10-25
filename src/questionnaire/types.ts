@@ -27,7 +27,8 @@ export type QuestionInputType =
   | 'checkbox'
   | 'boolean'
   | 'address'
-  | 'ssn';
+  | 'ssn'
+  | 'searchable-select';
 
 /**
  * Question validation rule

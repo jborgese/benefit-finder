@@ -24,17 +24,27 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
       category: 'Navigation',
       shortcuts: [
         { key: 'Ctrl + Enter', description: 'Start questionnaire' },
-        { key: 'Ctrl + H', description: 'Go to home' },
-        { key: 'Ctrl + R', description: 'View results' },
+        { key: 'Ctrl + Shift + H', description: 'Go to home' },
+        { key: 'Ctrl + Shift + R', description: 'View results' },
+      ],
+    },
+    {
+      category: 'Questionnaire',
+      shortcuts: [
+        { key: '→', description: 'Next question' },
+        { key: '←', description: 'Previous question' },
+        { key: 'Ctrl + S', description: 'Save progress' },
+        { key: 'Ctrl + /', description: 'Show keyboard shortcuts' },
+        { key: 'Ctrl + Shift + N', description: 'Skip question (if allowed)' },
       ],
     },
     {
       category: 'Accessibility',
       shortcuts: [
-        { key: 'Ctrl + T', description: 'Toggle theme (light/dark)' },
-        { key: 'Ctrl + +', description: 'Increase text size' },
-        { key: 'Ctrl + -', description: 'Decrease text size' },
-        { key: 'Ctrl + 0', description: 'Reset text size' },
+        { key: 'Ctrl + Shift + T', description: 'Toggle theme (light/dark)' },
+        { key: 'Ctrl + Shift + =', description: 'Increase text size' },
+        { key: 'Ctrl + Shift + -', description: 'Decrease text size' },
+        { key: 'Ctrl + Shift + 0', description: 'Reset text size' },
       ],
     },
     {

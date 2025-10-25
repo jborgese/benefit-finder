@@ -9,6 +9,7 @@ import React from 'react';
 import { EligibilityStatus, EligibilityExplanation } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../../i18n/hooks';
+import { SpecificReasonsSection } from './SpecificReasonsSection';
 
 interface WicExplanationProps {
   programName: string;
@@ -20,6 +21,7 @@ interface WicExplanationProps {
     hasChildren?: boolean;
     householdIncome?: number;
     householdSize?: number;
+    citizenship?: string;
     [key: string]: unknown;
   };
   onClose: () => void;
@@ -131,6 +133,7 @@ function getWicRequirementsExplanation(userProfile?: { isPregnant?: boolean; has
   return requirements;
 }
 
+
 export const WicExplanation: React.FC<WicExplanationProps> = ({
   programName,
   status,
@@ -224,6 +227,13 @@ export const WicExplanation: React.FC<WicExplanationProps> = ({
 
       {/* WIC-Specific Information */}
       <div className="space-y-6">
+        {/* Specific Reasons for Not Qualifying */}
+        <SpecificReasonsSection
+          programId="wic-federal"
+          status={status}
+          userProfile={userProfile}
+        />
+
         {/* What WIC Provides */}
         <div>
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
