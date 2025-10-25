@@ -54,10 +54,10 @@ export function Button({
   // Enhanced variant classes with better color usage
   const getVariantClasses = (variant: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'ghost'): string => {
     const getPrimaryClasses = (): string => `
-      bg-primary-600 dark:bg-primary-500 text-white
-      hover:bg-primary-700 dark:hover:bg-primary-600 hover:shadow-md hover:shadow-primary-600/25
-      focus:ring-primary-500 dark:focus:ring-primary-400
-      active:bg-primary-800 dark:active:bg-primary-700
+      bg-gray-900 dark:bg-gray-800 text-white
+      hover:bg-gray-800 dark:hover:bg-gray-700 hover:shadow-md hover:shadow-gray-900/25
+      focus:ring-gray-500 dark:focus:ring-gray-400
+      active:bg-gray-700 dark:active:bg-gray-600
     `;
 
     switch (variant) {
@@ -143,9 +143,11 @@ export function Button({
       )}
 
       {/* Button content */}
-      <span className={isLoading ? 'opacity-70' : ''}>
-        {children}
-      </span>
+      {isLoading ? (
+        <span className="opacity-70">{children}</span>
+      ) : (
+        children
+      )}
     </button>
   );
 }
