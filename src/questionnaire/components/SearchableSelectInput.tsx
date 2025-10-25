@@ -151,7 +151,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
     if (highlightedIndex >= 0 && listRef.current && highlightedIndex < listRef.current.children.length) {
       // eslint-disable-next-line security/detect-object-injection
       const highlightedElement = listRef.current.children[highlightedIndex] as HTMLElement;
-      highlightedElement?.scrollIntoView({
+      highlightedElement.scrollIntoView({
         block: 'nearest',
         behavior: 'smooth'
       });

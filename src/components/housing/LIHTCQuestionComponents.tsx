@@ -255,7 +255,7 @@ export const IncomeSourcesQuestion: React.FC<QuestionProps> = ({
   value,
   onChange
 }) => {
-  const selectedSources = (value as string[]) ?? [];
+  const selectedSources = Array.isArray(value) ? value as string[] : [];
 
   const handleSourceChange = (sourceValue: string, checked: boolean): void => {
     if (checked) {
@@ -388,7 +388,7 @@ export const HousingPreferencesQuestion: React.FC<QuestionProps> = ({
   value,
   onChange
 }) => {
-  const selectedPreferences = (value as string[]) ?? [];
+  const selectedPreferences = Array.isArray(value) ? value as string[] : [];
 
   const handlePreferenceChange = (preferenceValue: string, checked: boolean): void => {
     if (checked) {
@@ -451,7 +451,7 @@ export const ContactPreferencesQuestion: React.FC<QuestionProps> = ({
   value,
   onChange
 }) => {
-  const selectedMethods = (value as string[]) ?? [];
+  const selectedMethods = Array.isArray(value) ? value as string[] : [];
 
   const handleMethodChange = (methodValue: string, checked: boolean): void => {
     if (checked) {

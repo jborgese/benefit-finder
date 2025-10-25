@@ -43,10 +43,22 @@ export const StateSelectorDemo: React.FC = () => {
   };
 
   const toggleConfig = (key: keyof typeof demoConfig): void => {
-    setDemoConfig(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+    setDemoConfig(prev => {
+      switch (key) {
+        case 'showPopularFirst':
+          return { ...prev, showPopularFirst: !prev.showPopularFirst };
+        case 'groupByRegion':
+          return { ...prev, groupByRegion: !prev.groupByRegion };
+        case 'enableSearch':
+          return { ...prev, enableSearch: !prev.enableSearch };
+        case 'enableAutoDetection':
+          return { ...prev, enableAutoDetection: !prev.enableAutoDetection };
+        case 'showPopulation':
+          return { ...prev, showPopulation: !prev.showPopulation };
+        default:
+          return prev;
+      }
+    });
   };
 
   return (

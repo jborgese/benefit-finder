@@ -61,10 +61,20 @@ export const CountySelectorDemo: React.FC = () => {
   };
 
   const toggleConfig = (key: keyof typeof demoConfig): void => {
-    setDemoConfig(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+    setDemoConfig(prev => {
+      switch (key) {
+        case 'showPopularFirst':
+          return { ...prev, showPopularFirst: !prev.showPopularFirst };
+        case 'showStateContext':
+          return { ...prev, showStateContext: !prev.showStateContext };
+        case 'enableSearch':
+          return { ...prev, enableSearch: !prev.enableSearch };
+        case 'mobileOptimized':
+          return { ...prev, mobileOptimized: !prev.mobileOptimized };
+        default:
+          return prev;
+      }
+    });
   };
 
   return (

@@ -83,7 +83,7 @@ export const SelectInput: React.FC<SelectProps> = ({
         onChange(option.value);
       }
     },
-    onEnterKey: onEnterKey,
+    onEnterKey,
   });
 
   const handleBlur = (): void => {
@@ -102,12 +102,10 @@ export const SelectInput: React.FC<SelectProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
     if (variant === 'radio') {
       keyboardNav.handleKeyDown(e);
-    } else {
+    } else if (e.key === 'Enter' && onEnterKey) {
       // For dropdown, only handle Enter key for submission
-      if (e.key === 'Enter' && onEnterKey) {
-        e.preventDefault();
-        onEnterKey();
-      }
+      e.preventDefault();
+      onEnterKey();
     }
   };
 

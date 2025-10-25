@@ -95,6 +95,7 @@ const POPULAR_LABEL = 'Popular';
 const PEOPLE_TEXT = 'people';
 const STATE_BUTTON_BASE_CLASSES = 'w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600';
 const REGION_HEADER_CLASSES = 'px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide';
+const POPULAR_BADGE_CLASSES = '${POPULAR_BADGE_CLASSES}';
 
 // Helper function to process location detection result
 const processLocationResult = (
@@ -154,6 +155,67 @@ const createStateGroups = (states: typeof US_STATES_ENHANCED): Array<{ region: s
     states: regionStates.sort((a, b) => a.label.localeCompare(b.label))
   }));
 };
+
+// Helper function to create state button classes
+const createStateButtonClasses = (isSelected: boolean, baseClasses: string): string => {
+  const selectedClasses = isSelected
+    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+    : 'text-secondary-900 dark:text-secondary-100';
+  return `${baseClasses} ${selectedClasses}`;
+};
+
+// Helper function to render state button content
+const renderStateButtonContent = (state: typeof US_STATES_ENHANCED[0], showPopulation: boolean): React.ReactNode => (
+  <>
+    <div className="flex items-center justify-between">
+      <span className="font-medium">{state.label}</span>
+      {state.priority === 'high' && (
+        <span className={POPULAR_BADGE_CLASSES}>{POPULAR_LABEL}</span>
+      )}
+    </div>
+    {showPopulation && (
+      <div className="text-xs text-secondary-500 dark:text-secondary-400">
+        {state.population.toLocaleString()} {PEOPLE_TEXT}
+      </div>
+    )}
+  </>
+);
+
+// Helper function to render state list
+const renderStateList = (
+  states: typeof US_STATES_ENHANCED,
+  value: string,
+  onStateSelect: (stateValue: string) => void,
+  showPopulation: boolean
+): React.ReactNode => (
+  states.map((state) => (
+    <button
+      key={state.value}
+      type="button"
+      onClick={() => onStateSelect(state.value)}
+      className={createStateButtonClasses(value === state.value, STATE_BUTTON_BASE_CLASSES)}
+    >
+      {renderStateButtonContent(state, showPopulation)}
+    </button>
+  ))
+);
+
+// Helper function to render grouped states
+const renderGroupedStates = (
+  groupedStates: Array<{ region: string; states: typeof US_STATES_ENHANCED }>,
+  value: string,
+  onStateSelect: (stateValue: string) => void,
+  showPopulation: boolean
+): React.ReactNode => (
+  groupedStates.map(({ region, states }) => (
+    <div key={region}>
+      <div className={REGION_HEADER_CLASSES}>
+        {region}
+      </div>
+      {renderStateList(states, value, onStateSelect, showPopulation)}
+    </div>
+  ))
+);
 
 // Helper function to render location detection UI
 const LocationDetectionUI: React.FC<{
@@ -265,6 +327,320 @@ const LocationDetectionUI: React.FC<{
 
     return null;
   };
+
+// Helper function to render mobile state selector
+const MobileStateSelector: React.FC<{
+  containerRef: React.RefObject<HTMLDivElement>;
+  className: string;
+  question: any;
+  id: string;
+  descId: string;
+  placeholder: string;
+  selectedState: typeof US_STATES_ENHANCED[0] | undefined;
+  isOpen: boolean;
+  isFocused: boolean;
+  showError: boolean;
+  disabled: boolean;
+  autoFocus: boolean;
+  onToggle: () => void;
+  onBlur: () => void;
+  onFocus: () => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
+  enableSearch: boolean;
+  searchInputRef: React.RefObject<HTMLInputElement>;
+  searchQuery: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  groupedStates: Array<{ region: string; states: typeof US_STATES_ENHANCED }> | null;
+  processedStates: typeof US_STATES_ENHANCED;
+  value: string;
+  onStateSelect: (stateValue: string) => void;
+  showPopulation: boolean;
+  helpText: string | undefined;
+  errorId: string;
+  errors: string[];
+  showLocationButton: boolean;
+  isLocationLoading: boolean;
+  hasRequestedLocation: boolean;
+  onLocationRequest: () => void;
+  showLocationError: boolean;
+  locationError: string | null | undefined;
+  locationDetected: boolean;
+  coordinates: GeolocationCoordinates | null;
+}> = (props) => {
+  const {
+    containerRef, className, question, id, descId, placeholder, selectedState,
+    isOpen, isFocused, showError, disabled, autoFocus, onToggle, onBlur, onFocus,
+    onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange,
+    groupedStates, processedStates, value, onStateSelect, showPopulation,
+    helpText, errorId, errors, showLocationButton, isLocationLoading,
+    hasRequestedLocation, onLocationRequest, showLocationError, locationError,
+    locationDetected, coordinates
+  } = props;
+
+  return (
+    <div ref={containerRef} className={`enhanced-state-selector-mobile ${className}`}>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
+        {question.text}
+        {question.required && (
+          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">*</span>
+        )}
+      </label>
+
+      {question.description && (
+        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
+          {question.description}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={onToggle}
+        onBlur={onBlur}
+        onFocus={onFocus}
+        onKeyDown={onKeyDown}
+        disabled={disabled}
+        autoFocus={autoFocus}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-describedby={question.description ? descId : undefined}
+        className={`
+          w-full px-4 py-3 text-left border rounded-lg shadow-sm
+          bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
+          border-secondary-300 dark:border-secondary-600
+          focus:outline-none transition-all duration-200 ease-smooth
+          ${showError ? 'border-error-400 ring-2 ring-error-400/20' : ''}
+          ${isFocused ? 'ring-2 ring-primary-400/20 border-primary-400' : ''}
+          ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        `}
+      >
+        <div className="flex items-center justify-between">
+          <span className={selectedState ? 'text-secondary-900 dark:text-secondary-100' : 'text-secondary-500'}>
+            {selectedState ? selectedState.label : placeholder}
+          </span>
+          <svg
+            className={`w-5 h-5 text-secondary-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-[99999] w-full mt-1 bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-lg shadow-lg max-h-80 overflow-hidden">
+          {enableSearch && (
+            <div className="p-3 border-b border-secondary-200 dark:border-secondary-600">
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={onSearchChange}
+                placeholder="Search states..."
+                className="w-full px-3 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
+              />
+            </div>
+          )}
+
+          <div className="max-h-60 overflow-y-auto">
+            {groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)}
+          </div>
+        </div>
+      )}
+
+      {helpText && !showError && (
+        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">{helpText}</p>
+      )}
+
+      {showError && (
+        <div id={errorId} role="alert" aria-live="polite" className="mt-2">
+          {errors.map((err, idx) => (
+            <p key={idx} className="text-sm text-red-600 dark:text-red-400">{err}</p>
+          ))}
+        </div>
+      )}
+
+      <LocationDetectionUI
+        showLocationButton={showLocationButton}
+        isLocationLoading={isLocationLoading}
+        hasRequestedLocation={hasRequestedLocation}
+        disabled={disabled}
+        onLocationRequest={onLocationRequest}
+        showLocationError={showLocationError}
+        locationError={locationError}
+        locationDetected={locationDetected}
+        coordinates={coordinates}
+      />
+    </div>
+  );
+};
+
+// Helper function to render desktop state selector
+const DesktopStateSelector: React.FC<{
+  containerRef: React.RefObject<HTMLDivElement>;
+  className: string;
+  question: any;
+  id: string;
+  descId: string;
+  placeholder: string;
+  selectedState: typeof US_STATES_ENHANCED[0] | undefined;
+  isOpen: boolean;
+  isFocused: boolean;
+  showError: boolean;
+  disabled: boolean;
+  autoFocus: boolean;
+  onToggle: () => void;
+  onBlur: () => void;
+  onFocus: () => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
+  enableSearch: boolean;
+  searchInputRef: React.RefObject<HTMLInputElement>;
+  searchQuery: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  groupedStates: Array<{ region: string; states: typeof US_STATES_ENHANCED }> | null;
+  processedStates: typeof US_STATES_ENHANCED;
+  value: string;
+  onStateSelect: (stateValue: string) => void;
+  showPopulation: boolean;
+  maxHeight: string;
+  helpText: string | undefined;
+  errorId: string;
+  errors: string[];
+  showLocationButton: boolean;
+  isLocationLoading: boolean;
+  hasRequestedLocation: boolean;
+  onLocationRequest: () => void;
+  showLocationError: boolean;
+  locationError: string | null | undefined;
+  locationDetected: boolean;
+  coordinates: GeolocationCoordinates | null;
+}> = (props) => {
+  const {
+    containerRef, className, question, id, descId, placeholder, selectedState,
+    isOpen, isFocused, showError, disabled, autoFocus, onToggle, onBlur, onFocus,
+    onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange,
+    groupedStates, processedStates, value, onStateSelect, showPopulation, maxHeight,
+    helpText, errorId, errors, showLocationButton, isLocationLoading,
+    hasRequestedLocation, onLocationRequest, showLocationError, locationError,
+    locationDetected, coordinates
+  } = props;
+
+  return (
+    <div ref={containerRef} className={`enhanced-state-selector-desktop relative ${className}`}>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
+        {question.text}
+        {question.required && (
+          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">*</span>
+        )}
+      </label>
+
+      {question.description && (
+        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
+          {question.description}
+        </p>
+      )}
+
+      <div className="relative">
+        <button
+          type="button"
+          onClick={onToggle}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onKeyDown={onKeyDown}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-describedby={question.description ? descId : undefined}
+          className={`
+            w-full px-4 py-3 text-left border rounded-lg shadow-sm
+            bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
+            border-secondary-300 dark:border-secondary-600
+            focus:outline-none transition-all duration-200 ease-smooth
+            ${showError ? 'border-error-400 ring-2 ring-error-400/20' : ''}
+            ${isFocused ? 'ring-2 ring-primary-400/20 border-primary-400' : ''}
+            ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
+            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          `}
+        >
+          <div className="flex items-center justify-between">
+            <span className={selectedState ? 'text-secondary-900 dark:text-secondary-100' : 'text-secondary-500'}>
+              {selectedState ? selectedState.label : placeholder}
+            </span>
+            <svg
+              className={`w-5 h-5 text-secondary-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </button>
+
+        {isOpen && (
+          <div
+            className="absolute z-[99999] w-full mt-1 bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-lg shadow-lg"
+            style={{ maxHeight }}
+          >
+            {enableSearch && (
+              <div className="p-3 border-b border-secondary-200 dark:border-secondary-600">
+                <div className="relative">
+                  <svg
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={onSearchChange}
+                    placeholder="Search states..."
+                    className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="max-h-60 overflow-y-auto">
+              {groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {helpText && !showError && (
+        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">{helpText}</p>
+      )}
+
+      {showError && (
+        <div id={errorId} role="alert" aria-live="polite" className="mt-2">
+          {errors.map((err, idx) => (
+            <p key={idx} className="text-sm text-red-600 dark:text-red-400">{err}</p>
+          ))}
+        </div>
+      )}
+
+      <LocationDetectionUI
+        showLocationButton={showLocationButton}
+        isLocationLoading={isLocationLoading}
+        hasRequestedLocation={hasRequestedLocation}
+        disabled={disabled}
+        onLocationRequest={onLocationRequest}
+        showLocationError={showLocationError}
+        locationError={locationError}
+        locationDetected={locationDetected}
+        coordinates={coordinates}
+      />
+    </div>
+  );
+};
 
 export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   question,
@@ -510,367 +886,51 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     }
   }, [isOpen]);
 
-  // Mobile-optimized render
+  // Use extracted components for cleaner code
+  const commonProps = {
+    containerRef,
+    className,
+    question,
+    id,
+    descId,
+    placeholder,
+    selectedState,
+    isOpen,
+    isFocused,
+    showError,
+    disabled,
+    autoFocus,
+    onToggle: handleToggle,
+    onBlur: handleBlur,
+    onFocus: handleFocus,
+    onKeyDown: handleKeyDown,
+    enableSearch,
+    searchInputRef,
+    searchQuery,
+    onSearchChange: handleSearchChange,
+    groupedStates,
+    processedStates,
+    value: String(value || ''),
+    onStateSelect: handleStateSelect,
+    showPopulation,
+    helpText: question.helpText,
+    errorId,
+    errors,
+    showLocationButton,
+    isLocationLoading,
+    hasRequestedLocation,
+    onLocationRequest: handleLocationRequest,
+    showLocationError,
+    locationError,
+    locationDetected,
+    coordinates
+  };
+
   if (mobileOptimized) {
-    return (
-      <div ref={containerRef} className={`enhanced-state-selector-mobile ${className}`}>
-        <label
-          htmlFor={id}
-          className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
-        >
-          {question.text}
-          {question.required && (
-            <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
-              *
-            </span>
-          )}
-        </label>
-
-        {question.description && (
-          <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
-            {question.description}
-          </p>
-        )}
-
-        <button
-          type="button"
-          onClick={handleToggle}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          autoFocus={autoFocus}
-          aria-expanded={isOpen}
-          aria-haspopup="listbox"
-          aria-describedby={question.description ? descId : undefined}
-          className={`
-            w-full px-4 py-3 text-left border rounded-lg shadow-sm
-            bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
-            border-secondary-300 dark:border-secondary-600
-            focus:outline-none transition-all duration-200 ease-smooth
-            ${showError ? 'border-error-400 ring-2 ring-error-400/20' : ''}
-            ${isFocused ? 'ring-2 ring-primary-400/20 border-primary-400' : ''}
-            ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          `}
-        >
-          <div className="flex items-center justify-between">
-            <span className={selectedState ? 'text-secondary-900 dark:text-secondary-100' : 'text-secondary-500'}>
-              {selectedState ? selectedState.label : placeholder}
-            </span>
-            <svg
-              className={`w-5 h-5 text-secondary-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </button>
-
-        {isOpen && (
-          <div
-            className="absolute z-[99999] w-full mt-1 bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-lg shadow-lg max-h-80 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {enableSearch && (
-              <div className="p-3 border-b border-secondary-200 dark:border-secondary-600">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  placeholder="Search states..."
-                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
-                />
-              </div>
-            )}
-
-            <div className="max-h-60 overflow-y-auto">
-              {groupedStates ? (
-                groupedStates.map(({ region, states }) => (
-                  <div key={region}>
-                    <div className={REGION_HEADER_CLASSES}>
-                      {region}
-                    </div>
-                    {states.map((state) => (
-                      <button
-                        key={state.value}
-                        type="button"
-                        onClick={() => handleStateSelect(state.value)}
-                        className={`
-                          ${STATE_BUTTON_BASE_CLASSES}
-                          ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
-                        `}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{state.label}</span>
-                          {state.priority === 'high' && (
-                            <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
-                          )}
-                        </div>
-                        {showPopulation && (
-                          <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                            {state.population.toLocaleString()} {PEOPLE_TEXT}
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ))
-              ) : (
-                processedStates.map((state) => (
-                  <button
-                    key={state.value}
-                    type="button"
-                    onClick={() => handleStateSelect(state.value)}
-                    className={`
-                      ${STATE_BUTTON_BASE_CLASSES}
-                      ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
-                    `}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{state.label}</span>
-                      {state.priority === 'high' && (
-                        <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
-                      )}
-                    </div>
-                    {showPopulation && (
-                      <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                        {state.population.toLocaleString()} {PEOPLE_TEXT}
-                      </div>
-                    )}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {question.helpText && !showError && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
-            {question.helpText}
-          </p>
-        )}
-
-        {showError && (
-          <div
-            id={errorId}
-            role="alert"
-            aria-live="polite"
-            className="mt-2"
-          >
-            {errors.map((err, idx) => (
-              <p key={idx} className="text-sm text-red-600 dark:text-red-400">
-                {err}
-              </p>
-            ))}
-          </div>
-        )}
-
-        <LocationDetectionUI
-          showLocationButton={showLocationButton}
-          isLocationLoading={isLocationLoading}
-          hasRequestedLocation={hasRequestedLocation}
-          disabled={disabled}
-          onLocationRequest={handleLocationRequest}
-          showLocationError={showLocationError}
-          locationError={locationError}
-          locationDetected={locationDetected}
-          coordinates={coordinates}
-        />
-      </div>
-    );
+    return <MobileStateSelector {...commonProps} />;
   }
 
-  // Desktop-optimized render
-  return (
-    <div ref={containerRef} className={`enhanced-state-selector-desktop relative ${className}`}>
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
-      >
-        {question.text}
-        {question.required && (
-          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
-            *
-          </span>
-        )}
-      </label>
-
-      {question.description && (
-        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
-          {question.description}
-        </p>
-      )}
-
-      <div className="relative">
-        <button
-          type="button"
-          onClick={handleToggle}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          autoFocus={autoFocus}
-          aria-expanded={isOpen}
-          aria-haspopup="listbox"
-          aria-describedby={question.description ? descId : undefined}
-          className={`
-            w-full px-4 py-3 text-left border rounded-lg shadow-sm
-            bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
-            border-secondary-300 dark:border-secondary-600
-            focus:outline-none transition-all duration-200 ease-smooth
-            ${showError ? 'border-error-400 ring-2 ring-error-400/20' : ''}
-            ${isFocused ? 'ring-2 ring-primary-400/20 border-primary-400' : ''}
-            ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          `}
-        >
-          <div className="flex items-center justify-between">
-            <span className={selectedState ? 'text-secondary-900 dark:text-secondary-100' : 'text-secondary-500'}>
-              {selectedState ? selectedState.label : placeholder}
-            </span>
-            <svg
-              className={`w-5 h-5 text-secondary-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </button>
-
-        {isOpen && (
-          <div
-            ref={dropdownRef}
-            className="absolute z-[99999] w-full mt-1 bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-lg shadow-lg"
-            style={{ maxHeight }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {enableSearch && (
-              <div className="p-3 border-b border-secondary-200 dark:border-secondary-600">
-                <div className="relative">
-                  <svg
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    placeholder="Search states..."
-                    className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="max-h-60 overflow-y-auto">
-              {groupedStates ? (
-                groupedStates.map(({ region, states }) => (
-                  <div key={region}>
-                    <div className={REGION_HEADER_CLASSES}>
-                      {region}
-                    </div>
-                    {states.map((state) => (
-                      <button
-                        key={state.value}
-                        type="button"
-                        onClick={() => handleStateSelect(state.value)}
-                        className={`
-                          ${STATE_BUTTON_BASE_CLASSES}
-                          ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
-                        `}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{state.label}</span>
-                          {state.priority === 'high' && (
-                            <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
-                          )}
-                        </div>
-                        {showPopulation && (
-                          <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                            {state.population.toLocaleString()} {PEOPLE_TEXT}
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ))
-              ) : (
-                processedStates.map((state) => (
-                  <button
-                    key={state.value}
-                    type="button"
-                    onClick={() => handleStateSelect(state.value)}
-                    className={`
-                      ${STATE_BUTTON_BASE_CLASSES}
-                      ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
-                    `}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{state.label}</span>
-                      {state.priority === 'high' && (
-                        <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
-                      )}
-                    </div>
-                    {showPopulation && (
-                      <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                        {state.population.toLocaleString()} {PEOPLE_TEXT}
-                      </div>
-                    )}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {question.helpText && !showError && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
-          {question.helpText}
-        </p>
-      )}
-
-      {showError && (
-        <div
-          id={errorId}
-          role="alert"
-          aria-live="polite"
-          className="mt-2"
-        >
-          {errors.map((err, idx) => (
-            <p key={idx} className="text-sm text-red-600 dark:text-red-400">
-              {err}
-            </p>
-          ))}
-        </div>
-      )}
-
-      <LocationDetectionUI
-        showLocationButton={showLocationButton}
-        isLocationLoading={isLocationLoading}
-        hasRequestedLocation={hasRequestedLocation}
-        disabled={disabled}
-        onLocationRequest={handleLocationRequest}
-        showLocationError={showLocationError}
-        locationError={locationError}
-        locationDetected={locationDetected}
-        coordinates={coordinates}
-      />
-    </div>
-  );
+  return <DesktopStateSelector {...commonProps} maxHeight={maxHeight} />;
 };
 
 EnhancedStateSelector.displayName = 'EnhancedStateSelector';

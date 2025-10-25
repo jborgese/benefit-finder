@@ -59,7 +59,7 @@ const useCountiesForState = (selectedState: string | undefined): CountyOption[] 
 const usePopularCounties = (selectedState: string | undefined, allCounties: CountyOption[], showPopularFirst: boolean): CountyOption[] => {
   return useMemo(() => {
     if (!selectedState || !showPopularFirst) return [];
-    const popular = selectedState in POPULAR_COUNTIES ? POPULAR_COUNTIES[selectedState] ?? [] : [];
+    const popular = Object.hasOwnProperty.call(POPULAR_COUNTIES, selectedState) ? POPULAR_COUNTIES[selectedState] ?? [] : [];
     return allCounties.filter(county =>
       popular.some(popularName =>
         county.label.toLowerCase().includes(popularName.toLowerCase()) ||
@@ -269,6 +269,115 @@ const renderHelpText = (question: QuestionDefinition, showError: boolean): React
   );
 };
 
+// Helper function to normalize errors array
+const normalizeErrors = (errorValue: string | string[] | undefined): string[] => {
+  if (Array.isArray(errorValue)) {
+    return errorValue;
+  }
+  if (errorValue) {
+    return [errorValue];
+  }
+  return [];
+};
+
+// Custom hook for component state management
+const useCountySelectorState = (question: QuestionDefinition, disabled: boolean, selectedState: string | undefined, enableSearch: boolean, searchInputRef: React.RefObject<HTMLInputElement>) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isTouched, setIsTouched] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Reset touched state when question changes
+  useEffect(() => {
+    setIsTouched(false);
+    setHasUserInteracted(false);
+  }, [question.id]);
+
+  const handleToggle = (): void => {
+    if (!disabled && selectedState) {
+      setIsOpen(!isOpen);
+      if (!isOpen && enableSearch) {
+        setTimeout(() => searchInputRef.current?.focus(), 100);
+      }
+    }
+  };
+
+  const handleCountySelect = (countyValue: string, onChange: (value: string | null) => void): void => {
+    setHasUserInteracted(true);
+    onChange(countyValue);
+    setIsOpen(false);
+    setSearchQuery('');
+  };
+
+  const handleBlur = (dropdownRef: React.RefObject<HTMLDivElement>): void => {
+    setTimeout(() => {
+      setIsFocused(false);
+      if (!dropdownRef.current?.contains(document.activeElement)) {
+        setIsOpen(false);
+      }
+      if (hasUserInteracted) {
+        setIsTouched(true);
+      }
+    }, 150);
+  };
+
+  const handleFocus = (): void => {
+    setIsFocused(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>, onEnterKey?: () => void): void => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+      setSearchQuery('');
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const newSearchQuery = e.target.value;
+    setSearchQuery(newSearchQuery);
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+
+  return {
+    isOpen,
+    isFocused,
+    isTouched,
+    hasUserInteracted,
+    searchQuery,
+    setIsOpen,
+    setSearchQuery,
+    handleToggle,
+    handleCountySelect,
+    handleBlur,
+    handleFocus,
+    handleKeyDown,
+    handleSearchChange
+  };
+};
+
+// Custom hook for component data
+const useCountySelectorData = (selectedState: string | undefined, showPopularFirst: boolean, searchQuery: string, value: string | null) => {
+  const allCounties = useCountiesForState(selectedState);
+  const popularCounties = usePopularCounties(selectedState, allCounties, showPopularFirst);
+  const processedCounties = useProcessedCounties(allCounties, searchQuery, selectedState, showPopularFirst, popularCounties);
+  const selectedCounty = allCounties.find(county => county.value === value);
+  const stateName = selectedState ? getStateName(selectedState) : null;
+
+  return {
+    allCounties,
+    popularCounties,
+    processedCounties,
+    selectedCounty,
+    stateName
+  };
+};
+
 export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   question,
   value,
@@ -293,93 +402,35 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const [isTouched, setIsTouched] = useState(false);
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
   const deviceInfo = useDeviceDetection();
 
-  // Reset touched state when question changes
-  useEffect(() => {
-    setIsTouched(false);
-    setHasUserInteracted(false);
-  }, [question.id]);
-
-  // Helper function to normalize errors array
-  const normalizeErrors = (errorValue: string | string[] | undefined): string[] => {
-    if (Array.isArray(errorValue)) {
-      return errorValue;
-    }
-    if (errorValue) {
-      return [errorValue];
-    }
-    return [];
-  };
-
   const hasError = Boolean(error);
-  const showError = hasError && isTouched;
   const errors: string[] = normalizeErrors(error);
 
-  // Use helper hooks
-  const allCounties = useCountiesForState(selectedState);
-  const popularCounties = usePopularCounties(selectedState, allCounties, showPopularFirst);
-  const processedCounties = useProcessedCounties(allCounties, searchQuery, selectedState, showPopularFirst, popularCounties);
+  // Use custom hooks for state and data management
+  const {
+    isOpen,
+    isFocused,
+    isTouched,
+    searchQuery,
+    setIsOpen,
+    setSearchQuery,
+    handleToggle,
+    handleCountySelect,
+    handleBlur,
+    handleFocus,
+    handleKeyDown,
+    handleSearchChange
+  } = useCountySelectorState(question, disabled, selectedState, enableSearch, searchInputRef);
 
-  const selectedCounty = allCounties.find(county => county.value === value);
-  const stateName = selectedState ? getStateName(selectedState) : null;
+  const {
+    popularCounties,
+    processedCounties,
+    selectedCounty,
+    stateName
+  } = useCountySelectorData(selectedState, showPopularFirst, searchQuery, value);
 
-  // Event handlers
-  const handleToggle = (): void => {
-    if (!disabled && selectedState) {
-      setIsOpen(!isOpen);
-      if (!isOpen && enableSearch) {
-        setTimeout(() => searchInputRef.current?.focus(), 100);
-      }
-    }
-  };
-
-  const handleCountySelect = (countyValue: string): void => {
-    setHasUserInteracted(true);
-    onChange(countyValue);
-    setIsOpen(false);
-    setSearchQuery('');
-  };
-
-  const handleBlur = (): void => {
-    setTimeout(() => {
-      setIsFocused(false);
-      if (!dropdownRef.current?.contains(document.activeElement)) {
-        setIsOpen(false);
-      }
-      if (hasUserInteracted) {
-        setIsTouched(true);
-      }
-    }, 150);
-  };
-
-  const handleFocus = (): void => {
-    setIsFocused(true);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
-    if (e.key === 'Enter' && onEnterKey) {
-      e.preventDefault();
-      onEnterKey();
-    } else if (e.key === 'Escape') {
-      setIsOpen(false);
-      setSearchQuery('');
-    }
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const newSearchQuery = e.target.value;
-    setSearchQuery(newSearchQuery);
-    if (!isOpen) {
-      setIsOpen(true);
-    }
-  };
+  const showError = hasError && isTouched;
 
   // Handle click outside
   useClickOutside(containerRef, isOpen, setIsOpen, setSearchQuery);
@@ -427,9 +478,9 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
         <button
           type="button"
           onClick={handleToggle}
-          onBlur={handleBlur}
+          onBlur={() => handleBlur(dropdownRef)}
           onFocus={handleFocus}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => handleKeyDown(e, onEnterKey)}
           disabled={disabled}
           autoFocus={autoFocus}
           aria-expanded={isOpen}
@@ -481,7 +532,7 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
             )}
 
             <div className="max-h-60 overflow-y-auto">
-              {renderCountyList(processedCounties, value, handleCountySelect, searchQuery, showPopularFirst, popularCounties, noResultsText)}
+              {renderCountyList(processedCounties, value, (countyValue: string) => handleCountySelect(countyValue, onChange), searchQuery, showPopularFirst, popularCounties, noResultsText)}
             </div>
           </div>
         )}
@@ -503,9 +554,9 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
         <button
           type="button"
           onClick={handleToggle}
-          onBlur={handleBlur}
+          onBlur={() => handleBlur(dropdownRef)}
           onFocus={handleFocus}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => handleKeyDown(e, onEnterKey)}
           disabled={disabled}
           autoFocus={autoFocus}
           aria-expanded={isOpen}
@@ -569,7 +620,7 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
             )}
 
             <div className="max-h-60 overflow-y-auto">
-              {renderCountyList(processedCounties, value, handleCountySelect, searchQuery, showPopularFirst, popularCounties, noResultsText)}
+              {renderCountyList(processedCounties, value, (countyValue: string) => handleCountySelect(countyValue, onChange), searchQuery, showPopularFirst, popularCounties, noResultsText)}
             </div>
           </div>
         )}

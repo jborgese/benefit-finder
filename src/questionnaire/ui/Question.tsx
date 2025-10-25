@@ -217,9 +217,9 @@ export const Question: React.FC<QuestionProps> = ({
       rawStateAnswer: stateAnswer,
       selectedState,
       hasSelectedState: !!selectedState,
-      allAnswers: Object.fromEntries(store.answers ?? new Map()),
+      allAnswers: Object.fromEntries(store.answers),
       value,
-      hasOptions: question.options?.length || 0
+      hasOptions: question.options?.length ?? 0
     });
 
     return (

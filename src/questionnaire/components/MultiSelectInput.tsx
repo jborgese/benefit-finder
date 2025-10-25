@@ -48,7 +48,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         handleToggle(option.value);
       }
     },
-    onEnterKey: onEnterKey,
+    onEnterKey,
   });
 
   const handleToggle = (optionValue: string | number): void => {
