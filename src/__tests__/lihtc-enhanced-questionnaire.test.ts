@@ -6,7 +6,6 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FlowEngine } from '@/questionnaire/flow-engine';
-import { QuestionFlow } from '@/questionnaire/types';
 import { sampleFlow } from '@/questionnaire/sampleFlow';
 import { LIHTC_RULES } from '@/rules/housing/lihtc-rules';
 import { evaluateRule } from '@/rules';

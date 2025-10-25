@@ -90,6 +90,9 @@ interface EnhancedStateSelectorProps extends Omit<SelectProps, 'options'> {
   maxHeight?: string;
 }
 
+// Constants
+const POPULAR_LABEL = 'Popular';
+
 // Helper function to process location detection result
 const processLocationResult = (
   coordinates: GeolocationCoordinates | null,
@@ -127,6 +130,134 @@ const processLocationResult = (
     console.log(`❌ No state detected from coordinates`);
   }
 };
+
+// Helper function to create state groups
+const createStateGroups = (states: typeof US_STATES_ENHANCED) => {
+  const groups = states.reduce((acc, state) => {
+    const { region } = state;
+    if (!acc[region]) {
+      acc[region] = [];
+    }
+    acc[region].push(state);
+    return acc;
+  }, {} as Record<string, typeof states>);
+
+  return Object.entries(groups).map(([region, regionStates]) => ({
+    region,
+    states: regionStates.sort((a, b) => a.label.localeCompare(b.label))
+  }));
+};
+
+// Helper function to render location detection UI
+const LocationDetectionUI: React.FC<{
+  showLocationButton: boolean;
+  isLocationLoading: boolean;
+  hasRequestedLocation: boolean;
+  disabled: boolean;
+  onLocationRequest: () => void;
+  showLocationError: boolean;
+  locationError?: string | null;
+  locationDetected: boolean;
+  coordinates: GeolocationCoordinates | null;
+}> = ({
+  showLocationButton,
+  isLocationLoading,
+  hasRequestedLocation,
+  disabled,
+  onLocationRequest,
+  showLocationError,
+  locationError,
+  locationDetected,
+  coordinates
+}) => {
+    if (showLocationButton) {
+      return (
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                {isLocationLoading ? 'Detecting your location...' : 'Use your current location?'}
+              </h4>
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                {isLocationLoading
+                  ? 'Please allow location access to automatically detect your state.'
+                  : 'We can automatically detect your state and county to save you time.'
+                }
+              </p>
+            </div>
+
+            {!isLocationLoading && (
+              <button
+                type="button"
+                onClick={onLocationRequest}
+                className="ml-4 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:text-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                disabled={disabled}
+              >
+                {hasRequestedLocation ? 'Try Again' : 'Detect Location'}
+              </button>
+            )}
+          </div>
+
+          {isLocationLoading && (
+            <div className="mt-3 flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent mr-2" />
+              <span className="text-xs text-blue-700 dark:text-blue-300">
+                Requesting location access...
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (showLocationError) {
+      return (
+        <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                Location Detection Unavailable
+              </h4>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                {locationError}
+              </p>
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                You can still manually select your state from the dropdown above.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (locationDetected && coordinates) {
+      return (
+        <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
+                Location Detected Successfully
+              </h4>
+              <p className="text-xs text-green-700 dark:text-green-300">
+                Your state has been automatically selected based on your location.
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                If you change your state selection, you may need to re-select your county.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
 export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   question,
@@ -218,7 +349,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     processLocationResult(
       coordinates,
       detectedState,
-      String(value || ''),
+      String(value ?? ''),
       onChange,
       store,
       setDetectedState,
@@ -286,20 +417,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   // Group states by region if enabled
   const groupedStates = useMemo(() => {
     if (!groupByRegion) return null;
-
-    const groups = processedStates.reduce((acc, state) => {
-      const region = state.region;
-      if (!acc[region]) {
-        acc[region] = [];
-      }
-      acc[region].push(state);
-      return acc;
-    }, {} as Record<string, typeof processedStates>);
-
-    return Object.entries(groups).map(([region, states]) => ({
-      region,
-      states: states.sort((a, b) => a.label.localeCompare(b.label))
-    }));
+    return createStateGroups(processedStates);
   }, [processedStates, groupByRegion]);
 
   const selectedState = US_STATES_ENHANCED.find(state => state.value === value);
@@ -367,7 +485,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
 
   const LOCATION_DETECTION_AVAILABLE = enableAutoDetection && isSupported && hasPermission !== false && !locationDetected;
   const showLocationButton = LOCATION_DETECTION_AVAILABLE;
-  const showLocationError = locationError && hasRequestedLocation;
+  const showLocationError = Boolean(locationError && hasRequestedLocation);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -483,7 +601,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                         <div className="flex items-center justify-between">
                           <span className="font-medium">{state.label}</span>
                           {state.priority === 'high' && (
-                            <span className="text-xs text-primary-500 dark:text-primary-400">Popular</span>
+                            <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
                           )}
                         </div>
                         {showPopulation && (
@@ -509,7 +627,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{state.label}</span>
                       {state.priority === 'high' && (
-                        <span className="text-xs text-primary-500 dark:text-primary-400">Popular</span>
+                        <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
                       )}
                     </div>
                     {showPopulation && (
@@ -545,86 +663,17 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
           </div>
         )}
 
-        {/* Location Detection UI */}
-        {showLocationButton && (
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  {isLocationLoading ? 'Detecting your location...' : 'Use your current location?'}
-                </h4>
-                <p className="text-xs text-blue-700 dark:text-blue-300">
-                  {isLocationLoading
-                    ? 'Please allow location access to automatically detect your state.'
-                    : 'We can automatically detect your state and county to save you time.'
-                  }
-                </p>
-              </div>
-
-              {!isLocationLoading && (
-                <button
-                  type="button"
-                  onClick={handleLocationRequest}
-                  className="ml-4 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:text-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  disabled={disabled}
-                >
-                  {hasRequestedLocation ? 'Try Again' : 'Detect Location'}
-                </button>
-              )}
-            </div>
-
-            {isLocationLoading && (
-              <div className="mt-3 flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent mr-2" />
-                <span className="text-xs text-blue-700 dark:text-blue-300">
-                  Requesting location access...
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {showLocationError && (
-          <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <div className="flex items-start">
-              <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <div className="flex-1">
-                <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
-                  Location Detection Unavailable
-                </h4>
-                <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                  {locationError}
-                </p>
-                <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                  You can still manually select your state from the dropdown above.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {locationDetected && coordinates && (
-          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <div className="flex-1">
-                <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                  Location Detected Successfully
-                </h4>
-                <p className="text-xs text-green-700 dark:text-green-300">
-                  Your state has been automatically selected based on your location.
-                </p>
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                  If you change your state selection, you may need to re-select your county.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        <LocationDetectionUI
+          showLocationButton={showLocationButton}
+          isLocationLoading={isLocationLoading}
+          hasRequestedLocation={hasRequestedLocation}
+          disabled={disabled}
+          onLocationRequest={handleLocationRequest}
+          showLocationError={showLocationError}
+          locationError={locationError}
+          locationDetected={locationDetected}
+          coordinates={coordinates}
+        />
       </div>
     );
   }
@@ -739,7 +788,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                         <div className="flex items-center justify-between">
                           <span className="font-medium">{state.label}</span>
                           {state.priority === 'high' && (
-                            <span className="text-xs text-primary-500 dark:text-primary-400">Popular</span>
+                            <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
                           )}
                         </div>
                         {showPopulation && (
@@ -765,7 +814,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{state.label}</span>
                       {state.priority === 'high' && (
-                        <span className="text-xs text-primary-500 dark:text-primary-400">Popular</span>
+                        <span className="text-xs text-primary-500 dark:text-primary-400">{POPULAR_LABEL}</span>
                       )}
                     </div>
                     {showPopulation && (
@@ -802,86 +851,17 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
         </div>
       )}
 
-      {/* Location Detection UI */}
-      {showLocationButton && (
-        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                {isLocationLoading ? 'Detecting your location...' : 'Use your current location?'}
-              </h4>
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                {isLocationLoading
-                  ? 'Please allow location access to automatically detect your state.'
-                  : 'We can automatically detect your state and county to save you time.'
-                }
-              </p>
-            </div>
-
-            {!isLocationLoading && (
-              <button
-                type="button"
-                onClick={handleLocationRequest}
-                className="ml-4 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:text-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                disabled={disabled}
-              >
-                {hasRequestedLocation ? 'Try Again' : 'Detect Location'}
-              </button>
-            )}
-          </div>
-
-          {isLocationLoading && (
-            <div className="mt-3 flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent mr-2" />
-              <span className="text-xs text-blue-700 dark:text-blue-300">
-                Requesting location access...
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {showLocationError && (
-        <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-          <div className="flex items-start">
-            <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <div className="flex-1">
-              <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
-                Location Detection Unavailable
-              </h4>
-              <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                {locationError}
-              </p>
-              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                You can still manually select your state from the dropdown above.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {locationDetected && coordinates && (
-        <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <div className="flex-1">
-              <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                Location Detected Successfully
-              </h4>
-              <p className="text-xs text-green-700 dark:text-green-300">
-                Your state has been automatically selected based on your location.
-              </p>
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                If you change your state selection, you may need to re-select your county.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      <LocationDetectionUI
+        showLocationButton={showLocationButton}
+        isLocationLoading={isLocationLoading}
+        hasRequestedLocation={hasRequestedLocation}
+        disabled={disabled}
+        onLocationRequest={handleLocationRequest}
+        showLocationError={showLocationError}
+        locationError={locationError}
+        locationDetected={locationDetected}
+        coordinates={coordinates}
+      />
     </div>
   );
 };
