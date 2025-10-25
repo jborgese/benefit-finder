@@ -511,7 +511,7 @@ function App(): React.ReactElement {
               clearAfter={3000}
             />
 
-            <nav className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700 px-4 py-4 shadow-sm">
+            <nav className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700 px-4 py-4 shadow-sm overflow-hidden">
               <div className="max-w-7xl mx-auto">
                 {/* Desktop Layout */}
                 <div className="hidden lg:flex items-center justify-between">
@@ -548,17 +548,6 @@ function App(): React.ReactElement {
                         className="animate-slide-in-right"
                       >
                         {t('navigation.home')}
-                      </Button>
-                    )}
-                    {hasResults && appState !== 'results' && (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={handleViewResults}
-                        aria-label={t('navigation.results')}
-                        className="animate-slide-in-right"
-                      >
-                        {t('navigation.results')}
                       </Button>
                     )}
 
@@ -629,59 +618,45 @@ function App(): React.ReactElement {
                 </div>
 
                 {/* Tablet/Desktop Portrait Layout */}
-                <div className="hidden md:flex lg:hidden items-center justify-between">
-                  <div className="flex items-center gap-2 min-w-0 flex-shrink">
-                    <h1 className="text-lg font-display font-semibold text-secondary-900 dark:text-secondary-100 truncate">
+                <div className="hidden md:flex lg:hidden items-center justify-between px-2">
+                  <div className="flex items-center gap-1 min-w-0 flex-shrink">
+                    <h1 className="text-base font-display font-semibold text-secondary-900 dark:text-secondary-100 truncate">
                       {t('app.title')}
                     </h1>
                     <a
                       href="https://frootsnoops.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
+                      className="flex items-center hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
                       aria-label="Visit frootsnoops.com"
                     >
-                      <div className="w-6 h-6 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
+                      <div className="w-5 h-5 rounded-full border-2 border-secondary-300 dark:border-secondary-600 overflow-hidden hover:scale-110 transition-transform duration-200 hover:border-primary-500 dark:hover:border-primary-400">
                         <img
                           src="/frootsnoops_mascot.png"
                           alt="Frootsnoops mascot"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="text-xs text-secondary-600 dark:text-secondary-400 font-medium hidden">
-                        a frootsnoops site
-                      </span>
                     </a>
                   </div>
 
                   <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
-                    {/* Navigation buttons - prioritize Results when available */}
-                    {hasResults && appState !== 'results' && (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={handleViewResults}
-                        aria-label={t('navigation.results')}
-                        className="animate-slide-in-right font-medium flex-shrink-0"
-                      >
-                        {t('navigation.results')}
-                      </Button>
-                    )}
+                    {/* Navigation buttons - only show Home when not on home page */}
                     {appState !== 'home' && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleBackToHome}
                         aria-label={t('navigation.home')}
-                        className="animate-slide-in-right flex-shrink-0"
+                        className="animate-slide-in-right flex-shrink-0 text-xs px-2"
                       >
                         {t('navigation.home')}
                       </Button>
                     )}
 
-                    {/* Condensed onboarding buttons for tablet - only show when on home and no results */}
-                    {appState === 'home' && !hasResults && (
-                      <div className="flex items-center gap-1 flex-shrink-0">
+                    {/* Onboarding buttons for tablet - show when on home page */}
+                    {appState === 'home' && (
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
                         <HelpTooltip
                           content="Take a guided tour of the app to learn about key features"
                           trigger="hover"
@@ -737,19 +712,12 @@ function App(): React.ReactElement {
                       </div>
                     )}
 
-                    {/* Controls - when results are available, show only essential controls */}
-                    {hasResults ? (
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <ThemeSwitcher size="sm" variant="minimal" />
-                        <LanguageSwitcher size="sm" variant="minimal" />
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-0.5 flex-shrink-0">
-                        <TextSizeControls size="sm" variant="minimal" />
-                        <ThemeSwitcher size="sm" variant="minimal" />
-                        <LanguageSwitcher size="sm" variant="minimal" />
-                      </div>
-                    )}
+                    {/* Controls - more space available now */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <TextSizeControls size="sm" variant="minimal" />
+                      <ThemeSwitcher size="sm" variant="minimal" />
+                      <LanguageSwitcher size="sm" variant="minimal" />
+                    </div>
                   </div>
                 </div>
 
@@ -785,17 +753,6 @@ function App(): React.ReactElement {
                         className="animate-slide-in-right"
                       >
                         {t('navigation.home')}
-                      </Button>
-                    )}
-                    {hasResults && appState !== 'results' && (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={handleViewResults}
-                        aria-label={t('navigation.results')}
-                        className="animate-slide-in-right"
-                      >
-                        {t('navigation.results')}
                       </Button>
                     )}
 
