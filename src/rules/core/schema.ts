@@ -398,8 +398,7 @@ export function validateRuleDefinition(
     errors: result.error.issues.map(issue => ({
       field: issue.path.join('.'),
       message: issue.message,
-      expected: issue.expected,
-      received: issue.received
+      code: issue.code
     }))
   });
 

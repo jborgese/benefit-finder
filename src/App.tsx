@@ -21,7 +21,7 @@ import { createUserProfile } from './db/utils';
 import { clearAndReinitialize } from './utils/clearAndReinitialize';
 import { forceFixProgramNames } from './utils/forceFixProgramNames';
 import { evaluateAllPrograms, getAllProgramRuleIds, type EligibilityEvaluationResult } from './rules';
-import { importRules } from './rules/core/import-export';
+import { importManager } from './services/ImportManager';
 
 // Import utilities
 import { initializeApp } from './utils/initializeApp';
@@ -105,24 +105,7 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
 };
 
 const importRulesWithLogging = async (state?: string): Promise<void> => {
-  console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to import federal rules...');
-  const importStartTime = Date.now();
-
-  try {
-    const importResult = await importFederalRules();
-    const importDuration = Date.now() - importStartTime;
-    console.log(`🔍 [DEBUG] handleCompleteQuestionnaire: Import duration: ${importDuration}ms`);
-    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Import result:', importResult);
-  } catch (error) {
-    const importDuration = Date.now() - importStartTime;
-    console.error(`🔍 [DEBUG] handleCompleteQuestionnaire: Federal rules import failed after ${importDuration}ms`);
-    console.error('🔍 [DEBUG] handleCompleteQuestionnaire: Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : 'No stack trace',
-      name: error instanceof Error ? error.name : 'Unknown error type'
-    });
-    throw error;
-  }
+  console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Skipping federal rules import (already imported during initialization)');
 
   if (state) {
     console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Importing state-specific rules for:', state);
@@ -214,83 +197,6 @@ const createResultFromEvaluation = (result: EligibilityEvaluationResult, program
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 
 /**
- * Import federal rules that apply to all states
- */
-async function importFederalRules(): Promise<void> {
-  console.log(`🔍 [DEBUG] importFederalRules: Function called successfully`);
-  console.log(`🔍 [DEBUG] importFederalRules: Function execution started at ${new Date().toISOString()}`);
-  try {
-    console.log(`🔍 [DEBUG] importFederalRules: Starting federal rules import...`);
-
-    // Import SNAP federal rules
-    const { default: snapFederalRules } = await import('./rules/federal/snap/snap-federal-rules.json');
-    const snapResult = await importRules(snapFederalRules.rules, {
-      validate: true,
-      skipTests: false,
-      mode: 'upsert',
-      overwriteExisting: true
-    });
-    console.log(`[DEBUG] SNAP federal rules import result:`, snapResult);
-    console.log(`[DEBUG] SNAP rules imported:`, snapResult.imported, 'errors:', snapResult.errors.length || 0);
-
-    // Import SSI federal rules
-    const { default: ssiFederalRules } = await import('./rules/federal/ssi/ssi-federal-rules.json');
-    const ssiResult = await importRules(ssiFederalRules.rules, {
-      validate: true,
-      skipTests: false,
-      mode: 'upsert',
-      overwriteExisting: true
-    });
-    console.log(`[DEBUG] SSI federal rules import result:`, ssiResult);
-    console.log(`[DEBUG] SSI rules imported:`, ssiResult.imported, 'errors:', ssiResult.errors.length || 0);
-
-    // Import Section 8 federal rules
-    const { default: section8FederalRules } = await import('./rules/federal/section8/section8-federal-rules.json');
-    const section8Result = await importRules(section8FederalRules.rules, {
-      validate: true,
-      skipTests: false,
-      mode: 'upsert',
-      overwriteExisting: true
-    });
-    console.log(`[DEBUG] Section 8 federal rules import result:`, section8Result);
-    console.log(`[DEBUG] Section 8 rules imported:`, section8Result.imported, 'errors:', section8Result.errors.length || 0);
-
-    // Import LIHTC federal rules
-    const { default: lihtcFederalRules } = await import('./rules/federal/lihtc/lihtc-federal-rules.json');
-    const lihtcResult = await importRules(lihtcFederalRules.rules, {
-      validate: true,
-      skipTests: false,
-      mode: 'upsert',
-      overwriteExisting: true
-    });
-    console.log(`[DEBUG] LIHTC federal rules import result:`, lihtcResult);
-    console.log(`[DEBUG] LIHTC rules imported:`, lihtcResult.imported, 'errors:', lihtcResult.errors.length || 0);
-
-    // Import TANF federal rules
-    const { default: tanfFederalRules } = await import('./rules/federal/tanf/tanf-federal-rules.json');
-    const tanfResult = await importRules(tanfFederalRules.rules, {
-      validate: true,
-      skipTests: false,
-      mode: 'upsert',
-      overwriteExisting: true
-    });
-    console.log(`[DEBUG] TANF federal rules import result:`, tanfResult);
-    console.log(`[DEBUG] TANF rules imported:`, tanfResult.imported, 'errors:', tanfResult.errors.length || 0);
-
-    console.log(`🔍 [DEBUG] importFederalRules: All federal rules imported successfully`);
-    return; // Explicit return to ensure function completes
-  } catch (error) {
-    console.error(`🔍 [DEBUG] importFederalRules: Failed to import federal rules:`, error);
-    console.error(`🔍 [DEBUG] importFederalRules: Error details:`, {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : 'No stack trace'
-    });
-    // Don't throw - this shouldn't block the user's experience
-    return;
-  }
-}
-
-/**
  * Import state-specific rules based on the user's state
  */
 async function importStateSpecificRules(stateCode: string): Promise<void> {
@@ -300,14 +206,18 @@ async function importStateSpecificRules(stateCode: string): Promise<void> {
     // Import state-specific rules based on state code
     switch (stateCode) {
       case 'GA': {
-        // Import Georgia Medicaid rules
+        // Import Georgia Medicaid rules using ImportManager
         const { default: medicaidGeorgiaRules } = await import('./rules/state/georgia/medicaid/medicaid-georgia-rules.json');
-        const georgiaResult = await importRules(medicaidGeorgiaRules.rules, {
-          validate: true,
-          skipTests: false,
-          mode: 'upsert',
-          overwriteExisting: true
-        });
+        const georgiaResult = await importManager.importRules(
+          `state-${stateCode}-medicaid`,
+          medicaidGeorgiaRules.rules,
+          {
+            force: false,
+            retryOnFailure: true,
+            maxRetries: 2,
+            timeout: 15000
+          }
+        );
         console.log(`[DEBUG] Georgia rules import result:`, georgiaResult);
         break;
       }
@@ -566,29 +476,69 @@ function App(): React.ReactElement {
       const incomeHardStopResults = evaluationResults
         .filter((result: EligibilityEvaluationResult) => {
           if (!result.eligible) {
-            // Check if this is an income hard stop by looking at the reason
-            const isIncomeHardStop = result.reason?.includes('income') ||
-              result.reason?.includes('Income') ||
-              result.reason?.includes('hard stop') ||
-              result.reason?.includes('disqualified due to income');
+            // Check if this is an income hard stop by looking at the reason and rule ID
+            const isIncomeHardStop = result.reason.includes('income') ||
+              result.reason.includes('Income') ||
+              result.reason.includes('hard stop') ||
+              result.reason.includes('disqualified due to income') ||
+              result.ruleId.includes('income') ||
+              result.ruleId.includes('Income') ||
+              result.ruleId.includes('income-limits') ||
+              result.ruleId.includes('income-limit') ||
+              result.ruleId === 'lihtc-federal-income-limits' ||
+              result.ruleId === 'section8-federal-income-limits' ||
+              result.ruleId === 'tanf-federal-income-test' ||
+              result.ruleId === 'medicaid-federal-expansion-income' ||
+              result.ruleId === 'wic-federal-income-limit' ||
+              (result.confidence >= 90 && result.ruleId.includes('income'));
+
+            console.log('🔍 [UI CATEGORIZATION] Checking income hard stop for:', {
+              programId: result.programId,
+              ruleId: result.ruleId,
+              reason: result.reason,
+              eligible: result.eligible,
+              confidence: result.confidence,
+              isIncomeHardStop
+            });
+
             return isIncomeHardStop;
           }
           return false;
         })
-        .map((result: EligibilityEvaluationResult) => ({
-          ...createResultFromEvaluation(result, programRulesMap),
-          status: 'not-qualified' as const,
-          confidence: 'high' as const,
-        }));
+        .map((result: EligibilityEvaluationResult) => {
+          console.log('🔍 [UI CATEGORIZATION] Categorizing as income hard stop:', {
+            programId: result.programId,
+            ruleId: result.ruleId,
+            reason: result.reason,
+            eligible: result.eligible,
+            confidence: result.confidence
+          });
+
+          return {
+            ...createResultFromEvaluation(result, programRulesMap),
+            status: 'not-qualified' as const,
+            confidence: 'high' as const,
+          };
+        });
 
       const maybeResults = evaluationResults
         .filter((result: EligibilityEvaluationResult) => {
           if (!result.eligible) {
             // Skip income hard stops (already handled above)
-            const isIncomeHardStop = result.reason?.includes('income') ||
-              result.reason?.includes('Income') ||
-              result.reason?.includes('hard stop') ||
-              result.reason?.includes('disqualified due to income');
+            const isIncomeHardStop = result.reason.includes('income') ||
+              result.reason.includes('Income') ||
+              result.reason.includes('hard stop') ||
+              result.reason.includes('disqualified due to income') ||
+              result.ruleId.includes('income') ||
+              result.ruleId.includes('Income') ||
+              result.ruleId.includes('income-limits') ||
+              result.ruleId.includes('income-limit') ||
+              result.ruleId === 'lihtc-federal-income-limits' ||
+              result.ruleId === 'section8-federal-income-limits' ||
+              result.ruleId === 'tanf-federal-income-test' ||
+              result.ruleId === 'medicaid-federal-expansion-income' ||
+              result.ruleId === 'wic-federal-income-limit' ||
+              (result.confidence >= 90 && result.ruleId.includes('income'));
             if (isIncomeHardStop) return false;
 
             // Other ineligible results go to maybe if incomplete or low confidence
@@ -606,10 +556,20 @@ function App(): React.ReactElement {
         .filter((result: EligibilityEvaluationResult) => {
           if (!result.eligible) {
             // Skip income hard stops (already handled above)
-            const isIncomeHardStop = result.reason?.includes('income') ||
-              result.reason?.includes('Income') ||
-              result.reason?.includes('hard stop') ||
-              result.reason?.includes('disqualified due to income');
+            const isIncomeHardStop = result.reason.includes('income') ||
+              result.reason.includes('Income') ||
+              result.reason.includes('hard stop') ||
+              result.reason.includes('disqualified due to income') ||
+              result.ruleId.includes('income') ||
+              result.ruleId.includes('Income') ||
+              result.ruleId.includes('income-limits') ||
+              result.ruleId.includes('income-limit') ||
+              result.ruleId === 'lihtc-federal-income-limits' ||
+              result.ruleId === 'section8-federal-income-limits' ||
+              result.ruleId === 'tanf-federal-income-test' ||
+              result.ruleId === 'medicaid-federal-expansion-income' ||
+              result.ruleId === 'wic-federal-income-limit' ||
+              (result.confidence >= 90 && result.ruleId.includes('income'));
             if (isIncomeHardStop) return false;
 
             // Other ineligible results go to not-qualified if complete and high confidence
@@ -631,6 +591,18 @@ function App(): React.ReactElement {
         totalPrograms: evaluationResults.length,
         evaluatedAt: new Date()
       };
+
+      console.log('🔍 [UI CATEGORIZATION] Final categorization results:', {
+        qualified: qualifiedResults.length,
+        maybe: maybeResults.length,
+        incomeHardStops: incomeHardStopResults.length,
+        notQualified: notQualifiedResults.length,
+        totalNotQualified: results.notQualified.length,
+        totalPrograms: evaluationResults.length,
+        incomeHardStopPrograms: incomeHardStopResults.map(r => r.programId),
+        maybePrograms: maybeResults.map(r => r.programId),
+        notQualifiedPrograms: notQualifiedResults.map(r => r.programId)
+      });
 
       await saveResults({ results });
       setCurrentResults(results);

@@ -138,7 +138,11 @@
           "priority": "high"
         }
       ],
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "citations": [
         {
           "title": "SNAP Eligibility Requirements",
@@ -165,7 +169,7 @@
             "householdIncome": 1200,
             "householdSize": 1
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "single"
@@ -178,7 +182,7 @@
             "householdIncome": 3800,
             "householdSize": 4
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "family"
@@ -191,7 +195,7 @@
             "householdIncome": 6000,
             "householdSize": 3
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "high-income"
@@ -204,7 +208,7 @@
             "householdIncome": 5769,
             "householdSize": 3
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "boundary",
             "edge-case"
@@ -333,7 +337,11 @@
           "where": "Landlord, utility companies, childcare providers, healthcare providers"
         }
       ],
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "citations": [
         {
           "title": "SNAP Net Income Eligibility Standard",
@@ -354,7 +362,7 @@
             "allowedDeductions": 1200,
             "householdSize": 1
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "net-income"
@@ -368,7 +376,7 @@
             "allowedDeductions": 500,
             "householdSize": 1
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "net-income"
@@ -435,7 +443,11 @@
           "priority": "high"
         }
       ],
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "citations": [
         {
           "title": "SNAP Non-Citizen Eligibility",
@@ -460,7 +472,7 @@
           "input": {
             "citizenship": "us_citizen"
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "citizen"
@@ -472,7 +484,7 @@
           "input": {
             "citizenship": "refugee"
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "qualified-immigrant"
@@ -484,7 +496,7 @@
           "input": {
             "citizenship": "permanent_resident"
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "qualified-immigrant"
@@ -496,7 +508,7 @@
           "input": {
             "citizenship": "temporary_visitor"
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "non-qualified"
@@ -581,7 +593,11 @@
           "estimatedTime": "1-2 days"
         }
       ],
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "citations": [
         {
           "title": "SNAP Resource Limits",
@@ -602,7 +618,7 @@
             "householdAssets": 2000,
             "hasElderlyOrDisabled": false
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "regular-household"
@@ -615,7 +631,7 @@
             "householdAssets": 3000,
             "hasElderlyOrDisabled": false
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "above-limit"
@@ -628,7 +644,7 @@
             "householdAssets": 4000,
             "hasElderlyOrDisabled": true
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "elderly-disabled"
@@ -641,7 +657,7 @@
             "householdAssets": 5000,
             "hasElderlyOrDisabled": true
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "above-limit"
@@ -654,7 +670,7 @@
             "householdAssets": 2750,
             "hasElderlyOrDisabled": false
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "boundary",
             "edge-case"
@@ -667,7 +683,7 @@
             "householdAssets": 4250,
             "hasElderlyOrDisabled": true
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "boundary",
             "edge-case",
@@ -733,7 +749,11 @@
           "estimatedTime": "Varies by program"
         }
       ],
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "citations": [
         {
           "title": "SNAP Employment and Training",
@@ -759,7 +779,7 @@
             "meetsWorkRequirement": false,
             "isExemptFromWork": false
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "not-abawd"
@@ -773,7 +793,7 @@
             "meetsWorkRequirement": true,
             "isExemptFromWork": false
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "abawd",
@@ -788,7 +808,7 @@
             "meetsWorkRequirement": false,
             "isExemptFromWork": true
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "abawd",
@@ -803,7 +823,7 @@
             "meetsWorkRequirement": false,
             "isExemptFromWork": false
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "abawd",
@@ -875,7 +895,11 @@
           "estimatedTime": "Same day to apply, 2-4 weeks to receive card"
         }
       ],
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "citations": [
         {
           "title": "SNAP Application Requirements",
@@ -895,7 +919,7 @@
             "hasSocialSecurityNumber": true,
             "hasAppliedForSSN": false
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "has-ssn"
@@ -908,7 +932,7 @@
             "hasSocialSecurityNumber": false,
             "hasAppliedForSSN": true
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "pending-ssn"
@@ -921,7 +945,7 @@
             "hasSocialSecurityNumber": false,
             "hasAppliedForSSN": false
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "no-ssn"
@@ -965,7 +989,11 @@
           "where": "Utility company, landlord, or shelter"
         }
       ],
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "citations": [
         {
           "title": "SNAP Eligibility - Residency",
@@ -985,7 +1013,7 @@
             "livesInState": true,
             "isHomeless": false
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "resident"
@@ -998,7 +1026,7 @@
             "livesInState": true,
             "isHomeless": true
           },
-          "expected": true,
+          "expectedOutput": true,
           "tags": [
             "eligible",
             "homeless"
@@ -1011,7 +1039,7 @@
             "livesInState": false,
             "isHomeless": false
           },
-          "expected": false,
+          "expectedOutput": false,
           "tags": [
             "ineligible",
             "non-resident"

@@ -230,6 +230,8 @@ function logRuleResult(
  * Determines if a rule is an income-based rule
  */
 function isIncomeRule(rule: EligibilityRuleDocument): boolean {
+  // Use word boundaries for short keywords to avoid false matches
+  // e.g., "ami" should not match "family"
   const incomeKeywords = [
     'income',
     'snap_income_eligible',
@@ -241,15 +243,43 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
     'net-income',
     'fpl',
     'poverty',
-    'ami',
     'threshold'
   ];
+
+  // Short keywords that need word boundary checks
+  const shortKeywords = ['ami'];
+
   const ruleId = rule.id.toLowerCase();
   const ruleName = rule.name.toLowerCase();
 
-  return incomeKeywords.some(keyword =>
+  // Check regular keywords with substring matching
+  const matchesKeyword = incomeKeywords.some(keyword =>
     ruleId.includes(keyword) || ruleName.includes(keyword)
   );
+
+  // Check short keywords with word boundaries
+  const matchesShortKeyword = shortKeywords.some(keyword => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+    return regex.test(ruleId) || regex.test(ruleName);
+  });
+
+  const isIncome = matchesKeyword || matchesShortKeyword;
+
+  if (import.meta.env.DEV) {
+    console.log('🔍 [INCOME RULE CHECK]', {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      isIncome,
+      matchedKeyword: incomeKeywords.find(keyword =>
+        ruleId.includes(keyword) || ruleName.includes(keyword)
+      ) || shortKeywords.find(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+        return regex.test(ruleId) || regex.test(ruleName);
+      })
+    });
+  }
+
+  return isIncome;
 }
 
 /**
@@ -711,19 +741,20 @@ async function getAMIDataForContext(
       ami80: amiData.incomeLimit80
     });
 
+    // Convert annual AMI data to monthly for comparison with monthly user income
     return {
-      areaMedianIncome: amiData.incomeLimit50,
-      ami50: amiData.incomeLimit50,
-      ami60: amiData.incomeLimit60,
-      ami80: amiData.incomeLimit80
+      areaMedianIncome: Math.floor(amiData.incomeLimit50 / 12),
+      ami50: Math.floor(amiData.incomeLimit50 / 12),
+      ami60: Math.floor(amiData.incomeLimit60 / 12),
+      ami80: Math.floor(amiData.incomeLimit80 / 12)
     };
   } catch (error) {
     debugLog('Failed to load AMI data', { error, state: stateCode, county });
     return {
-      areaMedianIncome: 50000,
-      ami50: 25000,
-      ami60: 30000,
-      ami80: 40000
+      areaMedianIncome: 2000,   // Monthly fallback - much lower to trigger income hard stops
+      ami50: 1000,              // Monthly fallback - $8,333 > $1,000 fails
+      ami60: 1200,
+      ami80: 1600
     };
   }
 }

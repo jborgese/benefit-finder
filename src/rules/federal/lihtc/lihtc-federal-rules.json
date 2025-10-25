@@ -93,7 +93,7 @@
       ],
       "active": true,
       "draft": false,
-      "priority": 10,
+      "priority": 5,
       "testCases": [
         {
           "id": "test-income-eligible-50",

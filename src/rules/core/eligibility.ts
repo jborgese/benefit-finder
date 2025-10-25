@@ -152,6 +152,17 @@ export async function evaluateEligibility(
   options: EligibilityEvaluationOptions = {}
 ): Promise<EligibilityEvaluationResult> {
   debugLog('Evaluating eligibility', { profileId, programId, options });
+
+  // Enhanced debug logging for SNAP and SSI
+  if (programId === 'snap-federal' || programId === 'ssi-federal') {
+    console.log(`🔍 [SNAP/SSI DEBUG] Starting eligibility evaluation for ${programId}:`, {
+      profileId,
+      programId,
+      options,
+      timestamp: new Date().toISOString()
+    });
+  }
+
   ensureOperatorsRegistered();
 
   const startTime = performance.now();
@@ -175,6 +186,25 @@ export async function evaluateEligibility(
     // Get required entities
     const { profile, rules } = await getEvaluationEntities(profileId, programId);
 
+    // Enhanced debug logging for SNAP and SSI entities
+    if (programId === 'snap-federal' || programId === 'ssi-federal') {
+      console.log(`🔍 [SNAP/SSI DEBUG] Retrieved entities for ${programId}:`, {
+        programId,
+        profileId,
+        rulesCount: rules.length,
+        ruleIds: rules.map(r => r.id),
+        ruleTypes: rules.map(r => r.ruleType),
+        activeRules: rules.filter(r => r.active).length,
+        profileData: {
+          householdSize: profile.householdSize,
+          householdIncome: profile.householdIncome,
+          incomePeriod: profile.incomePeriod,
+          state: profile.state,
+          county: profile.county
+        }
+      });
+    }
+
     // Prepare data
     const data = await prepareDataContext(profile);
 
@@ -193,6 +223,33 @@ export async function evaluateEligibility(
     debugLog('Summary after rule evaluation', {
       ruleResults, overallEligible, firstFailedRule, firstFailedResult, allMissingFields: finalMissingFields, executionTime
     });
+
+    // Enhanced debug logging for SNAP and SSI rule evaluation results
+    if (programId === 'snap-federal' || programId === 'ssi-federal') {
+      console.log(`🔍 [SNAP/SSI DEBUG] Rule evaluation results for ${programId}:`, {
+        programId,
+        overallEligible,
+        rulesEvaluated: ruleResults.length,
+        firstFailedRule: firstFailedRule?.id,
+        firstFailedResult: firstFailedResult ? {
+          success: firstFailedResult.success,
+          result: firstFailedResult.result,
+          error: firstFailedResult.error
+        } : null,
+        missingFields: finalMissingFields,
+        executionTime,
+        ruleBreakdown: ruleResults.map(r => ({
+          ruleId: r.rule.id,
+          ruleName: r.rule.name,
+          ruleType: r.rule.ruleType,
+          passed: r.evalResult.success ? Boolean(r.evalResult.result) : false,
+          success: r.evalResult.success,
+          result: r.evalResult.result,
+          error: r.evalResult.error,
+          executionTime: r.evalResult.executionTime
+        }))
+      });
+    }
 
     // Select result rule and create combined result
     const { resultRule, combinedEvalResult } = selectResultRule(
@@ -248,10 +305,36 @@ export async function evaluateEligibility(
 
     debugLog('Returning eligibility result', result);
 
+    // Enhanced debug logging for SNAP and SSI final results
+    if (programId === 'snap-federal' || programId === 'ssi-federal') {
+      console.log(`🔍 [SNAP/SSI DEBUG] Final eligibility result for ${programId}:`, {
+        programId,
+        eligible: result.eligible,
+        confidence: result.confidence,
+        reason: result.reason,
+        ruleId: result.ruleId,
+        missingFields: result.missingFields,
+        incomplete: result.incomplete,
+        executionTime: result.executionTime,
+        criteriaResults: result.criteriaResults?.length || 0
+      });
+    }
+
     return result;
 
   } catch (error) {
     debugLog('Error caught during eligibility evaluation', error);
+
+    // Enhanced debug logging for SNAP and SSI errors
+    if (programId === 'snap-federal' || programId === 'ssi-federal') {
+      console.log(`❌ [SNAP/SSI DEBUG] Error during eligibility evaluation for ${programId}:`, {
+        programId,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        profileId
+      });
+    }
+
     const executionTime = performance.now() - startTime;
     return buildErrorResult(profileId, programId, error, executionTime);
   }

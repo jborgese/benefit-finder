@@ -54,7 +54,11 @@
       },
       "explanation": "You must be 65 or older, blind, or have a qualifying disability to be eligible for SSI.",
       "ruleType": "eligibility",
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
@@ -101,7 +105,11 @@
       },
       "explanation": "Your income must be within SSI limits. The maximum monthly income is $943 for individuals and $1,415 for couples in 2024.",
       "ruleType": "eligibility",
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
@@ -141,7 +149,11 @@
       "priority": 15,
       "weight": 1,
       "ruleType": "eligibility",
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000
@@ -169,7 +181,11 @@
       "priority": 12,
       "weight": 1,
       "ruleType": "eligibility",
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000
@@ -189,7 +205,11 @@
       "priority": 8,
       "weight": 1,
       "ruleType": "eligibility",
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000
@@ -234,7 +254,11 @@
       "priority": 18,
       "weight": 0.8,
       "ruleType": "eligibility",
-      "version": "1.0.0",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000

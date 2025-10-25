@@ -40,6 +40,144 @@ export const IMPORT_ERROR_CODES = {
 } as const;
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const PROGRAM_IDS = {
+  SNAP_FEDERAL: 'snap-federal',
+  SSI_FEDERAL: 'ssi-federal',
+} as const;
+
+type _ProgramId = typeof PROGRAM_IDS[keyof typeof PROGRAM_IDS];
+
+// Type for rule data with unknown structure
+interface UnknownRuleData {
+  id?: string;
+  programId?: string;
+  ruleLogic?: unknown;
+  version?: unknown;
+  active?: unknown;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+  testCases?: unknown;
+}
+
+// ============================================================================
+// HELPER FUNCTIONS FOR IMPORT
+// ============================================================================
+
+/**
+ * Extract rule metadata from unknown rule data
+ */
+function extractRuleMetadata(ruleData: unknown): { ruleId: string; programId: string } {
+  const ruleId = ruleData && typeof ruleData === 'object' && 'id' in ruleData ? ruleData.id : 'unknown';
+  const programId = ruleData && typeof ruleData === 'object' && 'programId' in ruleData ? ruleData.programId : 'unknown';
+  return { ruleId, programId };
+}
+
+/**
+ * Log debug information for SNAP and SSI rules
+ */
+function logSnapSsiDebugInfo(programId: string, ruleId: string, ruleData: unknown): void {
+  if (programId === PROGRAM_IDS.SNAP_FEDERAL || programId === PROGRAM_IDS.SSI_FEDERAL) {
+    console.log(`🔍 [SNAP/SSI DEBUG] Starting import for ${ruleId} in program ${programId}`);
+    console.log(`🔍 [SNAP/SSI DEBUG] Rule data structure:`, {
+      hasId: 'id' in (ruleData as UnknownRuleData),
+      hasProgramId: 'programId' in (ruleData as UnknownRuleData),
+      hasRuleLogic: 'ruleLogic' in (ruleData as UnknownRuleData),
+      hasVersion: 'version' in (ruleData as UnknownRuleData),
+      hasActive: 'active' in (ruleData as UnknownRuleData),
+      hasCreatedAt: 'createdAt' in (ruleData as UnknownRuleData),
+      hasUpdatedAt: 'updatedAt' in (ruleData as UnknownRuleData),
+      hasTestCases: 'testCases' in (ruleData as UnknownRuleData),
+      testCaseCount: (ruleData as UnknownRuleData).testCases?.length ?? 0
+    });
+  }
+}
+
+/**
+ * Handle schema validation failure
+ */
+function handleSchemaValidationFailure(
+  validation: { success: false; error: { issues: Array<{ path: string[]; message: string; expected?: unknown; received?: unknown }> } },
+  programId: string,
+  ruleId: string,
+  result: RuleImportResult
+): RuleImportResult {
+  // Enhanced error logging for SNAP and SSI
+  if (programId === PROGRAM_IDS.SNAP_FEDERAL || programId === PROGRAM_IDS.SSI_FEDERAL) {
+    console.log(`❌ [SNAP/SSI DEBUG] Schema validation failed for ${ruleId}:`, {
+      errorCount: validation.error.issues.length,
+      errors: validation.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+        expected: issue.expected,
+        received: issue.received
+      }))
+    });
+  }
+
+  console.log('❌ [IMPORT] Schema validation failed:', validation.error.issues.map(issue => ({
+    field: issue.path.join('.'),
+    message: issue.message
+  })));
+
+  return {
+    ...result,
+    errors: [...result.errors, {
+      message: 'Invalid rule structure',
+      code: IMPORT_ERROR_CODES.INVALID_FORMAT,
+    }],
+    failed: 1,
+  };
+}
+
+/**
+ * Log validation success/failure for SNAP and SSI rules
+ */
+function logSnapSsiValidationResult(programId: string, ruleId: string, success: boolean, result: RuleImportResult): void {
+  if (programId === PROGRAM_IDS.SNAP_FEDERAL || programId === PROGRAM_IDS.SSI_FEDERAL) {
+    if (success) {
+      console.log(`✅ [SNAP/SSI DEBUG] Validation passed for ${ruleId}`);
+    } else {
+      console.log(`❌ [SNAP/SSI DEBUG] Validation failed for ${ruleId}:`, {
+        errorCount: result.errors.length,
+        errors: result.errors.map(e => ({ message: e.message, code: e.code }))
+      });
+    }
+  }
+}
+
+/**
+ * Log database operations for SNAP and SSI rules
+ */
+function logSnapSsiDatabaseOperation(programId: string, ruleId: string, operation: string, data?: Record<string, unknown>): void {
+  if (programId === PROGRAM_IDS.SNAP_FEDERAL || programId === PROGRAM_IDS.SSI_FEDERAL) {
+    if (operation === 'saving') {
+      console.log(`🔍 [SNAP/SSI DEBUG] Saving ${ruleId} to database:`, data);
+    } else if (operation === 'saved') {
+      console.log(`✅ [SNAP/SSI DEBUG] Successfully saved ${ruleId} to database`);
+    } else if (operation === 'dry-run') {
+      console.log(`🔍 [SNAP/SSI DEBUG] Dry run - ${ruleId} would be imported`);
+    }
+  }
+}
+
+/**
+ * Log error for SNAP and SSI rules
+ */
+function logSnapSsiError(programId: string, ruleId: string, error: unknown): void {
+  if (programId === PROGRAM_IDS.SNAP_FEDERAL || programId === PROGRAM_IDS.SSI_FEDERAL) {
+    console.log(`❌ [SNAP/SSI DEBUG] Error importing ${ruleId}:`, {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      programId,
+      ruleId
+    });
+  }
+}
+
+// ============================================================================
 // RULE IMPORT
 // ============================================================================
 
@@ -72,29 +210,18 @@ export async function importRule(
     dryRun: opts.dryRun,
   };
 
+  const { ruleId, programId } = extractRuleMetadata(ruleData);
+
   try {
-    // Validate structure
-    // Simplified logging
+    logSnapSsiDebugInfo(programId, ruleId, ruleData);
 
     const validation = validateRuleDefinition(ruleData);
 
     if (!validation.success) {
-      console.log('❌ [IMPORT] Schema validation failed:', validation.error?.issues?.map(issue => ({
-        field: issue.path.join('.'),
-        message: issue.message
-      })));
-
-      result.errors.push({
-        message: 'Invalid rule structure',
-        code: IMPORT_ERROR_CODES.INVALID_FORMAT,
-      });
-      result.failed = 1;
-      return result;
+      return handleSchemaValidationFailure(validation, programId, ruleId, result);
     }
 
     const rule = validation.data;
-
-    // Validate logic and run tests
     console.log(`🔍 [VALIDATE] ${rule.id} (${rule.ruleType})`);
 
     const validationSuccess = await performRuleValidationAndTests(
@@ -103,18 +230,13 @@ export async function importRule(
       result
     );
 
-    if (validationSuccess) {
-      console.log(`✅ [VALIDATE] ${rule.id} passed`);
-    } else {
-      console.log(`❌ [VALIDATE] ${rule.id} failed`);
-    }
+    logSnapSsiValidationResult(programId, ruleId, validationSuccess, result);
 
     if (!validationSuccess) {
       result.failed = 1;
       return result;
     }
 
-    // Check for existing rule and handle conflicts
     const canProceed = await checkExistingRuleConflicts(
       rule,
       { mode: opts.mode, overwriteExisting: opts.overwriteExisting },
@@ -125,13 +247,22 @@ export async function importRule(
       return result;
     }
 
-    // Import rule (unless dry run)
     if (!opts.dryRun) {
       console.log(`💾 [SAVE] ${rule.id}`);
+      logSnapSsiDatabaseOperation(programId, ruleId, 'saving', {
+        ruleId: rule.id,
+        programId: rule.programId,
+        ruleType: rule.ruleType,
+        version: rule.version,
+        active: rule.active,
+        mode: opts.mode
+      });
+
       await saveRuleToDatabase(rule, opts.mode);
       result.imported = 1;
       result.success = true;
       console.log(`✅ [SAVE] ${rule.id} completed`);
+      logSnapSsiDatabaseOperation(programId, ruleId, 'saved');
     } else {
       result.imported = 1;
       result.success = true;
@@ -139,9 +270,11 @@ export async function importRule(
         ruleId: rule.id,
         message: 'Dry run - rule not actually imported',
       });
+      logSnapSsiDatabaseOperation(programId, ruleId, 'dry-run');
     }
 
   } catch (error) {
+    logSnapSsiError(programId, ruleId, error);
     result.errors.push({
       message: error instanceof Error ? error.message : 'Unknown error',
       code: IMPORT_ERROR_CODES.DATABASE_ERROR,
@@ -175,6 +308,17 @@ export async function importRules(
 
   console.log(`🔍 [IMPORT] Starting import of ${rules.length} rules`);
 
+  // Enhanced debug logging for SNAP and SSI batch imports
+  const snapRules = rules.filter((rule: unknown) => (rule as UnknownRuleData).programId === PROGRAM_IDS.SNAP_FEDERAL);
+  const ssiRules = rules.filter((rule: unknown) => (rule as UnknownRuleData).programId === PROGRAM_IDS.SSI_FEDERAL);
+
+  if (snapRules.length > 0) {
+    console.log(`🔍 [SNAP/SSI DEBUG] Batch import starting for SNAP: ${snapRules.length} rules`);
+  }
+  if (ssiRules.length > 0) {
+    console.log(`🔍 [SNAP/SSI DEBUG] Batch import starting for SSI: ${ssiRules.length} rules`);
+  }
+
   for (const ruleData of rules) {
     const result = await importRule(ruleData, options);
 
@@ -190,6 +334,18 @@ export async function importRules(
   }
 
   console.log(`📊 [IMPORT] Complete: ${aggregateResult.imported} imported, ${aggregateResult.failed} failed, ${aggregateResult.errors.length} errors`);
+
+  // Enhanced debug logging for SNAP and SSI final results
+  if (snapRules.length > 0 || ssiRules.length > 0) {
+    console.log(`🔍 [SNAP/SSI DEBUG] Batch import complete:`, {
+      snapRules: snapRules.length,
+      ssiRules: ssiRules.length,
+      totalImported: aggregateResult.imported,
+      totalFailed: aggregateResult.failed,
+      totalErrors: aggregateResult.errors.length,
+      success: aggregateResult.success
+    });
+  }
 
   return aggregateResult;
 }
@@ -657,10 +813,10 @@ async function saveRuleToDatabase(
     }
 
     // Verify the rule was actually saved
-    const savedRule = await db.eligibility_rules.findOne({ selector: { id: rule.id } }).exec();
+    const _savedRule = await db.eligibility_rules.findOne({ selector: { id: rule.id } }).exec();
 
     // Also check by programId to see if there are any rules for this program
-    const programRules = await db.eligibility_rules.find({ selector: { programId: rule.programId } }).exec();
+    const _programRules = await db.eligibility_rules.find({ selector: { programId: rule.programId } }).exec();
 
   } catch (dbError) {
     console.log(`❌ [SAVE] Database error for ${rule.id}:`, dbError instanceof Error ? dbError.message : 'Unknown error');
