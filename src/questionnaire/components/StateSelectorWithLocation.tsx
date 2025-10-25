@@ -85,7 +85,7 @@ export const StateSelectorWithLocation: React.FC<StateSelectorWithLocationProps>
     }
   }, [hasPermission, locationDetected]);
 
-  const handleLocationRequest = () => {
+  const handleLocationRequest = (): void => {
     if (isLoading) return;
 
     clearLocation();

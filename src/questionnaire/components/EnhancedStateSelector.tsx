@@ -92,6 +92,9 @@ interface EnhancedStateSelectorProps extends Omit<SelectProps, 'options'> {
 
 // Constants
 const POPULAR_LABEL = 'Popular';
+const PEOPLE_TEXT = 'people';
+const STATE_BUTTON_BASE_CLASSES = 'w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600';
+const REGION_HEADER_CLASSES = 'px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide';
 
 // Helper function to process location detection result
 const processLocationResult = (
@@ -132,17 +135,21 @@ const processLocationResult = (
 };
 
 // Helper function to create state groups
-const createStateGroups = (states: typeof US_STATES_ENHANCED) => {
-  const groups = states.reduce((acc, state) => {
-    const { region } = state;
-    if (!acc[region]) {
-      acc[region] = [];
-    }
-    acc[region].push(state);
-    return acc;
-  }, {} as Record<string, typeof states>);
+const createStateGroups = (states: typeof US_STATES_ENHANCED): Array<{ region: string; states: typeof US_STATES_ENHANCED }> => {
+  const groups = new Map<string, typeof US_STATES_ENHANCED>();
 
-  return Object.entries(groups).map(([region, regionStates]) => ({
+  for (const state of states) {
+    const { region } = state;
+    if (!groups.has(region)) {
+      groups.set(region, []);
+    }
+    const regionStates = groups.get(region);
+    if (regionStates) {
+      regionStates.push(state);
+    }
+  }
+
+  return Array.from(groups.entries()).map(([region, regionStates]) => ({
     region,
     states: regionStates.sort((a, b) => a.label.localeCompare(b.label))
   }));
@@ -585,7 +592,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
               {groupedStates ? (
                 groupedStates.map(({ region, states }) => (
                   <div key={region}>
-                    <div className="px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide">
+                    <div className={REGION_HEADER_CLASSES}>
                       {region}
                     </div>
                     {states.map((state) => (
@@ -594,7 +601,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                         type="button"
                         onClick={() => handleStateSelect(state.value)}
                         className={`
-                          w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600
+                          ${STATE_BUTTON_BASE_CLASSES}
                           ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
                         `}
                       >
@@ -606,7 +613,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                         </div>
                         {showPopulation && (
                           <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                            {state.population.toLocaleString()} people
+                            {state.population.toLocaleString()} {PEOPLE_TEXT}
                           </div>
                         )}
                       </button>
@@ -620,7 +627,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                     type="button"
                     onClick={() => handleStateSelect(state.value)}
                     className={`
-                      w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600
+                      ${STATE_BUTTON_BASE_CLASSES}
                       ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
                     `}
                   >
@@ -632,7 +639,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                     </div>
                     {showPopulation && (
                       <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                        {state.population.toLocaleString()} people
+                        {state.population.toLocaleString()} {PEOPLE_TEXT}
                       </div>
                     )}
                   </button>
@@ -772,7 +779,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
               {groupedStates ? (
                 groupedStates.map(({ region, states }) => (
                   <div key={region}>
-                    <div className="px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide">
+                    <div className={REGION_HEADER_CLASSES}>
                       {region}
                     </div>
                     {states.map((state) => (
@@ -781,7 +788,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                         type="button"
                         onClick={() => handleStateSelect(state.value)}
                         className={`
-                          w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600
+                          ${STATE_BUTTON_BASE_CLASSES}
                           ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
                         `}
                       >
@@ -793,7 +800,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                         </div>
                         {showPopulation && (
                           <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                            {state.population.toLocaleString()} people
+                            {state.population.toLocaleString()} {PEOPLE_TEXT}
                           </div>
                         )}
                       </button>
@@ -807,7 +814,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                     type="button"
                     onClick={() => handleStateSelect(state.value)}
                     className={`
-                      w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600
+                      ${STATE_BUTTON_BASE_CLASSES}
                       ${value === state.value ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-secondary-900 dark:text-secondary-100'}
                     `}
                   >
@@ -819,7 +826,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
                     </div>
                     {showPopulation && (
                       <div className="text-xs text-secondary-500 dark:text-secondary-400">
-                        {state.population.toLocaleString()} people
+                        {state.population.toLocaleString()} {PEOPLE_TEXT}
                       </div>
                     )}
                   </button>

@@ -8,6 +8,11 @@
 import type { RuleDefinition } from '../core/types';
 
 /**
+ * LIHTC Program ID constant
+ */
+const LIHTC_PROGRAM_ID = 'lihtc-housing';
+
+/**
  * LIHTC Income Eligibility Rule
  *
  * Household income must be at or below 50% or 60% of Area Median Income (AMI)
@@ -15,7 +20,7 @@ import type { RuleDefinition } from '../core/types';
  */
 export const LIHTC_INCOME_ELIGIBILITY: RuleDefinition = {
   id: 'lihtc-income-eligibility-2024',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Income Eligibility Test',
   description: 'Household income must be at or below 50-60% of Area Median Income',
   ruleType: 'eligibility',
@@ -59,7 +64,7 @@ export const LIHTC_INCOME_ELIGIBILITY: RuleDefinition = {
  */
 export const LIHTC_STUDENT_ELIGIBILITY: RuleDefinition = {
   id: 'lihtc-student-eligibility',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Student Status Eligibility',
   description: 'Full-time students are generally ineligible unless exceptions apply',
   ruleType: 'eligibility',
@@ -84,7 +89,7 @@ export const LIHTC_STUDENT_ELIGIBILITY: RuleDefinition = {
  */
 export const LIHTC_UNIT_SIZE_MATCH: RuleDefinition = {
   id: 'lihtc-unit-size-match',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Unit Size Requirements',
   description: 'Household size must match appropriate unit size',
   ruleType: 'eligibility',
@@ -109,7 +114,7 @@ export const LIHTC_UNIT_SIZE_MATCH: RuleDefinition = {
  */
 export const LIHTC_RENT_AFFORDABILITY: RuleDefinition = {
   id: 'lihtc-rent-affordability',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Rent Affordability Test',
   description: 'Rent must not exceed 30% of applicable income limit',
   ruleType: 'benefit_amount',
@@ -136,7 +141,7 @@ export const LIHTC_RENT_AFFORDABILITY: RuleDefinition = {
  */
 export const LIHTC_CITIZENSHIP_ELIGIBILITY: RuleDefinition = {
   id: 'lihtc-citizenship-eligibility',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Citizenship Eligibility',
   description: 'Must be a U.S. citizen or eligible non-citizen',
   ruleType: 'eligibility',
@@ -162,7 +167,7 @@ export const LIHTC_CITIZENSHIP_ELIGIBILITY: RuleDefinition = {
  */
 export const LIHTC_AGE_ELIGIBILITY: RuleDefinition = {
   id: 'lihtc-age-eligibility',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Age Eligibility',
   description: 'Must be at least 18 years old to apply',
   ruleType: 'eligibility',
@@ -186,7 +191,7 @@ export const LIHTC_AGE_ELIGIBILITY: RuleDefinition = {
  */
 export const LIHTC_HOUSEHOLD_SIZE_VALIDATION: RuleDefinition = {
   id: 'lihtc-household-size-validation',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Household Size Validation',
   description: 'Household size must be appropriate for LIHTC units',
   ruleType: 'eligibility',
@@ -210,7 +215,7 @@ export const LIHTC_HOUSEHOLD_SIZE_VALIDATION: RuleDefinition = {
  */
 export const LIHTC_INCOME_VERIFICATION: RuleDefinition = {
   id: 'lihtc-income-verification',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Income Verification',
   description: 'Income must be verifiable through documentation',
   ruleType: 'document_requirements',
@@ -241,7 +246,7 @@ export const LIHTC_INCOME_VERIFICATION: RuleDefinition = {
  */
 export const LIHTC_BACKGROUND_CHECK: RuleDefinition = {
   id: 'lihtc-background-check',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Background Check',
   description: 'Must pass background check requirements',
   ruleType: 'eligibility',
@@ -265,7 +270,7 @@ export const LIHTC_BACKGROUND_CHECK: RuleDefinition = {
  */
 export const LIHTC_RENTAL_HISTORY: RuleDefinition = {
   id: 'lihtc-rental-history',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Rental History',
   description: 'Must have good rental history without evictions',
   ruleType: 'eligibility',
@@ -289,7 +294,7 @@ export const LIHTC_RENTAL_HISTORY: RuleDefinition = {
  */
 export const LIHTC_RENTAL_REFERENCES: RuleDefinition = {
   id: 'lihtc-rental-references',
-  programId: 'lihtc-housing',
+  programId: LIHTC_PROGRAM_ID,
   name: 'LIHTC Rental References',
   description: 'Must have rental references from previous landlords',
   ruleType: 'eligibility',

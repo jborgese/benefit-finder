@@ -61,10 +61,11 @@ export const CountySelectorDemo: React.FC = () => {
   };
 
   const toggleConfig = (key: keyof typeof demoConfig): void => {
-    setDemoConfig(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+    setDemoConfig(prev => {
+      const newConfig = { ...prev };
+      newConfig[key] = !prev[key];
+      return newConfig;
+    });
   };
 
   return (
@@ -159,7 +160,11 @@ export const CountySelectorDemo: React.FC = () => {
         <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Device Detection</h3>
         <div className="text-sm text-blue-800 dark:text-blue-200">
           <p>Screen: {deviceInfo.screenWidth}x{deviceInfo.screenHeight}</p>
-          <p>Device: {deviceInfo.isMobile ? 'Mobile' : deviceInfo.isTablet ? 'Tablet' : 'Desktop'}</p>
+          <p>Device: {(() => {
+            if (deviceInfo.isMobile) return 'Mobile';
+            if (deviceInfo.isTablet) return 'Tablet';
+            return 'Desktop';
+          })()}</p>
           <p>Touch: {deviceInfo.isTouchDevice ? 'Yes' : 'No'}</p>
         </div>
       </div>
@@ -307,7 +312,7 @@ export const CountySelectorDemo: React.FC = () => {
                 <ul className="mt-1 space-y-1">
                   {['Los Angeles', 'San Diego', 'Orange', 'Riverside'].map((county, idx) => (
                     <li key={idx} className="flex items-center">
-                      <span className="w-2 h-2 bg-primary-500 rounded-full mr-2"></span>
+                      <span className="w-2 h-2 bg-primary-500 rounded-full mr-2" />
                       {county}
                     </li>
                   ))}

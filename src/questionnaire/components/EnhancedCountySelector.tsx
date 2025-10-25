@@ -42,6 +42,73 @@ interface EnhancedCountySelectorProps {
   searchPlaceholder?: string;
 }
 
+// Helper function to get counties for a state
+const useCountiesForState = (selectedState: string | undefined) => {
+  return useMemo(() => {
+    if (!selectedState) return [];
+    return getCountiesForState(selectedState);
+  }, [selectedState]);
+};
+
+// Helper function to get popular counties
+const usePopularCounties = (selectedState: string | undefined, allCounties: any[], showPopularFirst: boolean) => {
+  return useMemo(() => {
+    if (!selectedState || !showPopularFirst) return [];
+    const popular = POPULAR_COUNTIES[selectedState as keyof typeof POPULAR_COUNTIES] || [];
+    return allCounties.filter(county =>
+      popular.some(popularName =>
+        county.label.toLowerCase().includes(popularName.toLowerCase()) ||
+        popularName.toLowerCase().includes(county.label.toLowerCase())
+      )
+    );
+  }, [selectedState, allCounties, showPopularFirst]);
+};
+
+// Helper function to process counties based on search
+const useProcessedCounties = (
+  allCounties: any[],
+  searchQuery: string,
+  selectedState: string | undefined,
+  showPopularFirst: boolean,
+  popularCounties: any[]
+) => {
+  return useMemo(() => {
+    let counties = allCounties;
+
+    if (searchQuery.trim()) {
+      if (!selectedState) return [];
+      counties = searchCounties(selectedState, searchQuery);
+    }
+
+    if (showPopularFirst && !searchQuery.trim()) {
+      const popular = popularCounties;
+      const other = counties.filter(county =>
+        !popular.some(popularCounty => popularCounty.value === county.value)
+      );
+      return [...popular, ...other.sort((a, b) => a.label.localeCompare(b.label))];
+    }
+
+    return counties.sort((a, b) => a.label.localeCompare(b.label));
+  }, [allCounties, searchQuery, selectedState, showPopularFirst, popularCounties]);
+};
+
+// Helper function to handle click outside
+const useClickOutside = (containerRef: React.RefObject<HTMLDivElement>, isOpen: boolean, setIsOpen: (open: boolean) => void, setSearchQuery: (query: string) => void) => {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSearchQuery('');
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen, containerRef, setIsOpen, setSearchQuery]);
+};
+
 export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   question,
   value,
@@ -59,18 +126,6 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   noResultsText = 'No counties found',
   searchPlaceholder = 'Search for your county...',
 }) => {
-  // COMPREHENSIVE DEBUG LOGGING
-  console.log('🔍 EnhancedCountySelector: Component Rendered', {
-    questionId: question.id,
-    questionText: question.text,
-    selectedState,
-    value,
-    hasError: !!error,
-    disabled,
-    enableSearch,
-    searchPlaceholder
-  });
-
   const id = useId();
   const errorId = `${id}-error`;
   const descId = `${id}-desc`;
@@ -83,8 +138,6 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   const [isTouched, setIsTouched] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
   const deviceInfo = useDeviceDetection();
 
@@ -96,111 +149,21 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
+  const errors: string[] = Array.isArray(error) ? error : error ? [error] : [];
 
-  // Convert error to array format
-  const errors: string[] = (() => {
-    if (Array.isArray(error)) return error;
-    if (error) return [error];
-    return [];
-  })();
-
-  // Get counties for the selected state
-  const allCounties = useMemo(() => {
-    console.log('🔍 EnhancedCountySelector: Getting counties for state', {
-      selectedState,
-      hasSelectedState: !!selectedState
-    });
-
-    if (!selectedState) {
-      console.log('🔍 EnhancedCountySelector: No selectedState, returning empty array');
-      return [];
-    }
-
-    const counties = getCountiesForState(selectedState);
-    console.log('🔍 EnhancedCountySelector: Counties retrieved', {
-      selectedState,
-      countyCount: counties.length,
-      firstFiveCounties: counties.slice(0, 5).map(c => c.label)
-    });
-
-    return counties;
-  }, [selectedState]);
-
-  // Get popular counties for the selected state
-  const popularCounties = useMemo(() => {
-    if (!selectedState || !showPopularFirst) return [];
-    const popular = POPULAR_COUNTIES[selectedState] || [];
-    return allCounties.filter(county =>
-      popular.some(popularName =>
-        county.label.toLowerCase().includes(popularName.toLowerCase()) ||
-        popularName.toLowerCase().includes(county.label.toLowerCase())
-      )
-    );
-  }, [selectedState, allCounties, showPopularFirst]);
-
-  // Process counties based on search and configuration
-  const processedCounties = useMemo(() => {
-    console.log('🔍 EnhancedCountySelector: Processing counties', {
-      searchQuery,
-      searchQueryTrimmed: searchQuery.trim(),
-      allCountiesLength: allCounties.length,
-      selectedState,
-      hasSearchQuery: !!searchQuery.trim()
-    });
-
-    let counties = allCounties;
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      console.log('🔍 EnhancedCountySelector: Filtering by search query', {
-        searchQuery,
-        selectedState,
-        allCountiesLength: allCounties.length
-      });
-
-      if (!selectedState) {
-        console.warn('🔍 EnhancedCountySelector: No selectedState provided, cannot search counties');
-        return [];
-      }
-
-      const searchResults = searchCounties(selectedState, searchQuery);
-      console.log('🔍 EnhancedCountySelector: Search results', {
-        selectedState,
-        searchQuery,
-        resultsCount: searchResults.length,
-        results: searchResults.map(c => c.label)
-      });
-
-      counties = searchResults;
-    }
-
-    // Sort by priority if enabled
-    if (showPopularFirst && !searchQuery.trim()) {
-      const popular = popularCounties;
-      const other = counties.filter(county =>
-        !popular.some(popularCounty => popularCounty.value === county.value)
-      );
-      return [...popular, ...other.sort((a, b) => a.label.localeCompare(b.label))];
-    }
-
-    const finalCounties = counties.sort((a, b) => a.label.localeCompare(b.label));
-
-    console.log('🔍 EnhancedCountySelector: Final processed counties', {
-      finalCount: finalCounties.length,
-      finalCounties: finalCounties.map(c => c.label)
-    });
-
-    return finalCounties;
-  }, [allCounties, searchQuery, selectedState, showPopularFirst, popularCounties]);
+  // Use helper hooks
+  const allCounties = useCountiesForState(selectedState);
+  const popularCounties = usePopularCounties(selectedState, allCounties, showPopularFirst);
+  const processedCounties = useProcessedCounties(allCounties, searchQuery, selectedState, showPopularFirst, popularCounties);
 
   const selectedCounty = allCounties.find(county => county.value === value);
   const stateName = selectedState ? getStateName(selectedState) : null;
 
+  // Event handlers
   const handleToggle = (): void => {
     if (!disabled && selectedState) {
       setIsOpen(!isOpen);
       if (!isOpen && enableSearch) {
-        // Focus search input when opening
         setTimeout(() => searchInputRef.current?.focus(), 100);
       }
     }
@@ -214,10 +177,8 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   };
 
   const handleBlur = (): void => {
-    // Delay to allow for option clicks
     setTimeout(() => {
       setIsFocused(false);
-      // Only close if not clicking on dropdown content
       if (!dropdownRef.current?.contains(document.activeElement)) {
         setIsOpen(false);
       }
@@ -243,34 +204,14 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newSearchQuery = e.target.value;
-    console.log('🔍 EnhancedCountySelector: Search input changed', {
-      newSearchQuery,
-      previousSearchQuery: searchQuery,
-      selectedState,
-      isOpen
-    });
-
     setSearchQuery(newSearchQuery);
     if (!isOpen) {
       setIsOpen(true);
     }
   };
 
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent): void => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setSearchQuery('');
-        setHighlightedIndex(-1);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isOpen]);
+  // Handle click outside
+  useClickOutside(containerRef, isOpen, setIsOpen, setSearchQuery);
 
   // Show loading state if no state selected
   if (!selectedState) {
@@ -296,7 +237,7 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
 
         <div className="w-full px-4 py-3 border rounded-lg shadow-sm bg-gray-50 dark:bg-secondary-800 text-gray-500 dark:text-secondary-400 border-gray-300 dark:border-secondary-600">
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500 mr-2"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500 mr-2" />
             Please select a state first to see available counties
           </div>
         </div>
@@ -307,7 +248,7 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
   // Mobile-optimized render
   if (mobileOptimized || deviceInfo.isMobile) {
     return (
-      <div ref={containerRef} className={`enhanced-county-selector-mobile`}>
+      <div ref={containerRef} className="enhanced-county-selector-mobile">
         <label
           htmlFor={id}
           className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
@@ -459,7 +400,7 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
 
   // Desktop-optimized render
   return (
-    <div ref={containerRef} className={`enhanced-county-selector-desktop relative`}>
+    <div ref={containerRef} className="enhanced-county-selector-desktop relative">
       <label
         htmlFor={id}
         className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"

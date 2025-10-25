@@ -60,7 +60,6 @@ export function useEligibilityEvaluation(options: EvaluationOptions): {
   const [error, setError] = useState<Error | null>(null);
 
   // Evaluate rules and generate results
-  // eslint-disable-next-line sonarjs/cognitive-complexity -- Complex evaluation logic for multi-program eligibility
   const results = useMemo((): EligibilityResults | null => {
     if (!rulePackages.length) {
       return null;
@@ -93,14 +92,14 @@ export function useEligibilityEvaluation(options: EvaluationOptions): {
         }
 
         // Evaluate each program
-        for (const [programId, rules] of rulesByProgram) {
+        Array.from(rulesByProgram.entries()).forEach(([programId, rules]) => {
           const result = evaluateProgram(programId, rules, profile, rulePackage);
           if (result) {
             result.evaluatedAt = evaluatedAt;
             result.rulesVersion = `${rulePackage.metadata.version.major}.${rulePackage.metadata.version.minor}.${rulePackage.metadata.version.patch}`;
             programResults.push(result);
           }
-        }
+        });
       }
 
       // Categorize results by status
@@ -423,83 +422,156 @@ function evaluateRules(rules: RuleDefinition[], profile: UserProfile): {
   calculations: Array<{ label: string; value: string | number; comparison?: string }>;
   hasIncomeFailure: boolean;
 } {
-  let passedRules = 0;
-  let totalRules = 0;
-  let hasIncomeFailure = false;
-  const rulesCited: string[] = [];
-  const details: string[] = [];
-  const calculations: Array<{ label: string; value: string | number; comparison?: string }> = [];
+  const evaluationState = {
+    passedRules: 0,
+    totalRules: 0,
+    hasIncomeFailure: false,
+    rulesCited: [] as string[],
+    details: [] as string[],
+    calculations: [] as Array<{ label: string; value: string | number; comparison?: string }>
+  };
 
   logEvaluationStart(profile);
 
   // First pass: Check for income rule failures (hard stops)
+  const incomeRulesResult = evaluateIncomeRules(rules, profile, evaluationState);
+
+  // If income rules failed, skip other rules and return early
+  if (incomeRulesResult.hasIncomeFailure) {
+    logEvaluationSummary(evaluationState.passedRules, evaluationState.totalRules, evaluationState.rulesCited);
+    return incomeRulesResult;
+  }
+
+  // Second pass: Evaluate non-income rules only if income rules passed
+  const finalResult = evaluateNonIncomeRules(rules, profile, evaluationState);
+
+  logEvaluationSummary(evaluationState.passedRules, evaluationState.totalRules, evaluationState.rulesCited);
+  return finalResult;
+}
+
+/**
+ * Evaluates income rules and returns early if any fail
+ */
+function evaluateIncomeRules(
+  rules: RuleDefinition[],
+  profile: UserProfile,
+  state: {
+    passedRules: number;
+    totalRules: number;
+    hasIncomeFailure: boolean;
+    rulesCited: string[];
+    details: string[];
+    calculations: Array<{ label: string; value: string | number; comparison?: string }>;
+  }
+): {
+  passedRules: number;
+  totalRules: number;
+  rulesCited: string[];
+  details: string[];
+  calculations: Array<{ label: string; value: string | number; comparison?: string }>;
+  hasIncomeFailure: boolean;
+} {
   for (const rule of rules) {
     if (rule.ruleType !== 'eligibility') continue;
     if (!isIncomeRule(rule)) continue;
 
-    totalRules++;
+    state.totalRules++;
+    const ruleResult = processSingleRule(rule, profile, state);
 
-    try {
-      const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
-      logRuleDebug(rule, evaluationResult);
-      debugSnapIncomeRule(rule, profile, evaluationResult);
-
-      const ruleCalculation = generateRuleCalculation(rule, profile);
-      if (ruleCalculation) {
-        calculations.push(ruleCalculation);
+    if (!ruleResult.passed) {
+      state.hasIncomeFailure = true;
+      if (import.meta.env.DEV) {
+        console.warn(`🚨 [INCOME HARD STOP] Rule ${rule.id} failed - user disqualified due to income`);
       }
-
-      if (processRuleResult(rule, evaluationResult, details, profile)) {
-        passedRules++;
-      } else {
-        // Income rule failed - this is a hard stop
-        hasIncomeFailure = true;
-        if (import.meta.env.DEV) {
-          console.warn(`🚨 [INCOME HARD STOP] Rule ${rule.id} failed - user disqualified due to income`);
-        }
-      }
-
-      rulesCited.push(rule.id);
-    } catch (err) {
-      console.error(`🚨 [ERROR] Error evaluating income rule ${rule.id}:`, err);
+    } else {
+      state.passedRules++;
     }
   }
 
-  // If income rules failed, skip other rules and return early
-  if (hasIncomeFailure) {
-    logEvaluationSummary(passedRules, totalRules, rulesCited);
-    return { passedRules, totalRules, rulesCited, details, calculations, hasIncomeFailure };
-  }
+  return {
+    passedRules: state.passedRules,
+    totalRules: state.totalRules,
+    rulesCited: state.rulesCited,
+    details: state.details,
+    calculations: state.calculations,
+    hasIncomeFailure: state.hasIncomeFailure
+  };
+}
 
-  // Second pass: Evaluate non-income rules only if income rules passed
+/**
+ * Evaluates non-income rules
+ */
+function evaluateNonIncomeRules(
+  rules: RuleDefinition[],
+  profile: UserProfile,
+  state: {
+    passedRules: number;
+    totalRules: number;
+    hasIncomeFailure: boolean;
+    rulesCited: string[];
+    details: string[];
+    calculations: Array<{ label: string; value: string | number; comparison?: string }>;
+  }
+): {
+  passedRules: number;
+  totalRules: number;
+  rulesCited: string[];
+  details: string[];
+  calculations: Array<{ label: string; value: string | number; comparison?: string }>;
+  hasIncomeFailure: boolean;
+} {
   for (const rule of rules) {
     if (rule.ruleType !== 'eligibility') continue;
     if (isIncomeRule(rule)) continue; // Skip income rules (already evaluated)
 
-    totalRules++;
+    state.totalRules++;
+    const ruleResult = processSingleRule(rule, profile, state);
 
-    try {
-      const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
-      logRuleDebug(rule, evaluationResult);
-
-      const ruleCalculation = generateRuleCalculation(rule, profile);
-      if (ruleCalculation) {
-        calculations.push(ruleCalculation);
-      }
-
-      if (processRuleResult(rule, evaluationResult, details, profile)) {
-        passedRules++;
-      }
-
-      rulesCited.push(rule.id);
-    } catch (err) {
-      console.error(`🚨 [ERROR] Error evaluating rule ${rule.id}:`, err);
+    if (ruleResult.passed) {
+      state.passedRules++;
     }
   }
 
-  logEvaluationSummary(passedRules, totalRules, rulesCited);
+  return {
+    passedRules: state.passedRules,
+    totalRules: state.totalRules,
+    rulesCited: state.rulesCited,
+    details: state.details,
+    calculations: state.calculations,
+    hasIncomeFailure: state.hasIncomeFailure
+  };
+}
 
-  return { passedRules, totalRules, rulesCited, details, calculations, hasIncomeFailure };
+/**
+ * Processes a single rule evaluation
+ */
+function processSingleRule(
+  rule: RuleDefinition,
+  profile: UserProfile,
+  state: {
+    rulesCited: string[];
+    details: string[];
+    calculations: Array<{ label: string; value: string | number; comparison?: string }>;
+  }
+): { passed: boolean } {
+  try {
+    const evaluationResult = evaluateRuleSync(rule.ruleLogic as JsonLogicRule, profile);
+    logRuleDebug(rule, evaluationResult);
+    debugSnapIncomeRule(rule, profile, evaluationResult);
+
+    const ruleCalculation = generateRuleCalculation(rule, profile);
+    if (ruleCalculation) {
+      state.calculations.push(ruleCalculation);
+    }
+
+    const passed = processRuleResult(rule, evaluationResult, state.details, profile);
+    state.rulesCited.push(rule.id);
+
+    return { passed };
+  } catch (err) {
+    console.error(`🚨 [ERROR] Error evaluating rule ${rule.id}:`, err);
+    return { passed: false };
+  }
 }
 
 /**

@@ -40,7 +40,7 @@ export class ProgramDataService {
   }
 
   static getInstance(): ProgramDataService {
-    if (!ProgramDataService.instance) {
+    if (ProgramDataService.instance === undefined) {
       ProgramDataService.instance = new ProgramDataService();
     }
     return ProgramDataService.instance;
@@ -192,7 +192,6 @@ export class ProgramDataService {
     // Required fields
     if (!program.id) errors.push('Program ID is required');
     if (!program.name) errors.push('Program name is required');
-    if (!program.category) errors.push('Program category is required');
     if (!program.jurisdiction) errors.push('Program jurisdiction is required');
 
     // Contact information warnings

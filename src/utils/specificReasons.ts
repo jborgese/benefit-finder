@@ -257,6 +257,42 @@ const programSpecificReasons: ProgramSpecificReasons = {
 };
 
 /**
+ * Valid program IDs that can be used for object access
+ * This whitelist prevents object injection attacks
+ */
+const VALID_PROGRAM_IDS = new Set([
+  'wic-federal',
+  'medicaid-federal',
+  'snap-federal',
+  'tanf-federal',
+  'ssi-federal',
+  'section8-federal',
+  'lihtc-federal'
+]);
+
+/**
+ * Safely access program-specific reasons with validation
+ */
+function getProgramReasonsSafely(programId: string): SpecificReason[] {
+  if (!VALID_PROGRAM_IDS.has(programId)) {
+    return [];
+  }
+  // eslint-disable-next-line security/detect-object-injection
+  return programSpecificReasons[programId] ?? [];
+}
+
+/**
+ * Safely access program-specific maybe reasons with validation
+ */
+function getProgramMaybeReasonsSafely(programId: string): SpecificReason[] {
+  if (!VALID_PROGRAM_IDS.has(programId)) {
+    return [];
+  }
+  // eslint-disable-next-line security/detect-object-injection
+  return programMaybeReasons[programId] ?? [];
+}
+
+/**
  * Program-specific Maybe reasons - what users need to address for potential eligibility
  */
 const programMaybeReasons: ProgramMaybeReasons = {
@@ -435,8 +471,8 @@ export function getSpecificReasons(
 
   const reasons: string[] = [];
 
-  // Get program-specific reasons
-  const programReasons = programSpecificReasons[programId] ?? [];
+  // Get program-specific reasons (with validation to prevent object injection)
+  const programReasons = getProgramReasonsSafely(programId);
 
   // Get generic reasons
   const allReasons = [...genericReasons, ...programReasons];
@@ -475,8 +511,8 @@ export function getMaybeReasons(
 
   const reasons: string[] = [];
 
-  // Get program-specific maybe reasons
-  const programMaybeReasonsList = programMaybeReasons[programId] ?? [];
+  // Get program-specific maybe reasons (with validation to prevent object injection)
+  const programMaybeReasonsList = getProgramMaybeReasonsSafely(programId);
 
   // Check each reason condition
   for (const reason of programMaybeReasonsList) {
