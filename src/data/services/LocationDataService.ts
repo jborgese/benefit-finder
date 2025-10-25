@@ -16,13 +16,22 @@ import type {
 import statesCountiesData from '../sources/locations/states-counties.json';
 
 /**
+ * Cache entry structure
+ */
+interface CacheEntry {
+  data: unknown;
+  timestamp: number;
+  ttl: number;
+}
+
+/**
  * Location Data Service
  *
  * Singleton service for managing location data with caching and validation.
  */
 export class LocationDataService {
   private static instance: LocationDataService;
-  private cache = new Map<string, any>();
+  private cache = new Map<string, CacheEntry>();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour
   private readonly MAX_CACHE_SIZE = 1000;
 
@@ -40,7 +49,7 @@ export class LocationDataService {
    */
   getStates(): StateOption[] {
     const cacheKey = 'states';
-    const cached = this.getFromCache(cacheKey);
+    const cached = this.getFromCache<StateOption[]>(cacheKey);
     if (cached) return cached;
 
     const states = Object.entries(statesCountiesData.states).map(([code, data]) => ({
@@ -57,11 +66,12 @@ export class LocationDataService {
    */
   getCountiesForState(stateCode: string): CountyOption[] {
     const cacheKey = `counties-${stateCode}`;
-    const cached = this.getFromCache(cacheKey);
+    const cached = this.getFromCache<CountyOption[]>(cacheKey);
     if (cached) return cached;
 
-    const stateData = statesCountiesData.states[stateCode];
-    if (!stateData) {
+    // Use type guard to prevent object injection
+    const stateData = (statesCountiesData.states as Record<string, { name: string; counties: string[] }>)[stateCode];
+    if (stateData === undefined) {
       return [];
     }
 
@@ -78,8 +88,9 @@ export class LocationDataService {
    * Get state name by code
    */
   getStateName(stateCode: string): string | null {
-    const stateData = statesCountiesData.states[stateCode];
-    return stateData?.name || null;
+    // Use type guard to prevent object injection
+    const stateData = (statesCountiesData.states as Record<string, { name: string; counties: string[] }>)[stateCode];
+    return stateData?.name ?? null;
   }
 
   /**
@@ -124,7 +135,8 @@ export class LocationDataService {
       return { isValid: false, errors };
     }
 
-    const stateData = statesCountiesData.states[stateCode];
+    // Use type guard to prevent object injection
+    const stateData = (statesCountiesData.states as Record<string, { name: string; counties: string[] }>)[stateCode];
     if (!stateData) {
       errors.push(`Invalid state code: ${stateCode}`);
       return { isValid: false, errors };
@@ -199,9 +211,9 @@ export class LocationDataService {
     };
   }
 
-  private getFromCache(key: string): any {
+  private getFromCache<T = unknown>(key: string): T | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (entry === undefined) return null;
 
     const now = Date.now();
     if (now - entry.timestamp > entry.ttl) {
@@ -209,13 +221,15 @@ export class LocationDataService {
       return null;
     }
 
-    return entry.data;
+    return entry.data as T;
   }
 
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: unknown): void {
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
       const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
     }
 
     this.cache.set(key, {

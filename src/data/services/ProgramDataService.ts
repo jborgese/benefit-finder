@@ -30,7 +30,7 @@ import { MIAMI_LIHTC_PROGRAM } from '../sources/programs/lihtc/city/miami';
  */
 export class ProgramDataService {
   private static instance: ProgramDataService;
-  private cache = new Map<string, any>();
+  private cache = new Map<string, unknown>();
   private programs: BenefitProgram[] = [];
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour
   private readonly MAX_CACHE_SIZE = 1000;
@@ -40,10 +40,10 @@ export class ProgramDataService {
   }
 
   static getInstance(): ProgramDataService {
-    if (!this.instance) {
-      this.instance = new ProgramDataService();
+    if (!ProgramDataService.instance) {
+      ProgramDataService.instance = new ProgramDataService();
     }
-    return this.instance;
+    return ProgramDataService.instance;
   }
 
   /**
@@ -117,7 +117,7 @@ export class ProgramDataService {
 
     if (filters.tags && filters.tags.length > 0) {
       results = results.filter(program =>
-        filters.tags!.some(tag => program.tags.includes(tag))
+        filters.tags?.some(tag => program.tags.includes(tag)) ?? false
       );
     }
 
@@ -142,7 +142,7 @@ export class ProgramDataService {
    * Get program by ID
    */
   getProgramById(id: string): BenefitProgram | null {
-    return this.programs.find(program => program.id === id) || null;
+    return this.programs.find(program => program.id === id) ?? null;
   }
 
   /**
@@ -153,18 +153,18 @@ export class ProgramDataService {
     const activePrograms = this.programs.filter(p => p.active).length;
 
     const programsByCategory = this.programs.reduce((acc, program) => {
-      acc[program.category] = (acc[program.category] || 0) + 1;
-      return acc;
+      const currentCount = acc[program.category] ?? 0;
+      return { ...acc, [program.category]: currentCount + 1 };
     }, {} as Record<string, number>);
 
     const programsByJurisdiction = this.programs.reduce((acc, program) => {
-      acc[program.jurisdiction] = (acc[program.jurisdiction] || 0) + 1;
-      return acc;
+      const currentCount = acc[program.jurisdiction] ?? 0;
+      return { ...acc, [program.jurisdiction]: currentCount + 1 };
     }, {} as Record<string, number>);
 
     const programsByLevel = this.programs.reduce((acc, program) => {
-      acc[program.jurisdictionLevel] = (acc[program.jurisdictionLevel] || 0) + 1;
-      return acc;
+      const currentCount = acc[program.jurisdictionLevel] ?? 0;
+      return { ...acc, [program.jurisdictionLevel]: currentCount + 1 };
     }, {} as Record<string, number>);
 
     const programsWithApplicationUrl = this.programs.filter(p => p.applicationUrl).length;

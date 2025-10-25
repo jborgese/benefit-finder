@@ -32,7 +32,11 @@ export interface GeolocationOptions {
 /**
  * Hook for geolocation functionality
  */
-export const useGeolocation = (options: GeolocationOptions = {}) => {
+export const useGeolocation = (options: GeolocationOptions = {}): GeolocationState & {
+  getCurrentPosition: () => void;
+  clearLocation: () => void;
+  checkPermission: () => Promise<void>;
+} => {
   const {
     enableHighAccuracy = true,
     timeout = 10000,
@@ -157,7 +161,7 @@ export const useGeolocation = (options: GeolocationOptions = {}) => {
 
   // Check permission on mount
   useEffect(() => {
-    checkPermission();
+    void checkPermission();
   }, [checkPermission]);
 
   return {
@@ -339,11 +343,11 @@ export const testGeorgiaCoordinates = (): void => {
 
 // Make test function available globally for debugging
 if (typeof window !== 'undefined') {
-  (window as any).testGeorgiaCoordinates = testGeorgiaCoordinates;
-  (window as any).testCoordinatesToState = coordinatesToState;
+  (window as unknown as { testGeorgiaCoordinates: typeof testGeorgiaCoordinates; testCoordinatesToState: typeof coordinatesToState; testUserCoordinates: () => { state: string | null; county: string | null } }).testGeorgiaCoordinates = testGeorgiaCoordinates;
+  (window as unknown as { testGeorgiaCoordinates: typeof testGeorgiaCoordinates; testCoordinatesToState: typeof coordinatesToState; testUserCoordinates: () => { state: string | null; county: string | null } }).testCoordinatesToState = coordinatesToState;
 
   // Test the specific coordinates from the log
-  (window as any).testUserCoordinates = () => {
+  (window as unknown as { testGeorgiaCoordinates: typeof testGeorgiaCoordinates; testCoordinatesToState: typeof coordinatesToState; testUserCoordinates: () => { state: string | null; county: string | null } }).testUserCoordinates = () => {
     console.log('🧪 Testing user coordinates from log...');
     const mockCoords = {
       latitude: 33.8460672,

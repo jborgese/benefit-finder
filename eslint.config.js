@@ -237,6 +237,8 @@ export default [
         afterEach: 'readonly',
         vi: 'readonly',
         vitest: 'readonly',
+        // Jest globals (for compatibility)
+        jest: 'readonly',
       }
     },
     rules: {

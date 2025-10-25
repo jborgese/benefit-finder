@@ -7,19 +7,51 @@
 import type { BenefitProgram } from '../../db/schemas';
 import type { ProgramValidationResult } from '../types/programs';
 
+interface ProgramCandidate {
+  [key: string]: unknown;
+}
+
 /**
  * Validate benefit program data
  */
-export function validateBenefitProgram(program: any): ProgramValidationResult {
+export function validateBenefitProgram(program: unknown): ProgramValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  if (!program) {
-    errors.push('Program data is required');
-    return { isValid: false, program: program as BenefitProgram, errors, warnings };
+  // Check if program exists and is an object
+  if (!program || typeof program !== 'object') {
+    errors.push('Program data is required and must be an object');
+    return {
+      isValid: false,
+      program: program as BenefitProgram,
+      errors,
+      warnings
+    };
   }
 
-  // Required fields
+  const programObj = program as ProgramCandidate;
+
+  // Validate required fields
+  validateRequiredFields(programObj, errors);
+
+  // Validate field types and formats
+  validateFieldTypes(programObj, errors);
+
+  // Validate optional contact fields
+  validateContactFields(programObj, warnings);
+
+  return {
+    isValid: errors.length === 0,
+    program: program as BenefitProgram,
+    errors,
+    warnings
+  };
+}
+
+/**
+ * Validate required fields
+ */
+function validateRequiredFields(program: ProgramCandidate, errors: string[]): void {
   if (!program.id || typeof program.id !== 'string') {
     errors.push('Program ID is required and must be a string');
   }
@@ -41,11 +73,23 @@ export function validateBenefitProgram(program: any): ProgramValidationResult {
   }
 
   // Validate jurisdiction level
-  const validJurisdictionLevels = ['federal', 'state', 'city', 'county'];
-  if (program.jurisdictionLevel && !validJurisdictionLevels.includes(program.jurisdictionLevel)) {
-    errors.push(`Invalid jurisdiction level: ${program.jurisdictionLevel}. Must be one of: ${validJurisdictionLevels.join(', ')}`);
+  if (program.jurisdictionLevel && typeof program.jurisdictionLevel === 'string') {
+    const validJurisdictionLevels = ['federal', 'state', 'city', 'county'];
+    if (!validJurisdictionLevels.includes(program.jurisdictionLevel)) {
+      errors.push(
+        `Invalid jurisdiction level: ${program.jurisdictionLevel}. Must be one of: ${validJurisdictionLevels.join(', ')}`
+      );
+    }
   }
+}
 
+/**
+ * Validate field types and formats
+ */
+function validateFieldTypes(
+  program: ProgramCandidate,
+  errors: string[]
+): void {
   // Validate timestamps
   if (typeof program.createdAt !== 'number' || program.createdAt <= 0) {
     errors.push('Created timestamp is required and must be a positive number');
@@ -72,36 +116,33 @@ export function validateBenefitProgram(program: any): ProgramValidationResult {
   if (!Array.isArray(program.tags)) {
     errors.push('Tags must be an array');
   }
+}
 
-  // Contact information warnings
+/**
+ * Validate contact fields
+ */
+function validateContactFields(program: ProgramCandidate, warnings: string[]): void {
   if (!program.website) {
     warnings.push('Program website is missing');
-  } else if (!isValidUrl(program.website)) {
+  } else if (typeof program.website === 'string' && !isValidUrl(program.website)) {
     warnings.push('Program website appears to be invalid');
   }
 
   if (!program.phoneNumber) {
     warnings.push('Program phone number is missing');
-  } else if (!isValidPhoneNumber(program.phoneNumber)) {
+  } else if (typeof program.phoneNumber === 'string' && !isValidPhoneNumber(program.phoneNumber)) {
     warnings.push('Program phone number appears to be invalid');
   }
 
   if (!program.applicationUrl) {
     warnings.push('Program application URL is missing');
-  } else if (!isValidUrl(program.applicationUrl)) {
+  } else if (typeof program.applicationUrl === 'string' && !isValidUrl(program.applicationUrl)) {
     warnings.push('Program application URL appears to be invalid');
   }
 
   if (!program.officeAddress) {
     warnings.push('Program office address is missing');
   }
-
-  return {
-    isValid: errors.length === 0,
-    program: program as BenefitProgram,
-    errors,
-    warnings
-  };
 }
 
 /**
@@ -121,7 +162,7 @@ function isValidUrl(url: string): boolean {
  */
 function isValidPhoneNumber(phone: string): boolean {
   // Basic phone number validation (allows various formats)
-  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-  const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
+  const phoneRegex = /^\+?[1-9][\d]{0,15}$/;
+  const cleanPhone = phone.replace(/[\s\-().]/g, '');
   return phoneRegex.test(cleanPhone);
 }

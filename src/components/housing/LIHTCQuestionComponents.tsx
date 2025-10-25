@@ -7,6 +7,34 @@
 import React from 'react';
 import type { QuestionDefinition } from '../../types/question';
 
+// Constants for repeated CSS classes
+const SELECTED_STYLES = 'border-blue-500 bg-blue-50';
+const DEFAULT_STYLES = 'border-gray-300 hover:border-gray-400';
+
+// Type for AMI data structure
+interface AMIData {
+  incomeLimit50: number;
+}
+
+// Helper function to get unit size className
+const getUnitSizeClassName = (
+  value: unknown,
+  optionValue: string,
+  isRecommended: boolean,
+  isTooSmall: boolean
+): string => {
+  if (value === optionValue) {
+    return SELECTED_STYLES;
+  }
+  if (isRecommended) {
+    return 'border-green-500 bg-green-50';
+  }
+  if (isTooSmall) {
+    return 'border-red-300 bg-red-50';
+  }
+  return DEFAULT_STYLES;
+};
+
 interface QuestionProps {
   question: QuestionDefinition;
   value: unknown;
@@ -36,8 +64,8 @@ export const StudentStatusQuestion: React.FC<QuestionProps> = ({
           <label
             key={option.value}
             className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${value === option.value
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+              ? SELECTED_STYLES
+              : DEFAULT_STYLES
               }`}
           >
             <input
@@ -126,14 +154,7 @@ export const UnitSizeQuestion: React.FC<QuestionProps> = ({
           return (
             <label
               key={option.value}
-              className={`p-4 border rounded-lg cursor-pointer transition-colors ${value === option.value
-                  ? 'border-blue-500 bg-blue-50'
-                  : isRecommended
-                    ? 'border-green-500 bg-green-50'
-                    : isTooSmall
-                      ? 'border-red-300 bg-red-50'
-                      : 'border-gray-300 hover:border-gray-400'
-                }`}
+              className={`p-4 border rounded-lg cursor-pointer transition-colors ${getUnitSizeClassName(value, option.value, isRecommended, isTooSmall)}`}
             >
               <input
                 type="radio"
@@ -195,8 +216,8 @@ export const HousingHistoryQuestion: React.FC<QuestionProps> = ({
           <label
             key={option.value}
             className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${value === option.value
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+              ? SELECTED_STYLES
+              : DEFAULT_STYLES
               }`}
           >
             <input
@@ -236,7 +257,7 @@ export const IncomeSourcesQuestion: React.FC<QuestionProps> = ({
 }) => {
   const selectedSources = (value as string[]) || [];
 
-  const handleSourceChange = (sourceValue: string, checked: boolean) => {
+  const handleSourceChange = (sourceValue: string, checked: boolean): void => {
     if (checked) {
       onChange(question.key, [...selectedSources, sourceValue]);
     } else {
@@ -258,8 +279,8 @@ export const IncomeSourcesQuestion: React.FC<QuestionProps> = ({
           <label
             key={option.value}
             className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${selectedSources.includes(option.value as string)
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+              ? SELECTED_STYLES
+              : DEFAULT_STYLES
               }`}
           >
             <input
@@ -298,7 +319,7 @@ export const RentAffordabilityQuestion: React.FC<QuestionProps> = ({
   onChange,
   context
 }) => {
-  const amiData = context?.amiData as any;
+  const amiData = context?.amiData as AMIData | undefined;
   const maxAffordableRent = amiData ? Math.floor(amiData.incomeLimit50 * 0.3) : 0;
 
   return (
@@ -369,7 +390,7 @@ export const HousingPreferencesQuestion: React.FC<QuestionProps> = ({
 }) => {
   const selectedPreferences = (value as string[]) || [];
 
-  const handlePreferenceChange = (preferenceValue: string, checked: boolean) => {
+  const handlePreferenceChange = (preferenceValue: string, checked: boolean): void => {
     if (checked) {
       onChange(question.key, [...selectedPreferences, preferenceValue]);
     } else {
@@ -391,8 +412,8 @@ export const HousingPreferencesQuestion: React.FC<QuestionProps> = ({
           <label
             key={option.value}
             className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${selectedPreferences.includes(option.value as string)
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+              ? SELECTED_STYLES
+              : DEFAULT_STYLES
               }`}
           >
             <input
@@ -432,7 +453,7 @@ export const ContactPreferencesQuestion: React.FC<QuestionProps> = ({
 }) => {
   const selectedMethods = (value as string[]) || [];
 
-  const handleMethodChange = (methodValue: string, checked: boolean) => {
+  const handleMethodChange = (methodValue: string, checked: boolean): void => {
     if (checked) {
       onChange(question.key, [...selectedMethods, methodValue]);
     } else {
@@ -454,8 +475,8 @@ export const ContactPreferencesQuestion: React.FC<QuestionProps> = ({
           <label
             key={option.value}
             className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${selectedMethods.includes(option.value as string)
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+              ? SELECTED_STYLES
+              : DEFAULT_STYLES
               }`}
           >
             <input

@@ -4,12 +4,21 @@
  * Runtime validation for Area Median Income data structures.
  */
 
-import type { StateAMIData, ProcessedAMIData } from '../types/ami';
+import type { ProcessedAMIData } from '../types/ami';
+
+/**
+ * Raw AMI data structure (unknown/partial data from JSON)
+ */
+interface RawAMIData {
+  year?: unknown;
+  state?: unknown;
+  counties?: unknown;
+}
 
 /**
  * Validate AMI data structure
  */
-export function validateAMIData(data: any): { isValid: boolean; errors: string[] } {
+export function validateAMIData(data: unknown): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   if (!data) {
@@ -17,32 +26,35 @@ export function validateAMIData(data: any): { isValid: boolean; errors: string[]
     return { isValid: false, errors };
   }
 
-  if (typeof data.year !== 'number' || data.year < 2020) {
+  const amiData = data as RawAMIData;
+
+  if (typeof amiData.year !== 'number' || amiData.year < 2020) {
     errors.push('Valid year is required (2020 or later)');
   }
 
-  if (!data.state || typeof data.state !== 'string') {
+  if (!amiData.state || typeof amiData.state !== 'string') {
     errors.push('State code is required');
   }
 
-  if (!data.counties || typeof data.counties !== 'object') {
+  if (!amiData.counties || typeof amiData.counties !== 'object') {
     errors.push('Counties data is required and must be an object');
   } else {
-    const countyEntries = Object.entries(data.counties);
+    const countyEntries = Object.entries(amiData.counties);
     if (countyEntries.length === 0) {
       errors.push('At least one county is required');
     }
 
-    countyEntries.forEach(([countyName, countyData]: [string, any]) => {
-      if (!countyData.ami || typeof countyData.ami !== 'object') {
+    countyEntries.forEach(([countyName, countyData]) => {
+      const county = countyData as Record<string, unknown>;
+      if (!county.ami || typeof county.ami !== 'object') {
         errors.push(`County ${countyName} is missing AMI data`);
       } else {
-        const amiAmounts = Object.entries(countyData.ami);
+        const amiAmounts = Object.entries(county.ami);
         if (amiAmounts.length === 0) {
           errors.push(`County ${countyName} must have at least one household size AMI amount`);
         }
 
-        amiAmounts.forEach(([householdSize, amount]: [string, any]) => {
+        amiAmounts.forEach(([householdSize, amount]) => {
           if (typeof amount !== 'number' || amount <= 0) {
             errors.push(`County ${countyName} household size ${householdSize} must have a positive AMI amount`);
           }

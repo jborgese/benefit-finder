@@ -85,6 +85,44 @@ interface EnhancedStateSelectorProps extends Omit<SelectProps, 'options'> {
   maxHeight?: string;
 }
 
+// Helper function to process location detection result
+const processLocationResult = (
+  coordinates: GeolocationCoordinates | null,
+  detectedState: string | null,
+  value: string,
+  onChange: (value: string) => void,
+  store: any,
+  setDetectedState: (state: string | null) => void,
+  setLocationDetected: (detected: boolean) => void
+): void => {
+  if (!coordinates || detectedState) return;
+
+  const detectedStateCode = coordinatesToState(coordinates);
+  console.log('🌍 Location detected:', {
+    coordinates: { lat: coordinates.latitude, lon: coordinates.longitude },
+    detectedStateCode,
+    currentValue: value
+  });
+
+  if (detectedStateCode && detectedStateCode !== value) {
+    console.log(`🔄 Updating state from "${value}" to "${detectedStateCode}"`);
+    onChange(detectedStateCode);
+    setDetectedState(detectedStateCode);
+    setLocationDetected(true);
+
+    const detectedCounty = coordinatesToCounty(coordinates);
+    if (detectedCounty) {
+      console.log(`🏘️ Detected county: ${detectedCounty}`);
+      store.answerQuestion('county', 'county', detectedCounty);
+    }
+  } else if (detectedStateCode === value) {
+    console.log(`✅ State already matches detected state: ${detectedStateCode}`);
+    setLocationDetected(true);
+  } else {
+    console.log(`❌ No state detected from coordinates`);
+  }
+};
+
 export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   question,
   value,
@@ -116,7 +154,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [detectedState, setDetectedState] = useState<string | null>(null);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [_highlightedIndex, setHighlightedIndex] = useState(-1);
   const [hasRequestedLocation, setHasRequestedLocation] = useState(false);
   const [locationDetected, setLocationDetected] = useState(false);
 
@@ -172,36 +210,16 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   // Handle location detection result
   useEffect(() => {
     console.log('DEBUG: Coordinates useEffect triggered', { coordinates, locationDetected, value, detectedState });
-    if (coordinates && !detectedState) {
-      const detectedStateCode = coordinatesToState(coordinates);
-      console.log('🌍 Location detected:', {
-        coordinates: { lat: coordinates.latitude, lon: coordinates.longitude },
-        detectedStateCode,
-        currentValue: value
-      });
-
-      if (detectedStateCode && detectedStateCode !== value) {
-        console.log(`🔄 Updating state from "${value}" to "${detectedStateCode}"`);
-        // Update the state selection
-        onChange(detectedStateCode);
-        setDetectedState(detectedStateCode);
-        setLocationDetected(true);
-
-        // Try to detect county for the next question
-        const detectedCounty = coordinatesToCounty(coordinates);
-        if (detectedCounty) {
-          console.log(`🏘️ Detected county: ${detectedCounty}`);
-          // Store county for the next question
-          store.answerQuestion('county', 'county', detectedCounty);
-        }
-      } else if (detectedStateCode === value) {
-        console.log(`✅ State already matches detected state: ${detectedStateCode}`);
-        setLocationDetected(true);
-      } else {
-        console.log(`❌ No state detected from coordinates`);
-      }
-    }
-  }, [coordinates, detectedState, value, onChange, store]);
+    processLocationResult(
+      coordinates,
+      detectedState,
+      String(value || ''),
+      onChange,
+      store,
+      setDetectedState,
+      setLocationDetected
+    );
+  }, [coordinates, detectedState, value, onChange, store, locationDetected]);
 
   // Handle manual state changes after location detection
   useEffect(() => {
@@ -265,10 +283,11 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     if (!groupByRegion) return null;
 
     const groups = processedStates.reduce((acc, state) => {
-      if (!acc[state.region]) {
-        acc[state.region] = [];
+      const region = state.region;
+      if (!acc[region]) {
+        acc[region] = [];
       }
-      acc[state.region].push(state);
+      acc[region].push(state);
       return acc;
     }, {} as Record<string, typeof processedStates>);
 
@@ -332,7 +351,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     }
   };
 
-  const handleLocationRequest = () => {
+  const handleLocationRequest = (): void => {
     if (isLocationLoading) return;
 
     clearLocation();
@@ -341,7 +360,8 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     getCurrentPosition();
   };
 
-  const showLocationButton = enableAutoDetection && isSupported && hasPermission !== false && !locationDetected;
+  const LOCATION_DETECTION_AVAILABLE = enableAutoDetection && isSupported && hasPermission !== false && !locationDetected;
+  const showLocationButton = LOCATION_DETECTION_AVAILABLE;
   const showLocationError = locationError && hasRequestedLocation;
 
   // Handle click outside to close dropdown

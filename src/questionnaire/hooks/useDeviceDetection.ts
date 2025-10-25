@@ -6,6 +6,11 @@
 
 import { useState, useEffect } from 'react';
 
+// Extend Navigator interface to include Microsoft-specific properties
+interface NavigatorWithTouchPoints extends Navigator {
+  msMaxTouchPoints?: number;
+}
+
 interface DeviceInfo {
   isMobile: boolean;
   isTablet: boolean;
@@ -33,7 +38,7 @@ export const useDeviceDetection = (): DeviceInfo => {
       // Touch device detection
       const isTouchDevice = 'ontouchstart' in window ||
         navigator.maxTouchPoints > 0 ||
-        (navigator as any).msMaxTouchPoints > 0;
+        (navigator as NavigatorWithTouchPoints).msMaxTouchPoints > 0;
 
       // Breakpoint definitions
       const isMobile = width < 768;

@@ -17,6 +17,7 @@ import type {
   ResultRuleSelection,
   EligibilityEvaluationResult
 } from './types';
+import type { ProcessedAMIData } from '../../../data/types/ami';
 
 // Global debug log utility
 function debugLog(...args: unknown[]): void {
@@ -37,6 +38,38 @@ function ensureOperatorsRegistered(): void {
     operatorsRegistered = true;
   } else {
     debugLog('Benefit operators already registered.');
+  }
+}
+
+/**
+ * Log detailed entities information for debugging
+ */
+function logEntitiesDebugInfo(
+  profileId: string,
+  programId: string,
+  programName: string,
+  profile: UserProfileDocument,
+  sortedRules: EligibilityRuleDocument[]
+): void {
+  if (import.meta.env.DEV) {
+    console.warn('🔍 [DEBUG] getEvaluationEntities: Retrieved entities:', {
+      profileId,
+      programId,
+      programName,
+      profileData: {
+        householdIncome: profile.householdIncome,
+        householdSize: profile.householdSize,
+        citizenship: profile.citizenship
+      },
+      rulesFound: sortedRules.length,
+      allRules: sortedRules.map(r => ({
+        id: r.id,
+        name: r.name,
+        priority: r.priority,
+        active: r.active,
+        ruleLogic: `${JSON.stringify(r.ruleLogic, null, 2).substring(0, 100)}...`
+      }))
+    });
   }
 }
 
@@ -94,26 +127,7 @@ export async function getEvaluationEntities(
     }))
   });
 
-  if (import.meta.env.DEV) {
-    console.warn('🔍 [DEBUG] getEvaluationEntities: Retrieved entities:', {
-      profileId,
-      programId,
-      programName: program.name,
-      profileData: {
-        householdIncome: profile.householdIncome,
-        householdSize: profile.householdSize,
-        citizenship: profile.citizenship
-      },
-      rulesFound: rules.length,
-      allRules: sortedRules.map(r => ({
-        id: r.id,
-        name: r.name,
-        priority: r.priority,
-        active: r.active,
-        ruleLogic: `${JSON.stringify(r.ruleLogic, null, 2).substring(0, 100)}...`
-      }))
-    });
-  }
+  logEntitiesDebugInfo(profileId, programId, program.name, profile, sortedRules);
 
   return { profile, rules: sortedRules };
 }
@@ -604,6 +618,50 @@ function isMedicaidExpansionState(stateCode: string): boolean {
 }
 
 /**
+ * Add AMI data to processed data context
+ * Returns an object with the AMI data fields to merge into the main data
+ */
+async function getAMIDataForContext(
+  stateCode: string,
+  county: string,
+  householdSize: number
+): Promise<Record<string, unknown>> {
+  try {
+    const { AMIDataService } = await import('../../../data/services/AMIDataService');
+    const amiService = AMIDataService.getInstance();
+    const amiData: ProcessedAMIData = await amiService.getAMIForHousehold(
+      stateCode,
+      county,
+      householdSize
+    );
+
+    debugLog('Added AMI data for housing programs', {
+      state: stateCode,
+      county,
+      householdSize,
+      ami50: amiData.incomeLimit50,
+      ami60: amiData.incomeLimit60,
+      ami80: amiData.incomeLimit80
+    });
+
+    return {
+      areaMedianIncome: amiData.incomeLimit50,
+      ami50: amiData.incomeLimit50,
+      ami60: amiData.incomeLimit60,
+      ami80: amiData.incomeLimit80
+    };
+  } catch (error) {
+    debugLog('Failed to load AMI data', { error, state: stateCode, county });
+    return {
+      areaMedianIncome: 100000,
+      ami50: 50000,
+      ami60: 60000,
+      ami80: 80000
+    };
+  }
+}
+
+/**
  * Normalize state name or code to 2-character state code
  */
 function normalizeStateToCode(stateValue: string): string {
@@ -655,14 +713,14 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
   const data = profile.toJSON();
 
   // Add computed fields
-  const processedData: any = {
+  const processedData: Record<string, unknown> = {
     ...data,
     // Add any derived fields here
     _timestamp: Date.now(),
   };
 
   // Calculate age from dateOfBirth
-  if (processedData.dateOfBirth) {
+  if (processedData.dateOfBirth && typeof processedData.dateOfBirth === 'string') {
     // Parse the ISO date string and create a date object in local timezone
     // This prevents timezone shift issues when calculating age
     const [year, month, day] = processedData.dateOfBirth.split('-').map(Number);
@@ -686,11 +744,12 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
   // Convert annual income to monthly
   if (processedData.householdIncome && typeof processedData.householdIncome === 'number') {
     const originalAnnualIncome = processedData.householdIncome;
-    processedData.householdIncome = Math.round(processedData.householdIncome / 12);
+    const monthlyIncome = Math.round(processedData.householdIncome / 12);
+    processedData.householdIncome = monthlyIncome;
 
     debugLog('Converted annual income to monthly', {
       originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
-      convertedMonthlyIncome: `$${processedData.householdIncome.toLocaleString()}`,
+      convertedMonthlyIncome: `$${monthlyIncome.toLocaleString()}`,
       householdSize: processedData.householdSize,
       citizenship: processedData.citizenship
     });
@@ -698,7 +757,7 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
     if (import.meta.env.DEV) {
       console.warn('🔍 [DEBUG] prepareDataContext: Income conversion:', {
         originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
-        convertedMonthlyIncome: `$${processedData.householdIncome.toLocaleString()}`,
+        convertedMonthlyIncome: `$${monthlyIncome.toLocaleString()}`,
         householdSize: processedData.householdSize,
         citizenship: processedData.citizenship
       });
@@ -725,38 +784,12 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
 
     // Add Area Median Income (AMI) data for housing programs
     if (processedData.county && processedData.householdSize) {
-      try {
-        // Import AMI service dynamically to avoid circular dependencies
-        const { AMIDataService } = await import('../../../data/services/AMIDataService');
-        const amiService = AMIDataService.getInstance();
-        const amiData = await amiService.getAMIForHousehold(
-          stateCode,
-          processedData.county as string,
-          processedData.householdSize as number
-        );
-
-        // Add AMI data to the evaluation context
-        processedData.areaMedianIncome = amiData.incomeLimit50; // 50% AMI for Section 8
-        processedData.ami50 = amiData.incomeLimit50;
-        processedData.ami60 = amiData.incomeLimit60;
-        processedData.ami80 = amiData.incomeLimit80;
-
-        debugLog('Added AMI data for housing programs', {
-          state: stateCode,
-          county: processedData.county,
-          householdSize: processedData.householdSize,
-          ami50: amiData.incomeLimit50,
-          ami60: amiData.incomeLimit60,
-          ami80: amiData.incomeLimit80
-        });
-      } catch (error) {
-        debugLog('Failed to load AMI data', { error, state: stateCode, county: processedData.county });
-        // Set default high values to ensure ineligibility when AMI data is missing
-        processedData.areaMedianIncome = 100000; // High default to ensure ineligibility
-        processedData.ami50 = 50000;
-        processedData.ami60 = 60000;
-        processedData.ami80 = 80000;
-      }
+      const amiData = await getAMIDataForContext(
+        stateCode,
+        processedData.county as string,
+        processedData.householdSize as number
+      );
+      Object.assign(processedData, amiData);
     }
 
     debugLog('Added state-specific variables', {
@@ -798,6 +831,11 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
   });
 
   if (import.meta.env.DEV) {
+    const timestampValue = processedData._timestamp;
+    const timestampStr = timestampValue !== undefined && (typeof timestampValue === 'string' || typeof timestampValue === 'number')
+      ? new Date(timestampValue).toISOString()
+      : 'N/A';
+
     console.warn('🔍 [DEBUG] prepareDataContext: Final processed data:', {
       householdIncome: processedData.householdIncome,
       householdSize: processedData.householdSize,
@@ -817,7 +855,7 @@ export async function prepareDataContext(profile: UserProfileDocument): Promise<
       stateHasExpanded: processedData.stateHasExpanded,
       livesInState: processedData.livesInState,
       livesInGeorgia: processedData.livesInGeorgia,
-      timestamp: new Date(processedData._timestamp).toISOString(),
+      timestamp: timestampStr,
       allKeys: Object.keys(processedData)
     });
   }

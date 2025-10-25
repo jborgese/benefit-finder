@@ -132,7 +132,15 @@ export const Question: React.FC<QuestionProps> = ({
   };
 
   // Helper function to render state selector
-  const renderStateSelector = (commonProps: any): React.ReactNode => {
+  const renderStateSelector = (commonProps: {
+    question: QuestionDefinition;
+    value: unknown;
+    onChange: (value: unknown) => void;
+    error?: string[];
+    disabled: boolean;
+    autoFocus: boolean;
+    onEnterKey?: () => void;
+  }): React.ReactNode => {
     return (
       <EnhancedStateSelector
         {...commonProps}
@@ -190,8 +198,16 @@ export const Question: React.FC<QuestionProps> = ({
   };
 
   // Helper function to render county selector
-  const renderCountySelector = (commonProps: any): React.ReactNode => {
-    const stateAnswer = store.answers?.get('state');
+  const renderCountySelector = (commonProps: {
+    question: QuestionDefinition;
+    value: unknown;
+    onChange: (value: unknown) => void;
+    error?: string[];
+    disabled: boolean;
+    autoFocus: boolean;
+    onEnterKey?: () => void;
+  }): React.ReactNode => {
+    const stateAnswer = store.answers.get('state');
     const selectedState = extractStateValue(stateAnswer);
 
     console.log('🔍 Question: Rendering EnhancedCountySelector', {
@@ -203,7 +219,7 @@ export const Question: React.FC<QuestionProps> = ({
       hasSelectedState: !!selectedState,
       allAnswers: Object.fromEntries(store.answers ?? new Map()),
       value,
-      hasOptions: question.options?.length ?? 0
+      hasOptions: question.options?.length || 0
     });
 
     return (

@@ -4,12 +4,12 @@
  * Runtime validation for location data structures.
  */
 
-import type { LocationData, LocationValidationResult } from '../types/location';
+import type { LocationValidationResult } from '../types/location';
 
 /**
  * Validate location data structure
  */
-export function validateLocationData(data: any): LocationValidationResult {
+export function validateLocationData(data: unknown): LocationValidationResult {
   const errors: string[] = [];
 
   if (!data) {
@@ -17,29 +17,44 @@ export function validateLocationData(data: any): LocationValidationResult {
     return { isValid: false, errors };
   }
 
-  if (!data.metadata) {
-    errors.push('Location metadata is required');
-  } else {
-    if (!data.metadata.version) errors.push('Metadata version is required');
-    if (!data.metadata.lastUpdated) errors.push('Metadata lastUpdated is required');
-    if (!data.metadata.description) errors.push('Metadata description is required');
+  // Type guard to check if data is an object
+  if (typeof data !== 'object' || data === null) {
+    errors.push('Location data must be an object');
+    return { isValid: false, errors };
   }
 
-  if (!data.states || typeof data.states !== 'object') {
+  const locationData = data as Record<string, unknown>;
+
+  if (!locationData.metadata) {
+    errors.push('Location metadata is required');
+  } else {
+    const metadata = locationData.metadata as Record<string, unknown>;
+    if (!metadata.version) errors.push('Metadata version is required');
+    if (!metadata.lastUpdated) errors.push('Metadata lastUpdated is required');
+    if (!metadata.description) errors.push('Metadata description is required');
+  }
+
+  if (!locationData.states || typeof locationData.states !== 'object') {
     errors.push('States data is required and must be an object');
   } else {
-    const stateEntries = Object.entries(data.states);
+    const stateEntries = Object.entries(locationData.states);
     if (stateEntries.length === 0) {
       errors.push('At least one state is required');
     }
 
-    stateEntries.forEach(([stateCode, stateData]: [string, any]) => {
-      if (!stateData.name) {
+    stateEntries.forEach(([stateCode, stateData]: [string, unknown]) => {
+      if (typeof stateData !== 'object' || stateData === null) {
+        errors.push(`State ${stateCode} data must be an object`);
+        return;
+      }
+
+      const state = stateData as Record<string, unknown>;
+      if (!state.name) {
         errors.push(`State ${stateCode} is missing name`);
       }
-      if (!Array.isArray(stateData.counties)) {
+      if (!Array.isArray(state.counties)) {
         errors.push(`State ${stateCode} counties must be an array`);
-      } else if (stateData.counties.length === 0) {
+      } else if (state.counties.length === 0) {
         errors.push(`State ${stateCode} must have at least one county`);
       }
     });
