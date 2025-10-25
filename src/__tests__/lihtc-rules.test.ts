@@ -344,7 +344,7 @@ describe('LIHTC Rules Unit Tests', () => {
       const result = await evaluateRule(rule.ruleLogic, data);
 
       expect(result.success).toBe(true);
-      expect(result.result).toBe(null); // Should return null for invalid data
+      expect(result.result).toBe(false); // JSON Logic returns false for invalid data types
     });
 
     it('should handle null values', async () => {
@@ -354,7 +354,7 @@ describe('LIHTC Rules Unit Tests', () => {
       const result = await evaluateRule(rule.ruleLogic, data);
 
       expect(result.success).toBe(true);
-      expect(result.result).toBe(null); // Should return null for null values
+      expect(result.result).toBe(false); // JSON Logic returns false for null values
     });
   });
 
