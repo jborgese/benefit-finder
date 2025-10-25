@@ -269,10 +269,7 @@ export const LIHTC_RENTAL_HISTORY: RuleDefinition = {
   description: 'Must have good rental history without evictions',
   ruleType: 'eligibility',
   ruleLogic: {
-    and: [
-      { var: 'hasEvictionHistory' },
-      { '==': [{ var: 'hasEvictionHistory' }, false] }
-    ]
+    '==': [{ var: 'hasEvictionHistory' }, false]
   },
   explanation: 'You must have good rental history without evictions to qualify for LIHTC housing',
   requiredFields: ['hasEvictionHistory'],
@@ -293,10 +290,7 @@ export const LIHTC_RENTAL_REFERENCES: RuleDefinition = {
   description: 'Must have rental references from previous landlords',
   ruleType: 'eligibility',
   ruleLogic: {
-    and: [
-      { var: 'hasRentalReferences' },
-      { '==': [{ var: 'hasRentalReferences' }, true] }
-    ]
+    '==': [{ var: 'hasRentalReferences' }, true]
   },
   explanation: 'You must have rental references from previous landlords to qualify for LIHTC housing',
   requiredFields: ['hasRentalReferences'],

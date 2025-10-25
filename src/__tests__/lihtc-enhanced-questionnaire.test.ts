@@ -61,6 +61,10 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
       hasDisability: false,
       isPregnant: false,
       isVeteran: false,
+      studentStatus: 'none', // Add required student status field
+      age: 34, // Add required age field (calculated from dateOfBirth)
+      preferredUnitSize: '1br', // Add required unit size field
+      maxUnitOccupancy: 2, // Add required unit occupancy field
     };
 
     flowEngine.setContext(householdProfile);
