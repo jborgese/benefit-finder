@@ -256,7 +256,7 @@ export function getCaliforniaQuestions(): FlowNode[] {
     const nextNode = californiaQuestions[index + 1];
     return {
       ...node,
-      nextId: nextNode?.id,
+      nextId: nextNode ? nextNode.id : undefined,
       previousId: index > 0 ? californiaQuestions[index - 1].id : undefined
     };
   });

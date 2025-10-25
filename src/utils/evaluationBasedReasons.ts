@@ -250,7 +250,7 @@ function generateReasonFromCalculation(
 function generateReasonFromRule(
   ruleId: string,
   programId: string,
-  _userProfile?: UserProfile
+  userProfile?: UserProfile
 ): EvaluationBasedReason | null {
   // Parse rule ID to understand what failed
   const ruleParts = ruleId.toLowerCase().split('-');
@@ -435,12 +435,8 @@ function getProgramDisplayName(programId: string): string {
     'lihtc-federal': 'LIHTC'
   };
 
-  // Use Object.prototype.hasOwnProperty.call for safe property access
-  if (Object.prototype.hasOwnProperty.call(programNames, programId)) {
-    return programNames[programId];
-  }
-
-  return programId;
+  // Use direct property access with fallback for safe property access
+  return programNames[programId] ?? programId;
 }
 
 /**
