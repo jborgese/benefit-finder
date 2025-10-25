@@ -34,7 +34,7 @@ export interface ImportPerformanceRecord {
 }
 
 export class ResourceMonitor {
-  private static instance: ResourceMonitor;
+  private static instance: ResourceMonitor | undefined;
   private performanceRecords: ImportPerformanceRecord[] = [];
   private readonly MAX_RECORDS = 100;
   private readonly MEMORY_THRESHOLD = 0.8; // 80% memory usage threshold

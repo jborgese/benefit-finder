@@ -265,7 +265,7 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
     const lowerKeyword = keyword.toLowerCase();
 
     // Check for word boundaries manually
-    const hasWordBoundary = (text: string, keyword: string) => {
+    const hasWordBoundary = (text: string, keyword: string): boolean => {
       const index = text.indexOf(keyword);
       if (index === -1) return false;
 
@@ -273,7 +273,7 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
       const beforeChar = index === 0 ? '' : text[index - 1];
       const afterChar = index + keyword.length >= text.length ? '' : text[index + keyword.length];
 
-      const isWordChar = (char: string) => /[a-zA-Z0-9_]/.test(char);
+      const isWordChar = (char: string): boolean => /[a-zA-Z0-9_]/.test(char);
 
       return (!isWordChar(beforeChar) && !isWordChar(afterChar));
     };
@@ -297,7 +297,7 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
         const lowerKeyword = keyword.toLowerCase();
 
         // Check for word boundaries manually
-        const hasWordBoundary = (text: string, keyword: string) => {
+        const hasWordBoundary = (text: string, keyword: string): boolean => {
           const index = text.indexOf(keyword);
           if (index === -1) return false;
 
@@ -305,7 +305,7 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
           const beforeChar = index === 0 ? '' : text[index - 1];
           const afterChar = index + keyword.length >= text.length ? '' : text[index + keyword.length];
 
-          const isWordChar = (char: string) => /[a-zA-Z0-9_]/.test(char);
+          const isWordChar = (char: string): boolean => /[a-zA-Z0-9_]/.test(char);
 
           return (!isWordChar(beforeChar) && !isWordChar(afterChar));
         };

@@ -37,7 +37,9 @@ export class ImportManager {
   private constructor() {}
 
   public static getInstance(): ImportManager {
-    ImportManager.instance ??= new ImportManager();
+    if (!ImportManager.instance) {
+      ImportManager.instance = new ImportManager();
+    }
     return ImportManager.instance;
   }
 
