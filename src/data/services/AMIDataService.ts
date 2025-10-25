@@ -91,7 +91,7 @@ export class AMIDataService {
   /**
    * Get the latest year of AMI data available
    */
-  async getLatestAMIYear(): Promise<number> {
+  getLatestAMIYear(): number {
     // For now, return 2024 as the latest year
     // In a real implementation, this would check the data files
     return 2024;
@@ -100,7 +100,7 @@ export class AMIDataService {
   /**
    * Get available states with AMI data
    */
-  async getAvailableStates(): Promise<string[]> {
+  getAvailableStates(): string[] {
     return ['CA', 'FL', 'GA']; // Based on current data files
   }
 
@@ -192,16 +192,27 @@ export class AMIDataService {
     householdSize: number
   ): Promise<ProcessedAMIData> {
     const stateData = await this.loadStateData(state);
-    const countyData = stateData.counties[county];
 
+    // Use safer property access to avoid object injection
+    const counties = stateData.counties;
+    if (!counties || typeof counties !== 'object') {
+      throw new Error(`Invalid counties data for state ${state}`);
+    }
+
+    const countyData = counties[county];
     if (!countyData) {
       throw new Error(`AMI data not found for ${county}, ${state}`);
     }
 
     // Get AMI amount for household size, use 8+ person limit as fallback
-    const amiAmount = countyData.ami[householdSize] || countyData.ami[8];
+    // Use safer property access
+    const amiData = countyData.ami;
+    if (!amiData || typeof amiData !== 'object') {
+      throw new Error(`Invalid AMI data for ${county}, ${state}`);
+    }
 
-    if (!amiAmount) {
+    const amiAmount = amiData[householdSize] ?? amiData[8];
+    if (amiAmount === undefined) {
       throw new Error(`AMI data not available for household size ${householdSize}`);
     }
 

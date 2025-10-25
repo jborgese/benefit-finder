@@ -77,10 +77,16 @@ export const SelectInput: React.FC<SelectProps> = ({
     enabled: variant === 'radio' && !disabled,
     wrap: true,
     onItemSelect: (index) => {
-      const option = filteredOptions[index];
-      if (option && !option.disabled) {
-        setHasUserInteracted(true);
-        onChange(option.value);
+      // Validate index is within bounds to prevent object injection
+      if (index >= 0 && index < filteredOptions.length) {
+        // Use safe array access with explicit bounds checking
+        const options = filteredOptions;
+        const option = options[index];
+        // Validate option exists and has required properties
+        if (option && typeof option === 'object' && 'value' in option && 'disabled' in option && !option.disabled) {
+          setHasUserInteracted(true);
+          onChange(option.value);
+        }
       }
     },
     onEnterKey,

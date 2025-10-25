@@ -9,6 +9,7 @@ import React, { useState, useId, useMemo, useRef, useEffect } from 'react';
 import { useGeolocation, coordinatesToState, coordinatesToCounty } from '../hooks/useGeolocation';
 import { useQuestionFlowStore } from '../store';
 import type { SelectProps } from './types';
+import type { QuestionDefinition } from '../types';
 
 // Type for store with answerQuestion method
 interface StoreWithAnswerQuestion {
@@ -332,7 +333,7 @@ const LocationDetectionUI: React.FC<{
 const MobileStateSelector: React.FC<{
   containerRef: React.RefObject<HTMLDivElement>;
   className: string;
-  question: any;
+  question: QuestionDefinition;
   id: string;
   descId: string;
   placeholder: string;
@@ -481,7 +482,7 @@ const MobileStateSelector: React.FC<{
 const DesktopStateSelector: React.FC<{
   containerRef: React.RefObject<HTMLDivElement>;
   className: string;
-  question: any;
+  question: QuestionDefinition;
   id: string;
   descId: string;
   placeholder: string;
@@ -910,7 +911,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     onSearchChange: handleSearchChange,
     groupedStates,
     processedStates,
-    value: String(value || ''),
+    value: String(value ?? ''),
     onStateSelect: handleStateSelect,
     showPopulation,
     helpText: question.helpText,

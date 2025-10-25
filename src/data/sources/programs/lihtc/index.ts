@@ -51,14 +51,14 @@ export const LIHTC_PROGRAMS_BY_STATE: Record<string, BenefitProgram[]> = {
  * Get LIHTC programs by state code
  */
 export function getLIHTCProgramsByState(stateCode: string): BenefitProgram[] {
-  return LIHTC_PROGRAMS_BY_STATE[stateCode] || [];
+  return Object.prototype.hasOwnProperty.call(LIHTC_PROGRAMS_BY_STATE, stateCode) ? LIHTC_PROGRAMS_BY_STATE[stateCode as keyof typeof LIHTC_PROGRAMS_BY_STATE] : [];
 }
 
 /**
  * Get LIHTC programs by jurisdiction level
  */
 export function getLIHTCProgramsByLevel(level: 'federal' | 'state' | 'city'): BenefitProgram[] {
-  return LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL[level];
+  return Object.prototype.hasOwnProperty.call(LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL, level) ? LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL[level as keyof typeof LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL] : [];
 }
 
 /**

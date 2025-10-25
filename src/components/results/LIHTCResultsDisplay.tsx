@@ -7,7 +7,6 @@
 import React from 'react';
 import type { EligibilityResult } from '../../types/eligibility';
 import type { LIHTCProfile, LIHTCEligibilityResult, AMIData } from '../../types/housing';
-import { useAMIData } from '../../services/ami-data';
 
 interface LIHTCResultsDisplayProps {
   eligibility: EligibilityResult;
@@ -53,7 +52,7 @@ export const LIHTCResultsDisplay: React.FC<LIHTCResultsDisplayProps> = ({
       {amiData && (
         <RentInformationCard
           maxAffordableRent={maxAffordableRent}
-          householdIncome={householdProfile.householdIncome || 0}
+          householdIncome={householdProfile.householdIncome ?? 0}
         />
       )}
 
@@ -83,8 +82,8 @@ const EligibilityStatusCard: React.FC<{
   reasons: string[];
 }> = ({ eligible, explanation, reasons }) => (
   <div className={`p-6 rounded-lg border-2 ${eligible
-      ? 'bg-green-50 border-green-200'
-      : 'bg-red-50 border-red-200'
+    ? 'bg-green-50 border-green-200'
+    : 'bg-red-50 border-red-200'
     }`}>
     <div className="flex items-center space-x-3 mb-4">
       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${eligible ? 'bg-green-100' : 'bg-red-100'
@@ -277,10 +276,10 @@ const EligibilityBreakdownCard: React.FC<{
 const NextStepsCard: React.FC<{
   eligible: boolean;
   lihtcEligibility: LIHTCEligibilityResult;
-}> = ({ eligible, lihtcEligibility }) => (
+}> = ({ eligible, _lihtcEligibility }) => (
   <div className={`p-6 rounded-lg border-2 ${eligible
-      ? 'bg-green-50 border-green-200'
-      : 'bg-amber-50 border-amber-200'
+    ? 'bg-green-50 border-green-200'
+    : 'bg-amber-50 border-amber-200'
     }`}>
     <h4 className={`font-semibold mb-4 ${eligible ? 'text-green-900' : 'text-amber-900'
       }`}>

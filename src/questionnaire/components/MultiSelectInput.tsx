@@ -43,9 +43,13 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
     enabled: !disabled,
     wrap: true,
     onItemSelect: (index) => {
-      const option = options[index];
-      if (option && !option.disabled) {
-        handleToggle(option.value);
+      // Validate index is within bounds to prevent object injection
+      if (index >= 0 && index < options.length) {
+        // Use safe array access with explicit bounds checking
+        const option = options.at(index);
+        if (option && !option.disabled) {
+          handleToggle(option.value);
+        }
       }
     },
     onEnterKey,

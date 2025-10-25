@@ -18,7 +18,7 @@ export function validateLocationData(data: unknown): LocationValidationResult {
   }
 
   // Type guard to check if data is an object
-  if (typeof data !== 'object' || data === null) {
+  if (typeof data !== 'object') {
     errors.push('Location data must be an object');
     return { isValid: false, errors };
   }

@@ -47,7 +47,7 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = tr
       if (!enabled) return;
 
       // Check if user is focused on an input field
-      const activeElement = document.activeElement;
+      const { activeElement } = document;
       const isInputFocused = activeElement && (
         activeElement.tagName === 'INPUT' ||
         activeElement.tagName === 'TEXTAREA' ||

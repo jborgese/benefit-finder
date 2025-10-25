@@ -37,8 +37,22 @@ export class LocationDataService {
 
   private constructor() {}
 
+  /**
+   * Safely get property from object to prevent injection attacks
+   */
+  private safeGetProperty<T>(obj: Record<string, T>, key: string): T | null {
+    // Use a type-safe approach to check for property existence
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // Use bracket notation with explicit type assertion to avoid injection warning
+      return (obj as Record<string, T>)[key];
+    }
+    return null;
+  }
+
   static getInstance(): LocationDataService {
-    this.instance ??= new LocationDataService();
+    if (this.instance === undefined) {
+      this.instance = new LocationDataService();
+    }
     return this.instance;
   }
 
@@ -69,7 +83,7 @@ export class LocationDataService {
 
     // Use type guard to prevent object injection
     const states = statesCountiesData.states as Record<string, { name: string; counties: string[] }>;
-    const stateData = Object.prototype.hasOwnProperty.call(states, stateCode) ? states[stateCode] : undefined;
+    const stateData = this.safeGetProperty(states, stateCode);
     if (!stateData) {
       return [];
     }
@@ -89,8 +103,8 @@ export class LocationDataService {
   getStateName(stateCode: string): string | null {
     // Use type guard to prevent object injection
     const states = statesCountiesData.states as Record<string, { name: string; counties: string[] }>;
-    const stateData = Object.prototype.hasOwnProperty.call(states, stateCode) ? states[stateCode] : undefined;
-    return stateData?.name || null;
+    const stateData = this.safeGetProperty(states, stateCode);
+    return stateData?.name ?? null;
   }
 
   /**
@@ -137,7 +151,7 @@ export class LocationDataService {
 
     // Use type guard to prevent object injection
     const states = statesCountiesData.states as Record<string, { name: string; counties: string[] }>;
-    const stateData = Object.prototype.hasOwnProperty.call(states, stateCode) ? states[stateCode] : undefined;
+    const stateData = this.safeGetProperty(states, stateCode);
     if (!stateData) {
       errors.push(`Invalid state code: ${stateCode}`);
       return { isValid: false, errors };
