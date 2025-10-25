@@ -28,7 +28,7 @@ export interface ImportOptions {
 }
 
 export class ImportManager {
-  private static instance: ImportManager;
+  private static instance: ImportManager | undefined;
   private importStates: Map<string, ImportState> = new Map();
   private importPromises: Map<string, Promise<RuleImportResult>> = new Map();
   private readonly DEFAULT_TIMEOUT = 30000; // 30 seconds

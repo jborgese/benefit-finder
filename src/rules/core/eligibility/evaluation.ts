@@ -257,26 +257,26 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
     ruleId.includes(keyword) || ruleName.includes(keyword)
   );
 
+  // Check for word boundaries manually
+  const hasWordBoundary = (text: string, keyword: string): boolean => {
+    const index = text.indexOf(keyword);
+    if (index === -1) return false;
+
+    // Check if it's at the beginning or after a non-word character
+    const beforeChar = index === 0 ? '' : text[index - 1];
+    const afterChar = index + keyword.length >= text.length ? '' : text[index + keyword.length];
+
+    const isWordChar = (char: string): boolean => /[a-zA-Z0-9_]/.test(char);
+
+    return (!isWordChar(beforeChar) && !isWordChar(afterChar));
+  };
+
   // Check short keywords with word boundaries
   const matchesShortKeyword = shortKeywords.some(keyword => {
     // Use string methods instead of regex for security
     const lowerRuleId = ruleId.toLowerCase();
     const lowerRuleName = ruleName.toLowerCase();
     const lowerKeyword = keyword.toLowerCase();
-
-    // Check for word boundaries manually
-    const hasWordBoundary = (text: string, keyword: string): boolean => {
-      const index = text.indexOf(keyword);
-      if (index === -1) return false;
-
-      // Check if it's at the beginning or after a non-word character
-      const beforeChar = index === 0 ? '' : text[index - 1];
-      const afterChar = index + keyword.length >= text.length ? '' : text[index + keyword.length];
-
-      const isWordChar = (char: string): boolean => /[a-zA-Z0-9_]/.test(char);
-
-      return (!isWordChar(beforeChar) && !isWordChar(afterChar));
-    };
 
     return hasWordBoundary(lowerRuleId, lowerKeyword) || hasWordBoundary(lowerRuleName, lowerKeyword);
   });
@@ -295,20 +295,6 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
         const lowerRuleId = ruleId.toLowerCase();
         const lowerRuleName = ruleName.toLowerCase();
         const lowerKeyword = keyword.toLowerCase();
-
-        // Check for word boundaries manually
-        const hasWordBoundary = (text: string, keyword: string): boolean => {
-          const index = text.indexOf(keyword);
-          if (index === -1) return false;
-
-          // Check if it's at the beginning or after a non-word character
-          const beforeChar = index === 0 ? '' : text[index - 1];
-          const afterChar = index + keyword.length >= text.length ? '' : text[index + keyword.length];
-
-          const isWordChar = (char: string): boolean => /[a-zA-Z0-9_]/.test(char);
-
-          return (!isWordChar(beforeChar) && !isWordChar(afterChar));
-        };
 
         return hasWordBoundary(lowerRuleId, lowerKeyword) || hasWordBoundary(lowerRuleName, lowerKeyword);
       })
