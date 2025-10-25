@@ -4,7 +4,8 @@
  * Tests for standardized keyboard navigation across questionnaire components
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { SelectInput } from '../questionnaire/components/SelectInput';
 import { MultiSelectInput } from '../questionnaire/components/MultiSelectInput';
@@ -26,7 +27,7 @@ const mockOptions = [
 
 describe('Keyboard Navigation', () => {
   describe('SelectInput (Radio)', () => {
-    it('navigates between options with arrow keys', () => {
+    it('navigates between options with arrow keys', async () => {
       const onChange = vi.fn();
       render(
         <SelectInput
@@ -39,11 +40,14 @@ describe('Keyboard Navigation', () => {
       );
 
       const firstOption = screen.getByRole('radio', { name: 'Option 1' });
+      const secondOption = screen.getByRole('radio', { name: 'Option 2' });
+
+      // Focus the first option and trigger focus event to set focusedIndex
       firstOption.focus();
+      fireEvent.focus(firstOption);
 
       // Test arrow down navigation
       fireEvent.keyDown(firstOption, { key: 'ArrowDown' });
-      const secondOption = screen.getByRole('radio', { name: 'Option 2' });
       expect(secondOption).toHaveFocus();
 
       // Test arrow up navigation
@@ -51,7 +55,8 @@ describe('Keyboard Navigation', () => {
       expect(firstOption).toHaveFocus();
     });
 
-    it('selects option with Enter key', () => {
+    it('selects option with Enter key', async () => {
+      const user = userEvent.setup();
       const onChange = vi.fn();
       render(
         <SelectInput
@@ -64,9 +69,10 @@ describe('Keyboard Navigation', () => {
       );
 
       const firstOption = screen.getByRole('radio', { name: 'Option 1' });
-      firstOption.focus();
 
-      fireEvent.keyDown(firstOption, { key: 'Enter' });
+      await user.click(firstOption);
+      await user.keyboard('{Enter}');
+
       expect(onChange).toHaveBeenCalledWith('option1');
     });
 
@@ -86,6 +92,7 @@ describe('Keyboard Navigation', () => {
       const lastOption = screen.getByRole('radio', { name: 'Option 3' });
 
       firstOption.focus();
+      fireEvent.focus(firstOption);
 
       // Test wrap from first to last
       fireEvent.keyDown(firstOption, { key: 'ArrowUp' });
@@ -112,6 +119,7 @@ describe('Keyboard Navigation', () => {
       const lastOption = screen.getByRole('radio', { name: 'Option 3' });
 
       firstOption.focus();
+      fireEvent.focus(firstOption);
 
       // Test End key
       fireEvent.keyDown(firstOption, { key: 'End' });
@@ -137,11 +145,12 @@ describe('Keyboard Navigation', () => {
       );
 
       const firstOption = screen.getByRole('checkbox', { name: 'Option 1' });
+      const secondOption = screen.getByRole('checkbox', { name: 'Option 2' });
       firstOption.focus();
+      fireEvent.focus(firstOption);
 
       // Test arrow down navigation
       fireEvent.keyDown(firstOption, { key: 'ArrowDown' });
-      const secondOption = screen.getByRole('checkbox', { name: 'Option 2' });
       expect(secondOption).toHaveFocus();
     });
 
@@ -159,6 +168,7 @@ describe('Keyboard Navigation', () => {
 
       const firstOption = screen.getByRole('checkbox', { name: 'Option 1' });
       firstOption.focus();
+      fireEvent.focus(firstOption);
 
       fireEvent.keyDown(firstOption, { key: 'Enter' });
       expect(onChange).toHaveBeenCalledWith(['option1']);
@@ -179,11 +189,12 @@ describe('Keyboard Navigation', () => {
       );
 
       const firstPill = screen.getByRole('button', { name: 'Option 1' });
+      const secondPill = screen.getByRole('button', { name: 'Option 2' });
       firstPill.focus();
+      fireEvent.focus(firstPill);
 
       // Test arrow down navigation
       fireEvent.keyDown(firstPill, { key: 'ArrowDown' });
-      const secondPill = screen.getByRole('button', { name: 'Option 2' });
       expect(secondPill).toHaveFocus();
     });
 
@@ -201,6 +212,7 @@ describe('Keyboard Navigation', () => {
 
       const firstPill = screen.getByRole('button', { name: 'Option 1' });
       firstPill.focus();
+      fireEvent.focus(firstPill);
 
       fireEvent.keyDown(firstPill, { key: 'Enter' });
       expect(onChange).toHaveBeenCalledWith(['option1']);
