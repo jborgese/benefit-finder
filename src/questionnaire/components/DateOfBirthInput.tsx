@@ -213,10 +213,10 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
 
       {/* Age display */}
       {value && !showError && calculatedAge !== null && showAge && (
-        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div className="mt-2 p-2 bg-gray-50 border-l-4 border-gray-300 rounded-r-md">
           <div className="flex items-center">
             <svg
-              className="w-4 h-4 text-blue-600 mr-2"
+              className="w-4 h-4 text-gray-500 mr-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -229,10 +229,10 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
               />
             </svg>
             <div>
-              <p className="text-sm font-medium text-blue-900">
+              <p className="text-sm text-gray-700">
                 {formatDateForDisplay(value)}
               </p>
-              <p className="text-xs text-blue-700">
+              <p className="text-xs text-gray-600">
                 {showAgeInWords ? formatAgeInWords(calculatedAge) : `Age: ${calculatedAge}`}
               </p>
             </div>

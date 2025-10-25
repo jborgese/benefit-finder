@@ -1,40 +1,39 @@
 /**
- * Area Median Income (AMI) Data Service
+ * AMI Data Service
  *
- * Provides access to HUD Area Median Income data for LIHTC eligibility calculations.
- * Uses real HUD data with offline-first caching strategy.
- *
- * @deprecated Use AMIDataService from @/data instead
+ * Centralized service for accessing Area Median Income data with caching,
+ * validation, and type safety. Provides a clean API for AMI-based operations.
  */
 
-import { AMIDataService } from '../data/services/AMIDataService';
-import type { ProcessedAMIData } from '../data/types/ami';
-
-/**
- * AMI Data Cache Entry
- */
-interface AMICacheEntry {
-  data: AMIData;
-  timestamp: number;
-  ttl: number; // Time to live in milliseconds
-}
+import type {
+  ProcessedAMIData,
+  AMICacheEntry,
+  AMIServiceConfig,
+  StateAMIData
+} from '../types/ami';
 
 /**
  * AMI Data Service
  *
- * Singleton service for managing Area Median Income data with caching and offline support.
+ * Singleton service for managing Area Median Income data with caching and validation.
  */
 export class AMIDataService {
   private static instance: AMIDataService;
   private cache = new Map<string, AMICacheEntry>();
-  private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-  private readonly MAX_CACHE_SIZE = 1000;
+  private config: AMIServiceConfig;
+  private readonly DEFAULT_CONFIG: AMIServiceConfig = {
+    cacheTtl: 24 * 60 * 60 * 1000, // 24 hours
+    maxCacheSize: 1000,
+    enableValidation: true
+  };
 
-  private constructor() {}
+  private constructor(config?: Partial<AMIServiceConfig>) {
+    this.config = { ...this.DEFAULT_CONFIG, ...config };
+  }
 
-  static getInstance(): AMIDataService {
+  static getInstance(config?: Partial<AMIServiceConfig>): AMIDataService {
     if (!this.instance) {
-      this.instance = new AMIDataService();
+      this.instance = new AMIDataService(config);
     }
     return this.instance;
   }
@@ -46,7 +45,7 @@ export class AMIDataService {
     state: string,
     county: string,
     householdSize: number
-  ): Promise<AMIData> {
+  ): Promise<ProcessedAMIData> {
     const cacheKey = this.createCacheKey(state, county, householdSize);
 
     // Check cache first
@@ -99,6 +98,40 @@ export class AMIDataService {
   }
 
   /**
+   * Get available states with AMI data
+   */
+  async getAvailableStates(): Promise<string[]> {
+    return ['CA', 'FL', 'GA']; // Based on current data files
+  }
+
+  /**
+   * Validate AMI data parameters
+   */
+  validateParameters(state: string, county: string, householdSize: number): {
+    isValid: boolean;
+    errors: string[];
+  } {
+    const errors: string[] = [];
+
+    if (!state || state.trim() === '') {
+      errors.push('State is required');
+    }
+
+    if (!county || county.trim() === '') {
+      errors.push('County is required');
+    }
+
+    if (!householdSize || householdSize < 1 || householdSize > 8) {
+      errors.push('Household size must be between 1 and 8');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
    * Clear cache
    */
   clearCache(): void {
@@ -115,11 +148,18 @@ export class AMIDataService {
     };
   }
 
+  /**
+   * Update service configuration
+   */
+  updateConfig(config: Partial<AMIServiceConfig>): void {
+    this.config = { ...this.config, ...config };
+  }
+
   private createCacheKey(state: string, county: string, householdSize: number): string {
     return `${state.toLowerCase()}-${county.toLowerCase()}-${householdSize}`;
   }
 
-  private getFromCache(key: string): AMIData | null {
+  private getFromCache(key: string): ProcessedAMIData | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
 
@@ -132,9 +172,9 @@ export class AMIDataService {
     return entry.data;
   }
 
-  private setCache(key: string, data: AMIData): void {
+  private setCache(key: string, data: ProcessedAMIData): void {
     // Implement LRU eviction if cache is full
-    if (this.cache.size >= this.MAX_CACHE_SIZE) {
+    if (this.cache.size >= this.config.maxCacheSize) {
       const oldestKey = this.cache.keys().next().value;
       this.cache.delete(oldestKey);
     }
@@ -142,7 +182,7 @@ export class AMIDataService {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: this.CACHE_TTL
+      ttl: this.config.cacheTtl
     });
   }
 
@@ -150,7 +190,7 @@ export class AMIDataService {
     state: string,
     county: string,
     householdSize: number
-  ): Promise<AMIData> {
+  ): Promise<ProcessedAMIData> {
     const stateData = await this.loadStateData(state);
     const countyData = stateData.counties[county];
 
@@ -178,63 +218,15 @@ export class AMIDataService {
     };
   }
 
-  private async loadStateData(state: string): Promise<any> {
+  private async loadStateData(state: string): Promise<StateAMIData> {
     const stateCode = state.toLowerCase();
 
     try {
       // Load from local data files
-      const stateData = await import(`../data/sources/ami/2024/${stateCode}.json`);
+      const stateData = await import(`../sources/ami/2024/${stateCode}.json`);
       return stateData.default;
     } catch (error) {
       throw new Error(`Failed to load AMI data for state ${state}: ${error}`);
     }
   }
 }
-
-/**
- * Hook for using AMI data in React components
- */
-export function useAMIData(
-  state: string | undefined,
-  county: string | undefined,
-  householdSize: number | undefined
-): {
-  amiData: AMIData | null;
-  loading: boolean;
-  error: string | null;
-} {
-  const [amiData, setAmiData] = useState<AMIData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!state || !county || !householdSize) {
-      setAmiData(null);
-      setError(null);
-      return;
-    }
-
-    const loadAMIData = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const service = AMIDataService.getInstance();
-        const data = await service.getAMIForHousehold(state, county, householdSize);
-        setAmiData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load AMI data');
-        setAmiData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAMIData();
-  }, [state, county, householdSize]);
-
-  return { amiData, loading, error };
-}
-
-// Import React hooks
-import { useState, useEffect } from 'react';

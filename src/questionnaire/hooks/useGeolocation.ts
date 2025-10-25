@@ -51,7 +51,10 @@ export const useGeolocation = (options: GeolocationOptions = {}) => {
    * Request current position
    */
   const getCurrentPosition = useCallback(() => {
+    console.log('🌍 getCurrentPosition called', { isSupported: state.isSupported });
+
     if (!state.isSupported) {
+      console.log('❌ Geolocation not supported');
       setState(prev => ({
         ...prev,
         error: 'Geolocation is not supported by this browser',
@@ -59,6 +62,7 @@ export const useGeolocation = (options: GeolocationOptions = {}) => {
       return;
     }
 
+    console.log('🔄 Requesting geolocation...');
     setState(prev => ({
       ...prev,
       isLoading: true,
@@ -67,6 +71,11 @@ export const useGeolocation = (options: GeolocationOptions = {}) => {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('✅ Geolocation success:', {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        });
         setState(prev => ({
           ...prev,
           coordinates: position.coords,
@@ -76,6 +85,11 @@ export const useGeolocation = (options: GeolocationOptions = {}) => {
         }));
       },
       (error) => {
+        console.log('❌ Geolocation error:', {
+          code: error.code,
+          message: error.message
+        });
+
         let errorMessage = 'Unable to get your location';
 
         switch (error.code) {
@@ -162,6 +176,8 @@ export const useGeolocation = (options: GeolocationOptions = {}) => {
 export const coordinatesToState = (coordinates: GeolocationCoordinates): string | null => {
   const { latitude, longitude } = coordinates;
 
+  console.log(`🗺️ Converting coordinates to state: lat=${latitude}, lon=${longitude}`);
+
   // Simplified state boundary detection based on approximate coordinates
   // This is a basic implementation - for production use, consider using
   // a proper geocoding service or comprehensive boundary data
@@ -222,16 +238,20 @@ export const coordinatesToState = (coordinates: GeolocationCoordinates): string 
   ];
 
   for (const state of stateBoundaries) {
-    if (
-      latitude >= state.minLat &&
-      latitude <= state.maxLat &&
-      longitude >= state.minLon &&
-      longitude <= state.maxLon
-    ) {
+    const isInBounds = latitude >= state.minLat &&
+                      latitude <= state.maxLat &&
+                      longitude >= state.minLon &&
+                      longitude <= state.maxLon;
+
+    console.log(`🔍 Checking ${state.code}: lat ${latitude} in [${state.minLat}, ${state.maxLat}] = ${latitude >= state.minLat && latitude <= state.maxLat}, lon ${longitude} in [${state.minLon}, ${state.maxLon}] = ${longitude >= state.minLon && longitude <= state.maxLon}, match: ${isInBounds}`);
+
+    if (isInBounds) {
+      console.log(`✅ Found matching state: ${state.code} for coordinates (${latitude}, ${longitude})`);
       return state.code;
     }
   }
 
+  console.log(`❌ No state found for coordinates (${latitude}, ${longitude})`);
   return null;
 };
 
@@ -245,3 +265,60 @@ export const coordinatesToCounty = (coordinates: GeolocationCoordinates): string
   // For now, return null to indicate county detection is not available
   return null;
 };
+
+/**
+ * Test function to verify Georgia coordinates
+ * This can be called from the browser console for debugging
+ */
+export const testGeorgiaCoordinates = (): void => {
+  console.log('🧪 Testing Georgia coordinate detection...');
+
+  // Test coordinates for Atlanta, Georgia (approximately)
+  const testCoords = [
+    { lat: 33.749, lon: -84.388 }, // Atlanta
+    { lat: 32.083, lon: -81.1 },   // Savannah
+    { lat: 34.052, lon: -84.3 },   // North Georgia
+    { lat: 33.8, lon: -84.4 },     // Atlanta area
+    { lat: 32.0, lon: -81.0 },     // Savannah area
+  ];
+
+  testCoords.forEach((coord, index) => {
+    console.log(`\n📍 Test ${index + 1}: Atlanta area (${coord.lat}, ${coord.lon})`);
+    const mockCoords = {
+      latitude: coord.lat,
+      longitude: coord.lon,
+      accuracy: 10,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+    } as GeolocationCoordinates;
+
+    const result = coordinatesToState(mockCoords);
+    console.log(`Result: ${result}`);
+  });
+};
+
+// Make test function available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).testGeorgiaCoordinates = testGeorgiaCoordinates;
+  (window as any).testCoordinatesToState = coordinatesToState;
+
+  // Test the specific coordinates from the log
+  (window as any).testUserCoordinates = () => {
+    console.log('🧪 Testing user coordinates from log...');
+    const mockCoords = {
+      latitude: 33.8460672,
+      longitude: -84.5479936,
+      accuracy: 1286.1234731772754,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+    } as GeolocationCoordinates;
+
+    const result = coordinatesToState(mockCoords);
+    console.log(`Result for user coordinates: ${result}`);
+    return result;
+  };
+}

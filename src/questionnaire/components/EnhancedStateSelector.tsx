@@ -136,19 +136,52 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     maximumAge: 300000, // 5 minutes
   });
 
+  // Debug state changes
+  useEffect(() => {
+    console.log('🔍 State change:', { locationDetected, hasRequestedLocation, coordinates: !!coordinates });
+  }, [locationDetected, hasRequestedLocation, coordinates]);
+
+  // Debug coordinates changes
+  useEffect(() => {
+    console.log('🌍 Coordinates changed:', {
+      hasCoordinates: !!coordinates,
+      lat: coordinates?.latitude,
+      lon: coordinates?.longitude,
+      locationDetected
+    });
+  }, [coordinates, locationDetected]);
+
   // Auto-detect user's state when component mounts
   useEffect(() => {
+    console.log('🔍 EnhancedStateSelector: Auto-detection check', {
+      enableAutoDetection,
+      hasRequestedLocation,
+      isSupported,
+      hasPermission,
+      questionId: question.id,
+      fieldName: question.fieldName
+    });
+
     if (enableAutoDetection && !hasRequestedLocation && isSupported && hasPermission !== false) {
+      console.log('🚀 Starting location detection...');
       setHasRequestedLocation(true);
       getCurrentPosition();
     }
-  }, [enableAutoDetection, hasRequestedLocation, isSupported, hasPermission, getCurrentPosition]);
+  }, [enableAutoDetection, hasRequestedLocation, isSupported, hasPermission, getCurrentPosition, question.id, question.fieldName]);
 
   // Handle location detection result
   useEffect(() => {
-    if (coordinates && !locationDetected) {
+    console.log('DEBUG: Coordinates useEffect triggered', { coordinates, locationDetected, value, detectedState });
+    if (coordinates && !detectedState) {
       const detectedStateCode = coordinatesToState(coordinates);
+      console.log('🌍 Location detected:', {
+        coordinates: { lat: coordinates.latitude, lon: coordinates.longitude },
+        detectedStateCode,
+        currentValue: value
+      });
+
       if (detectedStateCode && detectedStateCode !== value) {
+        console.log(`🔄 Updating state from "${value}" to "${detectedStateCode}"`);
         // Update the state selection
         onChange(detectedStateCode);
         setDetectedState(detectedStateCode);
@@ -157,12 +190,18 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
         // Try to detect county for the next question
         const detectedCounty = coordinatesToCounty(coordinates);
         if (detectedCounty) {
+          console.log(`🏘️ Detected county: ${detectedCounty}`);
           // Store county for the next question
           store.answerQuestion('county', 'county', detectedCounty);
         }
+      } else if (detectedStateCode === value) {
+        console.log(`✅ State already matches detected state: ${detectedStateCode}`);
+        setLocationDetected(true);
+      } else {
+        console.log(`❌ No state detected from coordinates`);
       }
     }
-  }, [coordinates, locationDetected, value, onChange, store]);
+  }, [coordinates, detectedState, value, onChange, store]);
 
   // Handle manual state changes after location detection
   useEffect(() => {
@@ -176,10 +215,10 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
 
   // Handle location permission denial
   useEffect(() => {
-    if (hasPermission === false && !locationDetected) {
-      setLocationDetected(true); // Prevent repeated requests
+    if (hasPermission === false && !locationDetected && !coordinates) {
+      setLocationDetected(true); // Prevent repeated requests only if no coordinates
     }
-  }, [hasPermission, locationDetected]);
+  }, [hasPermission, locationDetected, coordinates]);
 
   // Reset touched state when question changes
   useEffect(() => {

@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01",
+  "description": "Complete US states and counties data for location-based benefit eligibility",
+  "source": "US Census Bureau",
+  "totalStates": 50,
+  "totalCounties": 3142,
+  "dataFormat": "json",
+  "updateFrequency": "annual",
+  "validation": {
+    "requiredFields": [
+      "name",
+      "counties"
+    ],
+    "countyValidation": true,
+    "stateCodeValidation": true
+  }
+}

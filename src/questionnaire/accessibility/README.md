@@ -13,10 +13,13 @@ Comprehensive accessibility utilities for building WCAG 2.1 AA compliant questio
 
 ### ✅ Keyboard Navigation
 - Full keyboard support for all interactions
+- Standardized arrow key navigation across all components
+- Enter key submission for all question types
 - Customizable keyboard shortcuts
-- Arrow key navigation
 - Focus trap for modals
 - Roving tabindex for lists
+- Visual focus indicators
+- Screen reader announcements
 
 ### ✅ ARIA Labels & Descriptions
 - Automatic ID generation
@@ -43,14 +46,27 @@ Comprehensive accessibility utilities for building WCAG 2.1 AA compliant questio
 
 ## Keyboard Shortcuts
 
+### Universal Navigation Keys
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `↑` / `↓` | Navigate options | Move between selectable options |
+| `←` / `→` | Navigate options | Alternative navigation (horizontal layouts) |
+| `Home` | First option | Jump to first selectable option |
+| `End` | Last option | Jump to last selectable option |
+| `Enter` | Select/Submit | Select focused option or submit question |
+| `Space` | Select/Submit | Alternative selection method |
+| `Tab` | Next element | Standard tab navigation |
+| `Shift+Tab` | Previous element | Reverse tab navigation |
+
 ### Default Questionnaire Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
 | `→` | Next question (when not in input field) |
 | `←` | Previous question (when not in input field) |
-| `↑` | Increment number input (when focused on number field) or navigate dropdown options (when focused on select field) |
-| `↓` | Decrement number input (when focused on number field) or navigate dropdown options (when focused on select field) |
+| `↑` | Navigate options or increment number input |
+| `↓` | Navigate options or decrement number input |
 | `Ctrl + S` | Save progress |
 | `Ctrl + /` | Show keyboard shortcuts |
 | `Ctrl + Shift + N` | Skip question (if allowed) |

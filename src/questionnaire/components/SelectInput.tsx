@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useId } from 'react';
+import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 import type { SelectProps } from './types';
 
 export const SelectInput: React.FC<SelectProps> = ({
@@ -70,6 +71,21 @@ export const SelectInput: React.FC<SelectProps> = ({
     )
     : options;
 
+  // Keyboard navigation for radio variant
+  const keyboardNav = useKeyboardNavigation({
+    itemCount: variant === 'radio' ? filteredOptions.length : 0,
+    enabled: variant === 'radio' && !disabled,
+    wrap: true,
+    onItemSelect: (index) => {
+      const option = filteredOptions[index];
+      if (option && !option.disabled) {
+        setHasUserInteracted(true);
+        onChange(option.value);
+      }
+    },
+    onEnterKey: onEnterKey,
+  });
+
   const handleBlur = (): void => {
     console.log('SelectInput handleBlur called', { variant, questionId: question.id, hasUserInteracted });
     setIsFocused(false);
@@ -84,9 +100,14 @@ export const SelectInput: React.FC<SelectProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
-    if (e.key === 'Enter' && onEnterKey) {
-      e.preventDefault();
-      onEnterKey();
+    if (variant === 'radio') {
+      keyboardNav.handleKeyDown(e);
+    } else {
+      // For dropdown, only handle Enter key for submission
+      if (e.key === 'Enter' && onEnterKey) {
+        e.preventDefault();
+        onEnterKey();
+      }
     }
   };
 
@@ -113,10 +134,11 @@ export const SelectInput: React.FC<SelectProps> = ({
           )}
 
           <div className="space-y-2">
-            {options.map((option) => {
+            {filteredOptions.map((option, index) => {
               const optionId = `${id}-${option.value}`;
               const isSelected = value === option.value;
               const isDisabled = disabled || option.disabled;
+              const isFocused = keyboardNav.focusedIndex === index;
 
               return (
                 <label
@@ -126,10 +148,12 @@ export const SelectInput: React.FC<SelectProps> = ({
                     flex items-start p-4 border rounded-lg cursor-pointer
                     transition-all duration-200 ease-smooth
                     ${isSelected ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 ring-2 ring-primary-200 dark:ring-primary-800' : 'border-secondary-300 dark:border-secondary-600 hover:border-secondary-400 dark:hover:border-secondary-500 hover:shadow-sm'}
+                    ${isFocused && !isSelected ? 'ring-2 ring-primary-300 dark:ring-primary-700 border-primary-400 dark:border-primary-600' : ''}
                     ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
                 >
                   <input
+                    ref={keyboardNav.getItemRef(index)}
                     id={optionId}
                     type="radio"
                     name={id}
@@ -142,7 +166,10 @@ export const SelectInput: React.FC<SelectProps> = ({
                       }
                     }}
                     onBlur={handleBlur}
-                    onFocus={handleFocus}
+                    onFocus={() => {
+                      handleFocus();
+                      keyboardNav.setFocusedIndex(index);
+                    }}
                     disabled={isDisabled}
                     required={question.required}
                     aria-describedby={question.description ? descId : undefined}

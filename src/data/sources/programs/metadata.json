@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01",
+  "description": "Benefit program definitions and metadata",
+  "source": "Government agencies and official program documentation",
+  "totalPrograms": 7,
+  "categories": [
+    "housing"
+  ],
+  "jurisdictions": [
+    "United States",
+    "Georgia",
+    "California",
+    "Florida",
+    "Atlanta, GA",
+    "Los Angeles, CA",
+    "Miami, FL"
+  ],
+  "dataFormat": "typescript",
+  "updateFrequency": "as-needed",
+  "validation": {
+    "requiredFields": [
+      "id",
+      "name",
+      "category",
+      "jurisdiction"
+    ],
+    "programValidation": true,
+    "contactValidation": true
+  }
+}

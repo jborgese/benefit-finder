@@ -3,9 +3,11 @@
  *
  * Provides access to US states and counties data for location-based
  * benefit eligibility calculations.
+ *
+ * @deprecated Use LocationDataService from @/data instead
  */
 
-import statesCountiesData from '../data/locations/states-counties.json';
+import { LocationDataService } from '../data/services/LocationDataService';
 
 export interface StateData {
   name: string;
@@ -21,135 +23,53 @@ export interface LocationData {
   states: Record<string, StateData>;
 }
 
+// Create service instance
+const locationService = LocationDataService.getInstance();
+
 /**
  * Get all available states
+ * @deprecated Use LocationDataService.getInstance().getStates() instead
  */
 export function getStates(): Array<{ value: string; label: string }> {
-  return Object.entries(statesCountiesData.states).map(([code, data]) => ({
-    value: code,
-    label: data.name
-  }));
+  return locationService.getStates();
 }
 
 /**
  * Get counties for a specific state
+ * @deprecated Use LocationDataService.getInstance().getCountiesForState() instead
  */
 export function getCountiesForState(stateCode: string): Array<{ value: string; label: string }> {
-  console.log('🔍 getCountiesForState: Function called', {
-    stateCode,
-    hasStateCode: !!stateCode
-  });
-
-  const stateData = statesCountiesData.states[stateCode];
-  console.log('🔍 getCountiesForState: State data retrieved', {
-    stateCode,
-    hasStateData: !!stateData,
-    stateName: stateData?.name,
-    countyCount: stateData?.counties?.length || 0
-  });
-
-  if (!stateData) {
-    console.log('🔍 getCountiesForState: No state data found', {
-      stateCode,
-      availableStates: Object.keys(statesCountiesData.states)
-    });
-    return [];
-  }
-
-  const counties = stateData.counties.map(county => ({
-    value: county,
-    label: county
-  }));
-
-  console.log('🔍 getCountiesForState: Counties mapped', {
-    stateCode,
-    stateName: stateData.name,
-    countyCount: counties.length,
-    firstFiveCounties: counties.slice(0, 5).map(c => c.label)
-  });
-
-  return counties;
+  return locationService.getCountiesForState(stateCode);
 }
 
 /**
  * Get state name by code
+ * @deprecated Use LocationDataService.getInstance().getStateName() instead
  */
 export function getStateName(stateCode: string): string | null {
-  const stateData = statesCountiesData.states[stateCode];
-  return stateData?.name || null;
+  return locationService.getStateName(stateCode);
 }
 
 /**
  * Check if a county exists in a state
+ * @deprecated Use LocationDataService.getInstance().isCountyValid() instead
  */
 export function isCountyValid(stateCode: string, countyName: string): boolean {
-  const counties = getCountiesForState(stateCode);
-  return counties.some(county => county.value === countyName);
+  return locationService.isCountyValid(stateCode, countyName);
 }
 
 /**
  * Search counties within a state by partial name match
+ * @deprecated Use LocationDataService.getInstance().searchCounties() instead
  */
 export function searchCounties(stateCode: string, searchTerm: string): Array<{ value: string; label: string }> {
-  console.log('🔍 searchCounties: Function called', {
-    stateCode,
-    searchTerm,
-    hasStateCode: !!stateCode,
-    hasSearchTerm: !!searchTerm.trim()
-  });
-
-  const counties = getCountiesForState(stateCode);
-  console.log('🔍 searchCounties: Counties retrieved', {
-    stateCode,
-    countyCount: counties.length,
-    firstFiveCounties: counties.slice(0, 5).map(c => c.label)
-  });
-
-  if (!searchTerm.trim()) {
-    console.log('🔍 searchCounties: No search term, returning all counties', {
-      stateCode,
-      countyCount: counties.length
-    });
-    return counties;
-  }
-
-  const normalizedSearch = searchTerm.toLowerCase().trim();
-  console.log('🔍 searchCounties: Normalized search term', {
-    originalSearchTerm: searchTerm,
-    normalizedSearch,
-    stateCode
-  });
-
-  const filteredCounties = counties.filter(county => {
-    const countyLabel = county.label.toLowerCase();
-    const matches = countyLabel.includes(normalizedSearch);
-
-    if (matches) {
-      console.log('🔍 searchCounties: Match found', {
-        countyLabel: county.label,
-        normalizedSearch,
-        matches
-      });
-    }
-
-    return matches;
-  });
-
-  console.log('🔍 searchCounties: Search results', {
-    stateCode,
-    searchTerm,
-    normalizedSearch,
-    totalCounties: counties.length,
-    filteredCount: filteredCounties.length,
-    filteredCounties: filteredCounties.map(c => c.label)
-  });
-
-  return filteredCounties;
+  return locationService.searchCounties(stateCode, searchTerm);
 }
 
 /**
  * Get the complete location data structure
+ * @deprecated Use LocationDataService.getInstance().getLocationData() instead
  */
 export function getLocationData(): LocationData {
-  return statesCountiesData;
+  return locationService.getLocationData();
 }

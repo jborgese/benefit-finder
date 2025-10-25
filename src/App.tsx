@@ -40,6 +40,7 @@ type AppState = 'home' | 'questionnaire' | 'results' | 'error';
  */
 async function importFederalRules(): Promise<void> {
   console.log(`🔍 [DEBUG] importFederalRules: Function called successfully`);
+  console.log(`🔍 [DEBUG] importFederalRules: Function execution started at ${new Date().toISOString()}`);
   try {
     console.log(`🔍 [DEBUG] importFederalRules: Starting federal rules import...`);
 
@@ -395,7 +396,11 @@ function App(): React.ReactElement {
         const importStartTime = Date.now();
         try {
           console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Calling importFederalRules()...');
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to call importFederalRules function');
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: importFederalRules function type:', typeof importFederalRules);
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Calling importFederalRules now...');
           const importResult = await importFederalRules();
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: importFederalRules returned:', importResult);
           const importDuration = Date.now() - importStartTime;
           console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Federal rules import completed successfully');
           console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Import duration:', importDuration + 'ms');

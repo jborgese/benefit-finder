@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useId } from 'react';
+import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 import type { MultiSelectProps } from './types';
 
 export const MultiSelectInput: React.FC<MultiSelectProps> = ({
@@ -36,6 +37,20 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
     return [];
   })();
 
+  // Keyboard navigation
+  const keyboardNav = useKeyboardNavigation({
+    itemCount: options.length,
+    enabled: !disabled,
+    wrap: true,
+    onItemSelect: (index) => {
+      const option = options[index];
+      if (option && !option.disabled) {
+        handleToggle(option.value);
+      }
+    },
+    onEnterKey: onEnterKey,
+  });
+
   const handleToggle = (optionValue: string | number): void => {
     const newValue = value.includes(optionValue)
       ? value.filter((v) => v !== optionValue)
@@ -51,10 +66,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
-    if (e.key === 'Enter' && onEnterKey) {
-      e.preventDefault();
-      onEnterKey();
-    }
+    keyboardNav.handleKeyDown(e);
   };
 
   const isOptionSelected = (optionValue: string | number): boolean => {
@@ -136,15 +148,18 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
           aria-labelledby={id}
           className="flex flex-wrap gap-2"
         >
-          {options.map((option) => {
+          {options.map((option, index) => {
             const isSelected = isOptionSelected(option.value);
             const isDisabled = disabled || (option.disabled ?? false) || (!isSelected && !canSelectMore);
+            const isFocused = keyboardNav.focusedIndex === index;
 
             return (
               <button
                 key={option.value}
+                ref={keyboardNav.getItemRef(index)}
                 type="button"
                 onClick={() => !isDisabled && handleToggle(option.value)}
+                onFocus={() => keyboardNav.setFocusedIndex(index)}
                 disabled={isDisabled}
                 aria-pressed={isSelected}
                 className={`
@@ -154,6 +169,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
                     ? 'bg-blue-500 text-white border-blue-500'
                     : 'bg-white dark:bg-secondary-700 text-gray-700 dark:text-secondary-200 border-gray-300 dark:border-secondary-600 hover:border-blue-300 dark:hover:border-blue-400'
                   }
+                  ${isFocused && !isSelected ? 'ring-2 ring-blue-300 dark:ring-blue-700 border-blue-400 dark:border-blue-600' : ''}
                   ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                 `}
@@ -216,10 +232,11 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         {renderConstraintsText()}
 
         <div className="space-y-2">
-          {options.map((option) => {
+          {options.map((option, index) => {
             const optionId = `${id}-${option.value}`;
             const isSelected = isOptionSelected(option.value);
             const isDisabled = disabled || (option.disabled ?? false) || (!isSelected && !canSelectMore);
+            const isFocused = keyboardNav.focusedIndex === index;
 
             return (
               <label
@@ -229,14 +246,17 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
                   flex items-start p-3 border rounded-md cursor-pointer
                   transition-colors
                   ${isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-secondary-600 hover:border-gray-400 dark:hover:border-secondary-500'}
+                  ${isFocused && !isSelected ? 'ring-2 ring-blue-300 dark:ring-blue-700 border-blue-400 dark:border-blue-600' : ''}
                   ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
                 <input
+                  ref={keyboardNav.getItemRef(index)}
                   id={optionId}
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => !isDisabled && handleToggle(option.value)}
+                  onFocus={() => keyboardNav.setFocusedIndex(index)}
                   disabled={isDisabled}
                   aria-describedby={option.description ? `${optionId}-desc` : undefined}
                   className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"

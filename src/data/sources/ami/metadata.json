@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01",
+  "description": "HUD Area Median Income data for housing benefit eligibility",
+  "source": "US Department of Housing and Urban Development",
+  "availableYears": [
+    2024
+  ],
+  "availableStates": [
+    "CA",
+    "FL",
+    "GA"
+  ],
+  "totalCounties": 58,
+  "dataFormat": "json",
+  "updateFrequency": "annual",
+  "validation": {
+    "requiredFields": [
+      "year",
+      "state",
+      "counties"
+    ],
+    "amiValidation": true,
+    "householdSizeValidation": true
+  }
+}
