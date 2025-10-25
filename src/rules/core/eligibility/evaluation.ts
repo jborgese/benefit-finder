@@ -66,6 +66,13 @@ export async function getEvaluationEntities(
 
   // Get active rules for program
   const rules: EligibilityRuleDocument[] = await db.eligibility_rules.findRulesByProgram(programId);
+  debugLog('🔍 [DEBUG] Rules found for program', {
+    programId,
+    ruleCount: rules.length,
+    ruleIds: rules.map(r => r.id),
+    ruleNames: rules.map(r => r.name)
+  });
+
   if (rules.length === 0) {
     debugLog('No active rules found for program', { programId });
     throw new Error(`No active rules found for program ${programId}`);
@@ -195,10 +202,22 @@ export function evaluateAllRules(
   const allMissingFields = new Set<string>();
 
   for (const rule of rules) {
-    debugLog('Evaluating rule', rule.id);
+    debugLog('🔍 [DEBUG] Evaluating rule', {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      ruleType: rule.ruleType,
+      priority: rule.priority,
+      requiredFields: rule.requiredFields
+    });
+
     // Check for missing fields for this rule
     const missingFields = checkMissingFields(data, rule.requiredFields ?? []);
-    debugLog('Missing fields for rule', rule.id, missingFields);
+    debugLog('🔍 [DEBUG] Missing fields for rule', {
+      ruleId: rule.id,
+      missingFields,
+      requiredFields: rule.requiredFields,
+      dataKeys: Object.keys(data)
+    });
     missingFields.forEach(field => allMissingFields.add(field));
 
     // Add debugging for rule evaluation
@@ -225,12 +244,25 @@ export function evaluateAllRules(
 
     // Check if this rule passed
     const rulePassedResult = evalResult.success ? Boolean(evalResult.result) : false;
-    debugLog('Rule evaluation outcome', { ruleId: rule.id, rulePassedResult, success: evalResult.success, result: evalResult.result });
+    debugLog('🔍 [DEBUG] Rule evaluation outcome', {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      rulePassedResult,
+      success: evalResult.success,
+      result: evalResult.result,
+      error: evalResult.error,
+      executionTime: evalResult.executionTime
+    });
+
     if (!rulePassedResult && overallEligible) {
       overallEligible = false;
       firstFailedRule = rule;
       firstFailedResult = evalResult;
-      debugLog('First failed rule', { ruleId: rule.id });
+      debugLog('🔍 [DEBUG] First failed rule', {
+        ruleId: rule.id,
+        ruleName: rule.name,
+        reason: 'Rule evaluation failed'
+      });
     }
   }
 
@@ -481,12 +513,12 @@ function normalizeStateToCode(stateValue: string): string {
 /**
  * Prepare data context from user profile
  */
-export function prepareDataContext(profile: UserProfileDocument): JsonLogicData {
+export async function prepareDataContext(profile: UserProfileDocument): Promise<JsonLogicData> {
   debugLog('Preparing data context from user profile', profile.id);
   const data = profile.toJSON();
 
   // Add computed fields
-  const processedData = {
+  const processedData: any = {
     ...data,
     // Add any derived fields here
     _timestamp: Date.now(),
@@ -554,6 +586,42 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
     processedData.livesInTexas = stateCode === 'TX';
     processedData.livesInFlorida = stateCode === 'FL';
 
+    // Add Area Median Income (AMI) data for housing programs
+    if (processedData.county && processedData.householdSize) {
+      try {
+        // Import AMI service dynamically to avoid circular dependencies
+        const { AMIDataService } = await import('../../../services/ami-data');
+        const amiService = AMIDataService.getInstance();
+        const amiData = await amiService.getAMIForHousehold(
+          stateCode,
+          processedData.county as string,
+          processedData.householdSize as number
+        );
+
+        // Add AMI data to the evaluation context
+        processedData.areaMedianIncome = amiData.incomeLimit50; // 50% AMI for Section 8
+        processedData.ami50 = amiData.incomeLimit50;
+        processedData.ami60 = amiData.incomeLimit60;
+        processedData.ami80 = amiData.incomeLimit80;
+
+        debugLog('Added AMI data for housing programs', {
+          state: stateCode,
+          county: processedData.county,
+          householdSize: processedData.householdSize,
+          ami50: amiData.incomeLimit50,
+          ami60: amiData.incomeLimit60,
+          ami80: amiData.incomeLimit80
+        });
+      } catch (error) {
+        debugLog('Failed to load AMI data', { error, state: stateCode, county: processedData.county });
+        // Set default high values to ensure ineligibility when AMI data is missing
+        processedData.areaMedianIncome = 100000; // High default to ensure ineligibility
+        processedData.ami50 = 50000;
+        processedData.ami60 = 60000;
+        processedData.ami80 = 80000;
+      }
+    }
+
     debugLog('Added state-specific variables', {
       originalState: stateValue,
       normalizedStateCode: stateCode,
@@ -574,7 +642,23 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
     }
   }
 
-  debugLog('Final processed data context', processedData);
+  debugLog('🔍 [DEBUG] Final processed data context', {
+    householdIncome: processedData.householdIncome,
+    householdSize: processedData.householdSize,
+    citizenship: processedData.citizenship,
+    state: processedData.state,
+    county: processedData.county,
+    age: processedData.age,
+    hasChildren: processedData.hasChildren,
+    hasDisability: processedData.hasDisability,
+    isPregnant: processedData.isPregnant,
+    employmentStatus: processedData.employmentStatus,
+    areaMedianIncome: processedData.areaMedianIncome,
+    ami50: processedData.ami50,
+    ami60: processedData.ami60,
+    ami80: processedData.ami80,
+    allKeys: Object.keys(processedData)
+  });
 
   if (import.meta.env.DEV) {
     console.warn('🔍 [DEBUG] prepareDataContext: Final processed data:', {
@@ -583,10 +667,21 @@ export function prepareDataContext(profile: UserProfileDocument): JsonLogicData 
       citizenship: processedData.citizenship,
       dateOfBirth: processedData.dateOfBirth,
       state: processedData.state,
+      county: processedData.county,
+      age: processedData.age,
+      hasChildren: processedData.hasChildren,
+      hasDisability: processedData.hasDisability,
+      isPregnant: processedData.isPregnant,
+      employmentStatus: processedData.employmentStatus,
+      areaMedianIncome: processedData.areaMedianIncome,
+      ami50: processedData.ami50,
+      ami60: processedData.ami60,
+      ami80: processedData.ami80,
       stateHasExpanded: processedData.stateHasExpanded,
       livesInState: processedData.livesInState,
       livesInGeorgia: processedData.livesInGeorgia,
-      timestamp: new Date(processedData._timestamp).toISOString()
+      timestamp: new Date(processedData._timestamp).toISOString(),
+      allKeys: Object.keys(processedData)
     });
   }
 

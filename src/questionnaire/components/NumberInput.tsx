@@ -91,6 +91,19 @@ export const NumberInput: React.FC<NumberInputProps> = ({
       e.preventDefault();
       onEnterKey();
     }
+
+    // Handle arrow keys for increment/decrement
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (canIncrement) {
+        handleIncrement();
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (canDecrement) {
+        handleDecrement();
+      }
+    }
   };
 
   const handleIncrement = (): void => {

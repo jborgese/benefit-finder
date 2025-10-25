@@ -195,6 +195,11 @@ export interface QuestionFlowActions {
    * Complete the questionnaire
    */
   complete: () => void;
+
+  /**
+   * Update question definition (for dynamic options)
+   */
+  updateQuestion: (questionId: string, questionUpdate: Partial<QuestionDefinition>) => void;
 }
 
 export type QuestionFlowStore = QuestionFlowState & QuestionFlowActions;
@@ -687,6 +692,58 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
 
         // Update progress to reflect completion
         get().updateProgress();
+      },
+
+      updateQuestion: (questionId: string, questionUpdate: Partial<QuestionDefinition>) => {
+        const state = get();
+
+        if (!state.flow) {
+          return;
+        }
+
+        // Find the node containing this question
+        const node = Array.from(state.flow.nodes.values()).find(
+          n => n.question.id === questionId
+        );
+
+        if (!node) {
+          console.warn(`Question ${questionId} not found in flow`);
+          return;
+        }
+
+        // Update the question definition
+        const updatedQuestion: QuestionDefinition = {
+          ...node.question,
+          ...questionUpdate,
+        };
+
+        const updatedNode = {
+          ...node,
+          question: updatedQuestion,
+        };
+
+        // Create new flow with updated node
+        const updatedFlow = {
+          ...state.flow,
+          nodes: new Map(state.flow.nodes),
+        };
+        updatedFlow.nodes.set(node.id, updatedNode);
+
+        const now = Date.now();
+
+        set({
+          flow: updatedFlow,
+          updatedAt: now,
+          events: [
+            ...state.events,
+            {
+              type: 'question_updated',
+              timestamp: now,
+              nodeId: questionId,
+              data: { questionUpdate },
+            },
+          ],
+        });
       },
     }),
     {

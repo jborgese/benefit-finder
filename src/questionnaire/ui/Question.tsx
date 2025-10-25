@@ -16,6 +16,10 @@ import {
 } from '../components';
 import { SearchableSelectInput } from '../components/SearchableSelectInput';
 import { DateOfBirthInput } from '../components/DateOfBirthInput';
+import { EnhancedStateSelector } from '../components/EnhancedStateSelector';
+import { EnhancedCountySelector } from '../components/EnhancedCountySelector';
+import { useDeviceDetection } from '../hooks/useDeviceDetection';
+import { useQuestionFlowStore } from '../store';
 import type { QuestionDefinition } from '../types';
 import { createSchemaFromQuestion, validateWithSchema } from '../validation/schemas';
 
@@ -50,6 +54,8 @@ export const Question: React.FC<QuestionProps> = ({
 }) => {
   const [errors, setErrors] = React.useState<string[]>([]);
   const [touched, setTouched] = React.useState(false);
+  const deviceInfo = useDeviceDetection();
+  const store = useQuestionFlowStore();
 
   // Validate value
   const validateValue = React.useCallback((val: unknown): void => {
@@ -151,6 +157,23 @@ export const Question: React.FC<QuestionProps> = ({
 
       case 'select':
       case 'radio':
+        // Use enhanced state selector for state questions
+        if (question.fieldName === 'state' || question.text.toLowerCase().includes('state')) {
+          return (
+            <EnhancedStateSelector
+              {...commonProps}
+              value={value as string}
+              placeholder="Search for your state..."
+              showPopularFirst={true}
+              groupByRegion={!deviceInfo.isMobile}
+              enableSearch={true}
+              mobileOptimized={deviceInfo.isMobile}
+              enableAutoDetection={true}
+              maxHeight={deviceInfo.isMobile ? '60vh' : '300px'}
+            />
+          );
+        }
+
         return (
           <SelectInput
             {...commonProps}
@@ -161,6 +184,73 @@ export const Question: React.FC<QuestionProps> = ({
         );
 
       case 'searchable-select':
+        // Use enhanced county selector for county questions
+        if (question.fieldName === 'county' || question.text.toLowerCase().includes('county')) {
+          const stateAnswer = store?.answers?.get('state');
+
+          // Extract the actual state value - handle both string and object cases
+          let selectedState: string | null = null;
+          if (typeof stateAnswer === 'string') {
+            selectedState = stateAnswer;
+          } else if (stateAnswer && typeof stateAnswer === 'object') {
+            // Handle object format - could be { value: 'GA', label: 'Georgia' } or similar
+            if ('value' in stateAnswer) {
+              selectedState = (stateAnswer as any).value;
+            } else if ('label' in stateAnswer) {
+              // If we only have the label, we need to find the corresponding state code
+              const stateLabel = (stateAnswer as any).label;
+              // Try to find the state code from the label
+              const stateOptions = [
+                { value: 'AL', label: 'Alabama' }, { value: 'AK', label: 'Alaska' }, { value: 'AZ', label: 'Arizona' },
+                { value: 'AR', label: 'Arkansas' }, { value: 'CA', label: 'California' }, { value: 'CO', label: 'Colorado' },
+                { value: 'CT', label: 'Connecticut' }, { value: 'DE', label: 'Delaware' }, { value: 'FL', label: 'Florida' },
+                { value: 'GA', label: 'Georgia' }, { value: 'HI', label: 'Hawaii' }, { value: 'ID', label: 'Idaho' },
+                { value: 'IL', label: 'Illinois' }, { value: 'IN', label: 'Indiana' }, { value: 'IA', label: 'Iowa' },
+                { value: 'KS', label: 'Kansas' }, { value: 'KY', label: 'Kentucky' }, { value: 'LA', label: 'Louisiana' },
+                { value: 'ME', label: 'Maine' }, { value: 'MD', label: 'Maryland' }, { value: 'MA', label: 'Massachusetts' },
+                { value: 'MI', label: 'Michigan' }, { value: 'MN', label: 'Minnesota' }, { value: 'MS', label: 'Mississippi' },
+                { value: 'MO', label: 'Missouri' }, { value: 'MT', label: 'Montana' }, { value: 'NE', label: 'Nebraska' },
+                { value: 'NV', label: 'Nevada' }, { value: 'NH', label: 'New Hampshire' }, { value: 'NJ', label: 'New Jersey' },
+                { value: 'NM', label: 'New Mexico' }, { value: 'NY', label: 'New York' }, { value: 'NC', label: 'North Carolina' },
+                { value: 'ND', label: 'North Dakota' }, { value: 'OH', label: 'Ohio' }, { value: 'OK', label: 'Oklahoma' },
+                { value: 'OR', label: 'Oregon' }, { value: 'PA', label: 'Pennsylvania' }, { value: 'RI', label: 'Rhode Island' },
+                { value: 'SC', label: 'South Carolina' }, { value: 'SD', label: 'South Dakota' }, { value: 'TN', label: 'Tennessee' },
+                { value: 'TX', label: 'Texas' }, { value: 'UT', label: 'Utah' }, { value: 'VT', label: 'Vermont' },
+                { value: 'VA', label: 'Virginia' }, { value: 'WA', label: 'Washington' }, { value: 'WV', label: 'West Virginia' },
+                { value: 'WI', label: 'Wisconsin' }, { value: 'WY', label: 'Wyoming' }
+              ];
+              const matchingState = stateOptions.find(state => state.label === stateLabel);
+              selectedState = matchingState?.value || null;
+            }
+          }
+
+          console.log('🔍 Question: Rendering EnhancedCountySelector', {
+            questionId: question.id,
+            questionText: question.text,
+            fieldName: question.fieldName,
+            rawStateAnswer: stateAnswer,
+            selectedState,
+            hasSelectedState: !!selectedState,
+            allAnswers: Object.fromEntries(store?.answers || new Map()),
+            value,
+            hasOptions: question.options?.length || 0
+          });
+
+          return (
+            <EnhancedCountySelector
+              {...commonProps}
+              value={value as string | null}
+              selectedState={selectedState}
+              placeholder={question.placeholder || 'Search for your county...'}
+              showPopularFirst={true}
+              showStateContext={true}
+              enableSearch={true}
+              mobileOptimized={deviceInfo.isMobile}
+              maxHeight={deviceInfo.isMobile ? '60vh' : '300px'}
+            />
+          );
+        }
+
         return (
           <SearchableSelectInput
             {...commonProps}

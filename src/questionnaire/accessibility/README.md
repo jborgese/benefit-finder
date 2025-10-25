@@ -47,8 +47,10 @@ Comprehensive accessibility utilities for building WCAG 2.1 AA compliant questio
 
 | Shortcut | Action |
 |----------|--------|
-| `→` | Next question |
-| `←` | Previous question |
+| `→` | Next question (when not in input field) |
+| `←` | Previous question (when not in input field) |
+| `↑` | Increment number input (when focused on number field) or navigate dropdown options (when focused on select field) |
+| `↓` | Decrement number input (when focused on number field) or navigate dropdown options (when focused on select field) |
 | `Ctrl + S` | Save progress |
 | `Ctrl + /` | Show keyboard shortcuts |
 | `Ctrl + Shift + N` | Skip question (if allowed) |

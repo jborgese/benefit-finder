@@ -72,6 +72,7 @@ async function discoverRuleFiles(config: RuleDiscoveryConfig): Promise<Discovere
 
     if (import.meta.env.DEV) {
       console.warn('[DEBUG] Rule Discovery: Found rule files:', Object.keys(ruleFiles));
+      console.warn('[DEBUG] Rule Discovery: Federal rule files found:', Object.keys(ruleFiles).filter(f => f.includes('federal')));
     }
 
     for (const [filePath, module] of Object.entries(ruleFiles)) {

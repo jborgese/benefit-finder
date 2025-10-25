@@ -13,8 +13,16 @@
       "organization": "BenefitFinder"
     },
     "jurisdiction": "US-FEDERAL",
-    "programs": ["snap-federal"],
-    "tags": ["snap", "food-assistance", "federal", "2024", "fns"],
+    "programs": [
+      "snap-federal"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "federal",
+      "2024",
+      "fns"
+    ],
     "createdAt": 1728777600000,
     "updatedAt": 1728777600000
   },
@@ -26,25 +34,101 @@
       "description": "Household gross income must be at or below 130% of the federal poverty line",
       "ruleLogic": {
         "<=": [
-          { "var": "householdIncome" },
           {
-            "*": [
-              { "var": "householdSize" },
-              1923
+            "var": "householdIncome"
+          },
+          {
+            "if": [
+              {
+                "<=": [
+                  {
+                    "var": "householdSize"
+                  },
+                  8
+                ]
+              },
+              {
+                "switch": [
+                  {
+                    "var": "householdSize"
+                  },
+                  {
+                    "default": 0
+                  },
+                  {
+                    "case": 1,
+                    "do": 1696
+                  },
+                  {
+                    "case": 2,
+                    "do": 2292
+                  },
+                  {
+                    "case": 3,
+                    "do": 2888
+                  },
+                  {
+                    "case": 4,
+                    "do": 3483
+                  },
+                  {
+                    "case": 5,
+                    "do": 4079
+                  },
+                  {
+                    "case": 6,
+                    "do": 4675
+                  },
+                  {
+                    "case": 7,
+                    "do": 5271
+                  },
+                  {
+                    "case": 8,
+                    "do": 5867
+                  }
+                ]
+              },
+              {
+                "+": [
+                  5867,
+                  {
+                    "*": [
+                      {
+                        "-": [
+                          {
+                            "var": "householdSize"
+                          },
+                          8
+                        ]
+                      },
+                      596
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
       },
       "ruleType": "eligibility",
-      "explanation": "To qualify for SNAP, your household's gross monthly income must be at or below 130% of the federal poverty level. For 2024, this means: 1 person = $1,923/month, 2 people = $2,600/month, 3 people = $3,278/month, 4 people = $3,955/month. Add $678 per additional person.",
-      "requiredFields": ["householdIncome", "householdSize"],
+      "explanation": "To qualify for SNAP, your household's gross monthly income must be at or below 130% of the federal poverty level. For 2024, this means: 1 person = $1,696/month, 2 people = $2,292/month, 3 people = $2,888/month, 4 people = $3,483/month. Add $596 per additional person.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-income",
           "name": "Proof of Income",
           "description": "Recent pay stubs, tax returns, or benefit statements",
           "required": true,
-          "alternatives": ["W-2 forms", "1099 forms", "Bank statements", "Self-employment records"],
+          "alternatives": [
+            "W-2 forms",
+            "1099 forms",
+            "Bank statements",
+            "Self-employment records"
+          ],
           "where": "Employer, IRS, bank, or your own records"
         }
       ],
@@ -86,7 +170,10 @@
             "householdSize": 1
           },
           "expected": true,
-          "tags": ["eligible", "single"]
+          "tags": [
+            "eligible",
+            "single"
+          ]
         },
         {
           "id": "test-eligible-family-low",
@@ -96,7 +183,10 @@
             "householdSize": 4
           },
           "expected": true,
-          "tags": ["eligible", "family"]
+          "tags": [
+            "eligible",
+            "family"
+          ]
         },
         {
           "id": "test-ineligible-high-income",
@@ -106,7 +196,10 @@
             "householdSize": 3
           },
           "expected": false,
-          "tags": ["ineligible", "high-income"]
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
         },
         {
           "id": "test-boundary-3-person",
@@ -116,12 +209,19 @@
             "householdSize": 3
           },
           "expected": true,
-          "tags": ["boundary", "edge-case"]
+          "tags": [
+            "boundary",
+            "edge-case"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["income", "poverty-level", "gross-income"],
+      "tags": [
+        "income",
+        "poverty-level",
+        "gross-income"
+      ],
       "category": "financial-eligibility",
       "jurisdiction": "US-FEDERAL"
     },
@@ -134,28 +234,106 @@
         "<=": [
           {
             "-": [
-              { "var": "householdIncome" },
-              { "var": "allowedDeductions" }
+              {
+                "var": "householdIncome"
+              },
+              {
+                "var": "allowedDeductions"
+              }
             ]
           },
           {
-            "*": [
-              { "var": "householdSize" },
-              1480
+            "if": [
+              {
+                "<=": [
+                  {
+                    "var": "householdSize"
+                  },
+                  8
+                ]
+              },
+              {
+                "switch": [
+                  {
+                    "var": "householdSize"
+                  },
+                  {
+                    "default": 0
+                  },
+                  {
+                    "case": 1,
+                    "do": 1305
+                  },
+                  {
+                    "case": 2,
+                    "do": 1763
+                  },
+                  {
+                    "case": 3,
+                    "do": 2221
+                  },
+                  {
+                    "case": 4,
+                    "do": 2679
+                  },
+                  {
+                    "case": 5,
+                    "do": 3137
+                  },
+                  {
+                    "case": 6,
+                    "do": 3595
+                  },
+                  {
+                    "case": 7,
+                    "do": 4053
+                  },
+                  {
+                    "case": 8,
+                    "do": 4511
+                  }
+                ]
+              },
+              {
+                "+": [
+                  4511,
+                  {
+                    "*": [
+                      {
+                        "-": [
+                          {
+                            "var": "householdSize"
+                          },
+                          8
+                        ]
+                      },
+                      458
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
       },
       "ruleType": "eligibility",
-      "explanation": "After deducting allowed expenses (like rent, childcare, medical costs for elderly/disabled), your net income must be at or below 100% of the federal poverty level. For 2024: 1 person = $1,480/month, 2 people = $2,000/month, 3 people = $2,520/month, 4 people = $3,040/month.",
-      "requiredFields": ["householdIncome", "allowedDeductions", "householdSize"],
+      "explanation": "After deducting allowed expenses (like rent, childcare, medical costs for elderly/disabled), your net income must be at or below 100% of the federal poverty level. For 2024: 1 person = $1,305/month, 2 people = $1,763/month, 3 people = $2,221/month, 4 people = $2,679/month. Add $458 per additional person.",
+      "requiredFields": [
+        "householdIncome",
+        "allowedDeductions",
+        "householdSize"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-expenses",
           "name": "Proof of Expenses",
           "description": "Rent/mortgage statements, utility bills, childcare receipts, medical bills",
           "required": true,
-          "alternatives": ["Lease agreement", "Childcare provider statement", "Medical receipts"],
+          "alternatives": [
+            "Lease agreement",
+            "Childcare provider statement",
+            "Medical receipts"
+          ],
           "where": "Landlord, utility companies, childcare providers, healthcare providers"
         }
       ],
@@ -185,7 +363,10 @@
             "householdSize": 1
           },
           "expected": true,
-          "tags": ["eligible", "net-income"]
+          "tags": [
+            "eligible",
+            "net-income"
+          ]
         },
         {
           "id": "test-net-income-ineligible",
@@ -196,12 +377,19 @@
             "householdSize": 1
           },
           "expected": false,
-          "tags": ["ineligible", "net-income"]
+          "tags": [
+            "ineligible",
+            "net-income"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["income", "net-income", "deductions"],
+      "tags": [
+        "income",
+        "net-income",
+        "deductions"
+      ],
       "category": "financial-eligibility",
       "jurisdiction": "US-FEDERAL"
     },
@@ -212,13 +400,26 @@
       "description": "Must be a U.S. citizen, U.S. national, or qualified immigrant",
       "ruleLogic": {
         "in": [
-          { "var": "citizenship" },
-          ["us_citizen", "us_national", "permanent_resident", "refugee", "asylee", "cuban_haitian", "amerasian", "trafficking_victim"]
+          {
+            "var": "citizenship"
+          },
+          [
+            "us_citizen",
+            "us_national",
+            "permanent_resident",
+            "refugee",
+            "asylee",
+            "cuban_haitian",
+            "amerasian",
+            "trafficking_victim"
+          ]
         ]
       },
       "ruleType": "eligibility",
       "explanation": "SNAP is available to U.S. citizens and certain categories of lawfully residing immigrants. Qualified immigrants include: lawful permanent residents (green card holders) who have lived in the U.S. for 5+ years, refugees, asylees, individuals granted withholding of deportation, Cuban and Haitian entrants, Amerasians, victims of trafficking, and certain other categories.",
-      "requiredFields": ["citizenship"],
+      "requiredFields": [
+        "citizenship"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-citizenship",
@@ -272,7 +473,10 @@
             "citizenship": "us_citizen"
           },
           "expected": true,
-          "tags": ["eligible", "citizen"]
+          "tags": [
+            "eligible",
+            "citizen"
+          ]
         },
         {
           "id": "test-refugee",
@@ -281,7 +485,10 @@
             "citizenship": "refugee"
           },
           "expected": true,
-          "tags": ["eligible", "qualified-immigrant"]
+          "tags": [
+            "eligible",
+            "qualified-immigrant"
+          ]
         },
         {
           "id": "test-permanent-resident",
@@ -290,7 +497,10 @@
             "citizenship": "permanent_resident"
           },
           "expected": true,
-          "tags": ["eligible", "qualified-immigrant"]
+          "tags": [
+            "eligible",
+            "qualified-immigrant"
+          ]
         },
         {
           "id": "test-other",
@@ -299,12 +509,19 @@
             "citizenship": "temporary_visitor"
           },
           "expected": false,
-          "tags": ["ineligible", "non-qualified"]
+          "tags": [
+            "ineligible",
+            "non-qualified"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["citizenship", "immigration", "non-citizen"],
+      "tags": [
+        "citizenship",
+        "immigration",
+        "non-citizen"
+      ],
       "category": "eligibility-requirement",
       "jurisdiction": "US-FEDERAL"
     },
@@ -317,28 +534,55 @@
         "or": [
           {
             "and": [
-              { "<=": [{ "var": "householdAssets" }, 2750] },
-              { "!": { "var": "hasElderlyOrDisabled" } }
+              {
+                "<=": [
+                  {
+                    "var": "householdAssets"
+                  },
+                  2750
+                ]
+              },
+              {
+                "!": {
+                  "var": "hasElderlyOrDisabled"
+                }
+              }
             ]
           },
           {
             "and": [
-              { "<=": [{ "var": "householdAssets" }, 4250] },
-              { "var": "hasElderlyOrDisabled" }
+              {
+                "<=": [
+                  {
+                    "var": "householdAssets"
+                  },
+                  4250
+                ]
+              },
+              {
+                "var": "hasElderlyOrDisabled"
+              }
             ]
           }
         ]
       },
       "ruleType": "eligibility",
       "explanation": "SNAP has an asset test. Most households can have up to $2,750 in countable resources. If the household includes someone age 60 or older, or someone who is disabled, the limit is $4,250. Countable resources include: bank accounts (checking/savings), cash, stocks, bonds, and certain other assets. NOT counted: your home, retirement accounts (401k, IRA), most vehicles, household goods, and life insurance.",
-      "requiredFields": ["householdAssets", "hasElderlyOrDisabled"],
+      "requiredFields": [
+        "householdAssets",
+        "hasElderlyOrDisabled"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-assets",
           "name": "Proof of Assets",
           "description": "Bank statements (all accounts), investment account statements",
           "required": true,
-          "alternatives": ["Bank letter showing balance", "Brokerage statements", "Savings bonds"],
+          "alternatives": [
+            "Bank letter showing balance",
+            "Brokerage statements",
+            "Savings bonds"
+          ],
           "where": "Your bank or financial institution"
         }
       ],
@@ -375,7 +619,10 @@
             "hasElderlyOrDisabled": false
           },
           "expected": true,
-          "tags": ["eligible", "regular-household"]
+          "tags": [
+            "eligible",
+            "regular-household"
+          ]
         },
         {
           "id": "test-regular-above-limit",
@@ -385,7 +632,10 @@
             "hasElderlyOrDisabled": false
           },
           "expected": false,
-          "tags": ["ineligible", "above-limit"]
+          "tags": [
+            "ineligible",
+            "above-limit"
+          ]
         },
         {
           "id": "test-elderly-below-higher-limit",
@@ -395,7 +645,10 @@
             "hasElderlyOrDisabled": true
           },
           "expected": true,
-          "tags": ["eligible", "elderly-disabled"]
+          "tags": [
+            "eligible",
+            "elderly-disabled"
+          ]
         },
         {
           "id": "test-elderly-above-higher-limit",
@@ -405,7 +658,10 @@
             "hasElderlyOrDisabled": true
           },
           "expected": false,
-          "tags": ["ineligible", "above-limit"]
+          "tags": [
+            "ineligible",
+            "above-limit"
+          ]
         },
         {
           "id": "test-boundary-regular",
@@ -415,7 +671,10 @@
             "hasElderlyOrDisabled": false
           },
           "expected": true,
-          "tags": ["boundary", "edge-case"]
+          "tags": [
+            "boundary",
+            "edge-case"
+          ]
         },
         {
           "id": "test-boundary-elderly",
@@ -425,12 +684,21 @@
             "hasElderlyOrDisabled": true
           },
           "expected": true,
-          "tags": ["boundary", "edge-case", "elderly"]
+          "tags": [
+            "boundary",
+            "edge-case",
+            "elderly"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["assets", "resources", "elderly", "disabled"],
+      "tags": [
+        "assets",
+        "resources",
+        "elderly",
+        "disabled"
+      ],
       "category": "financial-eligibility",
       "jurisdiction": "US-FEDERAL"
     },
@@ -441,21 +709,36 @@
       "description": "Able-bodied adults without dependents (ABAWD) ages 18-52 must work or participate in work programs",
       "ruleLogic": {
         "or": [
-          { "!": { "var": "isABAWD" } },
-          { "var": "meetsWorkRequirement" },
-          { "var": "isExemptFromWork" }
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          }
         ]
       },
       "ruleType": "eligibility",
       "explanation": "If you are an able-bodied adult without dependents (ABAWD) between ages 18 and 52, you must work at least 80 hours per month, participate in a work program, or qualify for an exemption to receive SNAP for more than 3 months in a 36-month period. Exemptions include: having a disability, being pregnant, caring for a child under 18, being medically certified as unable to work, or living in an area with high unemployment.",
-      "requiredFields": ["isABAWD", "meetsWorkRequirement", "isExemptFromWork"],
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-work",
           "name": "Proof of Work or Work Program Participation",
           "description": "Pay stubs, employer letter, work program enrollment verification",
           "required": false,
-          "alternatives": ["Self-employment records", "Work program attendance records"],
+          "alternatives": [
+            "Self-employment records",
+            "Work program attendance records"
+          ],
           "where": "Employer or work program administrator"
         }
       ],
@@ -497,7 +780,10 @@
             "isExemptFromWork": false
           },
           "expected": true,
-          "tags": ["eligible", "not-abawd"]
+          "tags": [
+            "eligible",
+            "not-abawd"
+          ]
         },
         {
           "id": "test-abawd-working",
@@ -508,7 +794,11 @@
             "isExemptFromWork": false
           },
           "expected": true,
-          "tags": ["eligible", "abawd", "working"]
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
         },
         {
           "id": "test-abawd-exempt",
@@ -519,7 +809,11 @@
             "isExemptFromWork": true
           },
           "expected": true,
-          "tags": ["eligible", "abawd", "exempt"]
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
         },
         {
           "id": "test-abawd-not-compliant",
@@ -530,12 +824,20 @@
             "isExemptFromWork": false
           },
           "expected": false,
-          "tags": ["ineligible", "abawd", "not-compliant"]
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["work-requirements", "abawd", "employment"],
+      "tags": [
+        "work-requirements",
+        "abawd",
+        "employment"
+      ],
       "category": "work-requirement",
       "jurisdiction": "US-FEDERAL"
     },
@@ -546,20 +848,32 @@
       "description": "All household members applying for benefits must provide or apply for a Social Security Number",
       "ruleLogic": {
         "or": [
-          { "var": "hasSocialSecurityNumber" },
-          { "var": "hasAppliedForSSN" }
+          {
+            "var": "hasSocialSecurityNumber"
+          },
+          {
+            "var": "hasAppliedForSSN"
+          }
         ]
       },
       "ruleType": "eligibility",
       "explanation": "You and everyone in your household applying for SNAP must have a Social Security Number or have applied for one. If you don't have an SSN, you can apply for SNAP benefits while you apply for an SSN. Household members who are not applying for benefits (such as ineligible immigrants) do not need to provide an SSN.",
-      "requiredFields": ["hasSocialSecurityNumber", "hasAppliedForSSN"],
+      "requiredFields": [
+        "hasSocialSecurityNumber",
+        "hasAppliedForSSN"
+      ],
       "requiredDocuments": [
         {
           "id": "social-security-card",
           "name": "Social Security Card or Proof of SSN",
           "description": "Social Security card or other document showing SSN",
           "required": true,
-          "alternatives": ["Medicare card", "Medicaid card", "SSA benefit letter", "W-2 or 1099"],
+          "alternatives": [
+            "Medicare card",
+            "Medicaid card",
+            "SSA benefit letter",
+            "W-2 or 1099"
+          ],
           "where": "Social Security Administration"
         },
         {
@@ -567,7 +881,9 @@
           "name": "Proof of SSN Application",
           "description": "Receipt showing you have applied for an SSN",
           "required": false,
-          "alternatives": ["SSA application receipt"],
+          "alternatives": [
+            "SSA application receipt"
+          ],
           "where": "Social Security Administration office"
         }
       ],
@@ -604,7 +920,10 @@
             "hasAppliedForSSN": false
           },
           "expected": true,
-          "tags": ["eligible", "has-ssn"]
+          "tags": [
+            "eligible",
+            "has-ssn"
+          ]
         },
         {
           "id": "test-applied-for-ssn",
@@ -614,7 +933,10 @@
             "hasAppliedForSSN": true
           },
           "expected": true,
-          "tags": ["eligible", "pending-ssn"]
+          "tags": [
+            "eligible",
+            "pending-ssn"
+          ]
         },
         {
           "id": "test-no-ssn-no-application",
@@ -624,12 +946,19 @@
             "hasAppliedForSSN": false
           },
           "expected": false,
-          "tags": ["ineligible", "no-ssn"]
+          "tags": [
+            "ineligible",
+            "no-ssn"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["ssn", "identification", "application-requirement"],
+      "tags": [
+        "ssn",
+        "identification",
+        "application-requirement"
+      ],
       "category": "administrative-requirement",
       "jurisdiction": "US-FEDERAL"
     },
@@ -643,14 +972,20 @@
       },
       "ruleType": "eligibility",
       "explanation": "You must live in the state where you are applying for SNAP benefits. You do not need a permanent address - homeless individuals can receive SNAP. You can apply in any state where you currently live, but you cannot receive benefits from multiple states at the same time.",
-      "requiredFields": ["livesInState"],
+      "requiredFields": [
+        "livesInState"
+      ],
       "requiredDocuments": [
         {
           "id": "proof-residence",
           "name": "Proof of Residence",
           "description": "Utility bill, lease, or mail showing your address",
           "required": false,
-          "alternatives": ["Letter from landlord", "Homeless shelter statement", "Neighbor's statement"],
+          "alternatives": [
+            "Letter from landlord",
+            "Homeless shelter statement",
+            "Neighbor's statement"
+          ],
           "where": "Utility company, landlord, or shelter"
         }
       ],
@@ -679,7 +1014,10 @@
             "isHomeless": false
           },
           "expected": true,
-          "tags": ["eligible", "resident"]
+          "tags": [
+            "eligible",
+            "resident"
+          ]
         },
         {
           "id": "test-homeless-in-state",
@@ -689,7 +1027,10 @@
             "isHomeless": true
           },
           "expected": true,
-          "tags": ["eligible", "homeless"]
+          "tags": [
+            "eligible",
+            "homeless"
+          ]
         },
         {
           "id": "test-not-in-state",
@@ -699,15 +1040,21 @@
             "isHomeless": false
           },
           "expected": false,
-          "tags": ["ineligible", "non-resident"]
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
         }
       ],
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000,
-      "tags": ["residence", "homeless", "address"],
+      "tags": [
+        "residence",
+        "homeless",
+        "address"
+      ],
       "category": "eligibility-requirement",
       "jurisdiction": "US-FEDERAL"
     }
   ]
 }
-

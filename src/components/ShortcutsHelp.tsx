@@ -31,8 +31,10 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
     {
       category: 'Questionnaire',
       shortcuts: [
-        { key: '→', description: 'Next question' },
-        { key: '←', description: 'Previous question' },
+        { key: '→', description: 'Next question (when not in input field)' },
+        { key: '←', description: 'Previous question (when not in input field)' },
+        { key: '↑', description: 'Increment number input or navigate dropdown options' },
+        { key: '↓', description: 'Decrement number input or navigate dropdown options' },
         { key: 'Ctrl + S', description: 'Save progress' },
         { key: 'Ctrl + /', description: 'Show keyboard shortcuts' },
         { key: 'Ctrl + Shift + N', description: 'Skip question (if allowed)' },

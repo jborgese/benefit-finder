@@ -247,6 +247,7 @@ export const SelectInput: React.FC<SelectProps> = ({
         aria-invalid={showError}
         aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
         aria-label={question.ariaLabel ?? question.text}
+        size={filteredOptions.length > 10 ? 8 : 1}
         className={`
           question-input w-full px-4 py-3 border rounded-lg shadow-sm
           bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100

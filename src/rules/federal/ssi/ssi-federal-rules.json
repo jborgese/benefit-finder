@@ -73,7 +73,7 @@
           {
             "<": [
               {
-                "var": "monthlyIncome"
+                "var": "householdIncome"
               },
               {
                 "if": [
@@ -89,7 +89,7 @@
           {
             ">=": [
               {
-                "var": "monthlyIncome"
+                "var": "householdIncome"
               },
               0
             ]
@@ -101,7 +101,7 @@
         "notQualified": "Your income exceeds SSI limits. The maximum monthly income is $943 for individuals and $1,415 for couples in 2024."
       },
       "requiredFields": [
-        "monthlyIncome",
+        "householdIncome",
         "isMarried"
       ],
       "weight": 1.0

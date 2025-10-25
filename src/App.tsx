@@ -36,6 +36,82 @@ const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 
 /**
+ * Import federal rules that apply to all states
+ */
+async function importFederalRules(): Promise<void> {
+  console.log(`🔍 [DEBUG] importFederalRules: Function called successfully`);
+  try {
+    console.log(`🔍 [DEBUG] importFederalRules: Starting federal rules import...`);
+
+    // Import SNAP federal rules
+    const { default: snapFederalRules } = await import('./rules/federal/snap/snap-federal-rules.json');
+    const snapResult = await importRules(snapFederalRules.rules, {
+      validate: true,
+      skipTests: false,
+      mode: 'upsert',
+      overwriteExisting: true
+    });
+    console.log(`[DEBUG] SNAP federal rules import result:`, snapResult);
+    console.log(`[DEBUG] SNAP rules imported:`, snapResult.imported, 'errors:', snapResult.errors?.length || 0);
+
+    // Import SSI federal rules
+    const { default: ssiFederalRules } = await import('./rules/federal/ssi/ssi-federal-rules.json');
+    const ssiResult = await importRules(ssiFederalRules.rules, {
+      validate: true,
+      skipTests: false,
+      mode: 'upsert',
+      overwriteExisting: true
+    });
+    console.log(`[DEBUG] SSI federal rules import result:`, ssiResult);
+    console.log(`[DEBUG] SSI rules imported:`, ssiResult.imported, 'errors:', ssiResult.errors?.length || 0);
+
+    // Import Section 8 federal rules
+    const { default: section8FederalRules } = await import('./rules/federal/section8/section8-federal-rules.json');
+    const section8Result = await importRules(section8FederalRules.rules, {
+      validate: true,
+      skipTests: false,
+      mode: 'upsert',
+      overwriteExisting: true
+    });
+    console.log(`[DEBUG] Section 8 federal rules import result:`, section8Result);
+    console.log(`[DEBUG] Section 8 rules imported:`, section8Result.imported, 'errors:', section8Result.errors?.length || 0);
+
+    // Import LIHTC federal rules
+    const { default: lihtcFederalRules } = await import('./rules/federal/lihtc/lihtc-federal-rules.json');
+    const lihtcResult = await importRules(lihtcFederalRules.rules, {
+      validate: true,
+      skipTests: false,
+      mode: 'upsert',
+      overwriteExisting: true
+    });
+    console.log(`[DEBUG] LIHTC federal rules import result:`, lihtcResult);
+    console.log(`[DEBUG] LIHTC rules imported:`, lihtcResult.imported, 'errors:', lihtcResult.errors?.length || 0);
+
+    // Import TANF federal rules
+    const { default: tanfFederalRules } = await import('./rules/federal/tanf/tanf-federal-rules.json');
+    const tanfResult = await importRules(tanfFederalRules.rules, {
+      validate: true,
+      skipTests: false,
+      mode: 'upsert',
+      overwriteExisting: true
+    });
+    console.log(`[DEBUG] TANF federal rules import result:`, tanfResult);
+    console.log(`[DEBUG] TANF rules imported:`, tanfResult.imported, 'errors:', tanfResult.errors?.length || 0);
+
+    console.log(`🔍 [DEBUG] importFederalRules: All federal rules imported successfully`);
+    return; // Explicit return to ensure function completes
+  } catch (error) {
+    console.error(`🔍 [DEBUG] importFederalRules: Failed to import federal rules:`, error);
+    console.error(`🔍 [DEBUG] importFederalRules: Error details:`, {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    });
+    // Don't throw - this shouldn't block the user's experience
+    return;
+  }
+}
+
+/**
  * Import state-specific rules based on the user's state
  */
 async function importStateSpecificRules(stateCode: string): Promise<void> {
@@ -226,8 +302,10 @@ function App(): React.ReactElement {
   };
 
   const handleCompleteQuestionnaire = async (answers: Record<string, unknown>): Promise<void> => {
+    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Function called with answers:', answers);
     try {
       // Immediately transition to results UI; perform work in background
+      console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Setting app state to results');
       setAppState('results');
       setIsProcessingResults(true);
       setAnnouncementMessage('Assessment completed. Preparing results...');
@@ -283,7 +361,14 @@ function App(): React.ReactElement {
       let batchResult;
 
       try {
+        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Creating user profile with data:', profileData);
         profile = await createUserProfile(profileData);
+        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: User profile created successfully:', {
+          id: profile.id,
+          householdIncome: profile.householdIncome,
+          householdSize: profile.householdSize,
+          state: profile.state
+        });
 
         // Store current user profile for passing to components
         setCurrentUserProfile({
@@ -297,12 +382,47 @@ function App(): React.ReactElement {
           hasChildren
         });
 
-        // Import state-specific rules if state is provided
-        if (state) {
-          await importStateSpecificRules(state);
+        // Import federal rules first (apply to all states)
+        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to import federal rules...');
+        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: importFederalRules function exists:', typeof importFederalRules);
+        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Current profile data:', {
+          profileId: profile.id,
+          householdIncome: profile.householdIncome,
+          householdSize: profile.householdSize,
+          state: profile.state
+        });
+
+        const importStartTime = Date.now();
+        try {
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Calling importFederalRules()...');
+          const importResult = await importFederalRules();
+          const importDuration = Date.now() - importStartTime;
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Federal rules import completed successfully');
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Import duration:', importDuration + 'ms');
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Import result:', importResult);
+        } catch (error) {
+          const importDuration = Date.now() - importStartTime;
+          console.error('🔍 [DEBUG] handleCompleteQuestionnaire: Federal rules import failed after', importDuration + 'ms');
+          console.error('🔍 [DEBUG] handleCompleteQuestionnaire: Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : 'No stack trace',
+            name: error instanceof Error ? error.name : 'Unknown error type'
+          });
+          throw error; // Re-throw to ensure we don't continue with missing rules
         }
 
+        // Import state-specific rules if state is provided
+        if (state) {
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Importing state-specific rules for:', state);
+          await importStateSpecificRules(state);
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: State-specific rules import completed');
+        } else {
+          console.log('🔍 [DEBUG] handleCompleteQuestionnaire: No state provided, skipping state-specific rules');
+        }
+
+        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: About to evaluate all programs for profile:', profile.id);
         batchResult = await evaluateAllPrograms(profile.id);
+        console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Program evaluation completed');
       } catch (dbError) {
         console.error('Database operations failed:', dbError);
 
@@ -862,7 +982,9 @@ function App(): React.ReactElement {
                         {t('navigation.results')}
                       </Button>
                     )}
+
                   </div>
+
 
                   <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4">
                     <div
@@ -916,7 +1038,7 @@ function App(): React.ReactElement {
                     </p>
                   </div>
 
-                  <div className="max-w-4xl mx-auto px-4 sm:px-0">
+                  <div className="max-w-4xl mx-auto px-4 sm:px-0 questionnaire-container">
                     <EnhancedQuestionnaire
                       flow={sampleFlow}
                       onComplete={(answers): void => {
@@ -926,6 +1048,7 @@ function App(): React.ReactElement {
                   </div>
                 </div>
               )}
+
 
               {appState === 'error' && (
                 <div>

@@ -68,7 +68,8 @@ const nodes: FlowNode[] = [
       fieldName: 'householdSize',
       required: true,
       min: 1,
-      max: 20
+      max: 20,
+      defaultValue: 1
     },
     nextId: 'income-period'
   },
@@ -84,7 +85,8 @@ const nodes: FlowNode[] = [
       options: [
         { value: 'monthly', label: 'Monthly income (e.g., $3,000/month)' },
         { value: 'annual', label: 'Annual income (e.g., $36,000/year)' }
-      ]
+      ],
+      defaultValue: 'monthly'
     },
     previousId: 'household-size',
     nextId: 'income'
@@ -134,7 +136,8 @@ const nodes: FlowNode[] = [
         { value: 'refugee', label: 'Refugee' },
         { value: 'asylee', label: 'Asylee' },
         { value: 'other', label: 'Other Status' }
-      ]
+      ],
+      defaultValue: 'us_citizen'
     },
     previousId: 'date-of-birth',
     nextId: 'state'
@@ -148,7 +151,8 @@ const nodes: FlowNode[] = [
       inputType: 'select',
       fieldName: 'state',
       required: true,
-      options: US_STATES
+      options: US_STATES,
+      defaultValue: 'CA'
     },
     previousId: 'citizenship',
     nextId: 'county'
@@ -252,7 +256,8 @@ const nodes: FlowNode[] = [
         { value: 'retired', label: 'Retired' },
         { value: 'disabled', label: 'Disabled' },
         { value: 'student', label: 'Student' }
-      ]
+      ],
+      defaultValue: 'employed'
     },
     previousId: 'existing-benefits',
     nextId: 'student-status'

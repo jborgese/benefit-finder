@@ -124,6 +124,17 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     }
   }, [store.completed, onComplete, store]);
 
+  // Initialize answer with default value if not set
+  useEffect(() => {
+    if (currentQuestion?.defaultValue !== undefined && !store.answers.has(currentQuestion.id)) {
+      store.answerQuestion(
+        currentQuestion.id,
+        currentQuestion.fieldName,
+        currentQuestion.defaultValue
+      );
+    }
+  }, [currentQuestion, store]);
+
   // Handle answer changes
   const handleAnswerChange = (value: unknown): void => {
     if (!currentQuestion) return;
@@ -144,7 +155,8 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
 
   // Handle Enter key press - navigate forward or complete questionnaire if valid
   const handleEnterKey = (): void => {
-    if (!isCurrentQuestionValid) return;
+    // For date inputs, allow Enter key even if not fully valid (user might be typing)
+    if (!isCurrentQuestionValid && currentQuestion.inputType !== 'date') return;
 
     // Check if we can go forward (not on last question)
     if (store.canGoForward()) {
@@ -206,10 +218,10 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     );
   }
 
-  const currentAnswer = store.answers.get(currentQuestion.id)?.value;
+  const currentAnswer = store.answers.get(currentQuestion.id)?.value ?? currentQuestion.defaultValue;
 
   return (
-    <div className={`question-flow-ui ${className} animate-fade-in`}>
+    <div className={`question-flow-ui questionnaire-container ${className} animate-fade-in`}>
       {enableSaveResume && <ResumeDialog storageKey="bf-questionnaire-autosave" />}
 
       {header && <div className="questionnaire-header mb-8 animate-fade-in-up">{header}</div>}
@@ -222,14 +234,14 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
       )}
 
       <div className="questionnaire-content mb-8">
-        <div className="card p-8 animate-scale-in">
+        <div className="card-questionnaire p-8 animate-scale-in relative z-10">
           <Question
             question={currentQuestion}
             value={currentAnswer}
             onChange={handleAnswerChange}
             onValidationChange={handleValidationChange}
             onEnterKey={handleEnterKey}
-            autoFocus={false}
+            autoFocus={currentQuestion.inputType === 'date'}
           />
         </div>
       </div>

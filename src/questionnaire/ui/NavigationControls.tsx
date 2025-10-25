@@ -100,7 +100,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
   const totalQuestions = progress?.totalQuestions ?? 0;
 
   return (
-    <div className={`navigation-controls ${className}`}>
+    <div className={`navigation-controls relative z-0 ${className}`}>
       {showProgress && progress && (
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
@@ -113,11 +113,11 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
           </div>
 
           <Progress.Root
-            className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-secondary-700"
+            className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-secondary-700 z-0"
             value={progressPercent}
           >
             <Progress.Indicator
-              className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
+              className="h-full bg-blue-500 transition-all duration-300 ease-in-out relative z-0"
               style={{ width: `${progressPercent}%` }}
             />
           </Progress.Root>
@@ -245,7 +245,7 @@ export const QuestionBreadcrumb: React.FC<{
     : history;
 
   return (
-    <nav aria-label="Question breadcrumb" className={`mb-4 ${className}`}>
+    <nav aria-label="Question breadcrumb" className={`mb-4 relative z-0 ${className}`}>
       <ol className="flex items-center space-x-2 text-sm overflow-x-auto scrollbar-hide pb-1">
         {shouldShowTruncated && (
           <>

@@ -105,11 +105,11 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           </span>
         </div>
         <Progress.Root
-          className="relative overflow-hidden bg-gray-200 rounded-full w-full h-3"
+          className="relative overflow-hidden bg-gray-200 rounded-full w-full h-3 z-0"
           value={qualifiedPercentage}
         >
           <Progress.Indicator
-            className="bg-green-500 w-full h-full transition-transform duration-300 ease-out"
+            className="bg-green-500 w-full h-full transition-transform duration-300 ease-out relative z-0"
             style={{ transform: `translateX(-${100 - qualifiedPercentage}%)` }}
           />
         </Progress.Root>

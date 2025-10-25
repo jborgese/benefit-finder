@@ -176,7 +176,7 @@ export async function evaluateEligibility(
     const { profile, rules } = await getEvaluationEntities(profileId, programId);
 
     // Prepare data
-    const data = prepareDataContext(profile);
+    const data = await prepareDataContext(profile);
 
     // Evaluate ALL rules - ALL must pass for eligibility
     const {

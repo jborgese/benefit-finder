@@ -46,6 +46,15 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = tr
     (event: KeyboardEvent) => {
       if (!enabled) return;
 
+      // Check if user is focused on an input field
+      const activeElement = document.activeElement;
+      const isInputFocused = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.tagName === 'SELECT' ||
+        activeElement.getAttribute('contenteditable') === 'true'
+      );
+
       for (const shortcut of shortcuts) {
         const keyMatches = event.key === shortcut.key;
         const ctrlMatches = shortcut.ctrlKey === undefined || event.ctrlKey === shortcut.ctrlKey;
@@ -53,7 +62,12 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = tr
         const shiftMatches = shortcut.shiftKey === undefined || event.shiftKey === shortcut.shiftKey;
         const metaMatches = shortcut.metaKey === undefined || event.metaKey === shortcut.metaKey;
 
-        if (keyMatches && ctrlMatches && altMatches && shiftMatches && metaMatches) {
+        // For arrow keys, only trigger if NOT focused on an input field
+        const isArrowKey = shortcut.key === Keys.ARROW_LEFT || shortcut.key === Keys.ARROW_RIGHT ||
+                          shortcut.key === Keys.ARROW_UP || shortcut.key === Keys.ARROW_DOWN;
+        const shouldSkip = isArrowKey && isInputFocused;
+
+        if (keyMatches && ctrlMatches && altMatches && shiftMatches && metaMatches && !shouldSkip) {
           event.preventDefault();
           shortcut.action();
           break;
