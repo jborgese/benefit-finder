@@ -148,6 +148,18 @@ export const ProgramCard: React.FC<ProgramCardProps> = React.memo(({
   const { t } = useI18n();
   const [showExplanation, setShowExplanation] = useState(false);
 
+  // Add SNAP-specific debug logging
+  if (result.programId.includes('snap') && import.meta.env.DEV) {
+    console.warn(`🔍 [SNAP DEBUG] ProgramCard rendering:`);
+    console.warn(`  - Program ID: ${result.programId}`);
+    console.warn(`  - Program Name: ${result.programName}`);
+    console.warn(`  - Status: ${result.status}`);
+    console.warn(`  - Confidence: ${result.confidence}`);
+    console.warn(`  - Confidence Score: ${result.confidenceScore}`);
+    console.warn(`  - User Profile:`, userProfile);
+    console.warn(`  - Explanation:`, result.explanation);
+  }
+
 
   const { shouldShowDocuments, shouldShowNextSteps, jurisdictionLabel, formattedBenefit } = useMemo(() => {
     const showDocs = result.status === 'qualified' || result.status === 'likely';

@@ -797,8 +797,8 @@ async function saveRuleToDatabase(
     draft: rule.draft,
     testCases: rule.testCases?.map((tc) => ({
       input: tc.input,
-      expectedOutput: tc.expected as boolean,
-      description: tc.description,
+      expectedOutput: tc.expectedOutput ?? true, // Default to true if null/undefined
+      description: tc.description || '',
     })),
     createdAt: rule.createdAt,
     updatedAt: rule.updatedAt,

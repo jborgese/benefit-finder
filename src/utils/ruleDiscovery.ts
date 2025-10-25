@@ -80,6 +80,8 @@ function logDiscoveryDebug(ruleFiles: Record<string, () => Promise<Record<string
 
   if (snapFiles.length === 0) {
     console.log('❌ [SNAP/SSI DISCOVERY DEBUG] No SNAP files found! Expected: snap-federal-rules.json');
+    console.log('🔍 [SNAP/SSI DISCOVERY DEBUG] All rule files found:', Object.keys(ruleFiles));
+    console.log('🔍 [SNAP/SSI DISCOVERY DEBUG] Pattern: ../rules/federal/**/*-federal-rules.json');
   }
   if (ssiFiles.length === 0) {
     console.log('❌ [SNAP/SSI DISCOVERY DEBUG] No SSI files found! Expected: ssi-federal-rules.json');
@@ -152,11 +154,17 @@ async function processRuleFile(
   console.log(`🔍 [RULE DISCOVERY DEBUG] Processing file: ${filePath}`);
   logSnapSsiDebug(filePath);
 
+  // Add SNAP-specific debug logging
+  if (filePath.includes('snap')) {
+    console.log(`🔍 [SNAP DISCOVERY DEBUG] Processing SNAP file: ${filePath}`);
+  }
+
   try {
     const module = await importFn();
     const rulePackage = extractRulePackage(module, filePath);
 
     if (!rulePackage) {
+      console.log(`❌ [RULE DISCOVERY DEBUG] Failed to extract rule package from ${filePath}`);
       return null;
     }
 
@@ -228,6 +236,10 @@ async function discoverRuleFiles(config: RuleDiscoveryConfig): Promise<Discovere
     // Use dynamic imports instead of static imports to avoid conflicts with App.tsx
     // This will find all files matching the pattern in the specified directory
     const ruleFiles = import.meta.glob('../rules/federal/**/*-federal-rules.json');
+
+    console.log('🔍 [RULE DISCOVERY DEBUG] Starting rule file discovery');
+    console.log('🔍 [RULE DISCOVERY DEBUG] Glob pattern: ../rules/federal/**/*-federal-rules.json');
+    console.log('🔍 [RULE DISCOVERY DEBUG] Found rule files:', Object.keys(ruleFiles));
 
     logDiscoveryDebug(ruleFiles);
 
@@ -833,8 +845,10 @@ export async function discoverAndSeedAllRules(): Promise<{
 
     // Discover all rule files
     console.log('🔍 [MAIN DISCOVERY DEBUG] Calling discoverRuleFiles with FEDERAL_RULE_CONFIG');
+    console.log('🔍 [MAIN DISCOVERY DEBUG] FEDERAL_RULE_CONFIG:', FEDERAL_RULE_CONFIG);
     const discoveredFiles = await discoverRuleFiles(FEDERAL_RULE_CONFIG);
     results.discovered = discoveredFiles.length;
+    console.log('🔍 [MAIN DISCOVERY DEBUG] Discovered files count:', discoveredFiles.length);
 
     logMainDiscoveryResults(discoveredFiles);
     logFileProcessingStart(discoveredFiles);

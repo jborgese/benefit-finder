@@ -141,6 +141,15 @@ export const SnapExplanation: React.FC<SnapExplanationProps> = ({
 }) => {
   const { t } = useI18n();
 
+  // Add SNAP-specific debug logging
+  if (import.meta.env.DEV) {
+    console.warn(`🔍 [SNAP DEBUG] SnapExplanation rendering:`);
+    console.warn(`  - Program Name: ${programName}`);
+    console.warn(`  - Status: ${status}`);
+    console.warn(`  - User Profile:`, userProfile);
+    console.warn(`  - Explanation:`, _explanation);
+  }
+
   const getStatusColor = (): string => {
     switch (status) {
       case 'qualified':

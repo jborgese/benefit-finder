@@ -37,78 +37,7 @@
           {
             "var": "householdIncome"
           },
-          {
-            "if": [
-              {
-                "<=": [
-                  {
-                    "var": "householdSize"
-                  },
-                  8
-                ]
-              },
-              {
-                "switch": [
-                  {
-                    "var": "householdSize"
-                  },
-                  {
-                    "default": 0
-                  },
-                  {
-                    "case": 1,
-                    "do": 1696
-                  },
-                  {
-                    "case": 2,
-                    "do": 2292
-                  },
-                  {
-                    "case": 3,
-                    "do": 2888
-                  },
-                  {
-                    "case": 4,
-                    "do": 3483
-                  },
-                  {
-                    "case": 5,
-                    "do": 4079
-                  },
-                  {
-                    "case": 6,
-                    "do": 4675
-                  },
-                  {
-                    "case": 7,
-                    "do": 5271
-                  },
-                  {
-                    "case": 8,
-                    "do": 5867
-                  }
-                ]
-              },
-              {
-                "+": [
-                  5867,
-                  {
-                    "*": [
-                      {
-                        "-": [
-                          {
-                            "var": "householdSize"
-                          },
-                          8
-                        ]
-                      },
-                      596
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+          1696
         ]
       },
       "ruleType": "eligibility",
@@ -242,78 +171,7 @@
               }
             ]
           },
-          {
-            "if": [
-              {
-                "<=": [
-                  {
-                    "var": "householdSize"
-                  },
-                  8
-                ]
-              },
-              {
-                "switch": [
-                  {
-                    "var": "householdSize"
-                  },
-                  {
-                    "default": 0
-                  },
-                  {
-                    "case": 1,
-                    "do": 1305
-                  },
-                  {
-                    "case": 2,
-                    "do": 1763
-                  },
-                  {
-                    "case": 3,
-                    "do": 2221
-                  },
-                  {
-                    "case": 4,
-                    "do": 2679
-                  },
-                  {
-                    "case": 5,
-                    "do": 3137
-                  },
-                  {
-                    "case": 6,
-                    "do": 3595
-                  },
-                  {
-                    "case": 7,
-                    "do": 4053
-                  },
-                  {
-                    "case": 8,
-                    "do": 4511
-                  }
-                ]
-              },
-              {
-                "+": [
-                  4511,
-                  {
-                    "*": [
-                      {
-                        "-": [
-                          {
-                            "var": "householdSize"
-                          },
-                          8
-                        ]
-                      },
-                      458
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+          1305
         ]
       },
       "ruleType": "eligibility",

@@ -53,6 +53,7 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
     state: string;
     householdSize: number;
     householdIncome: number;
+    incomePeriod: 'monthly' | 'annual';
     citizenship: string;
     employmentStatus: string;
     hasDisability: boolean;
@@ -77,6 +78,16 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
   // Convert income to annual amount based on user's selection
   const annualIncome = incomePeriod === 'monthly' ? householdIncome * 12 : householdIncome;
 
+  // Add SNAP-specific debug logging for income conversion
+  if (import.meta.env.DEV) {
+    console.warn(`🔍 [SNAP DEBUG] Income conversion in convertAnswersToProfileData:`);
+    console.warn(`  - Original Income: $${householdIncome.toLocaleString()}`);
+    console.warn(`  - Income Period: ${incomePeriod}`);
+    console.warn(`  - Converted Annual Income: $${annualIncome.toLocaleString()}`);
+    console.warn(`  - Household Size: ${householdSize}`);
+    console.warn(`  - State: ${state}`);
+  }
+
   return {
     profileData: {
       householdSize,
@@ -95,6 +106,7 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
       state,
       householdSize,
       householdIncome: annualIncome,
+      incomePeriod: incomePeriod as 'monthly' | 'annual',
       citizenship,
       employmentStatus,
       hasDisability: hasQualifyingDisability,
@@ -429,6 +441,17 @@ function App(): React.ReactElement {
           state: profile.state
         });
 
+        // Add SNAP-specific debug logging for profile creation
+        if (import.meta.env.DEV) {
+          console.warn(`🔍 [SNAP DEBUG] User profile created:`);
+          console.warn(`  - Profile ID: ${profile.id}`);
+          console.warn(`  - Household Income: $${profile.householdIncome?.toLocaleString()}/year`);
+          console.warn(`  - Household Size: ${profile.householdSize}`);
+          console.warn(`  - Income Period: ${profileData.incomePeriod}`);
+          console.warn(`  - State: ${profile.state}`);
+          console.warn(`  - Citizenship: ${profile.citizenship}`);
+        }
+
         // Store current user profile for passing to components
         setCurrentUserProfile(userProfile);
 
@@ -451,6 +474,22 @@ function App(): React.ReactElement {
       // Convert batch results to array for easier processing
       const evaluationResults = Array.from(batchResult.programResults.values());
       console.log('[DEBUG] App.tsx - evaluationResults', evaluationResults);
+
+      // Add SNAP-specific debug logging for evaluation results
+      if (import.meta.env.DEV) {
+        const snapResults = evaluationResults.filter(result => result.programId.includes('snap'));
+        if (snapResults.length > 0) {
+          console.warn(`🔍 [SNAP DEBUG] Evaluation results for SNAP:`);
+          snapResults.forEach(result => {
+            console.warn(`  - Program ID: ${result.programId}`);
+            console.warn(`  - Eligible: ${result.eligible}`);
+            console.warn(`  - Confidence: ${result.confidence}`);
+            console.warn(`  - Reason: ${result.reason}`);
+          });
+        } else {
+          console.warn(`🔍 [SNAP DEBUG] No SNAP results found in evaluation`);
+        }
+      }
 
       // Get all program rules for each program (for comprehensive requirements display)
       const programRulesMap = new Map<string, string[]>();

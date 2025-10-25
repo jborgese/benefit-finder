@@ -45,6 +45,19 @@ export async function initializeApp(): Promise<void> {
     // Check if we have programs with technical names that need fixing
     const hasTechnicalNames = existingPrograms.some(p => p.id.startsWith('benefits.') || p.name.includes('benefits.'));
 
+    // Check if SNAP program exists but has no rules (common issue)
+    const snapProgram = existingPrograms.find(p => p.id === 'snap-federal');
+    const hasSnapWithoutRules = snapProgram && snapProgram.id === 'snap-federal';
+
+    if (import.meta.env.DEV && hasSnapWithoutRules) {
+      console.warn('[DEBUG] initializeApp: Found SNAP program without rules, will force rule discovery');
+      console.warn('[DEBUG] initializeApp: SNAP program details:', {
+        id: snapProgram.id,
+        name: snapProgram.name,
+        hasRules: 'Will check rules count during discovery'
+      });
+    }
+
     if (hasTechnicalNames) {
       if (import.meta.env.DEV) {
         console.warn('[DEBUG] initializeApp: Found programs with technical names, clearing and reinitializing...');
@@ -53,6 +66,11 @@ export async function initializeApp(): Promise<void> {
       await clearDatabase();
       // Wait a moment for the database to fully clear
       await new Promise(resolve => setTimeout(resolve, 1000));
+    } else if (hasSnapWithoutRules) {
+      // Force rule discovery if SNAP program exists but has no rules
+      if (import.meta.env.DEV) {
+        console.warn('[DEBUG] initializeApp: SNAP program exists but has no rules, forcing rule discovery...');
+      }
     } else {
       // Check if we need to discover and seed new rule files
       const hasNewRuleFiles = await checkForNewRuleFiles();

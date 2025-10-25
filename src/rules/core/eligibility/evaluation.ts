@@ -849,27 +849,58 @@ function calculateAgeFromDateOfBirth(dateOfBirth: string): number {
  */
 function convertAnnualIncomeToMonthly(processedData: Record<string, unknown>): Record<string, unknown> {
   if (processedData.householdIncome && typeof processedData.householdIncome === 'number') {
-    const originalAnnualIncome = processedData.householdIncome;
-    const monthlyIncome = Math.round(processedData.householdIncome / 12);
-    const updatedData = { ...processedData, householdIncome: monthlyIncome };
+    const incomePeriod = processedData.incomePeriod as string;
 
-    debugLog('Converted annual income to monthly', {
-      originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
-      convertedMonthlyIncome: `$${monthlyIncome.toLocaleString()}`,
-      householdSize: processedData.householdSize,
-      citizenship: processedData.citizenship
-    });
+    console.warn(`🔍 [SNAP DEBUG] Income Conversion Check:`);
+    console.warn(`  - Original Income: $${processedData.householdIncome.toLocaleString()}`);
+    console.warn(`  - Income Period: ${incomePeriod || 'unknown'}`);
+    console.warn(`  - Household Size: ${processedData.householdSize}`);
 
-    if (import.meta.env.DEV) {
-      console.warn('🔍 [DEBUG] prepareDataContext: Income conversion:', {
+    // Only convert if income was entered as annual
+    if (incomePeriod === 'annual') {
+      const originalAnnualIncome = processedData.householdIncome;
+      const monthlyIncome = Math.round(processedData.householdIncome / 12);
+      const updatedData = { ...processedData, householdIncome: monthlyIncome };
+
+      console.warn(`🔍 [SNAP DEBUG] Converting annual to monthly:`);
+      console.warn(`  - Annual Income: $${originalAnnualIncome.toLocaleString()}/year`);
+      console.warn(`  - Monthly Income: $${monthlyIncome.toLocaleString()}/month`);
+      console.warn(`  - Conversion Factor: 12 (annual ÷ 12 = monthly)`);
+
+      debugLog('Converted annual income to monthly', {
         originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
         convertedMonthlyIncome: `$${monthlyIncome.toLocaleString()}`,
         householdSize: processedData.householdSize,
         citizenship: processedData.citizenship
       });
-    }
 
-    return updatedData;
+      if (import.meta.env.DEV) {
+        console.warn('🔍 [DEBUG] prepareDataContext: Income conversion:', {
+          originalAnnualIncome: `$${originalAnnualIncome.toLocaleString()}`,
+          convertedMonthlyIncome: `$${monthlyIncome.toLocaleString()}`,
+          householdSize: processedData.householdSize,
+          citizenship: processedData.citizenship
+        });
+      }
+
+      return updatedData;
+    } else {
+      // Income is already monthly, no conversion needed
+      console.warn(`🔍 [SNAP DEBUG] Income already in monthly format:`);
+      console.warn(`  - Monthly Income: $${processedData.householdIncome.toLocaleString()}/month`);
+      console.warn(`  - No conversion needed`);
+
+      debugLog('Income already in monthly format', {
+        monthlyIncome: `$${processedData.householdIncome.toLocaleString()}`,
+        incomePeriod: incomePeriod || 'unknown',
+        householdSize: processedData.householdSize,
+        citizenship: processedData.citizenship
+      });
+    }
+  } else {
+    console.warn(`🔍 [SNAP DEBUG] No income data to convert:`);
+    console.warn(`  - householdIncome: ${processedData.householdIncome}`);
+    console.warn(`  - Type: ${typeof processedData.householdIncome}`);
   }
   return processedData;
 }
