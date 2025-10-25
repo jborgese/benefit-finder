@@ -1,0 +1,974 @@
+{
+  "metadata": {
+    "id": "wic-texas-rules-2024",
+    "name": "Texas WIC Eligibility Rules (2024)",
+    "description": "Texas-specific WIC (Women, Infants, and Children) eligibility rules for 2024. WIC provides nutrition assistance to pregnant women, new mothers, and children under 5.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-TX",
+    "programs": [
+      "wic-texas",
+      "wic"
+    ],
+    "tags": [
+      "wic",
+      "nutrition",
+      "texas",
+      "2024",
+      "pregnant-women",
+      "children",
+      "infants"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "wic-tx-income-limit",
+      "programId": "wic-texas",
+      "name": "Texas WIC Income Limit (185% FPL)",
+      "description": "Household income must be at or below 185% FPL to qualify for WIC",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas WIC follows federal guidelines with an income limit of 185% of the federal poverty level. For 2024 at 185% FPL: 1 person = $2,738/month, 2 people = $3,707/month, 3 people = $4,676/month, 4 people = $5,645/month. This is a gross income test - if you pass this, you may still need to meet other requirements.",
+      "requiredFields": [
+        "livesInTexas",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-wic-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply at your local WIC clinic",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "priority": "high",
+          "estimatedTime": "1-2 hours"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas WIC Income Limits",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01",
+          "notes": "Texas WIC income limit: 185% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-tx-wic-income-eligible",
+          "description": "Household under 185% FPL income",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "income",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-wic-income-ineligible",
+          "description": "Household over 185% FPL income",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 3500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income",
+        "185-percent-fpl"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "wic-tx-pregnant-women",
+      "programId": "wic-texas",
+      "name": "Texas WIC for Pregnant Women",
+      "description": "Pregnant women qualify for WIC with income up to 185% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Pregnant women qualify for WIC if household income is at or below 185% of the federal poverty level. WIC provides: nutritious foods, nutrition education, breastfeeding support, and referrals to healthcare. Coverage continues through pregnancy and up to 6 months after delivery if breastfeeding, or up to 6 months after delivery if not breastfeeding.",
+      "requiredFields": [
+        "livesInTexas",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-wic-tx",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-wic-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply at your local WIC clinic as soon as you know you're pregnant",
+          "priority": "high",
+          "estimatedTime": "1-2 hours"
+        },
+        {
+          "step": "WIC provides nutrition education and breastfeeding support",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas WIC for Pregnant Women",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01",
+          "notes": "Pregnant women eligible up to 185% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-wic-pregnant-eligible",
+          "description": "Pregnant woman under 185% FPL",
+          "input": {
+            "livesInTexas": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-wic-pregnant-high-income",
+          "description": "Pregnant woman over 185% FPL",
+          "input": {
+            "livesInTexas": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-tx-wic-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInTexas": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "nutrition",
+        "185-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "wic-tx-postpartum-women",
+      "programId": "wic-texas",
+      "name": "Texas WIC for Postpartum Women",
+      "description": "Postpartum women qualify for WIC up to 6 months after delivery",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "var": "isPostpartum"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Postpartum women qualify for WIC up to 6 months after delivery if household income is at or below 185% FPL. WIC provides: nutritious foods, nutrition education, breastfeeding support, and referrals to healthcare. If breastfeeding, coverage can continue up to 1 year after delivery.",
+      "requiredFields": [
+        "livesInTexas",
+        "isPostpartum",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-postpartum-wic-tx",
+          "name": "Proof of Postpartum Status",
+          "description": "Birth certificate, hospital records, or doctor's note",
+          "required": true,
+          "alternatives": [
+            "Discharge papers",
+            "Pediatric records"
+          ],
+          "where": "Hospital or healthcare provider"
+        },
+        {
+          "id": "proof-income-postpartum-wic-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply at your local WIC clinic within 6 months of delivery",
+          "priority": "high",
+          "estimatedTime": "1-2 hours"
+        },
+        {
+          "step": "If breastfeeding, you may qualify for extended coverage up to 1 year",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas WIC for Postpartum Women",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01",
+          "notes": "Postpartum women eligible up to 6 months after delivery"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-wic-postpartum-eligible",
+          "description": "Postpartum woman under 185% FPL",
+          "input": {
+            "livesInTexas": true,
+            "isPostpartum": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "postpartum",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-wic-postpartum-high-income",
+          "description": "Postpartum woman over 185% FPL",
+          "input": {
+            "livesInTexas": true,
+            "isPostpartum": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-tx-wic-not-postpartum",
+          "description": "Not postpartum",
+          "input": {
+            "livesInTexas": true,
+            "isPostpartum": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-postpartum"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "postpartum",
+        "nutrition",
+        "185-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "wic-tx-infants",
+      "programId": "wic-texas",
+      "name": "Texas WIC for Infants",
+      "description": "Infants under 1 year qualify for WIC with income up to 185% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              1
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Infants under 1 year qualify for WIC if household income is at or below 185% FPL. WIC provides: infant formula, baby food, nutrition education for parents, and referrals to healthcare. Coverage continues until the child turns 1 year old.",
+      "requiredFields": [
+        "livesInTexas",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-infant-age-wic-tx",
+          "name": "Proof of Infant's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "Hospital discharge papers",
+            "Pediatric records"
+          ],
+          "where": "Hospital or vital records office"
+        },
+        {
+          "id": "proof-income-infant-wic-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply at your local WIC clinic as soon as possible after birth",
+          "priority": "high",
+          "estimatedTime": "1-2 hours"
+        },
+        {
+          "step": "WIC provides infant formula and baby food",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas WIC for Infants",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01",
+          "notes": "Infants under 1 year eligible up to 185% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-wic-infant-eligible",
+          "description": "Infant under 1 year with qualifying income",
+          "input": {
+            "livesInTexas": true,
+            "age": 0.5,
+            "householdIncome": 2500,
+            "householdSize": 2
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "infant",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-wic-infant-high-income",
+          "description": "Infant with family income above 185% FPL",
+          "input": {
+            "livesInTexas": true,
+            "age": 0.3,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-tx-wic-child-over-1",
+          "description": "Child over 1 year (covered under children's rules)",
+          "input": {
+            "livesInTexas": true,
+            "age": 1.5,
+            "householdIncome": 2000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "use-children-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "infants",
+        "nutrition",
+        "185-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "wic-tx-children",
+      "programId": "wic-texas",
+      "name": "Texas WIC for Children",
+      "description": "Children 1-4 years old qualify for WIC with income up to 185% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              1
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              5
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Children ages 1-4 years qualify for WIC if household income is at or below 185% FPL. WIC provides: nutritious foods, nutrition education for parents, and referrals to healthcare. Coverage continues until the child turns 5 years old.",
+      "requiredFields": [
+        "livesInTexas",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-wic-tx",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-income-child-wic-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply at your local WIC clinic",
+          "priority": "high",
+          "estimatedTime": "1-2 hours"
+        },
+        {
+          "step": "WIC provides nutritious foods for growing children",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas WIC for Children",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01",
+          "notes": "Children 1-4 years eligible up to 185% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-wic-child-eligible",
+          "description": "Child 1-4 years with qualifying income",
+          "input": {
+            "livesInTexas": true,
+            "age": 3,
+            "householdIncome": 2500,
+            "householdSize": 2
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-wic-child-high-income",
+          "description": "Child with family income above 185% FPL",
+          "input": {
+            "livesInTexas": true,
+            "age": 2,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-tx-wic-child-over-4",
+          "description": "Child over 4 years (not eligible for WIC)",
+          "input": {
+            "livesInTexas": true,
+            "age": 5,
+            "householdIncome": 2000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "nutrition",
+        "185-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "wic-tx-nutritional-risk",
+      "programId": "wic-texas",
+      "name": "Texas WIC Nutritional Risk Assessment",
+      "description": "WIC participants must have nutritional risk factors",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isWICApplicant"
+            }
+          },
+          {
+            "var": "hasNutritionalRisk"
+          },
+          {
+            "var": "hasMedicalRisk"
+          },
+          {
+            "var": "hasDietaryRisk"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "WIC participants must have nutritional risk factors determined by a health professional. Risk factors include: anemia, underweight, overweight, poor diet, pregnancy complications, breastfeeding difficulties, or other medical conditions. This assessment is done at the WIC clinic by a nutritionist or health professional.",
+      "requiredFields": [
+        "isWICApplicant",
+        "hasNutritionalRisk",
+        "hasMedicalRisk",
+        "hasDietaryRisk"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-nutritional-risk-wic-tx",
+          "name": "Proof of Nutritional Risk",
+          "description": "Medical records, lab results, or health professional assessment",
+          "required": false,
+          "alternatives": [
+            "Doctor's note",
+            "Blood test results",
+            "Growth charts"
+          ],
+          "where": "Healthcare provider or WIC clinic"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Visit your local WIC clinic for nutritional risk assessment",
+          "priority": "high",
+          "estimatedTime": "1-2 hours"
+        },
+        {
+          "step": "Bring any medical records or lab results you have",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas WIC Nutritional Risk Assessment",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01",
+          "notes": "Nutritional risk assessment required for WIC eligibility"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-wic-nutritional-risk",
+          "description": "Applicant with nutritional risk factors",
+          "input": {
+            "isWICApplicant": true,
+            "hasNutritionalRisk": true,
+            "hasMedicalRisk": false,
+            "hasDietaryRisk": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "nutritional-risk"
+          ]
+        },
+        {
+          "id": "test-tx-wic-medical-risk",
+          "description": "Applicant with medical risk factors",
+          "input": {
+            "isWICApplicant": true,
+            "hasNutritionalRisk": false,
+            "hasMedicalRisk": true,
+            "hasDietaryRisk": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "medical-risk"
+          ]
+        },
+        {
+          "id": "test-tx-wic-no-risk",
+          "description": "Applicant without nutritional risk factors",
+          "input": {
+            "isWICApplicant": true,
+            "hasNutritionalRisk": false,
+            "hasMedicalRisk": false,
+            "hasDietaryRisk": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "no-risk"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "nutritional-risk",
+        "medical-risk",
+        "dietary-risk"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "wic-tx-application-process",
+      "programId": "wic-texas",
+      "name": "Texas WIC Application Process",
+      "description": "Information about applying for WIC in Texas at local WIC clinics",
+      "ruleLogic": {
+        "var": "livesInTexas"
+      },
+      "ruleType": "conditional",
+      "explanation": "Texas WIC applications are processed at local WIC clinics throughout the state. You must apply in person at a WIC clinic near you. The process includes: 1) Income verification, 2) Nutritional risk assessment, 3) Health screening, 4) Nutrition education. Most applications are processed the same day. You can find your local WIC clinic online or by calling 2-1-1.",
+      "requiredFields": [
+        "livesInTexas"
+      ],
+      "nextSteps": [
+        {
+          "step": "Find your local WIC clinic",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "priority": "high",
+          "estimatedTime": "5-10 minutes"
+        },
+        {
+          "step": "Call 2-1-1 for WIC clinic locations and hours",
+          "priority": "high",
+          "estimatedTime": "5-10 minutes"
+        },
+        {
+          "step": "Visit the WIC clinic in person to apply",
+          "priority": "high",
+          "estimatedTime": "1-2 hours"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Texas WIC",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Find a WIC Clinic",
+          "url": "https://www.hhs.texas.gov/services/health/wic",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-tx-resident-wic",
+          "description": "Lives in Texas - can apply",
+          "input": {
+            "livesInTexas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "texas-resident"
+          ]
+        },
+        {
+          "id": "test-tx-non-resident-wic",
+          "description": "Does not live in Texas",
+          "input": {
+            "livesInTexas": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "wic-clinic",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-TX"
+    }
+  ]
+}

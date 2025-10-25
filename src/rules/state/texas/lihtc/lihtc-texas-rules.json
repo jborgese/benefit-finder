@@ -1,0 +1,739 @@
+{
+  "metadata": {
+    "id": "lihtc-texas-rules-2024",
+    "name": "Texas LIHTC Eligibility Rules (2024)",
+    "description": "Texas-specific LIHTC (Low-Income Housing Tax Credit) eligibility rules for 2024. LIHTC provides affordable housing opportunities for low-income families and individuals.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-TX",
+    "programs": [
+      "lihtc-texas",
+      "lihtc"
+    ],
+    "tags": [
+      "lihtc",
+      "affordable-housing",
+      "texas",
+      "2024",
+      "low-income-housing"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "lihtc-tx-income-limit-50-percent",
+      "programId": "lihtc-texas",
+      "name": "Texas LIHTC Income Limit (50% AMI)",
+      "description": "Household income must be at or below 50% of Area Median Income to qualify for LIHTC units",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  {
+                    "var": "areaMedianIncome50Percent"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "LIHTC properties have income limits based on Area Median Income (AMI). For 50% AMI units, household income must be at or below 50% of the local area median income. AMI varies by location - check your specific area. For example, in Houston: 1 person = $28,000/year, 2 people = $32,000/year, 3 people = $36,000/year, 4 people = $40,000/year.",
+      "requiredFields": [
+        "livesInTexas",
+        "householdIncome",
+        "householdSize",
+        "areaMedianIncome50Percent"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-lihtc-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Find LIHTC properties in your area",
+          "url": "https://www.huduser.gov/portal/datasets/lihtc.html",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Contact property management companies for availability",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas LIHTC Income Limits",
+          "url": "https://www.tdhca.state.tx.us/",
+          "date": "2024-10-01",
+          "notes": "LIHTC income limits based on Area Median Income"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-tx-lihtc-50-percent-eligible",
+          "description": "Household under 50% AMI",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 25000,
+            "householdSize": 1,
+            "areaMedianIncome50Percent": 28000
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "50-percent-ami"
+          ]
+        },
+        {
+          "id": "test-tx-lihtc-50-percent-ineligible",
+          "description": "Household over 50% AMI",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 35000,
+            "householdSize": 1,
+            "areaMedianIncome50Percent": 28000
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income",
+        "50-percent-ami",
+        "area-median-income"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "lihtc-tx-income-limit-60-percent",
+      "programId": "lihtc-texas",
+      "name": "Texas LIHTC Income Limit (60% AMI)",
+      "description": "Household income must be at or below 60% of Area Median Income to qualify for LIHTC units",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  {
+                    "var": "areaMedianIncome60Percent"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "LIHTC properties have income limits based on Area Median Income (AMI). For 60% AMI units, household income must be at or below 60% of the local area median income. AMI varies by location - check your specific area. For example, in Houston: 1 person = $33,600/year, 2 people = $38,400/year, 3 people = $43,200/year, 4 people = $48,000/year.",
+      "requiredFields": [
+        "livesInTexas",
+        "householdIncome",
+        "householdSize",
+        "areaMedianIncome60Percent"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-lihtc-60-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Find LIHTC properties in your area",
+          "url": "https://www.huduser.gov/portal/datasets/lihtc.html",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Contact property management companies for availability",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas LIHTC Income Limits",
+          "url": "https://www.tdhca.state.tx.us/",
+          "date": "2024-10-01",
+          "notes": "LIHTC income limits based on Area Median Income"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-lihtc-60-percent-eligible",
+          "description": "Household under 60% AMI",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 30000,
+            "householdSize": 1,
+            "areaMedianIncome60Percent": 33600
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "60-percent-ami"
+          ]
+        },
+        {
+          "id": "test-tx-lihtc-60-percent-ineligible",
+          "description": "Household over 60% AMI",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 40000,
+            "householdSize": 1,
+            "areaMedianIncome60Percent": 33600
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income",
+        "60-percent-ami",
+        "area-median-income"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "lihtc-tx-rent-limit",
+      "programId": "lihtc-texas",
+      "name": "Texas LIHTC Rent Limit",
+      "description": "Rent for LIHTC units is capped at 30% of income or HUD Fair Market Rent",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<=": [
+              {
+                "var": "monthlyRent"
+              },
+              {
+                "min": [
+                  {
+                    "*": [
+                      {
+                        "var": "householdIncome"
+                      },
+                      0.3
+                    ]
+                  },
+                  {
+                    "var": "hudFairMarketRent"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "LIHTC units have rent limits to ensure affordability. Rent cannot exceed 30% of household income or the HUD Fair Market Rent for the area, whichever is lower. This ensures that low-income families can afford the housing. Rent limits vary by location and unit size.",
+      "requiredFields": [
+        "livesInTexas",
+        "monthlyRent",
+        "householdIncome",
+        "hudFairMarketRent"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-rent-lihtc-tx",
+          "name": "Proof of Rent",
+          "description": "Lease agreement, rent receipts, or landlord statement",
+          "required": true,
+          "alternatives": [
+            "Rent payment records",
+            "Housing assistance documentation"
+          ],
+          "where": "Landlord or property management"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Check if the rent for LIHTC units in your area is affordable",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas LIHTC Rent Limits",
+          "url": "https://www.tdhca.state.tx.us/",
+          "date": "2024-10-01",
+          "notes": "LIHTC rent limits based on 30% of income or HUD FMR"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-lihtc-rent-eligible",
+          "description": "Rent within LIHTC limits",
+          "input": {
+            "livesInTexas": true,
+            "monthlyRent": 800,
+            "householdIncome": 30000,
+            "hudFairMarketRent": 1000
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "rent-limit"
+          ]
+        },
+        {
+          "id": "test-tx-lihtc-rent-ineligible",
+          "description": "Rent exceeds LIHTC limits",
+          "input": {
+            "livesInTexas": true,
+            "monthlyRent": 1200,
+            "householdIncome": 30000,
+            "hudFairMarketRent": 1000
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-rent"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "rent",
+        "affordability",
+        "30-percent-income"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "lihtc-tx-citizenship",
+      "programId": "lihtc-texas",
+      "name": "Texas LIHTC Citizenship Requirements",
+      "description": "Must be U.S. citizen or qualified immigrant to receive LIHTC housing",
+      "ruleLogic": {
+        "or": [
+          {
+            "in": [
+              {
+                "var": "citizenship"
+              },
+              [
+                "us_citizen",
+                "us_national"
+              ]
+            ]
+          },
+          {
+            "and": [
+              {
+                "in": [
+                  {
+                    "var": "citizenship"
+                  },
+                  [
+                    "permanent_resident",
+                    "refugee",
+                    "asylee",
+                    "trafficking_victim"
+                  ]
+                ]
+              },
+              {
+                ">=": [
+                  {
+                    "var": "yearsInUS"
+                  },
+                  5
+                ]
+              }
+            ]
+          },
+          {
+            "in": [
+              {
+                "var": "citizenship"
+              },
+              [
+                "refugee",
+                "asylee",
+                "trafficking_victim",
+                "cuban_haitian"
+              ]
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "U.S. citizens and nationals qualify for LIHTC housing. Lawfully present immigrants may qualify, but most must wait 5 years after obtaining qualified status. Exceptions to the 5-year wait include: refugees, asylees, trafficking victims, Cuban/Haitian entrants, certain military members and families. Mixed-status households can receive LIHTC housing for eligible members.",
+      "requiredFields": [
+        "citizenship",
+        "yearsInUS"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship-lihtc-tx",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, green card, or refugee documentation",
+          "required": true,
+          "alternatives": [
+            "U.S. Passport",
+            "Naturalization Certificate",
+            "Green Card (I-551)",
+            "I-94 with refugee/asylee status"
+          ],
+          "where": "Government agency that issued the document"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Mixed-status households can apply for eligible family members",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas LIHTC Citizenship Requirements",
+          "url": "https://www.tdhca.state.tx.us/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-citizen-lihtc",
+          "description": "U.S. citizen qualifies",
+          "input": {
+            "citizenship": "us_citizen",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "citizen"
+          ]
+        },
+        {
+          "id": "test-tx-refugee-lihtc",
+          "description": "Refugee qualifies immediately",
+          "input": {
+            "citizenship": "refugee",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "refugee",
+            "no-wait"
+          ]
+        },
+        {
+          "id": "test-tx-lpr-5-years-lihtc",
+          "description": "Permanent resident after 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 6
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "lpr",
+            "5-year-rule"
+          ]
+        },
+        {
+          "id": "test-tx-lpr-under-5-years-lihtc",
+          "description": "Permanent resident under 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 3
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "lpr",
+            "waiting-period"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "citizenship",
+        "immigration",
+        "5-year-rule"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "lihtc-tx-availability",
+      "programId": "lihtc-texas",
+      "name": "Texas LIHTC Availability",
+      "description": "LIHTC units must be available in the area where you want to live",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "var": "lihtcUnitsAvailable"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "LIHTC units are only available in properties that have been developed with Low-Income Housing Tax Credits. These properties are scattered throughout Texas and availability varies by location. You must find a LIHTC property in your desired area that has available units. Waiting lists are common due to high demand.",
+      "requiredFields": [
+        "livesInTexas",
+        "lihtcUnitsAvailable"
+      ],
+      "nextSteps": [
+        {
+          "step": "Search for LIHTC properties in your area",
+          "url": "https://www.huduser.gov/portal/datasets/lihtc.html",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Contact property management companies for availability and waiting lists",
+          "priority": "high"
+        },
+        {
+          "step": "Consider multiple LIHTC properties to increase your chances",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas LIHTC Properties",
+          "url": "https://www.tdhca.state.tx.us/",
+          "date": "2024-10-01",
+          "notes": "LIHTC properties available throughout Texas"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-tx-lihtc-available",
+          "description": "LIHTC units available in area",
+          "input": {
+            "livesInTexas": true,
+            "lihtcUnitsAvailable": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "units-available"
+          ]
+        },
+        {
+          "id": "test-tx-lihtc-not-available",
+          "description": "No LIHTC units available in area",
+          "input": {
+            "livesInTexas": true,
+            "lihtcUnitsAvailable": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "no-units-available"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "availability",
+        "units",
+        "waiting-list"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "lihtc-tx-application-process",
+      "programId": "lihtc-texas",
+      "name": "Texas LIHTC Application Process",
+      "description": "Information about applying for LIHTC housing in Texas",
+      "ruleLogic": {
+        "var": "livesInTexas"
+      },
+      "ruleType": "conditional",
+      "explanation": "LIHTC applications are processed directly by property management companies, not by government agencies. You must apply at each LIHTC property where you want to live. The process includes: 1) Income verification, 2) Background check, 3) Credit check, 4) References. Most properties have waiting lists due to high demand. You can apply at multiple properties to increase your chances.",
+      "requiredFields": [
+        "livesInTexas"
+      ],
+      "nextSteps": [
+        {
+          "step": "Find LIHTC properties in your area",
+          "url": "https://www.huduser.gov/portal/datasets/lihtc.html",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Contact each property management company for application process",
+          "priority": "high",
+          "estimatedTime": "1-2 hours per property"
+        },
+        {
+          "step": "Apply at multiple properties to increase your chances",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Texas LIHTC Housing",
+          "url": "https://www.tdhca.state.tx.us/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "LIHTC Property Database",
+          "url": "https://www.huduser.gov/portal/datasets/lihtc.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-tx-resident-lihtc",
+          "description": "Lives in Texas - can apply",
+          "input": {
+            "livesInTexas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "texas-resident"
+          ]
+        },
+        {
+          "id": "test-tx-non-resident-lihtc",
+          "description": "Does not live in Texas",
+          "input": {
+            "livesInTexas": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "property-management",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-TX"
+    }
+  ]
+}

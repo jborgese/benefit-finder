@@ -1,0 +1,889 @@
+{
+  "metadata": {
+    "id": "medicaid-texas-rules-2024",
+    "name": "Texas Medicaid Eligibility Rules (2024)",
+    "description": "Texas-specific Medicaid eligibility rules for 2024. Texas has NOT expanded Medicaid under the ACA, so it follows traditional Medicaid eligibility rules for children, pregnant women, disabled individuals, and elderly. Adults without children generally do not qualify unless they have disabilities or are elderly.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-TX",
+    "programs": [
+      "medicaid-texas",
+      "medicaid-children-texas",
+      "medicaid-pregnancy-texas",
+      "medicaid-disabled-texas",
+      "medicaid-elderly-texas"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "texas",
+      "2024",
+      "non-expansion",
+      "traditional-medicaid"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-tx-children",
+      "programId": "medicaid-children-texas",
+      "name": "Texas Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 200% FPL (federal minimum)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2960
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas covers children under age 19 in families with incomes up to 200% of the federal poverty level through Medicaid. For 2024 at 200% FPL: 1 child = $2,960/month, 2 children = $4,007/month, 3 children = $5,054/month. Children can enroll year-round, not just during open enrollment periods.",
+      "requiredFields": [
+        "livesInTexas",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-tx",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-tx",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at YourTexasBenefits.com (fastest method)",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        },
+        {
+          "step": "Find local assistance at a Texas Health and Human Services office",
+          "url": "https://www.hhs.texas.gov/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas Medicaid for Children",
+          "url": "https://www.hhs.texas.gov/services/health/medicaid-chip",
+          "date": "2024-10-01",
+          "notes": "Texas covers children up to 200% FPL through Medicaid"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-tx-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInTexas": true,
+            "age": 10,
+            "householdIncome": 2500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-child-high-income",
+          "description": "Child with family income above 200% FPL",
+          "input": {
+            "livesInTexas": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-tx-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInTexas": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "200-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "medicaid-tx-pregnant-women",
+      "programId": "medicaid-pregnancy-texas",
+      "name": "Texas Medicaid for Pregnant Women",
+      "description": "Pregnant women qualify for Medicaid with income up to 200% FPL (federal minimum)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2960
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas covers pregnant women through Medicaid if household income is at or below 200% of the federal poverty level. For 2024, this means: 1 person = $2,960/month, 2 people = $4,007/month, 3 people = $5,054/month. Coverage includes prenatal care, delivery, and postpartum care for up to 60 days after pregnancy ends.",
+      "requiredFields": [
+        "livesInTexas",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-tx",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online at YourTexasBenefits.com",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Texas offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas Medicaid for Pregnant Women",
+          "url": "https://www.hhs.texas.gov/services/health/medicaid-chip",
+          "date": "2024-10-01",
+          "notes": "Texas covers pregnant women up to 200% FPL with 60-day postpartum coverage"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-pregnant-eligible",
+          "description": "Pregnant woman under 200% FPL",
+          "input": {
+            "livesInTexas": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-pregnant-high-income",
+          "description": "Pregnant woman over 200% FPL",
+          "input": {
+            "livesInTexas": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-tx-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInTexas": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "200-percent-fpl",
+        "60-day-postpartum"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "medicaid-tx-disability",
+      "programId": "medicaid-disabled-texas",
+      "name": "Texas Medicaid for People with Disabilities",
+      "description": "People with disabilities may qualify for Medicaid with income up to 74% FPL or through SSI",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "var": "hasQualifyingDisability"
+          },
+          {
+            "or": [
+              {
+                "var": "receivesSSI"
+              },
+              {
+                "<=": [
+                  {
+                    "var": "householdIncome"
+                  },
+                  {
+                    "*": [
+                      {
+                        "var": "householdSize"
+                      },
+                      1095
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "People with disabilities qualify for Medicaid if they: 1) Receive SSI (automatic eligibility), OR 2) Have income below 74% FPL ($1,095/month for individual in 2024). Texas has asset limits for disabled adults. Many people with disabilities also qualify for Medicare and can have both Medicare and Medicaid (dual eligibility).",
+      "requiredFields": [
+        "livesInTexas",
+        "hasQualifyingDisability",
+        "receivesSSI",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-ssi-tx",
+          "name": "Proof of SSI (if applicable)",
+          "description": "SSI award letter or benefit verification",
+          "required": false,
+          "alternatives": [
+            "Social Security benefit statement",
+            "Bank deposits"
+          ],
+          "where": "Social Security Administration"
+        },
+        {
+          "id": "proof-disability-tx",
+          "name": "Proof of Disability",
+          "description": "Medical records, SSA disability determination, or doctor's certification",
+          "required": true,
+          "alternatives": [
+            "Medicare card",
+            "Doctor's certification",
+            "Functional assessment"
+          ],
+          "where": "SSA or healthcare provider"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you receive SSI, you should be automatically enrolled in Medicaid",
+          "priority": "high"
+        },
+        {
+          "step": "Apply online at YourTexasBenefits.com",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas Medicaid for People with Disabilities",
+          "url": "https://www.hhs.texas.gov/services/health/medicaid-chip",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 22,
+      "testCases": [
+        {
+          "id": "test-tx-ssi-recipient",
+          "description": "Receives SSI - automatic eligibility",
+          "input": {
+            "livesInTexas": true,
+            "hasQualifyingDisability": true,
+            "receivesSSI": true,
+            "householdIncome": 900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "ssi",
+            "automatic"
+          ]
+        },
+        {
+          "id": "test-tx-disabled-low-income",
+          "description": "Disabled with qualifying income",
+          "input": {
+            "livesInTexas": true,
+            "hasQualifyingDisability": true,
+            "receivesSSI": false,
+            "householdIncome": 1000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "disabled",
+            "low-income"
+          ]
+        },
+        {
+          "id": "test-tx-disabled-high-income",
+          "description": "Disabled but income too high",
+          "input": {
+            "livesInTexas": true,
+            "hasQualifyingDisability": true,
+            "receivesSSI": false,
+            "householdIncome": 1500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "disability",
+        "ssi",
+        "medicare-medicaid"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "medicaid-tx-elderly",
+      "programId": "medicaid-elderly-texas",
+      "name": "Texas Medicaid for Elderly (65+)",
+      "description": "Elderly people (65+) may qualify for Medicaid with income up to 74% FPL or through SSI",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "or": [
+              {
+                "var": "receivesSSI"
+              },
+              {
+                "<=": [
+                  {
+                    "var": "householdIncome"
+                  },
+                  {
+                    "*": [
+                      {
+                        "var": "householdSize"
+                      },
+                      1095
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Elderly people (65+) qualify for Medicaid if they: 1) Receive SSI (automatic eligibility), OR 2) Have income below 74% FPL ($1,095/month for individual in 2024). Texas has asset limits for elderly adults. Many elderly also qualify for Medicare and can have both Medicare and Medicaid (dual eligibility).",
+      "requiredFields": [
+        "livesInTexas",
+        "age",
+        "receivesSSI",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-ssi-elderly-tx",
+          "name": "Proof of SSI (if applicable)",
+          "description": "SSI award letter or benefit verification",
+          "required": false,
+          "alternatives": [
+            "Social Security benefit statement",
+            "Bank deposits"
+          ],
+          "where": "Social Security Administration"
+        },
+        {
+          "id": "proof-age-elderly-tx",
+          "name": "Proof of Age",
+          "description": "Birth certificate, driver's license, or passport",
+          "required": true,
+          "alternatives": [
+            "Medicare card",
+            "Social Security card"
+          ],
+          "where": "Vital records office or DMV"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you receive SSI, you should be automatically enrolled in Medicaid",
+          "priority": "high"
+        },
+        {
+          "step": "Apply online at YourTexasBenefits.com",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas Medicaid for Elderly",
+          "url": "https://www.hhs.texas.gov/services/health/medicaid-chip",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-elderly-ssi",
+          "description": "Elderly receiving SSI - automatic eligibility",
+          "input": {
+            "livesInTexas": true,
+            "age": 70,
+            "receivesSSI": true,
+            "householdIncome": 900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "elderly",
+            "ssi",
+            "automatic"
+          ]
+        },
+        {
+          "id": "test-tx-elderly-low-income",
+          "description": "Elderly with qualifying income",
+          "input": {
+            "livesInTexas": true,
+            "age": 68,
+            "receivesSSI": false,
+            "householdIncome": 1000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "elderly",
+            "low-income"
+          ]
+        },
+        {
+          "id": "test-tx-elderly-high-income",
+          "description": "Elderly but income too high",
+          "input": {
+            "livesInTexas": true,
+            "age": 67,
+            "receivesSSI": false,
+            "householdIncome": 1500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "elderly",
+        "ssi",
+        "medicare-medicaid"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "medicaid-tx-non-expansion-adults",
+      "programId": "medicaid-texas",
+      "name": "Texas Medicaid - Non-Expansion State (Adults Without Children)",
+      "description": "Texas has NOT expanded Medicaid - adults without children generally do not qualify unless they have disabilities or are elderly",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "!": {
+              "var": "isPregnant"
+            }
+          },
+          {
+            "!": {
+              "var": "hasQualifyingDisability"
+            }
+          },
+          {
+            "!": {
+              "var": "hasChildren"
+            }
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas has NOT expanded Medicaid under the Affordable Care Act. This means adults under age 65 who are not pregnant, disabled, or caring for children generally do NOT qualify for Medicaid regardless of income. This creates a 'coverage gap' where many low-income adults have no affordable health insurance options. Consider: 1) Marketplace plans with subsidies, 2) Community health centers for basic care, 3) Emergency Medicaid for emergencies only.",
+      "requiredFields": [
+        "livesInTexas",
+        "age",
+        "isPregnant",
+        "hasQualifyingDisability",
+        "hasChildren"
+      ],
+      "nextSteps": [
+        {
+          "step": "Consider marketplace health insurance with subsidies at healthcare.gov",
+          "url": "https://www.healthcare.gov/",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Find community health centers for basic care at reduced cost",
+          "url": "https://findahealthcenter.hrsa.gov/",
+          "priority": "high"
+        },
+        {
+          "step": "Emergency Medicaid covers emergency medical conditions regardless of immigration status",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas Medicaid Non-Expansion",
+          "url": "https://www.hhs.texas.gov/services/health/medicaid-chip",
+          "date": "2024-10-01",
+          "notes": "Texas has not expanded Medicaid under ACA"
+        },
+        {
+          "title": "KFF Medicaid Expansion Status",
+          "url": "https://www.kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 5,
+      "testCases": [
+        {
+          "id": "test-tx-adult-no-children",
+          "description": "Adult under 65 without children (coverage gap)",
+          "input": {
+            "livesInTexas": true,
+            "age": 35,
+            "isPregnant": false,
+            "hasQualifyingDisability": false,
+            "hasChildren": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
+        },
+        {
+          "id": "test-tx-adult-with-children",
+          "description": "Adult with children (may qualify under different rules)",
+          "input": {
+            "livesInTexas": true,
+            "age": 30,
+            "isPregnant": false,
+            "hasQualifyingDisability": false,
+            "hasChildren": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "use-parent-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "non-expansion",
+        "coverage-gap",
+        "adults",
+        "no-children"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "medicaid-tx-application-process",
+      "programId": "medicaid-texas",
+      "name": "Texas Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Texas through YourTexasBenefits.com",
+      "ruleLogic": {
+        "var": "livesInTexas"
+      },
+      "ruleType": "conditional",
+      "explanation": "Texas offers multiple ways to apply for Medicaid: 1) **YourTexasBenefits.com** (primary online portal), 2) **Phone applications** at 2-1-1 or 1-877-541-7905, 3) **In-person assistance** at local Health and Human Services offices, 4) **Paper applications** available for download. Most applications are processed within 45 days, with expedited processing for urgent medical needs.",
+      "requiredFields": [
+        "livesInTexas"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at YourTexasBenefits.com (recommended - fastest)",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call 2-1-1 for phone application assistance",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Find your local Health and Human Services office",
+          "url": "https://www.hhs.texas.gov/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Texas Medicaid",
+          "url": "https://www.hhs.texas.gov/services/health/medicaid-chip",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "YourTexasBenefits.com",
+          "url": "https://www.yourtexasbenefits.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-tx-resident",
+          "description": "Lives in Texas - can apply",
+          "input": {
+            "livesInTexas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "texas-resident"
+          ]
+        },
+        {
+          "id": "test-tx-non-resident",
+          "description": "Does not live in Texas",
+          "input": {
+            "livesInTexas": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "yourtexasbenefits",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-TX"
+    }
+  ]
+}

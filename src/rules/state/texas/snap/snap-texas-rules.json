@@ -1,0 +1,823 @@
+{
+  "metadata": {
+    "id": "snap-texas-rules-2024",
+    "name": "Texas SNAP Eligibility Rules (2024)",
+    "description": "Texas-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. Texas follows federal SNAP guidelines with standard income limits and asset tests.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-TX",
+    "programs": [
+      "snap-texas",
+      "snap"
+    ],
+    "tags": [
+      "snap",
+      "food-stamps",
+      "food-assistance",
+      "texas",
+      "2024",
+      "federal-guidelines"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-tx-gross-income-limit",
+      "programId": "snap-texas",
+      "name": "Texas SNAP Gross Income Limit (130% FPL)",
+      "description": "Household gross income must be at or below 130% FPL to qualify for SNAP",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1924
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas follows federal SNAP guidelines. Household gross income must be at or below 130% of the federal poverty level. For 2024 at 130% FPL: 1 person = $1,924/month, 2 people = $2,606/month, 3 people = $3,288/month, 4 people = $3,970/month. This is the first income test - if you pass this, you may still need to meet net income limits.",
+      "requiredFields": [
+        "livesInTexas",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at YourTexasBenefits.com (fastest method)",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call 2-1-1 for phone application assistance",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas SNAP Eligibility",
+          "url": "https://www.hhs.texas.gov/services/food/snap-food-benefits",
+          "date": "2024-10-01",
+          "notes": "Texas follows federal SNAP guidelines: 130% FPL gross income limit"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-tx-gross-income-eligible",
+          "description": "Household under 130% FPL gross income",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 1500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "gross-income",
+            "130-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-gross-income-ineligible",
+          "description": "Household over 130% FPL gross income",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "gross-income",
+        "130-percent-fpl",
+        "federal-guidelines"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "snap-tx-net-income-limit",
+      "programId": "snap-texas",
+      "name": "Texas SNAP Net Income Limit (100% FPL)",
+      "description": "Household net income (after deductions) must be at or below 100% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdNetIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1480
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "After passing the gross income test, household net income (after standard deductions) must be at or below 100% of the federal poverty level. For 2024 at 100% FPL: 1 person = $1,480/month, 2 people = $2,003/month, 3 people = $2,526/month, 4 people = $3,049/month. Net income is calculated after deducting: 20% earned income deduction, standard deduction ($198 for 1-3 people, $208 for 4+ people), dependent care costs, medical expenses over $35/month for elderly/disabled.",
+      "requiredFields": [
+        "livesInTexas",
+        "householdNetIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-deductions-tx",
+          "name": "Proof of Deductions",
+          "description": "Child care receipts, medical bills, rent/mortgage statements",
+          "required": false,
+          "alternatives": [
+            "Utility bills",
+            "Insurance statements",
+            "Child care provider statements"
+          ],
+          "where": "Service providers or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Bring documentation of all deductions to maximize your benefit amount",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas SNAP Net Income Calculation",
+          "url": "https://www.hhs.texas.gov/services/food/snap-food-benefits",
+          "date": "2024-10-01",
+          "notes": "Net income limit: 100% FPL after deductions"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-net-income-eligible",
+          "description": "Household under 100% FPL net income",
+          "input": {
+            "livesInTexas": true,
+            "householdNetIncome": 1200,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "net-income",
+            "100-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-net-income-ineligible",
+          "description": "Household over 100% FPL net income",
+          "input": {
+            "livesInTexas": true,
+            "householdNetIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-net-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "net-income",
+        "100-percent-fpl",
+        "deductions"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "snap-tx-asset-limit",
+      "programId": "snap-texas",
+      "name": "Texas SNAP Asset Limit",
+      "description": "Household assets must be below $2,750 (or $4,250 if elderly/disabled)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "or": [
+              {
+                "and": [
+                  {
+                    "or": [
+                      {
+                        ">=": [
+                          {
+                            "var": "age"
+                          },
+                          60
+                        ]
+                      },
+                      {
+                        "var": "hasQualifyingDisability"
+                      }
+                    ]
+                  },
+                  {
+                    "<": [
+                      {
+                        "var": "householdAssets"
+                      },
+                      4250
+                    ]
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "and": [
+                      {
+                        "<": [
+                          {
+                            "var": "age"
+                          },
+                          60
+                        ]
+                      },
+                      {
+                        "!": {
+                          "var": "hasQualifyingDisability"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "<": [
+                      {
+                        "var": "householdAssets"
+                      },
+                      2750
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas follows federal SNAP asset limits. Most households: assets must be below $2,750. Elderly (60+) or disabled households: assets must be below $4,250. Assets include: cash, bank accounts, stocks, bonds, real estate (except home), vehicles (except one). Excluded: home you live in, most retirement accounts, one vehicle per household, household goods.",
+      "requiredFields": [
+        "livesInTexas",
+        "age",
+        "hasQualifyingDisability",
+        "householdAssets"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-assets-tx",
+          "name": "Proof of Assets",
+          "description": "Bank statements, vehicle titles, property deeds",
+          "required": true,
+          "alternatives": [
+            "Investment statements",
+            "Savings account statements",
+            "Vehicle registration"
+          ],
+          "where": "Bank, DMV, or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather documentation of all assets including bank accounts and vehicles",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas SNAP Asset Limits",
+          "url": "https://www.hhs.texas.gov/services/food/snap-food-benefits",
+          "date": "2024-10-01",
+          "notes": "Standard asset limit: $2,750; Elderly/disabled: $4,250"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-assets-eligible-standard",
+          "description": "Standard household under asset limit",
+          "input": {
+            "livesInTexas": true,
+            "age": 35,
+            "hasQualifyingDisability": false,
+            "householdAssets": 2000
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "assets",
+            "standard-limit"
+          ]
+        },
+        {
+          "id": "test-tx-assets-eligible-elderly",
+          "description": "Elderly household under higher asset limit",
+          "input": {
+            "livesInTexas": true,
+            "age": 65,
+            "hasQualifyingDisability": false,
+            "householdAssets": 3500
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "assets",
+            "elderly-limit"
+          ]
+        },
+        {
+          "id": "test-tx-assets-ineligible",
+          "description": "Household over asset limit",
+          "input": {
+            "livesInTexas": true,
+            "age": 40,
+            "hasQualifyingDisability": false,
+            "householdAssets": 4000
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-assets"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "assets",
+        "elderly",
+        "disabled",
+        "federal-guidelines"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "snap-tx-work-requirements",
+      "programId": "snap-texas",
+      "name": "Texas SNAP Work Requirements",
+      "description": "Able-bodied adults without dependents (ABAWDs) must meet work requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "participatesInWorkProgram"
+          },
+          {
+            "var": "isExemptFromWorkRequirements"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Able-bodied adults without dependents (ABAWDs) age 18-49 must work at least 20 hours per week, participate in a work program, or meet exemption criteria. Exemptions include: pregnant, disabled, caring for disabled household member, student meeting certain criteria, or living in area with high unemployment. Texas has work requirement waivers in some counties.",
+      "requiredFields": [
+        "isABAWD",
+        "worksAtLeast20Hours",
+        "participatesInWorkProgram",
+        "isExemptFromWorkRequirements"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-tx",
+          "name": "Proof of Work or Work Program",
+          "description": "Pay stubs, work program participation letter",
+          "required": false,
+          "alternatives": [
+            "Employer letter",
+            "Work program documentation"
+          ],
+          "where": "Employer or work program"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're an ABAWD, look for work programs in your area",
+          "priority": "high"
+        },
+        {
+          "step": "Check if your county has work requirement waivers",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas SNAP Work Requirements",
+          "url": "https://www.hhs.texas.gov/services/food/snap-food-benefits",
+          "date": "2024-10-01",
+          "notes": "ABAWDs must work 20+ hours or participate in work program"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-tx-abawd-working",
+          "description": "ABAWD working 20+ hours",
+          "input": {
+            "isABAWD": true,
+            "worksAtLeast20Hours": true,
+            "participatesInWorkProgram": false,
+            "isExemptFromWorkRequirements": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-tx-abawd-work-program",
+          "description": "ABAWD in work program",
+          "input": {
+            "isABAWD": true,
+            "worksAtLeast20Hours": false,
+            "participatesInWorkProgram": true,
+            "isExemptFromWorkRequirements": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "work-program"
+          ]
+        },
+        {
+          "id": "test-tx-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirements",
+          "input": {
+            "isABAWD": true,
+            "worksAtLeast20Hours": false,
+            "participatesInWorkProgram": false,
+            "isExemptFromWorkRequirements": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "work-requirements",
+        "abawd",
+        "work-program"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "snap-tx-citizenship",
+      "programId": "snap-texas",
+      "name": "Texas SNAP Citizenship Requirements",
+      "description": "Must be U.S. citizen or qualified immigrant to receive SNAP",
+      "ruleLogic": {
+        "or": [
+          {
+            "in": [
+              {
+                "var": "citizenship"
+              },
+              [
+                "us_citizen",
+                "us_national"
+              ]
+            ]
+          },
+          {
+            "and": [
+              {
+                "in": [
+                  {
+                    "var": "citizenship"
+                  },
+                  [
+                    "permanent_resident",
+                    "refugee",
+                    "asylee",
+                    "trafficking_victim"
+                  ]
+                ]
+              },
+              {
+                ">=": [
+                  {
+                    "var": "yearsInUS"
+                  },
+                  5
+                ]
+              }
+            ]
+          },
+          {
+            "in": [
+              {
+                "var": "citizenship"
+              },
+              [
+                "refugee",
+                "asylee",
+                "trafficking_victim",
+                "cuban_haitian"
+              ]
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "U.S. citizens and nationals qualify for SNAP. Lawfully present immigrants may qualify, but most must wait 5 years after obtaining qualified status. Exceptions to the 5-year wait include: refugees, asylees, trafficking victims, Cuban/Haitian entrants, certain military members and families. Mixed-status households can receive SNAP for eligible members.",
+      "requiredFields": [
+        "citizenship",
+        "yearsInUS"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship-snap-tx",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, green card, or refugee documentation",
+          "required": true,
+          "alternatives": [
+            "U.S. Passport",
+            "Naturalization Certificate",
+            "Green Card (I-551)",
+            "I-94 with refugee/asylee status"
+          ],
+          "where": "Government agency that issued the document"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Mixed-status households can apply for eligible family members",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas SNAP Citizenship Requirements",
+          "url": "https://www.hhs.texas.gov/services/food/snap-food-benefits",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-citizen-snap",
+          "description": "U.S. citizen qualifies",
+          "input": {
+            "citizenship": "us_citizen",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "citizen"
+          ]
+        },
+        {
+          "id": "test-tx-refugee",
+          "description": "Refugee qualifies immediately",
+          "input": {
+            "citizenship": "refugee",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "refugee",
+            "no-wait"
+          ]
+        },
+        {
+          "id": "test-tx-lpr-5-years",
+          "description": "Permanent resident after 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 6
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "lpr",
+            "5-year-rule"
+          ]
+        },
+        {
+          "id": "test-tx-lpr-under-5-years",
+          "description": "Permanent resident under 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 3
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "lpr",
+            "waiting-period"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "citizenship",
+        "immigration",
+        "5-year-rule"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "snap-tx-application-process",
+      "programId": "snap-texas",
+      "name": "Texas SNAP Application Process",
+      "description": "Information about applying for SNAP in Texas through YourTexasBenefits.com",
+      "ruleLogic": {
+        "var": "livesInTexas"
+      },
+      "ruleType": "conditional",
+      "explanation": "Texas offers multiple ways to apply for SNAP: 1) **YourTexasBenefits.com** (primary online portal), 2) **Phone applications** at 2-1-1 or 1-877-541-7905, 3) **In-person assistance** at local Health and Human Services offices, 4) **Paper applications** available for download. Most applications are processed within 30 days, with expedited service (within 7 days) for households with urgent need.",
+      "requiredFields": [
+        "livesInTexas"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at YourTexasBenefits.com (recommended - fastest)",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call 2-1-1 for phone application assistance",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Find your local Health and Human Services office",
+          "url": "https://www.hhs.texas.gov/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Texas SNAP",
+          "url": "https://www.hhs.texas.gov/services/food/snap-food-benefits",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "YourTexasBenefits.com",
+          "url": "https://www.yourtexasbenefits.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-tx-resident-snap",
+          "description": "Lives in Texas - can apply",
+          "input": {
+            "livesInTexas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "texas-resident"
+          ]
+        },
+        {
+          "id": "test-tx-non-resident-snap",
+          "description": "Does not live in Texas",
+          "input": {
+            "livesInTexas": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "yourtexasbenefits",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-TX"
+    }
+  ]
+}

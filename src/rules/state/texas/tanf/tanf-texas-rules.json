@@ -1,0 +1,881 @@
+{
+  "metadata": {
+    "id": "tanf-texas-rules-2024",
+    "name": "Texas TANF Eligibility Rules (2024)",
+    "description": "Texas-specific TANF (Temporary Assistance for Needy Families) eligibility rules for 2024. Texas TANF provides cash assistance to families with children and has strict work requirements and time limits.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-TX",
+    "programs": [
+      "tanf-texas",
+      "tanf"
+    ],
+    "tags": [
+      "tanf",
+      "cash-assistance",
+      "texas",
+      "2024",
+      "work-requirements",
+      "time-limits"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "tanf-tx-income-limit",
+      "programId": "tanf-texas",
+      "name": "Texas TANF Income Limit",
+      "description": "Household income must be below 185% FPL to qualify for TANF",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas TANF has an income limit of 185% of the federal poverty level. For 2024 at 185% FPL: 1 person = $2,738/month, 2 people = $3,707/month, 3 people = $4,676/month, 4 people = $5,645/month. This is a gross income test - if you pass this, you may still need to meet other requirements.",
+      "requiredFields": [
+        "livesInTexas",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-tanf-tx",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at YourTexasBenefits.com",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas TANF Income Limits",
+          "url": "https://www.hhs.texas.gov/services/financial/cash-assistance",
+          "date": "2024-10-01",
+          "notes": "Texas TANF income limit: 185% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-tx-tanf-income-eligible",
+          "description": "Household under 185% FPL income",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "income",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-tx-tanf-income-ineligible",
+          "description": "Household over 185% FPL income",
+          "input": {
+            "livesInTexas": true,
+            "householdIncome": 3500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income",
+        "185-percent-fpl"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "tanf-tx-children-requirement",
+      "programId": "tanf-texas",
+      "name": "Texas TANF Children Requirement",
+      "description": "Must have a child under 18 (or 19 if still in high school) to qualify for TANF",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "var": "hasChildren"
+          },
+          {
+            "or": [
+              {
+                "<": [
+                  {
+                    "var": "ageOfYoungestChild"
+                  },
+                  18
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "<=": [
+                      {
+                        "var": "ageOfYoungestChild"
+                      },
+                      19
+                    ]
+                  },
+                  {
+                    "var": "childInHighSchool"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "TANF is designed to help families with children. You must have at least one child under age 18, or age 18-19 if still attending high school full-time. The child must live with you and be related to you (biological, adopted, stepchild, or other relative).",
+      "requiredFields": [
+        "livesInTexas",
+        "hasChildren",
+        "ageOfYoungestChild",
+        "childInHighSchool"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-tanf-tx",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, school records, or hospital records",
+          "required": true,
+          "alternatives": [
+            "Passport",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, school, or hospital"
+        },
+        {
+          "id": "proof-school-enrollment-tx",
+          "name": "Proof of School Enrollment (if applicable)",
+          "description": "School enrollment verification for children 18-19",
+          "required": false,
+          "alternatives": [
+            "Class schedule",
+            "School ID",
+            "Report card"
+          ],
+          "where": "School registrar"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather birth certificates for all children",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas TANF Children Requirements",
+          "url": "https://www.hhs.texas.gov/services/financial/cash-assistance",
+          "date": "2024-10-01",
+          "notes": "Must have child under 18 or 18-19 in high school"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-tx-tanf-child-eligible",
+          "description": "Household with child under 18",
+          "input": {
+            "livesInTexas": true,
+            "hasChildren": true,
+            "ageOfYoungestChild": 10,
+            "childInHighSchool": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "under-18"
+          ]
+        },
+        {
+          "id": "test-tx-tanf-child-high-school",
+          "description": "Household with child 18-19 in high school",
+          "input": {
+            "livesInTexas": true,
+            "hasChildren": true,
+            "ageOfYoungestChild": 18,
+            "childInHighSchool": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "high-school"
+          ]
+        },
+        {
+          "id": "test-tx-tanf-no-children",
+          "description": "Household without children",
+          "input": {
+            "livesInTexas": true,
+            "hasChildren": false,
+            "ageOfYoungestChild": 0,
+            "childInHighSchool": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "no-children"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "age-requirement"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "tanf-tx-work-requirements",
+      "programId": "tanf-texas",
+      "name": "Texas TANF Work Requirements",
+      "description": "TANF recipients must participate in work activities for required hours per week",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isTANFRecipient"
+            }
+          },
+          {
+            "var": "meetsWorkRequirements"
+          },
+          {
+            "var": "isExemptFromWorkRequirements"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "TANF recipients must participate in work activities for: 20 hours/week for single parents with child under 6, 30 hours/week for single parents with child 6+, 35 hours/week for two-parent families. Work activities include: employment, job search, job training, education, community service. Exemptions: pregnant (3rd trimester), caring for disabled child/adult, age 60+, disabled, child under 1 year.",
+      "requiredFields": [
+        "isTANFRecipient",
+        "meetsWorkRequirements",
+        "isExemptFromWorkRequirements"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activities-tx",
+          "name": "Proof of Work Activities",
+          "description": "Pay stubs, work program participation, job search logs",
+          "required": false,
+          "alternatives": [
+            "Employer letter",
+            "Training certificates",
+            "Community service verification"
+          ],
+          "where": "Employer, work program, or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you receive TANF, you must participate in work activities or face benefit reduction",
+          "priority": "high"
+        },
+        {
+          "step": "Contact your caseworker about work program options",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas TANF Work Requirements",
+          "url": "https://www.hhs.texas.gov/services/financial/cash-assistance",
+          "date": "2024-10-01",
+          "notes": "Work requirements: 20-35 hours/week depending on family type"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-tanf-work-compliant",
+          "description": "TANF recipient meeting work requirements",
+          "input": {
+            "isTANFRecipient": true,
+            "meetsWorkRequirements": true,
+            "isExemptFromWorkRequirements": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "work-compliant"
+          ]
+        },
+        {
+          "id": "test-tx-tanf-work-exempt",
+          "description": "TANF recipient exempt from work requirements",
+          "input": {
+            "isTANFRecipient": true,
+            "meetsWorkRequirements": false,
+            "isExemptFromWorkRequirements": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "work-exempt"
+          ]
+        },
+        {
+          "id": "test-tx-tanf-work-non-compliant",
+          "description": "TANF recipient not meeting work requirements",
+          "input": {
+            "isTANFRecipient": true,
+            "meetsWorkRequirements": false,
+            "isExemptFromWorkRequirements": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "work-non-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "work-requirements",
+        "work-activities"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "tanf-tx-time-limits",
+      "programId": "tanf-texas",
+      "name": "Texas TANF Time Limits",
+      "description": "TANF benefits are limited to 60 months (5 years) lifetime maximum",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isTANFRecipient"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "monthsOfTANFReceived"
+              },
+              60
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas TANF has a 60-month (5-year) lifetime limit for cash assistance. This limit applies to the adult recipient, not the children. Once you reach 60 months, you cannot receive TANF cash assistance again, even if you become eligible later. Some months may not count toward the limit if you were working or in certain circumstances.",
+      "requiredFields": [
+        "isTANFRecipient",
+        "monthsOfTANFReceived"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-tanf-history-tx",
+          "name": "Proof of TANF History",
+          "description": "Previous TANF award letters or case records",
+          "required": false,
+          "alternatives": [
+            "Benefit statements",
+            "Case worker records"
+          ],
+          "where": "Health and Human Services office"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Check your TANF history to see how many months you have remaining",
+          "priority": "high"
+        },
+        {
+          "step": "Consider other assistance programs if you're near the time limit",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas TANF Time Limits",
+          "url": "https://www.hhs.texas.gov/services/financial/cash-assistance",
+          "date": "2024-10-01",
+          "notes": "60-month lifetime limit for TANF cash assistance"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-tx-tanf-time-limit-eligible",
+          "description": "Under 60-month time limit",
+          "input": {
+            "isTANFRecipient": true,
+            "monthsOfTANFReceived": 30
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "under-time-limit"
+          ]
+        },
+        {
+          "id": "test-tx-tanf-time-limit-exceeded",
+          "description": "Over 60-month time limit",
+          "input": {
+            "isTANFRecipient": true,
+            "monthsOfTANFReceived": 65
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "time-limit-exceeded"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "time-limits",
+        "60-months",
+        "lifetime-limit"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "tanf-tx-asset-limit",
+      "programId": "tanf-texas",
+      "name": "Texas TANF Asset Limit",
+      "description": "Household assets must be below $1,000 to qualify for TANF",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInTexas"
+          },
+          {
+            "<": [
+              {
+                "var": "householdAssets"
+              },
+              1000
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Texas TANF has a strict asset limit of $1,000. Assets include: cash, bank accounts, stocks, bonds, real estate (except home), vehicles (except one), personal property. Excluded: home you live in, one vehicle per household, household goods, clothing, tools of trade.",
+      "requiredFields": [
+        "livesInTexas",
+        "householdAssets"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-assets-tanf-tx",
+          "name": "Proof of Assets",
+          "description": "Bank statements, vehicle titles, property deeds",
+          "required": true,
+          "alternatives": [
+            "Investment statements",
+            "Savings account statements",
+            "Vehicle registration"
+          ],
+          "where": "Bank, DMV, or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Gather documentation of all assets including bank accounts and vehicles",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas TANF Asset Limits",
+          "url": "https://www.hhs.texas.gov/services/financial/cash-assistance",
+          "date": "2024-10-01",
+          "notes": "Asset limit: $1,000 for TANF"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-tanf-assets-eligible",
+          "description": "Household under $1,000 asset limit",
+          "input": {
+            "livesInTexas": true,
+            "householdAssets": 500
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "assets",
+            "under-limit"
+          ]
+        },
+        {
+          "id": "test-tx-tanf-assets-ineligible",
+          "description": "Household over $1,000 asset limit",
+          "input": {
+            "livesInTexas": true,
+            "householdAssets": 1500
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-assets"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "assets",
+        "1000-dollar-limit"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "tanf-tx-citizenship",
+      "programId": "tanf-texas",
+      "name": "Texas TANF Citizenship Requirements",
+      "description": "Must be U.S. citizen or qualified immigrant to receive TANF",
+      "ruleLogic": {
+        "or": [
+          {
+            "in": [
+              {
+                "var": "citizenship"
+              },
+              [
+                "us_citizen",
+                "us_national"
+              ]
+            ]
+          },
+          {
+            "and": [
+              {
+                "in": [
+                  {
+                    "var": "citizenship"
+                  },
+                  [
+                    "permanent_resident",
+                    "refugee",
+                    "asylee",
+                    "trafficking_victim"
+                  ]
+                ]
+              },
+              {
+                ">=": [
+                  {
+                    "var": "yearsInUS"
+                  },
+                  5
+                ]
+              }
+            ]
+          },
+          {
+            "in": [
+              {
+                "var": "citizenship"
+              },
+              [
+                "refugee",
+                "asylee",
+                "trafficking_victim",
+                "cuban_haitian"
+              ]
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "U.S. citizens and nationals qualify for TANF. Lawfully present immigrants may qualify, but most must wait 5 years after obtaining qualified status. Exceptions to the 5-year wait include: refugees, asylees, trafficking victims, Cuban/Haitian entrants, certain military members and families. Mixed-status households can receive TANF for eligible members.",
+      "requiredFields": [
+        "citizenship",
+        "yearsInUS"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-citizenship-tanf-tx",
+          "name": "Proof of Citizenship or Immigration Status",
+          "description": "Birth certificate, passport, green card, or refugee documentation",
+          "required": true,
+          "alternatives": [
+            "U.S. Passport",
+            "Naturalization Certificate",
+            "Green Card (I-551)",
+            "I-94 with refugee/asylee status"
+          ],
+          "where": "Government agency that issued the document"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Mixed-status households can apply for eligible family members",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Texas TANF Citizenship Requirements",
+          "url": "https://www.hhs.texas.gov/services/financial/cash-assistance",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-tx-citizen-tanf",
+          "description": "U.S. citizen qualifies",
+          "input": {
+            "citizenship": "us_citizen",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "citizen"
+          ]
+        },
+        {
+          "id": "test-tx-refugee-tanf",
+          "description": "Refugee qualifies immediately",
+          "input": {
+            "citizenship": "refugee",
+            "yearsInUS": 0
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "refugee",
+            "no-wait"
+          ]
+        },
+        {
+          "id": "test-tx-lpr-5-years-tanf",
+          "description": "Permanent resident after 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 6
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "lpr",
+            "5-year-rule"
+          ]
+        },
+        {
+          "id": "test-tx-lpr-under-5-years-tanf",
+          "description": "Permanent resident under 5 years",
+          "input": {
+            "citizenship": "permanent_resident",
+            "yearsInUS": 3
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "lpr",
+            "waiting-period"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "citizenship",
+        "immigration",
+        "5-year-rule"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-TX"
+    },
+    {
+      "id": "tanf-tx-application-process",
+      "programId": "tanf-texas",
+      "name": "Texas TANF Application Process",
+      "description": "Information about applying for TANF in Texas through YourTexasBenefits.com",
+      "ruleLogic": {
+        "var": "livesInTexas"
+      },
+      "ruleType": "conditional",
+      "explanation": "Texas offers multiple ways to apply for TANF: 1) **YourTexasBenefits.com** (primary online portal), 2) **Phone applications** at 2-1-1 or 1-877-541-7905, 3) **In-person assistance** at local Health and Human Services offices, 4) **Paper applications** available for download. Most applications are processed within 30 days. TANF has strict requirements and time limits, so consider all eligibility criteria carefully.",
+      "requiredFields": [
+        "livesInTexas"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at YourTexasBenefits.com (recommended - fastest)",
+          "url": "https://www.yourtexasbenefits.com/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call 2-1-1 for phone application assistance",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Find your local Health and Human Services office",
+          "url": "https://www.hhs.texas.gov/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Texas TANF",
+          "url": "https://www.hhs.texas.gov/services/financial/cash-assistance",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "YourTexasBenefits.com",
+          "url": "https://www.yourtexasbenefits.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-tx-resident-tanf",
+          "description": "Lives in Texas - can apply",
+          "input": {
+            "livesInTexas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "texas-resident"
+          ]
+        },
+        {
+          "id": "test-tx-non-resident-tanf",
+          "description": "Does not live in Texas",
+          "input": {
+            "livesInTexas": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "yourtexasbenefits",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-TX"
+    }
+  ]
+}
