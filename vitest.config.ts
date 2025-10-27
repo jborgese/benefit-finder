@@ -28,19 +28,27 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
+      reportsDirectory: path.resolve(__dirname, 'coverage'),
       exclude: [
         '**/node_modules/**',
         '**/dist/**',
-        '**/*.config.{js,ts}',
+        '**/*.config.{js,ts,cjs,mjs}',
+        '**/playwright.config*.ts',
+        '**/vite.config*.ts',
+        '**/postcss.config.{js,cjs}',
         '**/test/**',
+        '**/tests/**',
         '**/__tests__/**',
         '**/*.test.{ts,tsx}',
         '**/*.spec.{ts,tsx}',
+        '**/*.e2e.{ts,tsx}',
+        '**/scripts/**',
         '**/types/**',
         '**/*.d.ts',
         '**/vite-env.d.ts',
         '**/coverage/**',
         '**/examples/**',
+        'clear-db.js',
       ],
       // Coverage thresholds
       thresholds: {
