@@ -158,7 +158,6 @@ test.describe('Questionnaire Component Interactivity', () => {
       if (await numberInput.isVisible()) {
         const min = await numberInput.getAttribute('min');
         // Check min constraint if present (max constraint handled by browser validation)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const _max = await numberInput.getAttribute('max');
 
         if (min) {
@@ -636,7 +635,6 @@ test.describe('Questionnaire Component Interactivity', () => {
         await page.waitForTimeout(500);
 
         // Should show validation feedback (check but don't assert since browser validation varies)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const _hasFeedback = await emailInput.evaluate(el => {
           return el.getAttribute('aria-invalid') === 'true' ||
                  el.getAttribute('aria-describedby') !== null;
@@ -690,7 +688,6 @@ test.describe('Questionnaire Component Interactivity', () => {
 
         // Progress should update (button should enable if was disabled)
         const nextButton = page.getByTestId('nav-forward-button');
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const _wasDisabled = await nextButton.isDisabled().catch(() => false);
 
         // After filling, button might be enabled

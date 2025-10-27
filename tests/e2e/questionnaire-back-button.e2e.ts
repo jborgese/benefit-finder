@@ -35,7 +35,7 @@ async function fillInputAndGetValue(page: Page, input: Awaited<ReturnType<Page['
     return await input.getAttribute('value') ?? 'checked';
   } else if (tagName === 'SELECT') {
     await input.selectOption({ index: 1 });
-    return await input.inputValue();
+    return input.inputValue();
   } else if (inputType === 'number') {
     const value = `${index + 1}`;
     await input.fill(value);

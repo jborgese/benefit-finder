@@ -163,16 +163,13 @@ test.describe('Questionnaire Flow', () => {
         return Boolean(inputValue || isChecked);
       };
 
-      const answers = new Map<number, string>();
-
       // Answer 3 questions forward
       for (let i = 0; i < 3; i++) {
         const inputs = await page.locator('input:visible, select:visible').all();
 
         if (inputs.length > 0) {
           const input = inputs[0];
-          const value = await fillInput(input, i);
-          answers.set(i, value);
+          await fillInput(input, i);
           await page.waitForTimeout(300);
         }
 
