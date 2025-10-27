@@ -11,6 +11,7 @@
 
 import { test, expect } from './fixtures/test-fixtures';
 import { waitForPageReady } from './utils/helpers';
+import type { Page, Locator } from '@playwright/test';
 
 test.describe('Questionnaire Flow', () => {
   // Helper to start questionnaire for all tests
@@ -121,7 +122,48 @@ test.describe('Questionnaire Flow', () => {
     });
 
     test('should preserve answers when navigating back through multiple questions', async ({ page }) => {
-      const answers: Record<number, string> = {};
+      // Helper function to fill an input based on its type
+      const fillInput = async (input: Locator, questionIndex: number): Promise<string> => {
+        const type = await input.getAttribute('type');
+        const tagName = await input.evaluate(el => el.tagName);
+        let value = '';
+
+        if (type === 'radio' || type === 'checkbox') {
+          await input.check({ force: true });
+          value = 'checked';
+        } else if (tagName === 'SELECT') {
+          await input.selectOption({ index: 1 });
+          value = await input.inputValue();
+        } else if (type === 'number') {
+          value = `${questionIndex + 1}`;
+          await input.fill(value);
+        } else {
+          value = `Answer ${questionIndex + 1}`;
+          await input.fill(value);
+        }
+
+        return value;
+      };
+
+      // Helper function to navigate forward through questions
+      const navigateForward = async (page: Page): Promise<boolean> => {
+        const nextButton = page.getByTestId('nav-forward-button');
+        if (await nextButton.isVisible() && await nextButton.isEnabled()) {
+          await nextButton.click();
+          await page.waitForTimeout(500);
+          return true;
+        }
+        return false;
+      };
+
+      // Helper function to verify answer is preserved
+      const verifyAnswerPreserved = async (input: Locator): Promise<boolean> => {
+        const inputValue = await input.inputValue();
+        const isChecked = await input.isChecked().catch(() => false);
+        return Boolean(inputValue || isChecked);
+      };
+
+      const answers = new Map<number, string>();
 
       // Answer 3 questions forward
       for (let i = 0; i < 3; i++) {
@@ -129,33 +171,13 @@ test.describe('Questionnaire Flow', () => {
 
         if (inputs.length > 0) {
           const input = inputs[0];
-          const type = await input.getAttribute('type');
-          const tagName = await input.evaluate(el => el.tagName);
-          let value = '';
-
-          if (type === 'radio' || type === 'checkbox') {
-            await input.check({ force: true });
-            value = 'checked';
-          } else if (tagName === 'SELECT') {
-            await input.selectOption({ index: 1 });
-            value = await input.inputValue();
-          } else if (type === 'number') {
-            value = `${i + 1}`;
-            await input.fill(value);
-          } else {
-            value = `Answer ${i + 1}`;
-            await input.fill(value);
-          }
-
-          answers[i] = value;
+          const value = await fillInput(input, i);
+          answers.set(i, value);
           await page.waitForTimeout(300);
         }
 
-        const nextButton = page.getByTestId('nav-forward-button');
-        if (await nextButton.isVisible() && await nextButton.isEnabled()) {
-          await nextButton.click();
-          await page.waitForTimeout(500);
-        } else {
+        const navigated = await navigateForward(page);
+        if (!navigated) {
           break;
         }
       }
@@ -171,11 +193,8 @@ test.describe('Questionnaire Flow', () => {
           const inputs = await page.locator('input:visible, select:visible').all();
           if (inputs.length > 0) {
             const input = inputs[0];
-            const inputValue = await input.inputValue();
-            const isChecked = await input.isChecked().catch(() => false);
-
-            // Answer should be preserved
-            expect(inputValue || isChecked).toBeTruthy();
+            const isPreserved = await verifyAnswerPreserved(input);
+            expect(isPreserved).toBeTruthy();
           }
         } else {
           break;
@@ -364,8 +383,6 @@ test.describe('Questionnaire Flow', () => {
       const checkbox = page.locator('input[type="checkbox"]').first();
 
       if (await checkbox.isVisible()) {
-        const initialState = await checkbox.isChecked();
-
         await checkbox.check();
         await expect(checkbox).toBeChecked();
 

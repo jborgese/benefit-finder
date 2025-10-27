@@ -65,6 +65,35 @@ function getVisibleQuestionsInOrder(
 // ============================================================================
 
 /**
+ * Calculate current question position in the flow
+ */
+function calculateCurrentQuestionPosition(
+  flow: QuestionFlow,
+  currentNodeId: string | null | undefined,
+  visibleQuestions: QuestionDefinition[],
+  answeredQuestions: number
+): number {
+  if (!currentNodeId) {
+    return answeredQuestions + 1;
+  }
+
+  const currentNode = flow.nodes.get(currentNodeId);
+  const currentQuestionId = currentNode?.question.id;
+
+  if (!currentQuestionId) {
+    return answeredQuestions + 1;
+  }
+
+  const currentQuestionIndex = visibleQuestions.findIndex(
+    (q) => q.id === currentQuestionId
+  );
+
+  return currentQuestionIndex >= 0
+    ? currentQuestionIndex + 1
+    : answeredQuestions + 1;
+}
+
+/**
  * Calculate progress metrics
  *
  * @param flow Question flow
@@ -119,31 +148,12 @@ export function calculateProgress(
   const remainingQuestions = totalQuestions - answeredQuestions - skippedQuestions;
 
   // Calculate current question position based on actual position in flow sequence
-  let currentQuestionPosition = 1;
-  if (currentNodeId) {
-    // Get the question ID from the node ID
-    const currentNode = flow.nodes.get(currentNodeId);
-    const currentQuestionId = currentNode?.question.id;
-
-    if (currentQuestionId) {
-      // Find the current question's position in the visible questions list
-      const currentQuestionIndex = visibleQuestions.findIndex(
-        (q) => q.id === currentQuestionId
-      );
-      if (currentQuestionIndex >= 0) {
-        currentQuestionPosition = currentQuestionIndex + 1;
-      } else {
-        // Fallback: if current question not found in visible list, use answered count + 1
-        currentQuestionPosition = answeredQuestions + 1;
-      }
-    } else {
-      // Fallback: if node not found, use answered count + 1
-      currentQuestionPosition = answeredQuestions + 1;
-    }
-  } else {
-    // Fallback: if no current node ID provided, use answered count + 1
-    currentQuestionPosition = answeredQuestions + 1;
-  }
+  const currentQuestionPosition = calculateCurrentQuestionPosition(
+    flow,
+    currentNodeId,
+    visibleQuestions,
+    answeredQuestions
+  );
 
   return {
     totalQuestions,

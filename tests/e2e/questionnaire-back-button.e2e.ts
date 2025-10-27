@@ -14,6 +14,73 @@
 
 import { test, expect } from './fixtures/test-fixtures';
 import { waitForPageReady } from './utils/helpers';
+import type { Page } from '@playwright/test';
+
+// Helper functions to reduce cognitive complexity
+async function fillInput(page: Page, input: Awaited<ReturnType<Page['locator']>>, index: number, inputType: string | null, tagName: string): Promise<void> {
+  if (inputType === 'radio' || inputType === 'checkbox') {
+    await input.check({ force: true });
+  } else if (tagName === 'SELECT') {
+    await input.selectOption({ index: 1 });
+  } else if (inputType === 'number') {
+    await input.fill(`${index + 1}`);
+  } else {
+    await input.fill(`Answer ${index + 1}`);
+  }
+}
+
+async function fillInputAndGetValue(page: Page, input: Awaited<ReturnType<Page['locator']>>, index: number, inputType: string | null, tagName: string): Promise<string> {
+  if (inputType === 'radio' || inputType === 'checkbox') {
+    await input.check({ force: true });
+    return await input.getAttribute('value') ?? 'checked';
+  } else if (tagName === 'SELECT') {
+    await input.selectOption({ index: 1 });
+    return await input.inputValue();
+  } else if (inputType === 'number') {
+    const value = `${index + 1}`;
+    await input.fill(value);
+    return value;
+  } else {
+    const value = `Answer ${index + 1}`;
+    await input.fill(value);
+    return value;
+  }
+}
+
+async function navigateForward(page: Page): Promise<boolean> {
+  const nextButton = page.getByTestId('nav-forward-button');
+  if (await nextButton.isVisible() && await nextButton.isEnabled()) {
+    await nextButton.click();
+    await page.waitForTimeout(500);
+    return true;
+  }
+  return false;
+}
+
+async function navigateBack(page: Page): Promise<boolean> {
+  const backButton = page.getByTestId('nav-back-button');
+  if (await backButton.isVisible() && await backButton.isEnabled()) {
+    await backButton.click();
+    await page.waitForTimeout(500);
+    return true;
+  }
+  return false;
+}
+
+async function fillSimpleInput(input: Awaited<ReturnType<Page['locator']>>, index: number, inputType: string | null): Promise<void> {
+  if (inputType === 'number') {
+    await input.fill(`${index + 1}`);
+  } else if (inputType === 'text') {
+    await input.fill(`Answer ${index + 1}`);
+  } else if (inputType === 'radio' || inputType === 'checkbox') {
+    await input.check({ force: true });
+  }
+}
+
+async function getProgressBarValue(page: Page): Promise<number | null> {
+  const value = await page.locator('[role="progressbar"]').getAttribute('aria-valuenow').catch(() => null);
+  return value ? parseInt(value, 10) : null;
+}
 
 test.describe('Questionnaire Back Button', () => {
   test.beforeEach(async ({ page }) => {
@@ -60,10 +127,6 @@ test.describe('Questionnaire Back Button', () => {
     });
 
     test('should navigate to previous question when clicked', async ({ page }) => {
-      // Get first question text/content for comparison
-      const firstQuestion = page.locator('.question-wrapper').first();
-      const firstQuestionText = await firstQuestion.textContent();
-
       // Fill and navigate forward
       const firstInput = page.locator('input[type="number"]').first();
       if (await firstInput.isVisible()) {
@@ -127,8 +190,6 @@ test.describe('Questionnaire Back Button', () => {
 
   test.describe('Multiple Back Navigations', () => {
     test('should navigate back multiple times consecutively', async ({ page }) => {
-      const answers: string[] = [];
-
       // Navigate forward through 3+ questions
       for (let i = 0; i < 3; i++) {
         const inputs = await page.locator('input:visible, select:visible').all();
@@ -137,38 +198,20 @@ test.describe('Questionnaire Back Button', () => {
           const input = inputs[0];
           const type = await input.getAttribute('type');
           const tagName = await input.evaluate(el => el.tagName);
-
-          if (type === 'radio' || type === 'checkbox') {
-            await input.check({ force: true });
-          } else if (tagName === 'SELECT') {
-            await input.selectOption({ index: 1 });
-          } else if (type === 'number') {
-            await input.fill(`${i + 1}`);
-            answers.push(`${i + 1}`);
-          } else {
-            await input.fill(`Answer ${i + 1}`);
-            answers.push(`Answer ${i + 1}`);
-          }
-
+          await fillInput(page, input, i, type, tagName);
           await page.waitForTimeout(300);
         }
 
-        const nextButton = page.getByTestId('nav-forward-button');
-        if (await nextButton.isVisible() && await nextButton.isEnabled()) {
-          await nextButton.click();
-          await page.waitForTimeout(500);
-        } else {
+        const navigated = await navigateForward(page);
+        if (!navigated) {
           break; // Reached end of questionnaire
         }
       }
 
       // Navigate back multiple times
       for (let i = 0; i < 3; i++) {
-        const backButton = page.getByTestId('nav-back-button');
-        if (await backButton.isVisible() && await backButton.isEnabled()) {
-          await backButton.click();
-          await page.waitForTimeout(500);
-        } else {
+        const navigated = await navigateBack(page);
+        if (!navigated) {
           break; // Reached beginning
         }
       }
@@ -219,54 +262,33 @@ test.describe('Questionnaire Back Button', () => {
           const input = inputs[0];
           const type = await input.getAttribute('type');
           const tagName = await input.evaluate(el => el.tagName);
-          let value = '';
-
-          if (type === 'radio' || type === 'checkbox') {
-            await input.check({ force: true });
-            value = await input.getAttribute('value') || 'checked';
-          } else if (tagName === 'SELECT') {
-            await input.selectOption({ index: 1 });
-            value = await input.inputValue();
-          } else if (type === 'number') {
-            value = `${i + 1}`;
-            await input.fill(value);
-          } else {
-            value = `Answer ${i + 1}`;
-            await input.fill(value);
-          }
-
-          answers[i] = value;
+          const value = await fillInputAndGetValue(page, input, i, type, tagName);
+          answers[Number(i)] = value;
           await page.waitForTimeout(300);
         }
 
-        const nextButton = page.getByTestId('nav-forward-button');
-        if (await nextButton.isVisible() && await nextButton.isEnabled()) {
-          await nextButton.click();
-          await page.waitForTimeout(500);
-        } else {
+        const navigated = await navigateForward(page);
+        if (!navigated) {
           break;
         }
       }
 
       // Navigate back and verify answers are preserved
       for (let i = 2; i >= 0; i--) {
-        const backButton = page.getByTestId('nav-back-button');
-        if (await backButton.isVisible() && await backButton.isEnabled()) {
-          await backButton.click();
-          await page.waitForTimeout(500);
-
-          // Check that answer is still there
-          const inputs = await page.locator('input:visible, select:visible').all();
-          if (inputs.length > 0) {
-            const input = inputs[0];
-            const inputValue = await input.inputValue();
-            const isChecked = await input.isChecked().catch(() => false);
-
-            // Answer should be preserved (either in value or checked state)
-            expect(inputValue || isChecked).toBeTruthy();
-          }
-        } else {
+        const navigated = await navigateBack(page);
+        if (!navigated) {
           break;
+        }
+
+        // Check that answer is still there
+        const inputs = await page.locator('input:visible, select:visible').all();
+        if (inputs.length > 0) {
+          const input = inputs[0];
+          const inputValue = await input.inputValue();
+          const isChecked = await input.isChecked().catch(() => false);
+
+          // Answer should be preserved (either in value or checked state)
+          expect(inputValue || isChecked).toBeTruthy();
         }
       }
     });
@@ -316,49 +338,29 @@ test.describe('Questionnaire Back Button', () => {
         if (inputs.length > 0) {
           const input = inputs[0];
           const type = await input.getAttribute('type');
-
-          if (type === 'number') {
-            await input.fill(`${i + 1}`);
-          } else if (type === 'text') {
-            await input.fill(`Answer ${i + 1}`);
-          } else if (type === 'radio' || type === 'checkbox') {
-            await input.check({ force: true });
-          }
-
+          await fillSimpleInput(input, i, type);
           await page.waitForTimeout(300);
         }
 
-        const nextButton = page.getByTestId('nav-forward-button');
-        if (await nextButton.isVisible() && await nextButton.isEnabled()) {
-          // Get progress before forward navigation
-          const progressBefore = await page.locator('[role="progressbar"]').getAttribute('aria-valuenow').catch(() => null);
-
-          await nextButton.click();
-          await page.waitForTimeout(500);
-
-          // Get progress after forward navigation
-          const progressAfter = await page.locator('[role="progressbar"]').getAttribute('aria-valuenow').catch(() => null);
-
-          // Navigate back
-          const backButton = page.getByTestId('nav-back-button');
-          if (await backButton.isVisible() && await backButton.isEnabled()) {
-            await backButton.click();
-            await page.waitForTimeout(500);
-
-            // Progress should have decreased (or be the same if at start)
-            const progressAfterBack = await page.locator('[role="progressbar"]').getAttribute('aria-valuenow').catch(() => null);
-
-            if (progressAfterBack && progressAfter) {
-              const backValue = parseInt(progressAfterBack, 10);
-              const forwardValue = parseInt(progressAfter, 10);
-              expect(backValue).toBeLessThanOrEqual(forwardValue);
-            }
-          }
-
-          break; // Only test once
-        } else {
+        const navigated = await navigateForward(page);
+        if (!navigated) {
           break;
         }
+
+        // Get progress after forward navigation
+        const progressAfter = await getProgressBarValue(page);
+
+        // Navigate back
+        const backNavigated = await navigateBack(page);
+        if (backNavigated && progressAfter !== null) {
+          // Progress should have decreased (or be the same if at start)
+          const progressAfterBack = await getProgressBarValue(page);
+          if (progressAfterBack !== null) {
+            expect(progressAfterBack).toBeLessThanOrEqual(progressAfter);
+          }
+        }
+
+        break; // Only test once
       }
     });
 
@@ -424,9 +426,6 @@ test.describe('Questionnaire Back Button', () => {
         if (await backButton.isVisible() && await backButton.isEnabled()) {
           // First click should work
           await backButton.click();
-
-          // Immediately try second click - button should be disabled during navigation
-          const isDisabled = await backButton.isDisabled();
 
           // Button should be disabled or navigation should complete before second click
           await page.waitForTimeout(300);

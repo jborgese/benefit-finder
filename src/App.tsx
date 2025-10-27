@@ -28,7 +28,6 @@ import { initializeApp } from './utils/initializeApp';
 import { formatCriteriaDetails } from './utils/formatCriteriaDetails';
 import { getProgramName, getProgramDescription } from './utils/programHelpers';
 import { createSampleResults as createSampleResultsData } from './utils/createSampleResults';
-import { sampleFlow } from './questionnaire/sampleFlow';
 import { createEnhancedFlow } from './questionnaire/enhanced-flow';
 
 // Constants

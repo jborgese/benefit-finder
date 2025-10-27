@@ -26,30 +26,6 @@ function isExternalRequest(url: string): boolean {
 }
 
 /**
- * Check if a button should be skipped
- */
-function shouldSkipButton(buttonText: string): boolean {
-  if (!buttonText) return true;
-
-  const skipKeywords = ['home', 'new assessment', 'refresh'];
-  return skipKeywords.some(keyword =>
-    buttonText.toLowerCase().includes(keyword)
-  );
-}
-
-/**
- * Attempt to click a button safely
- */
-async function clickButtonSafely(button: any, buttonText: string): Promise<void> {
-  try {
-    await button.click({ timeout: 2000 });
-  } catch (clickError) {
-    // Log but don't fail on click errors - focus on network monitoring
-    console.log(`Button click failed: ${buttonText}`, clickError);
-  }
-}
-
-/**
  * Navigate to a page with retry logic for connection issues
  */
 async function navigateWithRetry(page: any, url: string, maxRetries: number = 3): Promise<void> {
@@ -70,59 +46,6 @@ async function navigateWithRetry(page: any, url: string, maxRetries: number = 3)
       console.log(`Connection attempt ${retryCount} failed, retrying...`);
       await page.waitForTimeout(1000 * retryCount); // Exponential backoff
     }
-  }
-}
-
-/**
- * Process a single button
- */
-async function processButton(page: any, button: any, buttonText: string): Promise<void> {
-  if (await button.isVisible({ timeout: 1000 })) {
-    if (shouldSkipButton(buttonText)) {
-      return;
-    }
-
-    await clickButtonSafely(button, buttonText);
-
-    // Check if page is still alive after click
-    if (!page.isClosed()) {
-      await page.waitForTimeout(300);
-    }
-  }
-}
-
-/**
- * Perform button operations safely with error handling
- */
-async function performButtonOperations(page: any): Promise<void> {
-  try {
-    const buttons = await page.locator('button').all();
-    const maxButtons = Math.min(buttons.length, 5);
-
-    for (let i = 0; i < maxButtons; i++) {
-      // Check if page is still alive before proceeding
-      if (page.isClosed()) {
-        console.log('Page was closed during test execution');
-        break;
-      }
-
-      // Safely access button by index
-      const button = buttons.at(i);
-      if (!button) {
-        continue;
-      }
-
-      const buttonText = await button.textContent().catch(() => '');
-      await processButton(page, button, buttonText);
-
-      // Short pause between operations
-      if (!page.isClosed()) {
-        await page.waitForTimeout(100);
-      }
-    }
-  } catch (error) {
-    console.log('Error during button operations:', error);
-    // Continue to network verification even if button operations fail
   }
 }
 

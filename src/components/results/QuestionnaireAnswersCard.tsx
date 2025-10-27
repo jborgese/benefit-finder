@@ -19,7 +19,7 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
 
   // Get answer context for resolving dynamic question text
   // Recalculate when answers change to ensure dynamic question text is updated
-  const questionContext = useMemo(() => getAnswerContext(), [getAnswerContext, answers.size]);
+  const questionContext = useMemo(() => getAnswerContext(), [getAnswerContext, answers]);
 
   // Memoize the expensive filtering operations
   const answeredQuestions = useMemo(() => {

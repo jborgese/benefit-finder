@@ -399,6 +399,74 @@ const nodes: FlowNode[] = [
 ];
 
 /**
+ * Link county node to first California question or disability status
+ */
+function linkCountyNode(
+  flow: QuestionFlow,
+  californiaQuestions: FlowNode[]
+): void {
+  const countyNode = flow.nodes.get('county');
+  if (!countyNode) return;
+
+  countyNode.nextId = californiaQuestions.length > 0
+    ? californiaQuestions[0].id
+    : DISABILITY_STATUS_ID;
+  flow.nodes.set('county', countyNode);
+}
+
+/**
+ * Link first California question back to county
+ */
+function linkFirstCaliforniaQuestion(
+  flow: QuestionFlow,
+  californiaQuestions: FlowNode[]
+): void {
+  if (californiaQuestions.length === 0) return;
+
+  const firstCaliforniaQuestion = californiaQuestions[0];
+  const firstCaliforniaNode = flow.nodes.get(firstCaliforniaQuestion.id);
+  if (firstCaliforniaNode) {
+    firstCaliforniaNode.previousId = 'county';
+    flow.nodes.set(firstCaliforniaQuestion.id, firstCaliforniaNode);
+  }
+}
+
+/**
+ * Link last California question to disability status
+ */
+function linkLastCaliforniaQuestion(
+  flow: QuestionFlow,
+  californiaQuestions: FlowNode[]
+): void {
+  if (californiaQuestions.length === 0) return;
+
+  const lastCaliforniaQuestion = californiaQuestions[californiaQuestions.length - 1];
+  const lastCaliforniaNode = flow.nodes.get(lastCaliforniaQuestion.id);
+  if (lastCaliforniaNode) {
+    lastCaliforniaNode.nextId = DISABILITY_STATUS_ID;
+    flow.nodes.set(lastCaliforniaQuestion.id, lastCaliforniaNode);
+  }
+
+  const disabilityNode = flow.nodes.get(DISABILITY_STATUS_ID);
+  if (disabilityNode) {
+    disabilityNode.previousId = lastCaliforniaQuestion.id;
+    flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
+  }
+}
+
+/**
+ * Link county directly to disability status when no California questions exist
+ */
+function linkCountyToDisability(flow: QuestionFlow): void {
+  const countyNode = flow.nodes.get('county');
+  const disabilityNode = flow.nodes.get(DISABILITY_STATUS_ID);
+  if (countyNode && disabilityNode) {
+    disabilityNode.previousId = 'county';
+    flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
+  }
+}
+
+/**
  * Create the enhanced questionnaire flow with California integration
  */
 export function createEnhancedFlow(): QuestionFlow {
@@ -420,50 +488,13 @@ export function createEnhancedFlow(): QuestionFlow {
   // Set up proper linking for California questions
   const californiaQuestions = getCaliforniaQuestions();
 
-  // Link county question to first California question (or disability if no CA questions)
-  const countyNode = flow.nodes.get('county');
-  if (countyNode) {
-    if (californiaQuestions.length > 0) {
-      countyNode.nextId = californiaQuestions[0].id;
-    } else {
-      countyNode.nextId = DISABILITY_STATUS_ID;
-    }
-    flow.nodes.set('county', countyNode);
-  }
+  linkCountyNode(flow, californiaQuestions);
+  linkFirstCaliforniaQuestion(flow, californiaQuestions);
 
-  // Link first California question back to county
   if (californiaQuestions.length > 0) {
-    const firstCaliforniaQuestion = californiaQuestions[0];
-    const firstCaliforniaNode = flow.nodes.get(firstCaliforniaQuestion.id);
-    if (firstCaliforniaNode) {
-      firstCaliforniaNode.previousId = 'county';
-      flow.nodes.set(firstCaliforniaQuestion.id, firstCaliforniaNode);
-    }
-  }
-
-  // Link last California question to disability status
-  if (californiaQuestions.length > 0) {
-    const lastCaliforniaQuestion = californiaQuestions[californiaQuestions.length - 1];
-    const lastCaliforniaNode = flow.nodes.get(lastCaliforniaQuestion.id);
-    if (lastCaliforniaNode) {
-      lastCaliforniaNode.nextId = DISABILITY_STATUS_ID;
-      flow.nodes.set(lastCaliforniaQuestion.id, lastCaliforniaNode);
-    }
-
-    // Update disability status to point back to last California question
-    const disabilityNode = flow.nodes.get(DISABILITY_STATUS_ID);
-    if (disabilityNode) {
-      disabilityNode.previousId = lastCaliforniaQuestion.id;
-      flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
-    }
+    linkLastCaliforniaQuestion(flow, californiaQuestions);
   } else {
-    // If no California questions, link county directly to disability status
-    const countyNode = flow.nodes.get('county');
-    const disabilityNode = flow.nodes.get(DISABILITY_STATUS_ID);
-    if (countyNode && disabilityNode) {
-      disabilityNode.previousId = 'county';
-      flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
-    }
+    linkCountyToDisability(flow);
   }
 
   return flow;

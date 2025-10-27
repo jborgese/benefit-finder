@@ -241,7 +241,7 @@ export const QuestionBreadcrumb: React.FC<{
   };
 
   debugLog('Rendering breadcrumb', {
-    currentQuestionId: currentQuestion?.id,
+    currentQuestionId: currentQuestion.id,
     historyLength: history.length,
     history,
     currentQuestionPosition: progress?.currentQuestionPosition,

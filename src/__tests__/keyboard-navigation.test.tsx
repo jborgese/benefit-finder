@@ -4,7 +4,7 @@
  * Tests for standardized keyboard navigation across questionnaire components
  */
 
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { SelectInput } from '../questionnaire/components/SelectInput';
@@ -27,7 +27,7 @@ const mockOptions = [
 
 describe('Keyboard Navigation', () => {
   describe('SelectInput (Radio)', () => {
-    it('navigates between options with arrow keys', async () => {
+    it('navigates between options with arrow keys', () => {
       const onChange = vi.fn();
       render(
         <SelectInput

@@ -692,7 +692,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
       return question.text({} as QuestionContext);
     }
     return question.text || '';
-  }, [question.text, question.id]);
+  }, [question]);
 
   // Resolve question description if it's a function
   const resolvedQuestionDescription = useMemo(() => {
@@ -702,8 +702,8 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
       });
       return question.description({} as QuestionContext);
     }
-    return question.description || undefined;
-  }, [question.description, question.id]);
+    return question.description ?? undefined;
+  }, [question]);
 
   // Comprehensive debugging for question rendering - ALWAYS log (even in production for troubleshooting)
   useEffect(() => {
@@ -717,7 +717,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
       hasText: Boolean(question.text),
       hasDescription: Boolean(question.description),
       textLength: typeof question.text === 'string' ? question.text.length : 0,
-      descriptionLength: typeof question.description === 'string' ? question.description?.length : 0,
+      descriptionLength: typeof question.description === 'string' ? question.description.length : 0,
       questionRequired: question.required,
       value,
       disabled,
@@ -726,7 +726,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
       resolvedQuestionDescription,
       mobileOptimized,
     });
-  }, [question.id, question.text, question.description, question.required, value, disabled, className, resolvedQuestionText, resolvedQuestionDescription, mobileOptimized]);
+  }, [question, value, disabled, className, resolvedQuestionText, resolvedQuestionDescription, mobileOptimized]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);

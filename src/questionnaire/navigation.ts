@@ -106,6 +106,15 @@ export class NavigationManager {
   }
 
   /**
+   * Debug logging helper
+   */
+  private debugLog(message: string, data?: Record<string, unknown>): void {
+    if (import.meta.env.DEV || localStorage.getItem('DEBUG_NAVIGATION')) {
+      console.log(`[NavigationManager] ${message}`, data ?? '');
+    }
+  }
+
+  /**
    * Get flow engine
    */
   getEngine(): FlowEngine {
@@ -137,14 +146,7 @@ export class NavigationManager {
    * Navigate forward with skip logic
    */
   navigateForward(currentNodeId: string): NavigationResult {
-    // Debug logging
-    const debugLog = (message: string, data?: Record<string, unknown>): void => {
-      if (import.meta.env.DEV || localStorage.getItem('DEBUG_NAVIGATION')) {
-        console.log(`[NavigationManager] ${message}`, data ?? '');
-      }
-    };
-
-    debugLog('navigateForward called', {
+    this.debugLog('navigateForward called', {
       currentNodeId,
       historyBefore: [...this.history],
       historyLength: this.history.length,
@@ -173,7 +175,7 @@ export class NavigationManager {
       }
 
       skippedQuestions.push(question.id);
-      debugLog('Skipping question', {
+      this.debugLog('Skipping question', {
         skippedQuestionId: question.id,
         skippedQuestionText: question.text,
         totalSkipped: skippedQuestions.length,
@@ -186,25 +188,25 @@ export class NavigationManager {
       // Only add current node if it's not already the last item in history
       // This prevents duplicates during multiple forward navigations
       if (this.history.length === 0 || this.history[this.history.length - 1] !== currentNodeId) {
-        debugLog('Adding current node to history', { currentNodeId });
+        this.debugLog('Adding current node to history', { currentNodeId });
         this.history.push(currentNodeId);
       }
 
       // Add target node to history only if it's different from current
       if (result.targetNodeId !== currentNodeId) {
-        debugLog('Adding target node to history', {
+        this.debugLog('Adding target node to history', {
           targetNodeId: result.targetNodeId,
           historyBefore: [...this.history],
         });
         this.history.push(result.targetNodeId);
       } else {
-        debugLog('Target node same as current, skipping history add', {
+        this.debugLog('Target node same as current, skipping history add', {
           targetNodeId: result.targetNodeId,
         });
       }
     }
 
-    debugLog('navigateForward complete', {
+    this.debugLog('navigateForward complete', {
       resultSuccess: result.success,
       targetNodeId: result.targetNodeId,
       skippedQuestions,
@@ -219,17 +221,107 @@ export class NavigationManager {
   }
 
   /**
+   * Navigate backward using history when current node is last in history
+   */
+  private navigateBackwardFromLastHistoryItem(currentNodeId: string): NavigationResult | null {
+    const previousNodeId = this.history[this.history.length - 2];
+    if (!previousNodeId) return null;
+
+    this.debugLog('Using history for backward navigation', {
+      previousNodeId,
+      historyBefore: [...this.history],
+    });
+
+    this.history.pop();
+
+    this.debugLog('navigateBackward complete (from history)', {
+      targetNodeId: previousNodeId,
+      historyAfter: [...this.history],
+      historyLength: this.history.length,
+    });
+
+    return {
+      success: true,
+      targetNodeId: previousNodeId,
+      previousNodeId: currentNodeId,
+    };
+  }
+
+  /**
+   * Navigate backward using history when current node is not last in history
+   */
+  private navigateBackwardFromHistoryPosition(currentNodeId: string): NavigationResult | null {
+    const currentIndex = this.history.lastIndexOf(currentNodeId);
+    if (currentIndex < 0 || currentIndex === 0) return null;
+
+    const previousNodeId = this.history[currentIndex - 1];
+
+    this.debugLog('Current node found in history at different position', {
+      currentIndex,
+      previousNodeId,
+      historyBefore: [...this.history],
+    });
+
+    this.history = this.history.slice(0, currentIndex);
+
+    this.debugLog('navigateBackward complete (from history position)', {
+      targetNodeId: previousNodeId,
+      historyAfter: [...this.history],
+      historyLength: this.history.length,
+    });
+
+    return {
+      success: true,
+      targetNodeId: previousNodeId,
+      previousNodeId: currentNodeId,
+    };
+  }
+
+  /**
+   * Clean up history after fallback navigation
+   */
+  private cleanupHistoryAfterFallback(currentNodeId: string): void {
+    const lastHistoryItem = this.history[this.history.length - 1];
+
+    this.debugLog('History before pop', {
+      lastHistoryItem,
+      currentNodeId,
+      historyMatches: lastHistoryItem === currentNodeId,
+      fullHistory: [...this.history],
+    });
+
+    if (lastHistoryItem === currentNodeId) {
+      this.history.pop();
+      this.debugLog('Popped current node from history', {
+        historyAfter: [...this.history],
+      });
+      return;
+    }
+
+    // History is out of sync - try to find and remove current node
+    const currentIndex = this.history.lastIndexOf(currentNodeId);
+    if (currentIndex >= 0) {
+      this.debugLog('Current node found in history at different position', {
+        currentIndex,
+        historyBefore: [...this.history],
+      });
+      this.history = this.history.slice(0, currentIndex);
+      this.debugLog('Trimmed history to current node', {
+        historyAfter: [...this.history],
+      });
+    } else {
+      this.debugLog('WARNING: Current node not found in history!', {
+        currentNodeId,
+        history: [...this.history],
+      });
+    }
+  }
+
+  /**
    * Navigate backward
    */
   navigateBackward(currentNodeId: string): NavigationResult {
-    // Debug logging
-    const debugLog = (message: string, data?: Record<string, unknown>): void => {
-      if (import.meta.env.DEV || localStorage.getItem('DEBUG_NAVIGATION')) {
-        console.log(`[NavigationManager] ${message}`, data ?? '');
-      }
-    };
-
-    debugLog('navigateBackward called', {
+    this.debugLog('navigateBackward called', {
       currentNodeId,
       historyBefore: [...this.history],
       historyLength: this.history.length,
@@ -239,7 +331,7 @@ export class NavigationManager {
     if (this.history.length > 1) {
       const lastHistoryItem = this.history[this.history.length - 1];
 
-      debugLog('Checking history for backward navigation', {
+      this.debugLog('Checking history for backward navigation', {
         lastHistoryItem,
         currentNodeId,
         historyMatches: lastHistoryItem === currentNodeId,
@@ -248,64 +340,20 @@ export class NavigationManager {
 
       // If current node is last in history, use the previous history item
       if (lastHistoryItem === currentNodeId) {
-        const previousNodeId = this.history[this.history.length - 2];
-
-        if (previousNodeId) {
-          debugLog('Using history for backward navigation', {
-            previousNodeId,
-            historyBefore: [...this.history],
-          });
-
-          // Remove current node from history
-          this.history.pop();
-
-          debugLog('navigateBackward complete (from history)', {
-            targetNodeId: previousNodeId,
-            historyAfter: [...this.history],
-            historyLength: this.history.length,
-          });
-
-          return {
-            success: true,
-            targetNodeId: previousNodeId,
-            previousNodeId: currentNodeId,
-          };
-        }
+        const result = this.navigateBackwardFromLastHistoryItem(currentNodeId);
+        if (result) return result;
       } else {
         // Current node not at end of history - find it and trim history
-        const currentIndex = this.history.lastIndexOf(currentNodeId);
-        if (currentIndex >= 0 && currentIndex > 0) {
-          const previousNodeId = this.history[currentIndex - 1];
-
-          debugLog('Current node found in history at different position', {
-            currentIndex,
-            previousNodeId,
-            historyBefore: [...this.history],
-          });
-
-          // Trim history to previous node
-          this.history = this.history.slice(0, currentIndex);
-
-          debugLog('navigateBackward complete (from history position)', {
-            targetNodeId: previousNodeId,
-            historyAfter: [...this.history],
-            historyLength: this.history.length,
-          });
-
-          return {
-            success: true,
-            targetNodeId: previousNodeId,
-            previousNodeId: currentNodeId,
-          };
-        }
+        const result = this.navigateBackwardFromHistoryPosition(currentNodeId);
+        if (result) return result;
       }
     }
 
     // Fallback to flow engine if history not available or insufficient
-    debugLog('Falling back to flow engine for backward navigation');
+    this.debugLog('Falling back to flow engine for backward navigation');
     const result = this.engine.navigatePrevious(currentNodeId);
 
-    debugLog('navigatePrevious result', {
+    this.debugLog('navigatePrevious result', {
       success: result.success,
       targetNodeId: result.targetNodeId,
       previousNodeId: result.previousNodeId,
@@ -314,44 +362,10 @@ export class NavigationManager {
 
     // Remove current node from history if navigation succeeded
     if (result.success) {
-      const lastHistoryItem = this.history[this.history.length - 1];
-
-      debugLog('History before pop', {
-        lastHistoryItem,
-        currentNodeId,
-        historyMatches: lastHistoryItem === currentNodeId,
-        fullHistory: [...this.history],
-      });
-
-      // Only pop if the last history item matches current node
-      if (lastHistoryItem === currentNodeId) {
-        this.history.pop();
-        debugLog('Popped current node from history', {
-          historyAfter: [...this.history],
-        });
-      } else {
-        // History is out of sync - try to find and remove current node
-        const currentIndex = this.history.lastIndexOf(currentNodeId);
-        if (currentIndex >= 0) {
-          debugLog('Current node found in history at different position', {
-            currentIndex,
-            historyBefore: [...this.history],
-          });
-          // Remove all items after current node
-          this.history = this.history.slice(0, currentIndex);
-          debugLog('Trimmed history to current node', {
-            historyAfter: [...this.history],
-          });
-        } else {
-          debugLog('WARNING: Current node not found in history!', {
-            currentNodeId,
-            history: [...this.history],
-          });
-        }
-      }
+      this.cleanupHistoryAfterFallback(currentNodeId);
     }
 
-    debugLog('navigateBackward complete', {
+    this.debugLog('navigateBackward complete', {
       resultSuccess: result.success,
       targetNodeId: result.targetNodeId,
       historyAfter: [...this.history],

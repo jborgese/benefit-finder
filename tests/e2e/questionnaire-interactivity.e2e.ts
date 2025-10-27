@@ -157,7 +157,9 @@ test.describe('Questionnaire Component Interactivity', () => {
 
       if (await numberInput.isVisible()) {
         const min = await numberInput.getAttribute('min');
-        const max = await numberInput.getAttribute('max');
+        // Check min constraint if present (max constraint handled by browser validation)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _max = await numberInput.getAttribute('max');
 
         if (min) {
           const minValue = parseInt(min, 10);
@@ -264,10 +266,12 @@ test.describe('Questionnaire Component Interactivity', () => {
         const firstRadio = radios[0];
         const firstName = await firstRadio.getAttribute('name');
 
-        const groupRadios = radios.filter(async (radio) => {
-          const name = await radio.getAttribute('name');
-          return name === firstName;
-        });
+        const groupRadios = await Promise.all(
+          radios.map(async (radio) => {
+            const name = await radio.getAttribute('name');
+            return { radio, name };
+          })
+        ).then(results => results.filter(({ name }) => name === firstName).map(({ radio }) => radio));
 
         if (groupRadios.length >= 2) {
           // Select first radio
@@ -302,7 +306,7 @@ test.describe('Questionnaire Component Interactivity', () => {
 
         const focusedElement = await page.evaluate(() => {
           const el = document.activeElement as HTMLInputElement;
-          return el?.type;
+          return el.type;
         });
 
         expect(focusedElement).toBe('radio');
@@ -497,8 +501,6 @@ test.describe('Questionnaire Component Interactivity', () => {
       const stateSelect = page.locator('select').filter({ hasText: /state/i }).first();
 
       if (await stateSelect.isVisible()) {
-        const optionsBefore = await stateSelect.locator('option').count();
-
         // Select a state
         const options = await stateSelect.locator('option').all();
         if (options.length > 1) {
@@ -526,37 +528,50 @@ test.describe('Questionnaire Component Interactivity', () => {
       // Navigate through questions that might trigger option updates
       const inputs = await page.locator('input:visible, select:visible').all();
 
-      if (inputs.length > 0) {
-        const input = inputs[0];
-        const tagName = await input.evaluate(el => el.tagName);
-
-        if (tagName === 'SELECT') {
-          const options = await input.locator('option').count();
-          if (options > 1) {
-            await input.selectOption({ index: 1 });
-            const selectedValue = await input.inputValue();
-
-            await page.waitForTimeout(500);
-
-            // Navigate forward and back
-            const nextButton = page.getByTestId('nav-forward-button');
-            if (await nextButton.isVisible() && await nextButton.isEnabled()) {
-              await nextButton.click();
-              await page.waitForTimeout(500);
-
-              const backButton = page.getByTestId('nav-back-button');
-              if (await backButton.isVisible() && await backButton.isEnabled()) {
-                await backButton.click();
-                await page.waitForTimeout(500);
-
-                // Selection should be preserved
-                const valueAfterBack = await input.inputValue();
-                expect(valueAfterBack).toBe(selectedValue);
-              }
-            }
-          }
-        }
+      if (inputs.length === 0) {
+        return;
       }
+
+      const input = inputs[0];
+      const tagName = await input.evaluate(el => el.tagName);
+
+      if (tagName !== 'SELECT') {
+        return;
+      }
+
+      const options = await input.locator('option').count();
+      if (options <= 1) {
+        return;
+      }
+
+      await input.selectOption({ index: 1 });
+      const selectedValue = await input.inputValue();
+      await page.waitForTimeout(500);
+
+      // Navigate forward and back
+      const nextButton = page.getByTestId('nav-forward-button');
+      const canNavigateForward = await nextButton.isVisible() && await nextButton.isEnabled();
+
+      if (!canNavigateForward) {
+        return;
+      }
+
+      await nextButton.click();
+      await page.waitForTimeout(500);
+
+      const backButton = page.getByTestId('nav-back-button');
+      const canNavigateBack = await backButton.isVisible() && await backButton.isEnabled();
+
+      if (!canNavigateBack) {
+        return;
+      }
+
+      await backButton.click();
+      await page.waitForTimeout(500);
+
+      // Selection should be preserved
+      const valueAfterBack = await input.inputValue();
+      expect(valueAfterBack).toBe(selectedValue);
     });
   });
 
@@ -620,8 +635,9 @@ test.describe('Questionnaire Component Interactivity', () => {
         await emailInput.blur();
         await page.waitForTimeout(500);
 
-        // Should show validation feedback
-        const hasFeedback = await emailInput.evaluate(el => {
+        // Should show validation feedback (check but don't assert since browser validation varies)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _hasFeedback = await emailInput.evaluate(el => {
           return el.getAttribute('aria-invalid') === 'true' ||
                  el.getAttribute('aria-describedby') !== null;
         });
@@ -674,7 +690,8 @@ test.describe('Questionnaire Component Interactivity', () => {
 
         // Progress should update (button should enable if was disabled)
         const nextButton = page.getByTestId('nav-forward-button');
-        const wasDisabled = await nextButton.isDisabled().catch(() => false);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _wasDisabled = await nextButton.isDisabled().catch(() => false);
 
         // After filling, button might be enabled
         await page.waitForTimeout(300);

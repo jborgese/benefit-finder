@@ -107,7 +107,7 @@ export const Question: React.FC<QuestionProps> = ({
     }
 
     return resolved;
-  }, [question.text, questionContext, question.id]);
+  }, [question, questionContext]);
 
   const questionDescription = React.useMemo(() => {
     const resolved = typeof question.description === 'function'
@@ -124,7 +124,7 @@ export const Question: React.FC<QuestionProps> = ({
     }
 
     return resolved;
-  }, [question.description, questionContext, question.id]);
+  }, [question, questionContext]);
 
   // Create a modified question object with resolved text for input components
   const resolvedQuestion: QuestionDefinition = React.useMemo(() => ({
@@ -324,6 +324,110 @@ export const Question: React.FC<QuestionProps> = ({
     );
   };
 
+  // Helper to check if question is about state
+  const isStateQuestion = (): boolean => {
+    return question.fieldName === 'state' || questionText.toLowerCase().includes('state');
+  };
+
+  // Helper to check if question is about county
+  const isCountyQuestion = (): boolean => {
+    return question.fieldName === 'county' || questionText.toLowerCase().includes('county');
+  };
+
+  // Helper to check if question is about birth date
+  const isBirthDateQuestion = (): boolean => {
+    return question.fieldName.toLowerCase().includes('birth') ||
+      question.fieldName.toLowerCase().includes('dob') ||
+      questionText.toLowerCase().includes('birth');
+  };
+
+  // Render select or radio input
+  const renderSelectOrRadioInput = (commonProps: {
+    question: QuestionDefinition;
+    value: unknown;
+    onChange: (value: unknown) => void;
+    error?: string[];
+    disabled: boolean;
+    autoFocus: boolean;
+    onEnterKey?: () => void;
+  }): React.ReactNode => {
+    if (isStateQuestion()) {
+      if (import.meta.env.DEV) {
+        console.log('[Question] Rendering EnhancedStateSelector', {
+          questionId: question.id,
+          fieldName: question.fieldName,
+          questionText,
+          resolvedQuestion,
+        });
+      }
+      return renderStateSelector(commonProps);
+    }
+    return (
+      <SelectInput
+        {...commonProps}
+        value={value as string | number}
+        options={question.options ?? []}
+        variant={question.inputType === 'radio' ? 'radio' : 'dropdown'}
+      />
+    );
+  };
+
+  // Render searchable select input
+  const renderSearchableSelectInput = (commonProps: {
+    question: QuestionDefinition;
+    value: unknown;
+    onChange: (value: unknown) => void;
+    error?: string[];
+    disabled: boolean;
+    autoFocus: boolean;
+    onEnterKey?: () => void;
+  }): React.ReactNode => {
+    if (isStateQuestion()) {
+      console.log('[Question] Rendering EnhancedStateSelector for searchable-select state question', {
+        questionId: question.id,
+        fieldName: question.fieldName,
+        questionText,
+        resolvedQuestionText: resolvedQuestion.text,
+        resolvedQuestionDescription: resolvedQuestion.description,
+      });
+      return renderStateSelector(commonProps);
+    }
+    if (isCountyQuestion()) {
+      return renderCountySelector(commonProps);
+    }
+    return (
+      <SearchableSelectInput
+        {...commonProps}
+        value={value as string | null}
+        options={question.options ?? []}
+        searchPlaceholder={question.placeholder}
+      />
+    );
+  };
+
+  // Render date input
+  const renderDateInput = (commonProps: {
+    question: QuestionDefinition;
+    value: unknown;
+    onChange: (value: unknown) => void;
+    error?: string[];
+    disabled: boolean;
+    autoFocus: boolean;
+    onEnterKey?: () => void;
+  }): React.ReactNode => {
+    if (isBirthDateQuestion()) {
+      return (
+        <DateOfBirthInput
+          {...commonProps}
+          value={value as string}
+          showAge
+          showAgeInWords
+        />
+      );
+    }
+    return <DateInput {...commonProps} value={value as string} />;
+  };
+
   // Render appropriate input component
   const renderInput = (): React.ReactNode => {
     const commonProps = {
@@ -350,50 +454,10 @@ export const Question: React.FC<QuestionProps> = ({
 
       case 'select':
       case 'radio':
-        if (question.fieldName === 'state' || questionText.toLowerCase().includes('state')) {
-          if (import.meta.env.DEV) {
-            console.log('[Question] Rendering EnhancedStateSelector', {
-              questionId: question.id,
-              fieldName: question.fieldName,
-              questionText,
-              resolvedQuestion: resolvedQuestion,
-            });
-          }
-          return renderStateSelector(commonProps);
-        }
-        return (
-          <SelectInput
-            {...commonProps}
-            value={value as string | number}
-            options={question.options ?? []}
-            variant={question.inputType === 'radio' ? 'radio' : 'dropdown'}
-          />
-        );
+        return renderSelectOrRadioInput(commonProps);
 
       case 'searchable-select':
-        // State questions should use EnhancedStateSelector, not SearchableSelectInput
-        if (question.fieldName === 'state' || questionText.toLowerCase().includes('state')) {
-          console.log('[Question] Rendering EnhancedStateSelector for searchable-select state question', {
-            questionId: question.id,
-            fieldName: question.fieldName,
-            questionText,
-            resolvedQuestionText: resolvedQuestion.text,
-            resolvedQuestionDescription: resolvedQuestion.description,
-          });
-          return renderStateSelector(commonProps);
-        }
-        // County questions - render with EnhancedCountySelector
-        if (question.fieldName === 'county' || questionText.toLowerCase().includes('county')) {
-          return renderCountySelector(commonProps);
-        }
-        return (
-          <SearchableSelectInput
-            {...commonProps}
-            value={value as string | null}
-            options={question.options ?? []}
-            searchPlaceholder={question.placeholder}
-          />
-        );
+        return renderSearchableSelectInput(commonProps);
 
       case 'multiselect':
       case 'checkbox':
@@ -407,19 +471,7 @@ export const Question: React.FC<QuestionProps> = ({
         );
 
       case 'date':
-        if (question.fieldName.toLowerCase().includes('birth') ||
-          question.fieldName.toLowerCase().includes('dob') ||
-          questionText.toLowerCase().includes('birth')) {
-          return (
-            <DateOfBirthInput
-              {...commonProps}
-              value={value as string}
-              showAge
-              showAgeInWords
-            />
-          );
-        }
-        return <DateInput {...commonProps} value={value as string} />;
+        return renderDateInput(commonProps);
 
       case 'boolean':
         return (
