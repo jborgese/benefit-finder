@@ -101,7 +101,9 @@ describe('EnhancedStateSelector Component', () => {
       expect(screen.getByText('Texas')).toBeInTheDocument();
     });
 
-    it('should show search input when search is enabled', () => {
+    it('should show search input when search is enabled', async () => {
+      const user = userEvent.setup();
+
       render(
         <EnhancedStateSelector
           question={mockQuestion}
@@ -111,11 +113,25 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
-      const searchInput = screen.getByPlaceholderText(/Search states/i);
-      expect(searchInput).toBeInTheDocument();
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find the search input
+      await waitFor(() => {
+        const searchInput = screen.getByPlaceholderText(/Search states/i);
+        expect(searchInput).toBeInTheDocument();
+      });
     });
 
-    it('should display popular badge for high priority states', () => {
+    it('should display popular badge for high priority states', async () => {
+      const user = userEvent.setup();
+
       render(
         <EnhancedStateSelector
           question={mockQuestion}
@@ -125,7 +141,19 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
-      expect(screen.getByText('Popular')).toBeInTheDocument();
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find the Popular badge
+      await waitFor(() => {
+        expect(screen.getByText('Popular')).toBeInTheDocument();
+      });
     });
 
     it('should show population when enabled', () => {
@@ -155,11 +183,29 @@ describe('EnhancedStateSelector Component', () => {
       expect(mockOnChange).toHaveBeenCalledWith('CA');
     });
 
-    it('should highlight selected state', () => {
+    it('should highlight selected state', async () => {
+      const user = userEvent.setup();
       render(<EnhancedStateSelector question={mockQuestion} value="CA" onChange={mockOnChange} />);
 
-      const californiaButton = screen.getByText('California').closest('button');
-      expect(californiaButton).toHaveClass('bg-primary-50');
+      // Open the dropdown to see the state options
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find the California state button
+      await waitFor(() => {
+        // Get all buttons and filter out the trigger button (which has aria-haspopup)
+        const allButtons = screen.getAllByRole('button');
+        const stateButtons = allButtons.filter(btn => btn.getAttribute('aria-haspopup') !== 'listbox');
+        const californiaButton = stateButtons.find(btn => btn.textContent?.includes('California'));
+
+        expect(californiaButton).toBeInTheDocument();
+        expect(californiaButton).toHaveClass('bg-primary-50');
+      });
     });
 
     it('should show all states when popular first is disabled', () => {
@@ -194,6 +240,21 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find the search input
+      await waitFor(() => {
+        const searchInput = screen.getByPlaceholderText(/Search states/i);
+        expect(searchInput).toBeInTheDocument();
+      });
+
       const searchInput = screen.getByPlaceholderText(/Search states/i);
       await user.type(searchInput, 'California');
 
@@ -216,6 +277,21 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find the search input
+      await waitFor(() => {
+        const searchInput = screen.getByPlaceholderText(/Search states/i);
+        expect(searchInput).toBeInTheDocument();
+      });
+
       const searchInput = screen.getByPlaceholderText(/Search states/i);
       await user.type(searchInput, 'XYZ123');
 
@@ -235,6 +311,21 @@ describe('EnhancedStateSelector Component', () => {
           enableSearch
         />
       );
+
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find the search input
+      await waitFor(() => {
+        const searchInput = screen.getByPlaceholderText(/Search states/i);
+        expect(searchInput).toBeInTheDocument();
+      });
 
       const searchInput = screen.getByPlaceholderText(/Search states/i);
       await user.type(searchInput, 'California');
@@ -434,9 +525,23 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
-      // Touch the component to show error
-      const firstButton = screen.getByText('California');
-      await user.click(firstButton);
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find California
+      await waitFor(() => {
+        expect(screen.getByText('California')).toBeInTheDocument();
+      });
+
+      // Touch the component to show error by selecting a state and then blurring
+      const californiaButton = screen.getByText('California');
+      await user.click(californiaButton);
       await user.tab();
 
       await waitFor(() => {
@@ -456,8 +561,22 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
-      const firstButton = screen.getByText('California');
-      await user.click(firstButton);
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Wait for the dropdown to open and find California
+      await waitFor(() => {
+        expect(screen.getByText('California')).toBeInTheDocument();
+      });
+
+      const californiaButton = screen.getByText('California');
+      await user.click(californiaButton);
       await user.tab();
 
       await waitFor(() => {
@@ -516,7 +635,9 @@ describe('EnhancedStateSelector Component', () => {
       expect(container.firstChild).toHaveClass('custom-class');
     });
 
-    it('should respect maxHeight prop', () => {
+    it('should respect maxHeight prop', async () => {
+      const user = userEvent.setup();
+
       render(
         <EnhancedStateSelector
           question={mockQuestion}
@@ -526,8 +647,30 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
-      // Component should render with max height constraint
-      expect(screen.getByText('California')).toBeInTheDocument();
+      // Open the dropdown by clicking the trigger button
+      const buttons = screen.getAllByRole('button');
+      const triggerButton = buttons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      expect(triggerButton).toBeInTheDocument();
+
+      if (triggerButton) {
+        await user.click(triggerButton);
+      }
+
+      // Verify dropdown is open and has maxHeight style applied
+      await waitFor(() => {
+        // Find dropdown by searching for elements with maxHeight style
+        const allDivs = document.querySelectorAll('div');
+        const dropdown = Array.from(allDivs).find(div => {
+          const style = (div as HTMLElement).style;
+          return style.maxHeight === '300px';
+        });
+        expect(dropdown).toBeInTheDocument();
+      });
+
+      // Verify states are visible in the opened dropdown
+      await waitFor(() => {
+        expect(screen.getByText('California')).toBeInTheDocument();
+      });
     });
   });
 });

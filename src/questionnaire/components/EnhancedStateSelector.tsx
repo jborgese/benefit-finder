@@ -96,7 +96,7 @@ const POPULAR_LABEL = 'Popular';
 const PEOPLE_TEXT = 'people';
 const STATE_BUTTON_BASE_CLASSES = 'w-full px-3 py-2 text-left hover:bg-secondary-50 dark:hover:bg-secondary-600';
 const REGION_HEADER_CLASSES = 'px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide';
-const POPULAR_BADGE_CLASSES = '${POPULAR_BADGE_CLASSES}';
+const POPULAR_BADGE_CLASSES = 'ml-2 px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded';
 
 // Helper function for debug logging
 const debugLog = (message: string, data?: unknown): void => {
@@ -380,6 +380,7 @@ const MobileStateSelector: React.FC<{
   searchInputRef: React.RefObject<HTMLInputElement>;
   searchQuery: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClearSearch: () => void;
   groupedStates: Array<{ region: string; states: typeof US_STATES_ENHANCED }> | null;
   processedStates: typeof US_STATES_ENHANCED;
   value: string;
@@ -400,7 +401,7 @@ const MobileStateSelector: React.FC<{
   const {
     containerRef, className, question, questionText, questionDescription, id, descId, placeholder, selectedState,
     isOpen, isFocused, showError, disabled, autoFocus, onToggle, onBlur, onFocus,
-    onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange,
+    onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange, onClearSearch,
     groupedStates, processedStates, value, onStateSelect, showPopulation,
     helpText, errorId, errors, showLocationButton, isLocationLoading,
     hasRequestedLocation, onLocationRequest, showLocationError, locationError,
@@ -463,19 +464,39 @@ const MobileStateSelector: React.FC<{
         <div className="absolute z-[99999] w-full mt-1 bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-lg shadow-lg max-h-80 overflow-hidden">
           {enableSearch && (
             <div className="p-3 border-b border-secondary-200 dark:border-secondary-600">
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={onSearchChange}
-                placeholder="Search states..."
-                className="w-full px-3 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
-              />
+              <div className="relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={onSearchChange}
+                  placeholder="Search states..."
+                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={onClearSearch}
+                    aria-label="Clear search"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200 focus:outline-none"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
           <div className="max-h-60 overflow-y-auto">
-            {groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)}
+            {processedStates.length === 0 ? (
+              <div className="px-3 py-8 text-center text-secondary-500 dark:text-secondary-400">
+                <p className="text-sm">No states found</p>
+              </div>
+            ) : (
+              groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)
+            )}
           </div>
         </div>
       )}
@@ -531,6 +552,7 @@ const DesktopStateSelector: React.FC<{
   searchInputRef: React.RefObject<HTMLInputElement>;
   searchQuery: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClearSearch: () => void;
   groupedStates: Array<{ region: string; states: typeof US_STATES_ENHANCED }> | null;
   processedStates: typeof US_STATES_ENHANCED;
   value: string;
@@ -552,7 +574,7 @@ const DesktopStateSelector: React.FC<{
   const {
     containerRef, className, question, questionText, questionDescription, id, descId, placeholder, selectedState,
     isOpen, isFocused, showError, disabled, autoFocus, onToggle, onBlur, onFocus,
-    onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange,
+    onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange, onClearSearch,
     groupedStates, processedStates, value, onStateSelect, showPopulation, maxHeight,
     helpText, errorId, errors, showLocationButton, isLocationLoading,
     hasRequestedLocation, onLocationRequest, showLocationError, locationError,
@@ -634,14 +656,32 @@ const DesktopStateSelector: React.FC<{
                     value={searchQuery}
                     onChange={onSearchChange}
                     placeholder="Search states..."
-                    className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400"
+                    className={`w-full pl-10 py-2 border rounded-md bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400 ${searchQuery ? 'pr-10' : 'pr-3'}`}
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={onClearSearch}
+                      aria-label="Clear search"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200 focus:outline-none"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
             )}
 
             <div className="max-h-60 overflow-y-auto">
-              {groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)}
+              {processedStates.length === 0 ? (
+                <div className="px-3 py-8 text-center text-secondary-500 dark:text-secondary-400">
+                  <p className="text-sm">No states found</p>
+                </div>
+              ) : (
+                groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)
+              )}
             </div>
           </div>
         )}
@@ -1050,6 +1090,11 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     }
   };
 
+  const handleClearSearch = (): void => {
+    setSearchQuery('');
+    searchInputRef.current?.focus();
+  };
+
   const handleLocationRequest = (): void => {
     if (isLocationLoading) return;
 
@@ -1119,6 +1164,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     searchInputRef,
     searchQuery,
     onSearchChange: handleSearchChange,
+    onClearSearch: handleClearSearch,
     groupedStates,
     processedStates,
     value: String(value ?? ''),
