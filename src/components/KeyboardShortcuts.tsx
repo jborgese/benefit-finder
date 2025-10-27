@@ -108,7 +108,7 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
     if (!isCtrlOrCmd) return false;
 
     switch (key) {
-      case 'Enter':
+      case 'enter':
         event.preventDefault();
         onStartQuestionnaire?.();
         return true;
