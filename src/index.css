@@ -264,6 +264,17 @@
     position: relative;
   }
 
+  /* Hide native number input spinner controls */
+  .no-spinner::-webkit-inner-spin-button,
+  .no-spinner::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .no-spinner {
+    -moz-appearance: textfield;
+  }
+
   [data-theme="dark"] .question-input {
     @apply text-slate-100 bg-slate-700 border-slate-600;
   }

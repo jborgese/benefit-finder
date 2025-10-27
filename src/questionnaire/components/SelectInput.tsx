@@ -317,7 +317,7 @@ export const SelectInput: React.FC<SelectProps> = ({
           className="question-error-text"
         >
           {errors.map((err, idx) => (
-            <p key={idx} className="question-error-text">
+            <p key={idx}>
               {err}
             </p>
           ))}

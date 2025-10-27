@@ -187,6 +187,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
             ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
             ${showSteppers ? 'pr-20' : ''}
             ${(isIncrementing || isDecrementing) ? 'ring-2 ring-blue-400/30 border-blue-400 dark:border-blue-400' : ''}
+            no-spinner
           `}
         />
 
@@ -285,7 +286,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
           className="question-error-text"
         >
           {errors.map((err, idx) => (
-            <p key={idx} className="question-error-text">
+            <p key={idx}>
               {err}
             </p>
           ))}

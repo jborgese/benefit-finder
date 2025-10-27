@@ -144,7 +144,7 @@ export const TextInput: React.FC<TextInputProps> = ({
           className="question-error-text"
         >
           {errors.map((err, idx) => (
-            <p key={idx} className="question-error-text">
+            <p key={idx}>
               {err}
             </p>
           ))}
