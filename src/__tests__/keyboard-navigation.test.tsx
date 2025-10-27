@@ -220,9 +220,9 @@ describe('Keyboard Navigation', () => {
   });
 
   describe('NumberInput', () => {
-    it('increments/decrements with arrow keys', () => {
+    it('increments/decrements with arrow keys', async () => {
       const onChange = vi.fn();
-      render(
+      const { unmount } = render(
         <NumberInput
           question={mockQuestion}
           value={5}
@@ -241,6 +241,12 @@ describe('Keyboard Navigation', () => {
       // Test arrow down
       fireEvent.keyDown(input, { key: 'ArrowDown' });
       expect(onChange).toHaveBeenCalledWith(4);
+
+      // Wait for timeouts to complete (200ms + buffer) before unmounting
+      await new Promise(resolve => setTimeout(resolve, 250));
+
+      // Unmount and ensure cleanup happens
+      unmount();
     });
   });
 });

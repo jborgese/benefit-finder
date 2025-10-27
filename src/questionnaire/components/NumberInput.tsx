@@ -5,7 +5,7 @@
  * for age, household size, counts, etc.
  */
 
-import React, { useState, useId, useEffect } from 'react';
+import React, { useState, useId, useEffect, useRef } from 'react';
 import type { NumberInputProps } from './types';
 
 export const NumberInput: React.FC<NumberInputProps> = ({
@@ -31,6 +31,8 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   const [inputValue, setInputValue] = useState(value?.toString() ?? '');
   const [isIncrementing, setIsIncrementing] = useState(false);
   const [isDecrementing, setIsDecrementing] = useState(false);
+  const incrementTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const decrementTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sync inputValue with value prop to prevent glitches
   useEffect(() => {
@@ -40,6 +42,18 @@ export const NumberInput: React.FC<NumberInputProps> = ({
       setInputValue('');
     }
   }, [value, decimals]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (incrementTimeoutRef.current) {
+        clearTimeout(incrementTimeoutRef.current);
+      }
+      if (decrementTimeoutRef.current) {
+        clearTimeout(decrementTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const hasError = Boolean(error);
   const showError = hasError && isTouched;
@@ -111,11 +125,15 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     const newValue = currentValue + stepValue;
 
     if (maxValue === undefined || newValue <= maxValue) {
+      // Clear any existing timeout
+      if (incrementTimeoutRef.current) {
+        clearTimeout(incrementTimeoutRef.current);
+      }
       setIsIncrementing(true);
       setIsTouched(true); // Mark as touched when using stepper buttons
       onChange(decimals === 0 ? Math.round(newValue) : newValue);
       // Reset the incrementing state after a brief delay
-      setTimeout(() => setIsIncrementing(false), 200);
+      incrementTimeoutRef.current = setTimeout(() => setIsIncrementing(false), 200);
     }
   };
 
@@ -124,11 +142,15 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     const newValue = currentValue - stepValue;
 
     if (minValue === undefined || newValue >= minValue) {
+      // Clear any existing timeout
+      if (decrementTimeoutRef.current) {
+        clearTimeout(decrementTimeoutRef.current);
+      }
       setIsDecrementing(true);
       setIsTouched(true); // Mark as touched when using stepper buttons
       onChange(decimals === 0 ? Math.round(newValue) : newValue);
       // Reset the decrementing state after a brief delay
-      setTimeout(() => setIsDecrementing(false), 200);
+      decrementTimeoutRef.current = setTimeout(() => setIsDecrementing(false), 200);
     }
   };
 
