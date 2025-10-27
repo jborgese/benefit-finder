@@ -79,7 +79,7 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
   const annualIncome = incomePeriod === 'monthly' ? householdIncome * 12 : householdIncome;
 
   // Add SNAP-specific debug logging for income conversion
-  if (import.meta.env.DEV) {
+  if (import.meta.env.DEV && householdIncome != null && typeof householdIncome === 'number') {
     console.warn(`🔍 [SNAP DEBUG] Income conversion in convertAnswersToProfileData:`);
     console.warn(`  - Original Income: $${householdIncome.toLocaleString()}`);
     console.warn(`  - Income Period: ${incomePeriod}`);
