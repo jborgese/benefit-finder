@@ -17,7 +17,7 @@ interface TextSizeControlsProps {
 
 export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
   className = '',
-  size = 'sm',
+  size = 'md',
   variant = 'default',
   showLabels = false,
 }) => {
