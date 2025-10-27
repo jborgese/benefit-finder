@@ -279,7 +279,7 @@ describe('Button Component', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty children', () => {
-      render(<Button aria-label="Empty button"></Button>);
+      render(<Button aria-label="Empty button" />);
 
       const button = screen.getByRole('button', { name: 'Empty button' });
       expect(button).toBeInTheDocument();

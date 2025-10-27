@@ -102,8 +102,6 @@ describe('KeyboardShortcuts Component', () => {
     });
 
     it('should work with Meta key (Mac)', async () => {
-      const user = userEvent.setup();
-
       render(<KeyboardShortcuts />);
 
       // Simulate Meta+Shift+T

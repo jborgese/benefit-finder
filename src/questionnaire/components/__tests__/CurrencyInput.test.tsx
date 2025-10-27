@@ -240,7 +240,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={1000} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
+      const input = screen.getByLabelText(/What is your annual income/i);
       await user.click(input);
 
       // Text selection behavior - check that input is focused

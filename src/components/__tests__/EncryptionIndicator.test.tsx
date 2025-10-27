@@ -11,9 +11,6 @@ import React from 'react';
 import { EncryptionIndicator, EncryptionBadge, EncryptionBanner } from '../EncryptionIndicator';
 import * as encryptionStoreModule from '../../stores/encryptionStore';
 
-// Mock the encryption store
-const mockUseEncryptionStore = vi.fn();
-
 vi.mock('../../stores/encryptionStore', () => ({
   useEncryptionStore: vi.fn(),
   selectIsEncryptionEnabled: vi.fn(),

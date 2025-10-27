@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { EnhancedStateSelector } from '../EnhancedStateSelector';
@@ -68,7 +68,8 @@ describe('EnhancedStateSelector Component', () => {
   });
 
   afterEach(() => {
-    cleanup();
+    // Global cleanup() handles React cleanup
+    // Explicit unmounting in tests helps prevent delays
   });
 
   describe('Rendering', () => {
@@ -162,7 +163,7 @@ describe('EnhancedStateSelector Component', () => {
     });
 
     it('should show all states when popular first is disabled', () => {
-      render(
+      const { unmount } = render(
         <EnhancedStateSelector
           question={mockQuestion}
           value={undefined}
@@ -174,6 +175,9 @@ describe('EnhancedStateSelector Component', () => {
       // Should show all states alphabetically
       expect(screen.getByText('Alabama')).toBeInTheDocument();
       expect(screen.getByText('Wyoming')).toBeInTheDocument();
+
+      // Unmount immediately to prevent cleanup delays
+      unmount();
     });
   });
 
@@ -302,21 +306,26 @@ describe('EnhancedStateSelector Component', () => {
       expect(screen.getByText(/Use your current location/i)).toBeInTheDocument();
     });
 
-    it('should request location when button is clicked', async () => {
-      const user = userEvent.setup();
+    it('should request location when button is clicked', () => {
+      // Clear any previous calls
+      mockGetCurrentPosition.mockClear();
+      mockClearLocation.mockClear();
+      mockCheckPermission.mockClear();
 
+      // Use null permission to prevent auto-detection on mount
+      // hasPermission: null means the component won't auto-detect but also won't trigger denial effects
       mockUseGeolocation.mockReturnValue({
         coordinates: null,
         isLoading: false,
         error: null,
         isSupported: true,
-        hasPermission: null,
+        hasPermission: null, // Prevents auto-detection without triggering denial useEffect
         getCurrentPosition: mockGetCurrentPosition,
         clearLocation: mockClearLocation,
         checkPermission: mockCheckPermission,
       });
 
-      render(
+      const { unmount } = render(
         <EnhancedStateSelector
           question={mockQuestion}
           value={undefined}
@@ -325,10 +334,17 @@ describe('EnhancedStateSelector Component', () => {
         />
       );
 
+      // Button should be visible
       const locationButton = screen.getByText(/Use your current location/i);
-      await user.click(locationButton);
 
-      expect(mockGetCurrentPosition).toHaveBeenCalled();
+      // Use fireEvent for synchronous click - no need for act() with fireEvent
+      fireEvent.click(locationButton);
+
+      // Should have been called by the button click
+      expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
+
+      // Clean up immediately
+      unmount();
     });
 
     it('should show loading state when detecting location', () => {

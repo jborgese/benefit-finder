@@ -98,41 +98,68 @@ const STATE_BUTTON_BASE_CLASSES = 'w-full px-3 py-2 text-left hover:bg-secondary
 const REGION_HEADER_CLASSES = 'px-3 py-2 text-xs font-semibold text-secondary-500 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800 uppercase tracking-wide';
 const POPULAR_BADGE_CLASSES = '${POPULAR_BADGE_CLASSES}';
 
+// Helper function for debug logging
+const debugLog = (message: string, data?: unknown): void => {
+  if (import.meta.env.DEV) {
+    console.log(message, data ?? '');
+  }
+};
+
+// Helper function to handle county detection
+const handleCountyDetection = (
+  coordinates: GeolocationCoordinates,
+  store: readonly [StoreWithAnswerQuestion]
+): void => {
+  const detectedCounty = coordinatesToCounty(coordinates);
+  if (detectedCounty) {
+    debugLog(`🏘️ Detected county: ${detectedCounty}`);
+    store[0].answerQuestion('county', 'county', detectedCounty);
+  }
+};
+
+// Helper function to handle state update
+const handleStateUpdate = (
+  detectedStateCode: string,
+  value: string,
+  onChange: readonly [(value: string) => void],
+  setDetectedState: (state: string | null) => void,
+  setLocationDetected: (detected: boolean) => void,
+  coordinates: GeolocationCoordinates,
+  store: readonly [StoreWithAnswerQuestion]
+): void => {
+  debugLog(`🔄 Updating state from "${value}" to "${detectedStateCode}"`);
+  onChange[0](detectedStateCode);
+  setDetectedState(detectedStateCode);
+  setLocationDetected(true);
+  handleCountyDetection(coordinates, store);
+};
+
 // Helper function to process location detection result
 const processLocationResult = (
   coordinates: GeolocationCoordinates | null,
   detectedState: string | null,
   value: string,
-  onChange: (value: string) => void,
-  store: StoreWithAnswerQuestion,
+  onChange: readonly [(value: string) => void],
+  store: readonly [StoreWithAnswerQuestion],
   setDetectedState: (state: string | null) => void,
   setLocationDetected: (detected: boolean) => void
 ): void => {
   if (!coordinates || detectedState) return;
 
   const detectedStateCode = coordinatesToState(coordinates);
-  console.log('🌍 Location detected:', {
+  debugLog('🌍 Location detected:', {
     coordinates: { lat: coordinates.latitude, lon: coordinates.longitude },
     detectedStateCode,
     currentValue: value
   });
 
   if (detectedStateCode && detectedStateCode !== value) {
-    console.log(`🔄 Updating state from "${value}" to "${detectedStateCode}"`);
-    onChange(detectedStateCode);
-    setDetectedState(detectedStateCode);
-    setLocationDetected(true);
-
-    const detectedCounty = coordinatesToCounty(coordinates);
-    if (detectedCounty) {
-      console.log(`🏘️ Detected county: ${detectedCounty}`);
-      store.answerQuestion('county', 'county', detectedCounty);
-    }
+    handleStateUpdate(detectedStateCode, value, onChange, setDetectedState, setLocationDetected, coordinates, store);
   } else if (detectedStateCode === value) {
-    console.log(`✅ State already matches detected state: ${detectedStateCode}`);
+    debugLog(`✅ State already matches detected state: ${detectedStateCode}`);
     setLocationDetected(true);
   } else {
-    console.log(`❌ No state detected from coordinates`);
+    debugLog(`❌ No state detected from coordinates`);
   }
 };
 
@@ -665,14 +692,16 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   maxHeight = '300px',
   onEnterKey,
 }) => {
-  // DEBUG: Log component mount immediately
-  console.log('[EnhancedStateSelector] Component mounting', {
-    questionId: question.id,
-    questionText: question.text,
-    questionDescription: question.description,
-    inputType: question.inputType,
-    fieldName: question.fieldName,
-  });
+  // DEBUG: Log component mount immediately (only in dev mode)
+  if (import.meta.env.DEV) {
+    console.log('[EnhancedStateSelector] Component mounting', {
+      questionId: question.id,
+      questionText: question.text,
+      questionDescription: question.description,
+      inputType: question.inputType,
+      fieldName: question.fieldName,
+    });
+  }
 
   const id = useId();
   const errorId = `${id}-error`;
@@ -680,6 +709,9 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastProcessedCoordsRef = useRef<string | null>(null);
 
   // Resolve question text if it's a function
   const resolvedQuestionText = useMemo(() => {
@@ -705,27 +737,29 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     return question.description ?? undefined;
   }, [question]);
 
-  // Comprehensive debugging for question rendering - ALWAYS log (even in production for troubleshooting)
+  // Comprehensive debugging for question rendering (only in dev mode)
   useEffect(() => {
-    console.log('[EnhancedStateSelector] Component rendered', {
-      questionId: question.id,
-      questionFieldName: question.fieldName,
-      questionText: question.text,
-      questionTextType: typeof question.text,
-      questionDescription: question.description,
-      questionDescriptionType: typeof question.description,
-      hasText: Boolean(question.text),
-      hasDescription: Boolean(question.description),
-      textLength: typeof question.text === 'string' ? question.text.length : 0,
-      descriptionLength: typeof question.description === 'string' ? question.description.length : 0,
-      questionRequired: question.required,
-      value,
-      disabled,
-      className,
-      resolvedQuestionText,
-      resolvedQuestionDescription,
-      mobileOptimized,
-    });
+    if (import.meta.env.DEV) {
+      console.log('[EnhancedStateSelector] Component rendered', {
+        questionId: question.id,
+        questionFieldName: question.fieldName,
+        questionText: question.text,
+        questionTextType: typeof question.text,
+        questionDescription: question.description,
+        questionDescriptionType: typeof question.description,
+        hasText: Boolean(question.text),
+        hasDescription: Boolean(question.description),
+        textLength: typeof question.text === 'string' ? question.text.length : 0,
+        descriptionLength: typeof question.description === 'string' ? question.description.length : 0,
+        questionRequired: question.required,
+        value,
+        disabled,
+        className,
+        resolvedQuestionText,
+        resolvedQuestionDescription,
+        mobileOptimized,
+      });
+    }
   }, [question, value, disabled, className, resolvedQuestionText, resolvedQuestionDescription, mobileOptimized]);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -739,6 +773,16 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   const [locationDetected, setLocationDetected] = useState(false);
 
   const store = useQuestionFlowStore();
+
+  // Use refs to store stable references to prevent useEffect loops
+  const onChangeRef = useRef(onChange);
+  const storeRef = useRef(store);
+
+  // Update refs when props change
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    storeRef.current = store;
+  }, [onChange, store]);
 
   const {
     coordinates,
@@ -754,58 +798,87 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     maximumAge: 300000, // 5 minutes
   });
 
-  // Debug state changes
+  // Debug state changes (only in dev mode to reduce overhead)
   useEffect(() => {
-    console.log('🔍 State change:', { locationDetected, hasRequestedLocation, coordinates: !!coordinates });
+    if (import.meta.env.DEV) {
+      console.log('🔍 State change:', { locationDetected, hasRequestedLocation, coordinates: !!coordinates });
+    }
   }, [locationDetected, hasRequestedLocation, coordinates]);
 
-  // Debug coordinates changes
+  // Debug coordinates changes (only in dev mode to reduce overhead)
   useEffect(() => {
-    console.log('🌍 Coordinates changed:', {
-      hasCoordinates: !!coordinates,
-      lat: coordinates?.latitude,
-      lon: coordinates?.longitude,
-      locationDetected
-    });
+    if (import.meta.env.DEV) {
+      console.log('🌍 Coordinates changed:', {
+        hasCoordinates: !!coordinates,
+        lat: coordinates?.latitude,
+        lon: coordinates?.longitude,
+        locationDetected
+      });
+    }
   }, [coordinates, locationDetected]);
 
   // Auto-detect user's state when component mounts
   useEffect(() => {
-    console.log('🔍 EnhancedStateSelector: Auto-detection check', {
-      enableAutoDetection,
-      hasRequestedLocation,
-      isSupported,
-      hasPermission,
-      questionId: question.id,
-      fieldName: question.fieldName
-    });
+    if (import.meta.env.DEV) {
+      console.log('🔍 EnhancedStateSelector: Auto-detection check', {
+        enableAutoDetection,
+        hasRequestedLocation,
+        isSupported,
+        hasPermission,
+        questionId: question.id,
+        fieldName: question.fieldName
+      });
+    }
 
     if (enableAutoDetection && !hasRequestedLocation && isSupported && hasPermission !== false) {
-      console.log('🚀 Starting location detection...');
+      if (import.meta.env.DEV) {
+        console.log('🚀 Starting location detection...');
+      }
       setHasRequestedLocation(true);
       getCurrentPosition();
     }
-  }, [enableAutoDetection, hasRequestedLocation, isSupported, hasPermission, getCurrentPosition, question.id, question.fieldName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableAutoDetection, hasRequestedLocation, isSupported, hasPermission, question.id, question.fieldName]);
 
   // Handle location detection result
   useEffect(() => {
-    console.log('DEBUG: Coordinates useEffect triggered', { coordinates, locationDetected, value, detectedState });
+    // Early return if conditions aren't met - prevents unnecessary processing
+    if (!coordinates || locationDetected || detectedState) {
+      return;
+    }
+
+    // Use a ref to track if we've already processed these coordinates
+    const coordsKey = `${coordinates.latitude}-${coordinates.longitude}`;
+
+    if (lastProcessedCoordsRef.current === coordsKey) {
+      return; // Already processed these coordinates
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('DEBUG: Coordinates useEffect triggered', { coordinates, locationDetected, value, detectedState });
+    }
+
+    lastProcessedCoordsRef.current = coordsKey;
+
+    // Use refs to avoid dependency on onChange/store which might change
     processLocationResult(
       coordinates,
       detectedState,
       String(value ?? ''),
-      onChange,
-      store,
+      [onChangeRef.current] as const,
+      [storeRef.current] as const,
       setDetectedState,
       setLocationDetected
     );
-  }, [coordinates, detectedState, value, onChange, store, locationDetected]);
+  }, [coordinates, detectedState, value, locationDetected]);
 
   // Handle manual state changes after location detection
   useEffect(() => {
     if (locationDetected && detectedState && value !== detectedState) {
       // User manually changed state after location detection
-      console.log('User manually changed state after location detection. County may need to be cleared.');
+      if (import.meta.env.DEV) {
+        console.log('User manually changed state after location detection. County may need to be cleared.');
+      }
       setLocationDetected(false); // Reset location detection state
       setDetectedState(null); // Clear detected state
     }
@@ -889,8 +962,15 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     if (!disabled) {
       setIsOpen(!isOpen);
       if (!isOpen && enableSearch) {
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
         // Focus search input when opening
-        setTimeout(() => searchInputRef.current?.focus(), 100);
+        timeoutRef.current = setTimeout(() => {
+          searchInputRef.current?.focus();
+          timeoutRef.current = null;
+        }, 100);
       }
     }
   };
@@ -922,8 +1002,12 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   };
 
   const handleBlur = (): void => {
+    // Clear any existing blur timeout
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+    }
     // Delay to allow for option clicks
-    setTimeout(() => {
+    blurTimeoutRef.current = setTimeout(() => {
       setIsFocused(false);
       // Only close if not clicking on dropdown content
       if (!dropdownRef.current?.contains(document.activeElement)) {
@@ -941,6 +1025,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
           });
         }
       }
+      blurTimeoutRef.current = null;
     }, 150);
   };
 
@@ -990,9 +1075,25 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
     }
   }, [isOpen]);
+
+  // Cleanup all timers on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+        blurTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // Use extracted components for cleaner code
   const commonProps = {

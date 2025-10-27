@@ -19,7 +19,6 @@ const ThrowError = ({ shouldThrow = false }: { shouldThrow?: boolean }): React.R
 };
 
 // Suppress console.error for tests
-const originalError = console.error;
 beforeEach(() => {
   console.error = vi.fn();
 });
@@ -53,7 +52,7 @@ describe('ErrorBoundary Component', () => {
     it('should catch errors and display fallback UI', () => {
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -72,7 +71,7 @@ describe('ErrorBoundary Component', () => {
 
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -92,7 +91,7 @@ describe('ErrorBoundary Component', () => {
 
       render(
         <ErrorBoundary onError={onError}>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -106,7 +105,7 @@ describe('ErrorBoundary Component', () => {
 
       render(
         <ErrorBoundary fallback={customFallback}>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -119,9 +118,9 @@ describe('ErrorBoundary Component', () => {
     it('should handle retry button click', async () => {
       const user = userEvent.setup();
 
-      const { rerender } = render(
+      render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -141,7 +140,7 @@ describe('ErrorBoundary Component', () => {
 
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -156,7 +155,7 @@ describe('ErrorBoundary Component', () => {
     it('should display help text', () => {
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -168,7 +167,7 @@ describe('ErrorBoundary Component', () => {
     it('should recover when child stops throwing', () => {
       const { rerender } = render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -192,7 +191,7 @@ describe('ErrorBoundary Component', () => {
 
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -206,7 +205,7 @@ describe('ErrorBoundary Component', () => {
     it('should have accessible error message', () => {
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
@@ -217,7 +216,7 @@ describe('ErrorBoundary Component', () => {
     it('should have accessible buttons', () => {
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={true} />
+          <ThrowError shouldThrow />
         </ErrorBoundary>
       );
 
