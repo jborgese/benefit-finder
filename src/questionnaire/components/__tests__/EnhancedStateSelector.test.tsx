@@ -409,19 +409,41 @@ describe('EnhancedStateSelector Component', () => {
       const searchInput = screen.getByPlaceholderText(/Search states/i);
       await user.type(searchInput, 'California');
 
-      // Wait for clear button to appear after typing and click it
+      // Verify search is working - should only show California
+      await waitFor(() => {
+        expect(screen.getByText('California')).toBeInTheDocument();
+        expect(screen.queryByText('Texas')).not.toBeInTheDocument();
+      });
+
+      // Wait for clear button to appear after typing
       const clearButton = await waitFor(() => {
-        const button = screen.getByRole('button', { name: /clear search/i });
-        expect(button).toBeInTheDocument();
-        return button;
+        return screen.getByRole('button', { name: /clear search/i });
       });
 
       await user.click(clearButton);
 
-      // Wait for the input value to be cleared
-      await waitFor(() => {
-        expect(searchInput).toHaveValue('');
-      });
+      // Wait a bit for the clear action to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Reopen dropdown to verify search was cleared
+      const buttonsAfterClear = screen.getAllByRole('button');
+      const triggerButtonAfterClear = buttonsAfterClear.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+
+      expect(triggerButtonAfterClear).toBeInTheDocument();
+
+      // Always click to ensure dropdown is open for verification
+      if (triggerButtonAfterClear) {
+        await user.click(triggerButtonAfterClear);
+
+        // Wait for dropdown to open and verify search was cleared
+        await waitFor(() => {
+          const reopenedInput = screen.getByPlaceholderText(/Search states/i);
+          expect(reopenedInput).toHaveValue('');
+          // Verify all states are visible again (not filtered)
+          expect(screen.getByText('California')).toBeInTheDocument();
+          expect(screen.getByText('Texas')).toBeInTheDocument();
+        });
+      }
     });
   });
 

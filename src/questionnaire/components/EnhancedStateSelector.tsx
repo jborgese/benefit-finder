@@ -1090,7 +1090,8 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     }
   };
 
-  const handleClearSearch = (): void => {
+  const handleClearSearch = (e?: React.MouseEvent<HTMLButtonElement>): void => {
+    e?.stopPropagation(); // Prevent event from bubbling and closing dropdown
     setSearchQuery('');
     searchInputRef.current?.focus();
   };
