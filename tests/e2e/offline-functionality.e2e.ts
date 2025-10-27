@@ -8,8 +8,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Offline Functionality', () => {
   test('should load results page while offline', async ({ page, context }) => {
-    // First visit while online
+    // First visit while online to load the app
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Navigate to results page while online to ensure it loads properly
+    await page.goto('/results');
     await page.waitForLoadState('networkidle');
 
     // Go offline
