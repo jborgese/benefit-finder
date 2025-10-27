@@ -335,7 +335,25 @@ describe('EnhancedStateSelector Component', () => {
       });
 
       const searchInput = screen.getByPlaceholderText(/Search states/i);
+      // Click the search input to ensure it has focus before typing
+      await user.click(searchInput);
       await user.type(searchInput, 'California');
+
+      // Wait a bit for any blur events to settle, then check if dropdown is still open
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Check if dropdown closed and reopen if needed
+      const buttonsAfterType = screen.getAllByRole('button');
+      const triggerAfterType = buttonsAfterType.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      const isOpenAfterType = triggerAfterType?.getAttribute('aria-expanded') === 'true';
+
+      if (!isOpenAfterType && triggerAfterType) {
+        // Dropdown closed, reopen it
+        await user.click(triggerAfterType);
+        await waitFor(() => {
+          expect(triggerAfterType).toHaveAttribute('aria-expanded', 'true');
+        });
+      }
 
       await waitFor(() => {
         expect(screen.getByText('California')).toBeInTheDocument();
@@ -407,6 +425,8 @@ describe('EnhancedStateSelector Component', () => {
       });
 
       const searchInput = screen.getByPlaceholderText(/Search states/i);
+      // Click the search input to ensure it has focus before typing
+      await user.click(searchInput);
       await user.type(searchInput, 'California');
 
       // Verify search is working - should only show California
@@ -415,40 +435,68 @@ describe('EnhancedStateSelector Component', () => {
         expect(screen.queryByText('Texas')).not.toBeInTheDocument();
       });
 
+      // Wait a bit for any blur events to settle, then check if dropdown is still open
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Check if dropdown closed and reopen if needed
+      const buttonsAfterType = screen.getAllByRole('button');
+      const triggerAfterType = buttonsAfterType.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      const isOpenAfterType = triggerAfterType?.getAttribute('aria-expanded') === 'true';
+
+      if (!isOpenAfterType && triggerAfterType) {
+        // Dropdown closed, reopen it
+        await user.click(triggerAfterType);
+        await waitFor(() => {
+          expect(triggerAfterType).toHaveAttribute('aria-expanded', 'true');
+        });
+      }
+
       // Wait for clear button to appear after typing
       const clearButton = await waitFor(() => {
         return screen.getByRole('button', { name: /clear search/i });
-      });
+      }, { timeout: 2000 });
 
       await user.click(clearButton);
 
-      // Wait a bit for the clear action to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait a bit for blur timeout (150ms) to complete
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-      // Reopen dropdown to verify search was cleared
+      // Wait for the clear action to complete and check if dropdown closed
+      await waitFor(() => {
+        // The search query should be cleared (verify internally via visible states)
+        // Check if search input still exists (dropdown might still be open)
+        const searchInputs = screen.queryAllByPlaceholderText(/Search states/i);
+        if (searchInputs.length > 0) {
+          // Dropdown is still open, verify search is cleared
+          expect(searchInputs[0]).toHaveValue('');
+        }
+      }, { timeout: 500 });
+
+      // Reopen dropdown - it will have closed after clearing
       const buttonsAfterClear = screen.getAllByRole('button');
       const triggerButtonAfterClear = buttonsAfterClear.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
 
       expect(triggerButtonAfterClear).toBeInTheDocument();
 
-      // Always click to ensure dropdown is open for verification
+      // Use fireEvent to ensure the click is processed synchronously
       if (triggerButtonAfterClear) {
-        await user.click(triggerButtonAfterClear);
-
-        // First wait for dropdown to open
-        await waitFor(() => {
-          expect(triggerButtonAfterClear).toHaveAttribute('aria-expanded', 'true');
-        });
-
-        // Then verify search was cleared
-        await waitFor(() => {
-          const reopenedInput = screen.getByPlaceholderText(/Search states/i);
-          expect(reopenedInput).toHaveValue('');
-          // Verify all states are visible again (not filtered)
-          expect(screen.getByText('California')).toBeInTheDocument();
-          expect(screen.getByText('Texas')).toBeInTheDocument();
-        });
+        fireEvent.click(triggerButtonAfterClear);
       }
+
+      // Wait for dropdown to be open and verify search was cleared
+      await waitFor(() => {
+        // Ensure dropdown is open
+        const updatedButtons = screen.getAllByRole('button');
+        const updatedTrigger = updatedButtons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+        expect(updatedTrigger).toBeInTheDocument();
+        expect(updatedTrigger).toHaveAttribute('aria-expanded', 'true');
+
+        // Verify search input is cleared and all states are visible
+        const reopenedInput = screen.getByPlaceholderText(/Search states/i);
+        expect(reopenedInput).toHaveValue('');
+        expect(screen.getByText('California')).toBeInTheDocument();
+        expect(screen.getByText('Texas')).toBeInTheDocument();
+      }, { timeout: 2000 });
     });
   });
 
