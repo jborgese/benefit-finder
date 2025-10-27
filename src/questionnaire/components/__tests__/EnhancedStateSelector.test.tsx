@@ -409,13 +409,13 @@ describe('EnhancedStateSelector Component', () => {
       const searchInput = screen.getByPlaceholderText(/Search states/i);
       await user.type(searchInput, 'California');
 
-      // Wait for clear button to appear after typing
-      await waitFor(() => {
-        const clearButton = screen.queryByRole('button', { name: /clear search/i });
-        expect(clearButton).toBeInTheDocument();
+      // Wait for clear button to appear after typing and click it
+      const clearButton = await waitFor(() => {
+        const button = screen.getByRole('button', { name: /clear search/i });
+        expect(button).toBeInTheDocument();
+        return button;
       });
 
-      const clearButton = screen.getByRole('button', { name: /clear search/i });
       await user.click(clearButton);
 
       // Wait for the input value to be cleared
