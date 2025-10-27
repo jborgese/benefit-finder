@@ -11,7 +11,7 @@ import {
   TimeTracker,
   isFlowComplete,
 } from '../progress';
-import { createFlow, createFlowNode, addNodeToFlow } from '../flow-engine';
+import { createFlow, createFlowNode, addNodeToFlow, linkNodes } from '../flow-engine';
 import type { QuestionState, QuestionAnswer } from '../types';
 
 describe('Progress Tracking', () => {
@@ -42,6 +42,10 @@ describe('Progress Tracking', () => {
         fieldName: 'f3',
         required: false,
       }));
+
+      // Link nodes in sequence
+      linkNodes(flow, 'node1', 'node2');
+      linkNodes(flow, 'node2', 'node3');
 
       const questionStates = new Map<string, QuestionState>([
         ['q1', { questionId: 'q1', status: 'answered', visible: true, visited: true, visitCount: 1 }],

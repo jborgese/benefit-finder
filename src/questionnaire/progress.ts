@@ -57,6 +57,20 @@ function getVisibleQuestionsInOrder(
     steps++;
   }
 
+  // If traversal found very few nodes compared to total nodes, fall back to
+  // getting all visible questions (useful when nodes aren't properly linked)
+  const totalNodes = flow.nodes.size;
+  if (visible.length < totalNodes && visited.size < totalNodes) {
+    // Fallback: get all visible questions from all nodes
+    const allVisible = engine.getVisibleQuestions();
+
+    // Try to preserve order by using traversed questions first, then adding remaining
+    const traversedIds = new Set(visible.map(q => q.id));
+    const remaining = allVisible.filter(q => !traversedIds.has(q.id));
+
+    return [...visible, ...remaining];
+  }
+
   return visible;
 }
 

@@ -19,7 +19,7 @@ describe('LanguageSwitcher', () => {
   it('renders with different sizes', () => {
     const { rerender } = render(<LanguageSwitcher size="sm" />);
     const trigger = screen.getByRole('combobox');
-    expect(trigger).toHaveClass('h-8');
+    expect(trigger).toHaveClass('h-11');
 
     rerender(<LanguageSwitcher size="lg" />);
     expect(screen.getByRole('combobox')).toHaveClass('h-12');
