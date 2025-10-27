@@ -177,7 +177,7 @@ describe('EnhancedStateSelector Component', () => {
       await waitFor(() => {
         const allElements = document.querySelectorAll('*');
         const hasPopular = Array.from(allElements).some(el =>
-          el.textContent?.includes('Popular')
+          el.textContent !== null && el.textContent.includes('Popular')
         );
         expect(hasPopular).toBe(true);
       }, { timeout: 3000 });
@@ -217,7 +217,7 @@ describe('EnhancedStateSelector Component', () => {
       await waitFor(() => {
         const allElements = document.querySelectorAll('*');
         const hasPeople = Array.from(allElements).some(el =>
-          el.textContent?.toLowerCase().includes('people')
+          el.textContent !== null && el.textContent.toLowerCase().includes('people')
         );
         expect(hasPeople).toBe(true);
       }, { timeout: 3000 });
@@ -268,7 +268,7 @@ describe('EnhancedStateSelector Component', () => {
         // Get all buttons and filter out the trigger button (which has aria-haspopup)
         const allButtons = screen.getAllByRole('button');
         const stateButtons = allButtons.filter(btn => btn.getAttribute('aria-haspopup') !== 'listbox');
-        const californiaButton = stateButtons.find(btn => btn.textContent?.includes('California'));
+        const californiaButton = stateButtons.find(btn => btn.textContent !== null && btn.textContent.includes('California'));
 
         expect(californiaButton).toBeInTheDocument();
         expect(californiaButton).toHaveClass('bg-primary-50');
@@ -539,7 +539,7 @@ describe('EnhancedStateSelector Component', () => {
         const northeast = screen.queryByText('Northeast');
         const midwest = screen.queryByText('Midwest');
         // At least some region headers should be present
-        expect(west || south || northeast || midwest).toBeInTheDocument();
+        expect(west ?? south ?? northeast ?? midwest).toBeInTheDocument();
       }, { timeout: 3000 });
     });
 
@@ -582,7 +582,7 @@ describe('EnhancedStateSelector Component', () => {
         const northeastHeader = screen.queryByText('Northeast');
         const midwestHeader = screen.queryByText('Midwest');
         // At least one region header should be present when grouping is enabled
-        expect(westHeader || southHeader || northeastHeader || midwestHeader).toBeInTheDocument();
+        expect(westHeader ?? southHeader ?? northeastHeader ?? midwestHeader).toBeInTheDocument();
       }, { timeout: 3000 });
     });
   });
@@ -702,7 +702,7 @@ describe('EnhancedStateSelector Component', () => {
       expect(mockOnChange).toHaveBeenCalledWith('CA');
     });
 
-    it('should show error message when location detection fails', async () => {
+    it('should show error message when location detection fails', () => {
       // Mock with error state - component needs error + hasRequestedLocation
       // We simulate a scenario where location was requested and failed
       mockUseGeolocation.mockReturnValue({
@@ -899,7 +899,7 @@ describe('EnhancedStateSelector Component', () => {
         // Find dropdown by searching for elements with maxHeight style
         const allDivs = document.querySelectorAll('div');
         const dropdown = Array.from(allDivs).find(div => {
-          const style = (div as HTMLElement).style;
+          const { style } = div as HTMLElement;
           return style.maxHeight === '300px';
         });
         expect(dropdown).toBeInTheDocument();

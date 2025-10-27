@@ -226,10 +226,12 @@ describe('App Component', () => {
       // Buttons have emoji prefixes, so we need to use a text matcher function
       // Multiple responsive layouts render the same buttons, so use getAllByText
       expect(screen.getAllByText((content, element) => {
-        return element?.textContent === '🎯 navigation.tour' || element?.textContent?.includes('navigation.tour');
+        if (!element) return false;
+        return element.textContent === '🎯 navigation.tour' || element.textContent?.includes('navigation.tour');
       }).length).toBeGreaterThan(0);
       expect(screen.getAllByText((content, element) => {
-        return element?.textContent === '🔒 navigation.privacy' || element?.textContent?.includes('navigation.privacy');
+        if (!element) return false;
+        return element.textContent === '🔒 navigation.privacy' || element.textContent?.includes('navigation.privacy');
       }).length).toBeGreaterThan(0);
     });
   });
@@ -295,7 +297,7 @@ describe('App Component', () => {
       await waitFor(() => {
         const processingText = screen.queryByText('results.processing.title');
         const resultsSummary = screen.queryByText('results.summary.title');
-        expect(processingText || resultsSummary).toBeTruthy();
+        expect(processingText ?? resultsSummary).toBeTruthy();
       }, { timeout: 3000 });
     });
 
@@ -340,7 +342,8 @@ describe('App Component', () => {
       render(<App />);
 
       const tourButtons = screen.getAllByText((content, element) => {
-        return element?.textContent === '🎯 navigation.tour' || element?.textContent?.includes('navigation.tour');
+        if (!element) return false;
+        return element.textContent === '🎯 navigation.tour' || element.textContent?.includes('navigation.tour');
       });
       const tourButton = tourButtons[0]?.closest('button');
       if (tourButton) {
@@ -356,7 +359,8 @@ describe('App Component', () => {
       render(<App />);
 
       const privacyButtons = screen.getAllByText((content, element) => {
-        return element?.textContent === '🔒 navigation.privacy' || element?.textContent?.includes('navigation.privacy');
+        if (!element) return false;
+        return element.textContent === '🔒 navigation.privacy' || element.textContent?.includes('navigation.privacy');
       });
       const privacyButton = privacyButtons[0]?.closest('button');
       if (privacyButton) {
@@ -372,7 +376,8 @@ describe('App Component', () => {
       render(<App />);
 
       const guideButtons = screen.getAllByText((content, element) => {
-        return element?.textContent === '📖 navigation.guide' || element?.textContent?.includes('navigation.guide');
+        if (!element) return false;
+        return element.textContent === '📖 navigation.guide' || element.textContent?.includes('navigation.guide');
       });
       const guideButton = guideButtons[0]?.closest('button');
       if (guideButton) {
@@ -434,7 +439,7 @@ describe('App Component', () => {
         // Should either show error or return to a safe state
         const processingText = screen.queryByText('results.processing.title');
         const errorText = screen.queryByText(/Error/i);
-        expect(processingText || errorText).toBeTruthy();
+        expect(processingText ?? errorText).toBeTruthy();
       }, { timeout: 3000 });
     });
   });
@@ -578,7 +583,6 @@ describe('App Component', () => {
       render(<App />);
 
       // The LiveRegion component should be rendered
-      const liveRegion = screen.queryByRole('status');
       // Note: LiveRegion might not render if there's no message
       // This is a basic check that the component structure exists
       expect(document.body).toBeInTheDocument();

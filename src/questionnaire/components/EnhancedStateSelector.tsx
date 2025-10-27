@@ -245,6 +245,29 @@ const renderGroupedStates = (
   ))
 );
 
+// Helper function to render state list content (replaces nested ternary)
+const renderStateListContent = (
+  processedStates: typeof US_STATES_ENHANCED,
+  groupedStates: Array<{ region: string; states: typeof US_STATES_ENHANCED }> | null,
+  value: string,
+  onStateSelect: (stateValue: string) => void,
+  showPopulation: boolean
+): React.ReactNode => {
+  if (processedStates.length === 0) {
+    return (
+      <div className="px-3 py-8 text-center text-secondary-500 dark:text-secondary-400">
+        <p className="text-sm">No states found</p>
+      </div>
+    );
+  }
+
+  if (groupedStates) {
+    return renderGroupedStates(groupedStates, value, onStateSelect, showPopulation);
+  }
+
+  return renderStateList(processedStates, value, onStateSelect, showPopulation);
+};
+
 // Helper function to render location detection UI
 const LocationDetectionUI: React.FC<{
   showLocationButton: boolean;
@@ -490,13 +513,7 @@ const MobileStateSelector: React.FC<{
           )}
 
           <div className="max-h-60 overflow-y-auto">
-            {processedStates.length === 0 ? (
-              <div className="px-3 py-8 text-center text-secondary-500 dark:text-secondary-400">
-                <p className="text-sm">No states found</p>
-              </div>
-            ) : (
-              groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)
-            )}
+            {renderStateListContent(processedStates, groupedStates, value, onStateSelect, showPopulation)}
           </div>
         </div>
       )}
@@ -675,13 +692,7 @@ const DesktopStateSelector: React.FC<{
             )}
 
             <div className="max-h-60 overflow-y-auto">
-              {processedStates.length === 0 ? (
-                <div className="px-3 py-8 text-center text-secondary-500 dark:text-secondary-400">
-                  <p className="text-sm">No states found</p>
-                </div>
-              ) : (
-                groupedStates ? renderGroupedStates(groupedStates, value, onStateSelect, showPopulation) : renderStateList(processedStates, value, onStateSelect, showPopulation)
-              )}
+              {renderStateListContent(processedStates, groupedStates, value, onStateSelect, showPopulation)}
             </div>
           </div>
         )}
