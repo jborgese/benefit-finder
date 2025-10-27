@@ -227,11 +227,11 @@ describe('App Component', () => {
       // Multiple responsive layouts render the same buttons, so use getAllByText
       expect(screen.getAllByText((content, element) => {
         if (!element) return false;
-        return element.textContent === '🎯 navigation.tour' || element.textContent?.includes('navigation.tour');
+        return element.textContent === '🎯 navigation.tour' || element.textContent.includes('navigation.tour');
       }).length).toBeGreaterThan(0);
       expect(screen.getAllByText((content, element) => {
         if (!element) return false;
-        return element.textContent === '🔒 navigation.privacy' || element.textContent?.includes('navigation.privacy');
+        return element.textContent === '🔒 navigation.privacy' || element.textContent.includes('navigation.privacy');
       }).length).toBeGreaterThan(0);
     });
   });
@@ -343,7 +343,7 @@ describe('App Component', () => {
 
       const tourButtons = screen.getAllByText((content, element) => {
         if (!element) return false;
-        return element.textContent === '🎯 navigation.tour' || element.textContent?.includes('navigation.tour');
+        return element.textContent === '🎯 navigation.tour' || element.textContent.includes('navigation.tour');
       });
       const tourButton = tourButtons[0]?.closest('button');
       if (tourButton) {
@@ -360,7 +360,7 @@ describe('App Component', () => {
 
       const privacyButtons = screen.getAllByText((content, element) => {
         if (!element) return false;
-        return element.textContent === '🔒 navigation.privacy' || element.textContent?.includes('navigation.privacy');
+        return element.textContent === '🔒 navigation.privacy' || element.textContent.includes('navigation.privacy');
       });
       const privacyButton = privacyButtons[0]?.closest('button');
       if (privacyButton) {
@@ -377,7 +377,7 @@ describe('App Component', () => {
 
       const guideButtons = screen.getAllByText((content, element) => {
         if (!element) return false;
-        return element.textContent === '📖 navigation.guide' || element.textContent?.includes('navigation.guide');
+        return element.textContent === '📖 navigation.guide' || element.textContent.includes('navigation.guide');
       });
       const guideButton = guideButtons[0]?.closest('button');
       if (guideButton) {

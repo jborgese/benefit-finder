@@ -177,7 +177,7 @@ describe('EnhancedStateSelector Component', () => {
       await waitFor(() => {
         const allElements = document.querySelectorAll('*');
         const hasPopular = Array.from(allElements).some(el =>
-          el.textContent !== null && el.textContent.includes('Popular')
+          el.textContent.includes('Popular')
         );
         expect(hasPopular).toBe(true);
       }, { timeout: 3000 });
@@ -217,7 +217,7 @@ describe('EnhancedStateSelector Component', () => {
       await waitFor(() => {
         const allElements = document.querySelectorAll('*');
         const hasPeople = Array.from(allElements).some(el =>
-          el.textContent !== null && el.textContent.toLowerCase().includes('people')
+          el.textContent.toLowerCase().includes('people')
         );
         expect(hasPeople).toBe(true);
       }, { timeout: 3000 });
@@ -268,7 +268,7 @@ describe('EnhancedStateSelector Component', () => {
         // Get all buttons and filter out the trigger button (which has aria-haspopup)
         const allButtons = screen.getAllByRole('button');
         const stateButtons = allButtons.filter(btn => btn.getAttribute('aria-haspopup') !== 'listbox');
-        const californiaButton = stateButtons.find(btn => btn.textContent !== null && btn.textContent.includes('California'));
+        const californiaButton = stateButtons.find(btn => btn.textContent.includes('California'));
 
         expect(californiaButton).toBeInTheDocument();
         expect(californiaButton).toHaveClass('bg-primary-50');
