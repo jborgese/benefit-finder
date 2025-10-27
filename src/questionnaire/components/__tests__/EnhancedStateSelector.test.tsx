@@ -435,7 +435,12 @@ describe('EnhancedStateSelector Component', () => {
       if (triggerButtonAfterClear) {
         await user.click(triggerButtonAfterClear);
 
-        // Wait for dropdown to open and verify search was cleared
+        // First wait for dropdown to open
+        await waitFor(() => {
+          expect(triggerButtonAfterClear).toHaveAttribute('aria-expanded', 'true');
+        });
+
+        // Then verify search was cleared
         await waitFor(() => {
           const reopenedInput = screen.getByPlaceholderText(/Search states/i);
           expect(reopenedInput).toHaveValue('');
