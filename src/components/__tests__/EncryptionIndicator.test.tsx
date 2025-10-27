@@ -60,8 +60,8 @@ describe('EncryptionIndicator Component', () => {
     it('should have gray color when encryption is disabled', () => {
       render(<EncryptionIndicator />);
 
-      const indicator = screen.getByRole('status');
-      expect(indicator).toHaveClass('text-gray-500');
+      const icon = screen.getByRole('status').querySelector('span[aria-hidden="true"]');
+      expect(icon).toHaveClass('text-gray-500');
     });
 
     it('should show status text when showLabel is true', () => {
@@ -147,10 +147,19 @@ describe('EncryptionIndicator Component', () => {
     it('should show very strong passphrase', () => {
       (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
+          if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
+            return true;
+          }
+          if (selector === encryptionStoreModule.selectIsKeyLoaded) {
+            return true;
+          }
+          if (selector === encryptionStoreModule.selectEncryptionMode) {
+            return 'passphrase';
+          }
           if (selector === encryptionStoreModule.selectPassphraseStrength) {
             return 'very-strong';
           }
-          return true;
+          return undefined;
         });
 
       render(<EncryptionIndicator showLabel />);
@@ -161,10 +170,19 @@ describe('EncryptionIndicator Component', () => {
     it('should show medium passphrase', () => {
       (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
+          if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
+            return true;
+          }
+          if (selector === encryptionStoreModule.selectIsKeyLoaded) {
+            return true;
+          }
+          if (selector === encryptionStoreModule.selectEncryptionMode) {
+            return 'passphrase';
+          }
           if (selector === encryptionStoreModule.selectPassphraseStrength) {
             return 'medium';
           }
-          return true;
+          return undefined;
         });
 
       render(<EncryptionIndicator showLabel />);
@@ -175,10 +193,19 @@ describe('EncryptionIndicator Component', () => {
     it('should show weak passphrase', () => {
       (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
+          if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
+            return true;
+          }
+          if (selector === encryptionStoreModule.selectIsKeyLoaded) {
+            return true;
+          }
+          if (selector === encryptionStoreModule.selectEncryptionMode) {
+            return 'passphrase';
+          }
           if (selector === encryptionStoreModule.selectPassphraseStrength) {
             return 'weak';
           }
-          return true;
+          return undefined;
         });
 
       render(<EncryptionIndicator showLabel />);
@@ -217,8 +244,8 @@ describe('EncryptionIndicator Component', () => {
     it('should show yellow color when locked', () => {
       render(<EncryptionIndicator />);
 
-      const indicator = screen.getByRole('status');
-      expect(indicator).toHaveClass('text-yellow-600');
+      const icon = screen.getByRole('status').querySelector('span[aria-hidden="true"]');
+      expect(icon).toHaveClass('text-yellow-600');
     });
 
     it('should show locked status text', () => {
