@@ -233,10 +233,32 @@ export const QuestionBreadcrumb: React.FC<{
     return null;
   }
 
+  // Debug logging helper
+  const debugLog = (message: string, data?: Record<string, unknown>): void => {
+    if (import.meta.env.DEV || localStorage.getItem('DEBUG_NAVIGATION')) {
+      console.log(`[QuestionBreadcrumb] ${message}`, data ?? '');
+    }
+  };
+
+  debugLog('Rendering breadcrumb', {
+    currentQuestionId: currentQuestion?.id,
+    historyLength: history.length,
+    history,
+    currentQuestionPosition: progress?.currentQuestionPosition,
+    totalQuestions: progress?.totalQuestions,
+  });
+
   // Calculate the starting question number for the breadcrumb
   // The current question position tells us what question number we're on
   const currentQuestionNumber = progress?.currentQuestionPosition ?? 1;
   const startQuestionNumber = currentQuestionNumber - history.length + 1;
+
+  debugLog('Breadcrumb calculation', {
+    currentQuestionNumber,
+    historyLength: history.length,
+    startQuestionNumber,
+    calculation: `${currentQuestionNumber} - ${history.length} + 1 = ${startQuestionNumber}`,
+  });
 
   // For mobile screens, show only the last few questions to prevent overflow
   const shouldShowTruncated = history.length > 5;
@@ -270,6 +292,17 @@ export const QuestionBreadcrumb: React.FC<{
           const questionNumber = shouldShowTruncated
             ? startQuestionNumber + (history.length - visibleHistory.length) + index
             : startQuestionNumber + index;
+
+          debugLog('Rendering breadcrumb item', {
+            nodeId,
+            index,
+            isCurrentQuestion,
+            questionNumber,
+            shouldShowTruncated,
+            calculation: shouldShowTruncated
+              ? `${startQuestionNumber} + (${history.length} - ${visibleHistory.length}) + ${index} = ${questionNumber}`
+              : `${startQuestionNumber} + ${index} = ${questionNumber}`,
+          });
 
           return (
             <li key={nodeId} className="flex items-center flex-shrink-0">

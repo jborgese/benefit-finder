@@ -250,6 +250,22 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
 
         timeTracker.start();
 
+        // Debug: Check if functions are preserved in flow
+        if (import.meta.env.DEV) {
+          for (const [nodeId, node] of flow.nodes.entries()) {
+            const hasTextFunction = typeof node.question.text === 'function';
+            const hasDescFunction = typeof node.question.description === 'function';
+            if (hasTextFunction || hasDescFunction) {
+              console.log('[Store] startFlow - Found function in question', {
+                nodeId,
+                questionId: node.question.id,
+                hasTextFunction,
+                hasDescFunction,
+              });
+            }
+          }
+        }
+
         // Initialize question states
         const questionStates = new Map<string, QuestionState>();
         for (const node of flow.nodes.values()) {
@@ -307,6 +323,16 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         const state = get();
         const now = Date.now();
 
+        if (import.meta.env.DEV) {
+          console.log('[Store] answerQuestion called', {
+            questionId,
+            fieldName,
+            value,
+            currentAnswersSize: state.answers.size,
+            currentAnswers: Array.from(state.answers.entries()),
+          });
+        }
+
         // Create answer
         const answer: QuestionAnswer = {
           questionId,
@@ -319,6 +345,23 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         // Update answers
         const newAnswers = new Map(state.answers);
         newAnswers.set(questionId, answer);
+
+        if (import.meta.env.DEV) {
+          console.log('[Store] answerQuestion updated', {
+            questionId,
+            fieldName,
+            value,
+            newAnswersSize: newAnswers.size,
+            newAnswers: Array.from(newAnswers.entries()),
+            answerContext: (() => {
+              const ctx: Record<string, unknown> = {};
+              for (const ans of newAnswers.values()) {
+                ctx[ans.fieldName] = ans.value;
+              }
+              return ctx;
+            })(),
+          });
+        }
 
         // Update question state (keep as 'current' until user navigates away)
         const newQuestionStates = new Map(state.questionStates);
@@ -417,7 +460,22 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
       previous: (): NavigationResult => {
         const state = get();
 
+        // Debug logging helper
+        const debugLog = (message: string, data?: Record<string, unknown>): void => {
+          if (import.meta.env.DEV || localStorage.getItem('DEBUG_NAVIGATION')) {
+            console.log(`[Store] previous() - ${message}`, data ?? '');
+          }
+        };
+
+        debugLog('previous() called', {
+          hasNavigationManager: !!state._navigationManager,
+          currentNodeId: state.currentNodeId,
+          historyLength: state.history.length,
+          history: [...state.history],
+        });
+
         if (!state._navigationManager || !state.currentNodeId) {
+          debugLog('Navigation failed - flow not initialized');
           return {
             success: false,
             error: 'Flow not initialized',
@@ -426,13 +484,27 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
 
         const result = state._navigationManager.navigateBackward(state.currentNodeId);
 
+        debugLog('navigateBackward result', {
+          success: result.success,
+          targetNodeId: result.targetNodeId,
+          error: result.error,
+          navigationHistory: state._navigationManager.getHistory(),
+        });
+
         if (result.success && result.targetNodeId) {
           const newQuestionStates = new Map(state.questionStates);
 
           // Update states
           const currentState = newQuestionStates.get(state.currentNodeId);
           if (currentState) {
-            currentState.status = 'answered';
+            // If the current question has an answer, mark it as answered, otherwise pending
+            const hasAnswer = state.answers.has(state.currentNodeId);
+            currentState.status = hasAnswer ? 'answered' : 'pending';
+            debugLog('Updated current question state', {
+              questionId: state.currentNodeId,
+              status: currentState.status,
+              hasAnswer,
+            });
           }
 
           const prevState = newQuestionStates.get(result.targetNodeId);
@@ -440,13 +512,38 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
             prevState.status = 'current';
             prevState.visited = true;
             prevState.visitCount++;
+            debugLog('Updated previous question state', {
+              questionId: result.targetNodeId,
+              status: prevState.status,
+              visitCount: prevState.visitCount,
+            });
           }
+
+          const updatedHistory = state._navigationManager.getHistory();
+          debugLog('Setting new state', {
+            newCurrentNodeId: result.targetNodeId,
+            oldCurrentNodeId: state.currentNodeId,
+            updatedHistory,
+            historyLength: updatedHistory.length,
+          });
 
           set({
             currentNodeId: result.targetNodeId,
-            history: state._navigationManager.getHistory(),
+            history: updatedHistory,
             questionStates: newQuestionStates,
             updatedAt: Date.now(),
+          });
+
+          // Update progress after navigation
+          get().updateProgress();
+
+          debugLog('previous() complete', {
+            newCurrentNodeId: result.targetNodeId,
+            finalHistory: updatedHistory,
+          });
+        } else {
+          debugLog('previous() failed', {
+            error: result.error,
           });
         }
 
@@ -600,7 +697,19 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         }
 
         const node = state.flow.nodes.get(state.currentNodeId);
-        return node?.question ?? null;
+        const question = node?.question ?? null;
+
+        if (import.meta.env.DEV && question) {
+          console.log('[Store] getCurrentQuestion', {
+            questionId: question.id,
+            hasTextFunction: typeof question.text === 'function',
+            hasDescriptionFunction: typeof question.description === 'function',
+            textType: typeof question.text,
+            textIsFunction: question.text instanceof Function,
+          });
+        }
+
+        return question;
       },
 
       getAnswerContext: (): QuestionContext => {
@@ -609,6 +718,16 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
 
         for (const answer of state.answers.values()) {
           context[answer.fieldName] = answer.value;
+        }
+
+        if (import.meta.env.DEV) {
+          console.log('[Store] getAnswerContext called', {
+            answersSize: state.answers.size,
+            answers: Array.from(state.answers.entries()),
+            context,
+            hasIncomePeriod: 'incomePeriod' in context,
+            incomePeriodValue: context.incomePeriod,
+          });
         }
 
         return context;
@@ -625,7 +744,8 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
         const progress = calculateProgress(
           state.flow,
           state.questionStates,
-          context
+          context,
+          state.currentNodeId
         );
 
         // Check if flow is complete

@@ -126,10 +126,10 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
     return (
       <div className={`question-multiselect-pills ${className}`} onKeyDown={handleKeyDown}>
         <div className="mb-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-secondary-200">
+          <label className="question-label block">
             {question.text}
             {question.required && (
-              <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
+              <span className="required-indicator" aria-label="required">
                 *
               </span>
             )}
@@ -138,7 +138,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
           {question.description && (
             <p
               id={descId}
-              className="text-sm text-gray-600 dark:text-secondary-300 mt-1"
+              className="question-description"
             >
               {question.description}
             </p>
@@ -201,7 +201,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         </div>
 
         {question.helpText && !showError && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
+          <p className="question-help-text">
             {question.helpText}
           </p>
         )}
@@ -215,10 +215,10 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   return (
     <div className={`question-multiselect-checkbox ${className}`}>
       <fieldset onKeyDown={handleKeyDown}>
-        <legend className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
+        <legend className="question-label block">
           {question.text}
           {question.required && (
-            <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
+            <span className="required-indicator" aria-label="required">
               *
             </span>
           )}
@@ -227,7 +227,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
         {question.description && (
           <p
             id={descId}
-            className="text-sm text-gray-600 dark:text-secondary-300 mb-3"
+            className="question-description"
           >
             {question.description}
           </p>
@@ -291,7 +291,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
       </fieldset>
 
       {question.helpText && !showError && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
+        <p className="question-help-text">
           {question.helpText}
         </p>
       )}

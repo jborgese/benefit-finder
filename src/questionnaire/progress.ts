@@ -18,6 +18,49 @@ import type {
 import { FlowEngine } from './flow-engine';
 
 // ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get visible questions in flow order by traversing the flow graph
+ */
+function getVisibleQuestionsInOrder(
+  flow: QuestionFlow,
+  engine: FlowEngine
+): QuestionDefinition[] {
+  const visible: QuestionDefinition[] = [];
+  const visited = new Set<string>();
+  let currentNodeId: string | undefined = flow.startNodeId;
+  const maxSteps = 1000; // Prevent infinite loops
+  let steps = 0;
+
+  while (currentNodeId && steps < maxSteps) {
+    if (visited.has(currentNodeId)) {
+      // Circular reference detected
+      break;
+    }
+
+    visited.add(currentNodeId);
+    const node = flow.nodes.get(currentNodeId);
+
+    if (node && engine.shouldShowQuestion(node.question)) {
+      visible.push(node.question);
+    }
+
+    // Find next node
+    const result = engine.findNextNode(currentNodeId);
+    if (!result.success || !result.targetNodeId) {
+      break; // End of flow
+    }
+
+    currentNodeId = result.targetNodeId;
+    steps++;
+  }
+
+  return visible;
+}
+
+// ============================================================================
 // PROGRESS CALCULATOR
 // ============================================================================
 
@@ -27,18 +70,20 @@ import { FlowEngine } from './flow-engine';
  * @param flow Question flow
  * @param questionStates Current question states
  * @param context Answer context
+ * @param currentNodeId Current node ID (optional, used to calculate accurate position)
  * @returns Progress metrics
  */
 export function calculateProgress(
   flow: QuestionFlow,
   questionStates: Map<string, QuestionState>,
-  context: QuestionContext
+  context: QuestionContext,
+  currentNodeId?: string | null
 ): ProgressMetrics {
   const engine = new FlowEngine(flow);
   engine.setContext(context);
 
-  // Get visible questions based on current context
-  const visibleQuestions = engine.getVisibleQuestions();
+  // Get visible questions in flow order (traverse the flow graph)
+  const visibleQuestions = getVisibleQuestionsInOrder(flow, engine);
   const totalQuestions = visibleQuestions.length;
 
   // Count required questions
@@ -73,8 +118,32 @@ export function calculateProgress(
 
   const remainingQuestions = totalQuestions - answeredQuestions - skippedQuestions;
 
-  // Calculate current question position (answered questions + current question)
-  const currentQuestionPosition = answeredQuestions + 1;
+  // Calculate current question position based on actual position in flow sequence
+  let currentQuestionPosition = 1;
+  if (currentNodeId) {
+    // Get the question ID from the node ID
+    const currentNode = flow.nodes.get(currentNodeId);
+    const currentQuestionId = currentNode?.question.id;
+
+    if (currentQuestionId) {
+      // Find the current question's position in the visible questions list
+      const currentQuestionIndex = visibleQuestions.findIndex(
+        (q) => q.id === currentQuestionId
+      );
+      if (currentQuestionIndex >= 0) {
+        currentQuestionPosition = currentQuestionIndex + 1;
+      } else {
+        // Fallback: if current question not found in visible list, use answered count + 1
+        currentQuestionPosition = answeredQuestions + 1;
+      }
+    } else {
+      // Fallback: if node not found, use answered count + 1
+      currentQuestionPosition = answeredQuestions + 1;
+    }
+  } else {
+    // Fallback: if no current node ID provided, use answered count + 1
+    currentQuestionPosition = answeredQuestions + 1;
+  }
 
   return {
     totalQuestions,

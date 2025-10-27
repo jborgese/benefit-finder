@@ -178,10 +178,10 @@ export function validateCaliforniaAnswers(answers: Map<string, unknown>): string
     errors.push('California residency duration is required');
   }
 
-  // Validate county selection
-  const californiaCounty = answers.get('californiaCounty');
-  if (!californiaCounty) {
-    errors.push('California county selection is required');
+  // Validate county selection (using standard 'county' field name)
+  const county = answers.get('county');
+  if (!county) {
+    errors.push('County selection is required');
   }
 
   return errors;

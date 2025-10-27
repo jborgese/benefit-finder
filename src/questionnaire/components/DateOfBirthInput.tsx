@@ -147,11 +147,11 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     <div className={`question-date-of-birth-input ${className}`}>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-gray-700 mb-1"
+        className="question-label block"
       >
         {question.text}
         {question.required && (
-          <span className="text-red-500 ml-1" aria-label="required">
+          <span className="required-indicator" aria-label="required">
             *
           </span>
         )}
@@ -160,7 +160,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
       {question.description && (
         <p
           id={descId}
-          className="text-sm text-gray-600 mb-2"
+          className="question-description"
         >
           {question.description}
         </p>
@@ -184,11 +184,10 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
           aria-label={question.ariaLabel ?? question.text}
           className={`
-            w-full px-3 py-2 border rounded-md shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            disabled:bg-gray-100 disabled:cursor-not-allowed
-            ${showError ? 'border-red-500' : 'border-gray-300'}
-            ${isFocused ? 'ring-2 ring-blue-500' : ''}
+            question-input w-full px-3 py-2
+            ${showError ? 'border-red-400 dark:border-red-400' : ''}
+            ${isFocused ? 'ring-2 ring-blue-400/20 border-blue-400 dark:border-blue-400' : ''}
+            ${!showError && !isFocused ? 'hover:border-secondary-400 dark:hover:border-secondary-500' : ''}
           `}
         />
 
@@ -213,10 +212,10 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
 
       {/* Age display */}
       {value && !showError && calculatedAge !== null && showAge && (
-        <div className="mt-2 p-2 bg-gray-50 border-l-4 border-gray-300 rounded-r-md">
+        <div className="mt-2 p-2 bg-slate-800/80 border-l-4 border-slate-600 rounded-r-md backdrop-blur-sm">
           <div className="flex items-center">
             <svg
-              className="w-4 h-4 text-gray-500 mr-2"
+              className="w-4 h-4 text-slate-300 mr-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -229,11 +228,11 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
               />
             </svg>
             <div>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-slate-100 font-medium">
                 {formatDateForDisplay(value)}
               </p>
-              <p className="text-xs text-gray-600">
-                {showAgeInWords ? formatAgeInWords(calculatedAge) : `Age: ${calculatedAge}`}
+              <p className="text-xs text-slate-300">
+                {showAgeInWords ? formatAgeInWords(calculatedAge) : `${calculatedAge} years old`}
               </p>
             </div>
           </div>
@@ -241,7 +240,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
       )}
 
       {question.helpText && !showError && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="question-help-text">
           {question.helpText}
         </p>
       )}
@@ -251,10 +250,10 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
           id={errorId}
           role="alert"
           aria-live="polite"
-          className="mt-1"
+          className="question-error-text"
         >
           {errors.map((err, idx) => (
-            <p key={idx} className="text-sm text-red-600">
+            <p key={idx}>
               {err}
             </p>
           ))}

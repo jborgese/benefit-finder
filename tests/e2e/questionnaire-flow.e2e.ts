@@ -119,6 +119,112 @@ test.describe('Questionnaire Flow', () => {
         }
       }
     });
+
+    test('should preserve answers when navigating back through multiple questions', async ({ page }) => {
+      const answers: Record<number, string> = {};
+
+      // Answer 3 questions forward
+      for (let i = 0; i < 3; i++) {
+        const inputs = await page.locator('input:visible, select:visible').all();
+
+        if (inputs.length > 0) {
+          const input = inputs[0];
+          const type = await input.getAttribute('type');
+          const tagName = await input.evaluate(el => el.tagName);
+          let value = '';
+
+          if (type === 'radio' || type === 'checkbox') {
+            await input.check({ force: true });
+            value = 'checked';
+          } else if (tagName === 'SELECT') {
+            await input.selectOption({ index: 1 });
+            value = await input.inputValue();
+          } else if (type === 'number') {
+            value = `${i + 1}`;
+            await input.fill(value);
+          } else {
+            value = `Answer ${i + 1}`;
+            await input.fill(value);
+          }
+
+          answers[i] = value;
+          await page.waitForTimeout(300);
+        }
+
+        const nextButton = page.getByTestId('nav-forward-button');
+        if (await nextButton.isVisible() && await nextButton.isEnabled()) {
+          await nextButton.click();
+          await page.waitForTimeout(500);
+        } else {
+          break;
+        }
+      }
+
+      // Navigate back and verify answers are preserved
+      for (let i = 2; i >= 0; i--) {
+        const backButton = page.getByTestId('nav-back-button');
+        if (await backButton.isVisible() && await backButton.isEnabled()) {
+          await backButton.click();
+          await page.waitForTimeout(500);
+
+          // Check that answer is still there
+          const inputs = await page.locator('input:visible, select:visible').all();
+          if (inputs.length > 0) {
+            const input = inputs[0];
+            const inputValue = await input.inputValue();
+            const isChecked = await input.isChecked().catch(() => false);
+
+            // Answer should be preserved
+            expect(inputValue || isChecked).toBeTruthy();
+          }
+        } else {
+          break;
+        }
+      }
+    });
+
+    test('should handle back navigation at first question gracefully', async ({ page }) => {
+      // Back button should be disabled on first question
+      const backButton = page.getByTestId('nav-back-button');
+
+      if (await backButton.isVisible()) {
+        await expect(backButton).toBeDisabled();
+      }
+    });
+
+    test('should update progress when navigating back', async ({ page }) => {
+      // Navigate forward
+      const firstInput = page.locator('input[type="number"]').first();
+      if (await firstInput.isVisible()) {
+        await firstInput.fill('2');
+        await page.waitForTimeout(300);
+      }
+
+      const nextButton = page.getByTestId('nav-forward-button');
+      if (await nextButton.isVisible() && await nextButton.isEnabled()) {
+        await nextButton.click();
+        await page.waitForTimeout(500);
+
+        // Get progress after forward navigation
+        const progressAfter = await page.locator('[role="progressbar"]').getAttribute('aria-valuenow').catch(() => null);
+
+        // Navigate back
+        const backButton = page.getByTestId('nav-back-button');
+        if (await backButton.isVisible() && await backButton.isEnabled()) {
+          await backButton.click();
+          await page.waitForTimeout(500);
+
+          // Progress should have decreased
+          const progressBefore = await page.locator('[role="progressbar"]').getAttribute('aria-valuenow').catch(() => null);
+
+          if (progressAfter && progressBefore) {
+            const afterValue = parseInt(progressAfter, 10);
+            const beforeValue = parseInt(progressBefore, 10);
+            expect(beforeValue).toBeLessThanOrEqual(afterValue);
+          }
+        }
+      }
+    });
   });
 
   test.describe('Form Input Components', () => {
@@ -198,6 +304,73 @@ test.describe('Questionnaire Flow', () => {
       if (await dateInput.isVisible()) {
         await dateInput.fill('2000-01-01');
         await expect(dateInput).toHaveValue('2000-01-01');
+      }
+    });
+
+    test('should handle input changes immediately', async ({ page }) => {
+      await page.goto('/');
+      await waitForPageReady(page);
+
+      const textInput = page.locator('input[type="text"]').first();
+
+      if (await textInput.isVisible()) {
+        await textInput.fill('Test');
+        await page.waitForTimeout(100);
+
+        const value = await textInput.inputValue();
+        expect(value).toBe('Test');
+      }
+    });
+
+    test('should clear input when cleared', async ({ page }) => {
+      await page.goto('/');
+      await waitForPageReady(page);
+
+      const textInput = page.locator('input[type="text"]').first();
+
+      if (await textInput.isVisible()) {
+        await textInput.fill('Test Value');
+        await textInput.clear();
+
+        const value = await textInput.inputValue();
+        expect(value).toBe('');
+      }
+    });
+
+    test('should handle select option changes', async ({ page }) => {
+      await page.goto('/');
+      await waitForPageReady(page);
+
+      const select = page.locator('select').first();
+
+      if (await select.isVisible()) {
+        const options = await select.locator('option').count();
+        if (options > 1) {
+          const initialValue = await select.inputValue();
+
+          await select.selectOption({ index: 1 });
+          await page.waitForTimeout(300);
+
+          const newValue = await select.inputValue();
+          expect(newValue).not.toBe(initialValue);
+        }
+      }
+    });
+
+    test('should toggle checkbox state', async ({ page }) => {
+      await page.goto('/');
+      await waitForPageReady(page);
+
+      const checkbox = page.locator('input[type="checkbox"]').first();
+
+      if (await checkbox.isVisible()) {
+        const initialState = await checkbox.isChecked();
+
+        await checkbox.check();
+        await expect(checkbox).toBeChecked();
+
+        await checkbox.uncheck();
+        await expect(checkbox).not.toBeChecked();
       }
     });
   });

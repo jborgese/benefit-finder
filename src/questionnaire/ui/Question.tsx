@@ -20,7 +20,7 @@ import { EnhancedStateSelector } from '../components/EnhancedStateSelector';
 import { EnhancedCountySelector } from '../components/EnhancedCountySelector';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
 import { useQuestionFlowStore } from '../store';
-import type { QuestionDefinition } from '../types';
+import type { QuestionDefinition, QuestionContext } from '../types';
 import { createSchemaFromQuestion, validateWithSchema } from '../validation/schemas';
 
 export interface QuestionProps {
@@ -40,6 +40,8 @@ export interface QuestionProps {
   onValidationChange?: (isValid: boolean, errors: string[]) => void;
   /** Enter key handler */
   onEnterKey?: () => void;
+  /** Answer context for dynamic question text */
+  context?: QuestionContext;
 }
 
 export const Question: React.FC<QuestionProps> = ({
@@ -51,11 +53,85 @@ export const Question: React.FC<QuestionProps> = ({
   className = '',
   onValidationChange,
   onEnterKey,
+  context,
 }) => {
   const [errors, setErrors] = React.useState<string[]>([]);
   const [touched, setTouched] = React.useState(false);
   const deviceInfo = useDeviceDetection();
   const store = useQuestionFlowStore();
+
+  // Subscribe to answers changes to trigger re-render when context changes
+  // This ensures dynamic question text updates when previous answers change
+  const answersSize = store.answers.size;
+  React.useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[Question] Answers changed, re-rendering', {
+        questionId: question.id,
+        answersSize,
+        currentAnswers: Array.from(store.answers.entries()),
+      });
+    }
+  }, [answersSize, question.id, store]);
+
+  // Resolve dynamic question text and description
+  const questionContext = context ?? store.getAnswerContext();
+
+  // Debug logging for dynamic question text
+  React.useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[Question Debug]', {
+        questionId: question.id,
+        questionFieldName: question.fieldName,
+        hasTextFunction: typeof question.text === 'function',
+        hasDescriptionFunction: typeof question.description === 'function',
+        contextKeys: Object.keys(questionContext),
+        contextValues: questionContext,
+        incomePeriodValue: questionContext.incomePeriod,
+        allAnswers: Object.fromEntries(store.answers),
+      });
+    }
+  }, [question.id, question.fieldName, question.text, question.description, questionContext, store]);
+
+  const questionText = React.useMemo(() => {
+    const resolved = typeof question.text === 'function'
+      ? question.text(questionContext)
+      : question.text;
+
+    if (import.meta.env.DEV) {
+      console.log('[Question Text Resolved]', {
+        questionId: question.id,
+        isFunction: typeof question.text === 'function',
+        resolvedText: resolved,
+        contextIncomePeriod: questionContext.incomePeriod,
+      });
+    }
+
+    return resolved;
+  }, [question.text, questionContext, question.id]);
+
+  const questionDescription = React.useMemo(() => {
+    const resolved = typeof question.description === 'function'
+      ? question.description(questionContext)
+      : question.description;
+
+    if (import.meta.env.DEV) {
+      console.log('[Question Description Resolved]', {
+        questionId: question.id,
+        isFunction: typeof question.description === 'function',
+        resolvedDescription: resolved,
+        contextIncomePeriod: questionContext.incomePeriod,
+      });
+    }
+
+    return resolved;
+  }, [question.description, questionContext, question.id]);
+
+  // Create a modified question object with resolved text for input components
+  const resolvedQuestion: QuestionDefinition = React.useMemo(() => ({
+    ...question,
+    text: questionText,
+    description: questionDescription,
+  }), [question, questionText, questionDescription]);
 
   // Validate value
   const validateValue = React.useCallback((val: unknown): void => {
@@ -141,10 +217,21 @@ export const Question: React.FC<QuestionProps> = ({
     autoFocus: boolean;
     onEnterKey?: () => void;
   }): React.ReactNode => {
+    console.log('[Question] renderStateSelector called', {
+      questionId: commonProps.question.id,
+      questionText: commonProps.question.text,
+      questionDescription: commonProps.question.description,
+      value: commonProps.value,
+      deviceIsMobile: deviceInfo.isMobile,
+      resolvedQuestionText: resolvedQuestion.text,
+      resolvedQuestionDescription: resolvedQuestion.description,
+    });
+
     return (
       <EnhancedStateSelector
         {...commonProps}
-        value={value as string}
+        question={resolvedQuestion}
+        value={commonProps.value as string}
         placeholder="Search for your state..."
         showPopularFirst
         groupByRegion={!deviceInfo.isMobile}
@@ -212,7 +299,7 @@ export const Question: React.FC<QuestionProps> = ({
 
     console.log('🔍 Question: Rendering EnhancedCountySelector', {
       questionId: question.id,
-      questionText: question.text,
+      questionText,
       fieldName: question.fieldName,
       rawStateAnswer: stateAnswer,
       selectedState,
@@ -240,7 +327,7 @@ export const Question: React.FC<QuestionProps> = ({
   // Render appropriate input component
   const renderInput = (): React.ReactNode => {
     const commonProps = {
-      question,
+      question: resolvedQuestion,
       value,
       onChange: handleChange,
       error: errors.length > 0 ? errors : undefined,
@@ -263,7 +350,15 @@ export const Question: React.FC<QuestionProps> = ({
 
       case 'select':
       case 'radio':
-        if (question.fieldName === 'state' || question.text.toLowerCase().includes('state')) {
+        if (question.fieldName === 'state' || questionText.toLowerCase().includes('state')) {
+          if (import.meta.env.DEV) {
+            console.log('[Question] Rendering EnhancedStateSelector', {
+              questionId: question.id,
+              fieldName: question.fieldName,
+              questionText,
+              resolvedQuestion: resolvedQuestion,
+            });
+          }
           return renderStateSelector(commonProps);
         }
         return (
@@ -276,7 +371,19 @@ export const Question: React.FC<QuestionProps> = ({
         );
 
       case 'searchable-select':
-        if (question.fieldName === 'county' || question.text.toLowerCase().includes('county')) {
+        // State questions should use EnhancedStateSelector, not SearchableSelectInput
+        if (question.fieldName === 'state' || questionText.toLowerCase().includes('state')) {
+          console.log('[Question] Rendering EnhancedStateSelector for searchable-select state question', {
+            questionId: question.id,
+            fieldName: question.fieldName,
+            questionText,
+            resolvedQuestionText: resolvedQuestion.text,
+            resolvedQuestionDescription: resolvedQuestion.description,
+          });
+          return renderStateSelector(commonProps);
+        }
+        // County questions - render with EnhancedCountySelector
+        if (question.fieldName === 'county' || questionText.toLowerCase().includes('county')) {
           return renderCountySelector(commonProps);
         }
         return (
@@ -302,7 +409,7 @@ export const Question: React.FC<QuestionProps> = ({
       case 'date':
         if (question.fieldName.toLowerCase().includes('birth') ||
           question.fieldName.toLowerCase().includes('dob') ||
-          question.text.toLowerCase().includes('birth')) {
+          questionText.toLowerCase().includes('birth')) {
           return (
             <DateOfBirthInput
               {...commonProps}
@@ -337,7 +444,7 @@ export const Question: React.FC<QuestionProps> = ({
       className={`question-wrapper ${className}`}
       onBlur={handleBlur}
       role="group"
-      aria-label={`Question: ${question.text}`}
+      aria-label={`Question: ${questionText}`}
     >
       {renderInput()}
     </div>

@@ -49,13 +49,14 @@ describe('Progress Tracking', () => {
         ['q3', { questionId: 'q3', status: 'pending', visible: true, visited: false, visitCount: 0 }],
       ]);
 
-      const progress = calculateProgress(flow, questionStates, {});
+      const progress = calculateProgress(flow, questionStates, {}, 'node2');
 
       expect(progress.totalQuestions).toBe(3);
       expect(progress.requiredQuestions).toBe(2);
       expect(progress.answeredQuestions).toBe(1);
       expect(progress.remainingQuestions).toBe(2);
       expect(progress.progressPercent).toBeGreaterThan(0);
+      expect(progress.currentQuestionPosition).toBe(2); // q2 is the second question
     });
   });
 

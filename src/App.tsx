@@ -29,6 +29,7 @@ import { formatCriteriaDetails } from './utils/formatCriteriaDetails';
 import { getProgramName, getProgramDescription } from './utils/programHelpers';
 import { createSampleResults as createSampleResultsData } from './utils/createSampleResults';
 import { sampleFlow } from './questionnaire/sampleFlow';
+import { createEnhancedFlow } from './questionnaire/enhanced-flow';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
@@ -1117,7 +1118,7 @@ function App(): React.ReactElement {
 
                   <div className="max-w-4xl mx-auto px-4 sm:px-0 questionnaire-container">
                     <EnhancedQuestionnaire
-                      flow={sampleFlow}
+                      flow={createEnhancedFlow()}
                       onComplete={(answers): void => {
                         void handleCompleteQuestionnaire(answers);
                       }}

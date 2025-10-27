@@ -9,7 +9,7 @@ import React, { useState, useId, useMemo, useRef, useEffect } from 'react';
 import { useGeolocation, coordinatesToState, coordinatesToCounty } from '../hooks/useGeolocation';
 import { useQuestionFlowStore } from '../store';
 import type { SelectProps } from './types';
-import type { QuestionDefinition } from '../types';
+import type { QuestionDefinition, QuestionContext } from '../types';
 
 // Type for store with answerQuestion method
 interface StoreWithAnswerQuestion {
@@ -334,6 +334,8 @@ const MobileStateSelector: React.FC<{
   containerRef: React.RefObject<HTMLDivElement>;
   className: string;
   question: QuestionDefinition;
+  questionText: string;
+  questionDescription: string | undefined;
   id: string;
   descId: string;
   placeholder: string;
@@ -369,7 +371,7 @@ const MobileStateSelector: React.FC<{
   coordinates: GeolocationCoordinates | null;
 }> = (props) => {
   const {
-    containerRef, className, question, id, descId, placeholder, selectedState,
+    containerRef, className, question, questionText, questionDescription, id, descId, placeholder, selectedState,
     isOpen, isFocused, showError, disabled, autoFocus, onToggle, onBlur, onFocus,
     onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange,
     groupedStates, processedStates, value, onStateSelect, showPopulation,
@@ -380,16 +382,16 @@ const MobileStateSelector: React.FC<{
 
   return (
     <div ref={containerRef} className={`enhanced-state-selector-mobile ${className}`}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
-        {question.text}
+      <label htmlFor={id} className="question-label block">
+        {questionText}
         {question.required && (
-          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">*</span>
+          <span className="required-indicator" aria-label="required">*</span>
         )}
       </label>
 
-      {question.description && (
-        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
-          {question.description}
+      {questionDescription && (
+        <p id={descId} className="question-description">
+          {questionDescription}
         </p>
       )}
 
@@ -416,7 +418,7 @@ const MobileStateSelector: React.FC<{
         `}
       >
         <div className="flex items-center justify-between">
-          <span className={selectedState ? 'text-secondary-900 dark:text-secondary-100' : 'text-secondary-500'}>
+          <span className={selectedState ? 'text-secondary-900 dark:text-secondary-100' : 'text-secondary-500 dark:text-secondary-400'}>
             {selectedState ? selectedState.label : placeholder}
           </span>
           <svg
@@ -452,7 +454,7 @@ const MobileStateSelector: React.FC<{
       )}
 
       {helpText && !showError && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">{helpText}</p>
+        <p className="question-help-text">{helpText}</p>
       )}
 
       {showError && (
@@ -483,6 +485,8 @@ const DesktopStateSelector: React.FC<{
   containerRef: React.RefObject<HTMLDivElement>;
   className: string;
   question: QuestionDefinition;
+  questionText: string;
+  questionDescription: string | undefined;
   id: string;
   descId: string;
   placeholder: string;
@@ -519,7 +523,7 @@ const DesktopStateSelector: React.FC<{
   coordinates: GeolocationCoordinates | null;
 }> = (props) => {
   const {
-    containerRef, className, question, id, descId, placeholder, selectedState,
+    containerRef, className, question, questionText, questionDescription, id, descId, placeholder, selectedState,
     isOpen, isFocused, showError, disabled, autoFocus, onToggle, onBlur, onFocus,
     onKeyDown, enableSearch, searchInputRef, searchQuery, onSearchChange,
     groupedStates, processedStates, value, onStateSelect, showPopulation, maxHeight,
@@ -530,16 +534,16 @@ const DesktopStateSelector: React.FC<{
 
   return (
     <div ref={containerRef} className={`enhanced-state-selector-desktop relative ${className}`}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
-        {question.text}
+      <label htmlFor={id} className="question-label block">
+        {questionText}
         {question.required && (
-          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">*</span>
+          <span className="required-indicator" aria-label="required">*</span>
         )}
       </label>
 
-      {question.description && (
-        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
-          {question.description}
+      {questionDescription && (
+        <p id={descId} className="question-description">
+          {questionDescription}
         </p>
       )}
 
@@ -617,7 +621,7 @@ const DesktopStateSelector: React.FC<{
       </div>
 
       {helpText && !showError && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">{helpText}</p>
+        <p className="question-help-text">{helpText}</p>
       )}
 
       {showError && (
@@ -661,12 +665,68 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   maxHeight = '300px',
   onEnterKey,
 }) => {
+  // DEBUG: Log component mount immediately
+  console.log('[EnhancedStateSelector] Component mounting', {
+    questionId: question.id,
+    questionText: question.text,
+    questionDescription: question.description,
+    inputType: question.inputType,
+    fieldName: question.fieldName,
+  });
+
   const id = useId();
   const errorId = `${id}-error`;
   const descId = `${id}-desc`;
   const searchInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Resolve question text if it's a function
+  const resolvedQuestionText = useMemo(() => {
+    if (typeof question.text === 'function') {
+      // If text is a function, we need context - but EnhancedStateSelector doesn't receive context
+      // This should have been resolved by the Question component already
+      console.warn('[EnhancedStateSelector] Question text is a function but no context provided', {
+        questionId: question.id,
+      });
+      return question.text({} as QuestionContext);
+    }
+    return question.text || '';
+  }, [question.text, question.id]);
+
+  // Resolve question description if it's a function
+  const resolvedQuestionDescription = useMemo(() => {
+    if (typeof question.description === 'function') {
+      console.warn('[EnhancedStateSelector] Question description is a function but no context provided', {
+        questionId: question.id,
+      });
+      return question.description({} as QuestionContext);
+    }
+    return question.description || undefined;
+  }, [question.description, question.id]);
+
+  // Comprehensive debugging for question rendering - ALWAYS log (even in production for troubleshooting)
+  useEffect(() => {
+    console.log('[EnhancedStateSelector] Component rendered', {
+      questionId: question.id,
+      questionFieldName: question.fieldName,
+      questionText: question.text,
+      questionTextType: typeof question.text,
+      questionDescription: question.description,
+      questionDescriptionType: typeof question.description,
+      hasText: Boolean(question.text),
+      hasDescription: Boolean(question.description),
+      textLength: typeof question.text === 'string' ? question.text.length : 0,
+      descriptionLength: typeof question.description === 'string' ? question.description?.length : 0,
+      questionRequired: question.required,
+      value,
+      disabled,
+      className,
+      resolvedQuestionText,
+      resolvedQuestionDescription,
+      mobileOptimized,
+    });
+  }, [question.id, question.text, question.description, question.required, value, disabled, className, resolvedQuestionText, resolvedQuestionDescription, mobileOptimized]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -764,15 +824,34 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     setHasUserInteracted(false);
   }, [question.id]);
 
-  const hasError = Boolean(error);
-  const showError = hasError && isTouched;
-
-  // Convert error to array format
+  // Convert error to array format (must be declared before showError calculation)
   const errors: string[] = (() => {
     if (Array.isArray(error)) return error;
     if (error) return [error];
     return [];
   })();
+
+  // Calculate error state (must be declared before useEffect that uses it)
+  const hasError = Boolean(error);
+  const showError = hasError && isTouched;
+
+  // Debug validation state
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      const isValid = !question.required || (value && String(value).length > 0);
+      console.log('[EnhancedStateSelector] Validation state', {
+        questionId: question.id,
+        value,
+        required: question.required,
+        isTouched,
+        hasUserInteracted,
+        hasError: Boolean(error),
+        showError,
+        isValid,
+        errorMessages: errors,
+      });
+    }
+  }, [question.id, question.required, value, isTouched, hasUserInteracted, error, showError, errors]);
 
   // Process states based on configuration
   const processedStates = useMemo(() => {
@@ -817,10 +896,29 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   };
 
   const handleStateSelect = (stateValue: string): void => {
+    if (import.meta.env.DEV) {
+      console.log('[EnhancedStateSelector] State selected', {
+        questionId: question.id,
+        stateValue,
+        previousValue: value,
+        required: question.required,
+      });
+    }
+
     setHasUserInteracted(true);
+    setIsTouched(true); // Mark as touched when user selects a state
     onChange(stateValue);
     setIsOpen(false);
     setSearchQuery('');
+
+    // Trigger validation immediately after selection
+    if (import.meta.env.DEV) {
+      console.log('[EnhancedStateSelector] Validation triggered after selection', {
+        questionId: question.id,
+        stateValue,
+        isValid: Boolean(stateValue && stateValue.length > 0),
+      });
+    }
   };
 
   const handleBlur = (): void => {
@@ -831,8 +929,17 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
       if (!dropdownRef.current?.contains(document.activeElement)) {
         setIsOpen(false);
       }
-      if (hasUserInteracted) {
+      if (hasUserInteracted || value) {
         setIsTouched(true);
+        if (import.meta.env.DEV) {
+          console.log('[EnhancedStateSelector] Field blurred and marked as touched', {
+            questionId: question.id,
+            value,
+            hasUserInteracted,
+            required: question.required,
+            isValid: Boolean(value && String(value).length > 0),
+          });
+        }
       }
     }, 150);
   };
@@ -892,6 +999,8 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     containerRef,
     className,
     question,
+    questionText: resolvedQuestionText,
+    questionDescription: resolvedQuestionDescription,
     id,
     descId,
     placeholder,

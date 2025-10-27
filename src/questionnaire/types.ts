@@ -84,10 +84,10 @@ export interface QuestionTrigger {
 export interface QuestionDefinition {
   /** Unique question ID */
   id: string;
-  /** Question text */
-  text: string;
-  /** Optional description/help text */
-  description?: string;
+  /** Question text - can be a string or a function that takes context and returns string */
+  text: string | ((context: QuestionContext) => string);
+  /** Optional description/help text - can be a string or a function that takes context and returns string */
+  description?: string | ((context: QuestionContext) => string);
   /** Input type */
   inputType: QuestionInputType;
   /** Field name to store answer */

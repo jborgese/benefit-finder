@@ -183,45 +183,6 @@ export const californiaQuestions: FlowNode[] = [
       helpText: 'California provides 12 months of postpartum coverage through Medi-Cal, much longer than the federal 60 days.'
     },
     previousId: 'emergency-medical-condition-ca',
-    nextId: 'california-county-ca'
-  },
-  // California County Selection
-  {
-    id: 'california-county-ca',
-    question: {
-      id: 'california-county-ca',
-      text: 'Which California county do you live in?',
-      description: 'Some programs may have county-specific requirements or assistance.',
-      inputType: 'searchable-select',
-      fieldName: 'californiaCounty',
-      required: true,
-      showIf: { '==': [{ var: 'state' }, 'CA'] },
-      options: [
-        { value: 'los_angeles', label: 'Los Angeles County' },
-        { value: 'san_diego', label: 'San Diego County' },
-        { value: 'orange', label: 'Orange County' },
-        { value: 'riverside', label: 'Riverside County' },
-        { value: 'san_bernardino', label: 'San Bernardino County' },
-        { value: 'santa_clara', label: 'Santa Clara County' },
-        { value: 'alameda', label: 'Alameda County' },
-        { value: 'sacramento', label: 'Sacramento County' },
-        { value: 'contra_costa', label: 'Contra Costa County' },
-        { value: 'fresno', label: 'Fresno County' },
-        { value: 'kern', label: 'Kern County' },
-        { value: 'ventura', label: 'Ventura County' },
-        { value: 'san_francisco', label: 'San Francisco County' },
-        { value: 'san_joaquin', label: 'San Joaquin County' },
-        { value: 'stanislaus', label: 'Stanislaus County' },
-        { value: 'tulare', label: 'Tulare County' },
-        { value: 'santa_barbara', label: 'Santa Barbara County' },
-        { value: 'solano', label: 'Solano County' },
-        { value: 'monterey', label: 'Monterey County' },
-        { value: 'placer', label: 'Placer County' },
-        { value: 'other', label: 'Other County' }
-      ],
-      helpText: 'County information helps connect you with local resources and county-specific programs.'
-    },
-    previousId: 'postpartum-status-ca',
     nextId: 'california-assistance-preferences-ca'
   },
   // California Assistance Preferences
@@ -245,8 +206,7 @@ export const californiaQuestions: FlowNode[] = [
       ],
       helpText: 'California provides multiple application methods. Covered California is recommended for Medi-Cal, while GetCalFresh.org is popular for CalFresh applications.'
     },
-    previousId: 'california-county-ca',
-    isTerminal: true
+    previousId: 'postpartum-status-ca'
   }
 ];
 

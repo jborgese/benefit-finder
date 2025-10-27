@@ -139,11 +139,30 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
   const handleAnswerChange = (value: unknown): void => {
     if (!currentQuestion) return;
 
+    if (import.meta.env.DEV) {
+      console.log('[QuestionFlowUI] Answer changed', {
+        questionId: currentQuestion.id,
+        fieldName: currentQuestion.fieldName,
+        value,
+        allAnswersBefore: Array.from(store.answers.entries()),
+      });
+    }
+
     store.answerQuestion(
       currentQuestion.id,
       currentQuestion.fieldName,
       value
     );
+
+    if (import.meta.env.DEV) {
+      console.log('[QuestionFlowUI] Answer updated', {
+        questionId: currentQuestion.id,
+        fieldName: currentQuestion.fieldName,
+        value,
+        allAnswersAfter: Array.from(store.answers.entries()),
+        answerContext: store.getAnswerContext(),
+      });
+    }
 
     onAnswerChange?.(currentQuestion.id, value);
   };
@@ -156,7 +175,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
   // Handle Enter key press - navigate forward or complete questionnaire if valid
   const handleEnterKey = (): void => {
     // For date inputs, allow Enter key even if not fully valid (user might be typing)
-    if (!isCurrentQuestionValid && currentQuestion.inputType !== 'date') return;
+    if (!isCurrentQuestionValid && currentQuestion?.inputType !== 'date') return;
 
     // Check if we can go forward (not on last question)
     if (store.canGoForward()) {
@@ -169,6 +188,26 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
       store.complete();
     }
   };
+
+  // Get answer context for debugging - must be before early returns to maintain hook order
+  const answerContext = store.getAnswerContext();
+  const currentAnswer = currentQuestion ? (store.answers.get(currentQuestion.id)?.value ?? currentQuestion.defaultValue) : undefined;
+
+  // Debug logging for answer context - always call useEffect, conditionally log inside
+  React.useEffect(() => {
+    if (import.meta.env.DEV && currentQuestion) {
+      console.log('[QuestionFlowUI] Rendering question', {
+        questionId: currentQuestion.id,
+        questionFieldName: currentQuestion.fieldName,
+        currentAnswer,
+        hasDynamicText: typeof currentQuestion.text === 'function',
+        hasDynamicDescription: typeof currentQuestion.description === 'function',
+        answerContext,
+        incomePeriodInContext: answerContext.incomePeriod,
+        allAnswers: Array.from(store.answers.entries()),
+      });
+    }
+  }, [currentQuestion, currentAnswer, answerContext, store]);
 
   if (!store.started || !currentQuestion) {
     return (
@@ -218,8 +257,6 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     );
   }
 
-  const currentAnswer = store.answers.get(currentQuestion.id)?.value ?? currentQuestion.defaultValue;
-
   return (
     <div className={`question-flow-ui questionnaire-container ${className} animate-fade-in`}>
       {enableSaveResume && <ResumeDialog storageKey="bf-questionnaire-autosave" />}
@@ -242,6 +279,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
             onValidationChange={handleValidationChange}
             onEnterKey={handleEnterKey}
             autoFocus={currentQuestion.inputType === 'date'}
+            context={answerContext}
           />
         </div>
       </div>

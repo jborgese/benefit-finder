@@ -105,8 +105,45 @@ const nodes: FlowNode[] = [
     id: 'income',
     question: {
       id: 'income',
-      text: 'What is your total household income?',
-      description: 'Include all income sources: wages, benefits, child support, etc.',
+      text: (context: Record<string, unknown>) => {
+        const incomePeriod = context.incomePeriod as string | undefined;
+
+        if (import.meta.env.DEV) {
+          console.log('[Enhanced Flow] Income question text function called', {
+            context,
+            incomePeriod,
+            contextKeys: Object.keys(context),
+            hasIncomePeriod: 'incomePeriod' in context,
+          });
+        }
+
+        if (incomePeriod === 'monthly') {
+          return 'What is your total monthly household income?';
+        } else if (incomePeriod === 'annual') {
+          return 'What is your total annual household income?';
+        }
+        // Default fallback
+        return 'What is your total household income?';
+      },
+      description: (context: Record<string, unknown>) => {
+        const incomePeriod = context.incomePeriod as string | undefined;
+
+        if (import.meta.env.DEV) {
+          console.log('[Enhanced Flow] Income question description function called', {
+            context,
+            incomePeriod,
+            contextKeys: Object.keys(context),
+          });
+        }
+
+        if (incomePeriod === 'monthly') {
+          return 'Include all income sources: wages, benefits, child support, etc. Enter your monthly total.';
+        } else if (incomePeriod === 'annual') {
+          return 'Include all income sources: wages, benefits, child support, etc. Enter your annual total.';
+        }
+        // Default fallback
+        return 'Include all income sources: wages, benefits, child support, etc.';
+      },
       inputType: 'currency',
       fieldName: 'householdIncome',
       required: true,
@@ -171,6 +208,20 @@ const nodes: FlowNode[] = [
       ]
     },
     previousId: 'citizenship',
+    nextId: 'county'
+  },
+  {
+    id: 'county',
+    question: {
+      id: 'county',
+      text: 'Which county do you live in?',
+      description: 'Some programs may have county-specific requirements or assistance.',
+      inputType: 'searchable-select',
+      fieldName: 'county',
+      required: true,
+      helpText: 'County information helps connect you with local resources and county-specific programs.'
+    },
+    previousId: 'state',
     nextId: 'immigration-status-ca' // This will be dynamically set based on state
   },
 
@@ -369,11 +420,25 @@ export function createEnhancedFlow(): QuestionFlow {
   // Set up proper linking for California questions
   const californiaQuestions = getCaliforniaQuestions();
 
-  // Link state question to first California question
-  const stateNode = flow.nodes.get('state');
-  if (stateNode && californiaQuestions.length > 0) {
-    stateNode.nextId = californiaQuestions[0].id;
-    flow.nodes.set('state', stateNode);
+  // Link county question to first California question (or disability if no CA questions)
+  const countyNode = flow.nodes.get('county');
+  if (countyNode) {
+    if (californiaQuestions.length > 0) {
+      countyNode.nextId = californiaQuestions[0].id;
+    } else {
+      countyNode.nextId = DISABILITY_STATUS_ID;
+    }
+    flow.nodes.set('county', countyNode);
+  }
+
+  // Link first California question back to county
+  if (californiaQuestions.length > 0) {
+    const firstCaliforniaQuestion = californiaQuestions[0];
+    const firstCaliforniaNode = flow.nodes.get(firstCaliforniaQuestion.id);
+    if (firstCaliforniaNode) {
+      firstCaliforniaNode.previousId = 'county';
+      flow.nodes.set(firstCaliforniaQuestion.id, firstCaliforniaNode);
+    }
   }
 
   // Link last California question to disability status
@@ -392,13 +457,11 @@ export function createEnhancedFlow(): QuestionFlow {
       flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
     }
   } else {
-    // If no California questions, link state directly to disability status
-    const stateNode = flow.nodes.get('state');
+    // If no California questions, link county directly to disability status
+    const countyNode = flow.nodes.get('county');
     const disabilityNode = flow.nodes.get(DISABILITY_STATUS_ID);
-    if (stateNode && disabilityNode) {
-      stateNode.nextId = DISABILITY_STATUS_ID;
-      disabilityNode.previousId = 'state';
-      flow.nodes.set('state', stateNode);
+    if (countyNode && disabilityNode) {
+      disabilityNode.previousId = 'county';
       flow.nodes.set(DISABILITY_STATUS_ID, disabilityNode);
     }
   }

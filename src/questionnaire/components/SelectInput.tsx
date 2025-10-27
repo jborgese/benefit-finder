@@ -118,10 +118,10 @@ export const SelectInput: React.FC<SelectProps> = ({
     return (
       <div className={`question-select-radio ${className}`}>
         <fieldset onKeyDown={handleKeyDown}>
-          <legend className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2">
+          <legend className="question-label block">
             {question.text}
             {question.required && (
-              <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
+              <span className="required-indicator" aria-label="required">
                 *
               </span>
             )}
@@ -130,7 +130,7 @@ export const SelectInput: React.FC<SelectProps> = ({
           {question.description && (
             <p
               id={descId}
-              className="text-sm text-gray-600 dark:text-secondary-300 mb-3"
+              className="question-description"
             >
               {question.description}
             </p>
@@ -204,7 +204,7 @@ export const SelectInput: React.FC<SelectProps> = ({
         </fieldset>
 
         {question.helpText && !showError && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
+          <p className="question-help-text">
             {question.helpText}
           </p>
         )}
@@ -214,10 +214,10 @@ export const SelectInput: React.FC<SelectProps> = ({
             id={errorId}
             role="alert"
             aria-live="polite"
-            className="mt-2"
+            className="question-error-text"
           >
             {errors.map((err, idx) => (
-              <p key={idx} className="text-sm text-red-600 dark:text-red-400">
+              <p key={idx}>
                 {err}
               </p>
             ))}

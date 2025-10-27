@@ -209,6 +209,13 @@
     position: relative;
   }
 
+  /* Ensure legend elements get proper styling */
+  legend.question-label {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    width: 100%;
+  }
+
   [data-theme="dark"] .question-label {
     @apply text-slate-100;
   }
@@ -224,6 +231,11 @@
     background: linear-gradient(135deg, var(--color-trust), var(--color-empower));
     border-radius: 2px;
     opacity: 0.8;
+  }
+
+  /* Ensure accent bar displays correctly on legend elements */
+  legend.question-label::before {
+    display: block;
   }
 
   .question-description {
@@ -288,6 +300,10 @@
     @apply border-primary-500 ring-2 ring-primary-500/20 text-secondary-900;
     box-shadow: var(--shadow-trust);
     transform: translateY(-1px);
+  }
+
+  [data-theme="dark"] .question-input:focus {
+    @apply text-slate-100;
   }
 
   .question-input:hover:not(:focus):not(:disabled) {

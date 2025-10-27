@@ -15,7 +15,11 @@ interface QuestionnaireAnswersCardProps {
 export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> = ({
   className = '',
 }) => {
-  const { answers, flow } = useQuestionFlowStore();
+  const { answers, flow, getAnswerContext } = useQuestionFlowStore();
+
+  // Get answer context for resolving dynamic question text
+  // Recalculate when answers change to ensure dynamic question text is updated
+  const questionContext = useMemo(() => getAnswerContext(), [getAnswerContext, answers.size]);
 
   // Memoize the expensive filtering operations
   const answeredQuestions = useMemo(() => {
@@ -102,8 +106,15 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
   };
 
   const getQuestionLabel = (question: QuestionDefinition): string => {
+    // Resolve question text if it's a function
+    const resolvedText = typeof question.text === 'function'
+      ? question.text(questionContext)
+      : question.text;
+
     // Use the question text, but make it more concise for display
-    return question.text.replace(/\?$/, '').trim();
+    return typeof resolvedText === 'string'
+      ? resolvedText.replace(/\?$/, '').trim()
+      : String(resolvedText);
   };
 
   return (

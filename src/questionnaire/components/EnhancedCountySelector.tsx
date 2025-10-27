@@ -190,18 +190,18 @@ const renderLabelSection = (
     <>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
+        className="question-label block"
       >
         {question.text}
         {question.required && (
-          <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
+          <span className="required-indicator" aria-label="required">
             *
           </span>
         )}
       </label>
 
       {question.description && (
-        <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
+        <p id={descId} className="question-description">
           {question.description}
         </p>
       )}
