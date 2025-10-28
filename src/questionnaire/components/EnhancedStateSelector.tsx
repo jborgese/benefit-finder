@@ -934,12 +934,15 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     }
   }, [locationDetected, detectedState, value]);
 
-  // Handle location permission denial
+  // Handle location permission denial - only after we've confirmed it's permanently denied
+  // Don't set locationDetected prematurely as it blocks coordinate processing
   useEffect(() => {
-    if (hasPermission === false && !locationDetected && !coordinates) {
-      setLocationDetected(true); // Prevent repeated requests only if no coordinates
+    // Only mark as detected if permission is definitively denied AND we have an error
+    // This prevents premature blocking when hasPermission is temporarily false during initial request
+    if (hasPermission === false && locationError && !locationDetected && !coordinates) {
+      setLocationDetected(true); // Prevent repeated requests only if definitely denied
     }
-  }, [hasPermission, locationDetected, coordinates]);
+  }, [hasPermission, locationError, locationDetected, coordinates]);
 
   // Reset touched state when question changes
   useEffect(() => {
