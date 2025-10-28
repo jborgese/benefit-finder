@@ -398,6 +398,84 @@ src/
   - Organize by topic: use subdirectories for feature-specific documentation if needed
   - Never create documentation files in the project root (except README.md)
 
+## Post-File Creation Linting Requirements
+🚨 **MANDATORY: Run linting after creating ANY new file** 🚨
+
+### When This Rule Applies
+This rule applies when you create ANY new file, including but not limited to:
+- Test files (`*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`)
+- Component files (`*.tsx`)
+- Utility files (`*.ts`)
+- Configuration files (`*.json`, `*.js`, `*.ts`)
+- Documentation files (`*.md`)
+- Any other file that could be linted
+
+### Required Workflow After File Creation
+**Step 1:** Navigate to project root (ALWAYS do this first)
+```powershell
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
+```
+
+**Step 2:** Verify you're in the correct location
+```powershell
+Test-Path package.json
+```
+
+**Step 3:** Run linting on the newly created file
+```powershell
+npm run lint -- "path/to/newly/created/file"
+```
+
+**Step 4:** If linting errors/warnings are found, fix them immediately
+```powershell
+npm run lint:fix -- "path/to/newly/created/file"
+```
+
+**Step 5:** Re-run linting to verify all issues are resolved
+```powershell
+npm run lint -- "path/to/newly/created/file"
+```
+
+### Complete Example: After Creating a Test File
+```powershell
+# After creating src/components/Button.test.tsx
+cd "C:\Users\Nipply Nathan\Documents\GitHub\benefit-finder"
+Test-Path package.json
+npm run lint -- "src/components/Button.test.tsx"
+# If errors found:
+npm run lint:fix -- "src/components/Button.test.tsx"
+npm run lint -- "src/components/Button.test.tsx"  # Verify fixes
+```
+
+### Linting Error Resolution Guidelines
+1. **Auto-fixable issues**: Use `npm run lint:fix` to automatically resolve formatting and simple issues
+2. **Type errors**: Fix TypeScript type issues manually - never use `any` types
+3. **Import/export issues**: Ensure proper imports and exports according to project standards
+4. **Accessibility issues**: Fix any accessibility-related linting warnings
+5. **Security warnings**: Address any security-related linting warnings
+6. **Unused variables**: Remove or properly use all declared variables
+
+### What Constitutes "Resolved"
+- ✅ **Zero linting errors** for the newly created file
+- ✅ **Zero linting warnings** for the newly created file (unless explicitly justified)
+- ✅ **File passes all ESLint rules** configured in the project
+- ✅ **TypeScript compilation succeeds** without errors
+
+### Failure to Comply
+If you create a file and do NOT run linting:
+- ❌ **You have NOT completed the task**
+- ❌ **The file may contain errors that break the build**
+- ❌ **The file may not follow project coding standards**
+- ❌ **You must go back and fix the linting issues before wrapping up**
+
+### Integration with Existing Workflow
+This rule works in conjunction with the existing Git workflow:
+1. Create file → Run linting (this rule)
+2. Fix any linting issues
+3. Run tests if applicable
+4. Commit with proper message
+5. Push to repository
+
 ## Git Workflow
 - Use conventional commit format: `type(scope): description`
 - Types: feat, fix, docs, style, refactor, test, chore

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { CountySelectorDemo } from '../components/CountySelectorDemo';
@@ -15,7 +15,7 @@ vi.mock('../questionnaire/components/EnhancedCountySelector', () => ({
   EnhancedCountySelector: vi.fn(({ onChange, value, selectedState }) => (
     <div data-testid="enhanced-county-selector">
       <div data-testid="selected-state">{selectedState}</div>
-      <div data-testid="selected-county">{value || 'None'}</div>
+      <div data-testid="selected-county">{value ?? 'None'}</div>
       <button
         data-testid="select-county-button"
         onClick={() => onChange('Los Angeles County')}
@@ -356,7 +356,7 @@ describe('CountySelectorDemo Component', () => {
         .filter(block => block.className.includes('bg-gray-100'))
         .map(block => block.textContent);
 
-      expect(codeContent.some(content => content?.includes('EnhancedCountySelector'))).toBe(true);
+      expect(codeContent.some(content => content.includes('EnhancedCountySelector'))).toBe(true);
     });
   });
 
@@ -407,7 +407,7 @@ describe('CountySelectorDemo Component', () => {
       const checkboxes = screen.getAllByRole('checkbox');
       const checkboxLabels = checkboxes.map(checkbox => {
         const label = checkbox.closest('label');
-        return label?.textContent?.trim();
+        return label?.textContent.trim() ?? '';
       });
 
       expect(checkboxLabels).toContain('Popular Counties First');

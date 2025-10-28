@@ -758,7 +758,6 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   const errorId = `${id}-error`;
   const descId = `${id}-desc`;
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

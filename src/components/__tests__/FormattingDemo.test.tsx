@@ -31,7 +31,7 @@ describe('FormattingDemo Component', () => {
           'formatting.examples.dateTime': 'Date & Time Examples',
           'formatting.examples.percent': 'Percentage Examples',
         };
-        return translations[key] || key;
+        return translations[key] ?? key;
       }),
       formatCurrency: vi.fn((amount: number) => `$${amount.toLocaleString()}`),
       formatDate: vi.fn((date: Date, options?: Intl.DateTimeFormatOptions) => {
@@ -101,7 +101,7 @@ describe('FormattingDemo Component', () => {
     it('should call formatCurrency with correct parameters', () => {
       const mockFormatCurrency = vi.fn((amount: number) => `$${amount.toLocaleString()}`);
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: mockFormatCurrency,
         formatDate: vi.fn(),
         formatNumber: vi.fn(),
@@ -116,7 +116,7 @@ describe('FormattingDemo Component', () => {
     it('should call formatNumber with correct parameters for regular numbers', () => {
       const mockFormatNumber = vi.fn((number: number) => number.toLocaleString());
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: mockFormatNumber,
@@ -136,7 +136,7 @@ describe('FormattingDemo Component', () => {
         return number.toLocaleString();
       });
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: mockFormatNumber,
@@ -160,7 +160,7 @@ describe('FormattingDemo Component', () => {
         return date.toLocaleDateString('en-US');
       });
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: mockFormatDate,
         formatNumber: vi.fn(),
@@ -179,7 +179,7 @@ describe('FormattingDemo Component', () => {
 
     it('should display current language', () => {
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: vi.fn(),
@@ -194,7 +194,7 @@ describe('FormattingDemo Component', () => {
 
   describe('Translation Integration', () => {
     it('should call translation function with correct key', () => {
-      const mockT = vi.fn((key: string) => 'Currency Examples');
+      const mockT = vi.fn((_key: string) => 'Currency Examples');
       mockUseI18n.mockReturnValue({
         t: mockT,
         formatCurrency: vi.fn(),
@@ -248,7 +248,7 @@ describe('FormattingDemo Component', () => {
       const labels = screen.getAllByText(/:/);
       labels.forEach(label => {
         // Only check labels that end with ':' (not values that contain ':')
-        if (label.textContent?.endsWith(':') && label.tagName === 'SPAN') {
+        if (label.textContent.endsWith(':') && label.tagName === 'SPAN') {
           expect(label).toHaveClass('text-sm', 'text-gray-600');
         }
       });
@@ -266,7 +266,7 @@ describe('FormattingDemo Component', () => {
     it('should display formatted currency value', () => {
       const mockFormatCurrency = vi.fn(() => '$2,500.00');
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: mockFormatCurrency,
         formatDate: vi.fn(),
         formatNumber: vi.fn(),
@@ -281,7 +281,7 @@ describe('FormattingDemo Component', () => {
     it('should display formatted number value', () => {
       const mockFormatNumber = vi.fn(() => '1,234,567.89');
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: mockFormatNumber,
@@ -299,7 +299,7 @@ describe('FormattingDemo Component', () => {
     it('should display formatted date value', () => {
       const mockFormatDate = vi.fn(() => '12/25/2024');
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: mockFormatDate,
         formatNumber: vi.fn(),
@@ -322,7 +322,7 @@ describe('FormattingDemo Component', () => {
         return number.toLocaleString();
       });
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: mockFormatNumber,
@@ -342,7 +342,7 @@ describe('FormattingDemo Component', () => {
         return '12/25/2024';
       });
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: mockFormatDate,
         formatNumber: vi.fn(),
@@ -358,7 +358,7 @@ describe('FormattingDemo Component', () => {
   describe('Edge Cases', () => {
     it('should handle undefined formatting functions gracefully', () => {
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: undefined as unknown as (amount: number) => string,
         formatDate: undefined as unknown as (date: Date, options?: Intl.DateTimeFormatOptions) => string,
         formatNumber: undefined as unknown as (number: number, options?: Intl.NumberFormatOptions) => string,
@@ -370,7 +370,7 @@ describe('FormattingDemo Component', () => {
 
     it('should handle null current language', () => {
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: vi.fn(),
@@ -388,7 +388,7 @@ describe('FormattingDemo Component', () => {
 
     it('should handle empty string current language', () => {
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: vi.fn(),
@@ -405,7 +405,7 @@ describe('FormattingDemo Component', () => {
 
     it('should handle formatting functions that return empty strings', () => {
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(() => ''),
         formatDate: vi.fn(() => ''),
         formatNumber: vi.fn(() => ''),
@@ -427,7 +427,7 @@ describe('FormattingDemo Component', () => {
       const labels = screen.getAllByText(/:/);
       labels.forEach(label => {
         // Only check labels that are spans (not the note section)
-        if (label.textContent?.includes(':') && label.tagName === 'SPAN') {
+        if (label.textContent.includes(':') && label.tagName === 'SPAN') {
           const row = label.parentElement;
           expect(row).toHaveClass('flex', 'justify-between', 'items-center');
         }
@@ -460,7 +460,7 @@ describe('FormattingDemo Component', () => {
     it('should use correct sample income value', () => {
       const mockFormatCurrency = vi.fn();
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: mockFormatCurrency,
         formatDate: vi.fn(),
         formatNumber: vi.fn(),
@@ -475,7 +475,7 @@ describe('FormattingDemo Component', () => {
     it('should use correct sample number value', () => {
       const mockFormatNumber = vi.fn();
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: mockFormatNumber,
@@ -490,7 +490,7 @@ describe('FormattingDemo Component', () => {
     it('should use correct sample percentage value', () => {
       const mockFormatNumber = vi.fn();
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: vi.fn(),
         formatNumber: mockFormatNumber,
@@ -505,7 +505,7 @@ describe('FormattingDemo Component', () => {
     it('should use correct sample date', () => {
       const mockFormatDate = vi.fn();
       mockUseI18n.mockReturnValue({
-        t: vi.fn((key: string) => 'Currency Examples'),
+        t: vi.fn((_key: string) => 'Currency Examples'),
         formatCurrency: vi.fn(),
         formatDate: mockFormatDate,
         formatNumber: vi.fn(),
