@@ -24,14 +24,14 @@ describe('FormattingDemo Component', () => {
     // Default mock implementation
     mockUseI18n.mockReturnValue({
       t: vi.fn((key: string) => {
-        const translations: Record<string, string> = {
-          'formatting.examples.currency': 'Currency Examples',
-          'formatting.examples.number': 'Number Examples',
-          'formatting.examples.date': 'Date Examples',
-          'formatting.examples.dateTime': 'Date & Time Examples',
-          'formatting.examples.percent': 'Percentage Examples',
-        };
-        return translations[key] ?? key;
+        const translations = new Map([
+          ['formatting.examples.currency', 'Currency Examples'],
+          ['formatting.examples.number', 'Number Examples'],
+          ['formatting.examples.date', 'Date Examples'],
+          ['formatting.examples.dateTime', 'Date & Time Examples'],
+          ['formatting.examples.percent', 'Percentage Examples'],
+        ]);
+        return translations.get(key) ?? key;
       }),
       formatCurrency: vi.fn((amount: number) => `$${amount.toLocaleString()}`),
       formatDate: vi.fn((date: Date, options?: Intl.DateTimeFormatOptions) => {
