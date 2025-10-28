@@ -19,7 +19,7 @@ const WelcomeTour = React.lazy(() => import('./components/onboarding').then(m =>
 const HelpTooltip = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.HelpTooltip })));
 const PrivacyExplainer = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.PrivacyExplainer })));
 const QuickStartGuide = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.QuickStartGuide })));
-const ShortcutsHelp = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.ShortcutsHelp })));
+const ShortcutsHelp = React.lazy(() => import('./components/ShortcutsHelp').then(m => ({ default: m.ShortcutsHelp })));
 
 // Import ultra-optimized database functions
 import { clearDatabase } from './db/ultra-optimized-database';

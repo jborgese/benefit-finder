@@ -113,6 +113,132 @@ vi.mock('../utils/forceFixProgramNames', () => ({
   forceFixProgramNames: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('../utils/encryption', () => ({
+  deriveKeyFromPassphrase: vi.fn().mockResolvedValue({
+    key: new CryptoKey(),
+    salt: 'test-salt',
+    iterations: 1000,
+  }),
+  encrypt: vi.fn().mockResolvedValue({
+    ciphertext: 'test-ciphertext',
+    iv: 'test-iv',
+    algorithm: 'AES-GCM',
+    timestamp: Date.now(),
+  }),
+  decrypt: vi.fn().mockResolvedValue(JSON.stringify({
+    version: '1.0.0',
+    exportedAt: new Date().toISOString(),
+    results: {
+      qualified: [],
+      maybe: [],
+      likely: [],
+      notQualified: [],
+      totalPrograms: 0,
+      evaluatedAt: new Date().toISOString(),
+    },
+  })),
+}));
+
+vi.mock('../components/results/exportUtils', () => ({
+  importEncrypted: vi.fn().mockResolvedValue({
+    results: {
+      qualified: [],
+      maybe: [],
+      likely: [],
+      notQualified: [],
+      totalPrograms: 0,
+      evaluatedAt: new Date(),
+    },
+    profileSnapshot: {},
+    metadata: {},
+    exportedAt: new Date(),
+  }),
+  exportEncrypted: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'application/octet-stream' })),
+  exportToPDF: vi.fn(),
+  downloadBlob: vi.fn(),
+  generateExportFilename: vi.fn().mockReturnValue('test-filename'),
+}));
+
+vi.mock('../components/Routes', () => ({
+  Routes: {
+    Home: vi.fn(({ onStartQuestionnaire }: { onStartQuestionnaire: () => void }) => (
+      <div data-testid="home-page">
+        <button onClick={onStartQuestionnaire}>Start Assessment</button>
+      </div>
+    )),
+    Questionnaire: vi.fn(({ onComplete }: { onComplete: (answers: Record<string, unknown>) => void }) => (
+      <div data-testid="questionnaire-page">
+        <button onClick={() => onComplete({})}>Complete</button>
+      </div>
+    )),
+    Results: vi.fn(({ onNewAssessment, onImportResults }: {
+      onNewAssessment: () => void;
+      onImportResults: (results: unknown) => Promise<void>;
+    }) => (
+      <div data-testid="results-page">
+        <button onClick={onNewAssessment}>New Assessment</button>
+        <button onClick={() => void onImportResults({})}>Import</button>
+      </div>
+    )),
+    Error: vi.fn(({ onGoHome }: { onGoHome: () => void }) => (
+      <div data-testid="error-page">
+        <button onClick={onGoHome}>Go Home</button>
+      </div>
+    )),
+  },
+}));
+
+vi.mock('../pages/HomePage', () => ({
+  HomePage: () => <div data-testid="home-page">Home Page</div>,
+}));
+
+vi.mock('../pages/QuestionnairePage', () => ({
+  QuestionnairePage: () => <div data-testid="questionnaire-page">Questionnaire Page</div>,
+}));
+
+vi.mock('../pages/ResultsPage', () => ({
+  ResultsPage: () => <div data-testid="results-page">Results Page</div>,
+}));
+
+vi.mock('../pages/ErrorPage', () => ({
+  ErrorPage: () => <div data-testid="error-page">Error Page</div>,
+}));
+
+vi.mock('../components/RoutePreloader', () => ({
+  RoutePreloader: {
+    preloadAll: vi.fn(),
+    preloadRoute: vi.fn(),
+    preloadUserJourney: vi.fn(),
+  },
+}));
+
+vi.mock('../components/RouteComponent', () => ({
+  RouteComponent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+vi.mock('../components/RouteLoadingFallback', () => ({
+  RouteLoadingFallback: () => <div data-testid="loading-fallback">Loading...</div>,
+}));
+
+// Mock lazy-loaded onboarding components
+vi.mock('../components/onboarding', () => ({
+  WelcomeTour: ({ isOpen, onClose: _onClose }: { isOpen: boolean; onClose: () => void }) => (
+    isOpen ? <div data-testid="welcome-tour">Welcome Tour</div> : null
+  ),
+  HelpTooltip: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="help-tooltip">{children}</div>
+  ),
+  PrivacyExplainer: ({ isOpen, onClose: _onClose }: { isOpen: boolean; onClose: () => void }) => (
+    isOpen ? <div data-testid="privacy-explainer">Privacy Explainer</div> : null
+  ),
+  QuickStartGuide: ({ isOpen, onClose: _onClose }: { isOpen: boolean; onClose: () => void }) => (
+    isOpen ? <div data-testid="quick-start-guide">Quick Start Guide</div> : null
+  ),
+  ShortcutsHelp: ({ isOpen, onClose: _onClose }: { isOpen: boolean; onClose: () => void }) => (
+    isOpen ? <div data-testid="shortcuts-help">Shortcuts Help</div> : null
+  ),
+}));
+
 vi.mock('../rules', () => ({
   evaluateAllPrograms: vi.fn().mockResolvedValue({
     programResults: new Map(),

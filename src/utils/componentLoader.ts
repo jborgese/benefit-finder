@@ -9,7 +9,6 @@ import {
   LazyProgramCard,
   LazyResultsExport,
   LazyResultsImport,
-  LazyQuestionnaireAnswersCard,
   LazyEnhancedQuestionnaire
 } from '../components/LazyComponents';
 
@@ -20,15 +19,17 @@ export const ComponentLoader = {
   /**
    * Preload a component for better UX
    */
-  preload: (component: () => Promise<any>): void => {
-    component();
+  preload: (component: () => Promise<unknown>): void => {
+    void component();
   },
 
   /**
    * Preload multiple components
    */
-  preloadMultiple: (components: (() => Promise<any>)[]): void => {
-    components.forEach(component => component());
+  preloadMultiple: (components: (() => Promise<unknown>)[]): void => {
+    components.forEach(component => {
+      void component();
+    });
   },
 
   /**
@@ -38,17 +39,17 @@ export const ComponentLoader = {
     switch (state) {
       case 'home':
         // Preload questionnaire components
-        LazyEnhancedQuestionnaire();
+        ComponentLoader.preload(LazyEnhancedQuestionnaire);
         break;
       case 'questionnaire':
         // Preload results components
-        LazyResultsSummary();
-        LazyProgramCard();
+        ComponentLoader.preload(LazyResultsSummary);
+        ComponentLoader.preload(LazyProgramCard);
         break;
       case 'results':
         // Preload export/import components
-        LazyResultsExport();
-        LazyResultsImport();
+        ComponentLoader.preload(LazyResultsExport);
+        ComponentLoader.preload(LazyResultsImport);
         break;
     }
   }

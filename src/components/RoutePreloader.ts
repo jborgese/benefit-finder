@@ -5,10 +5,10 @@
  */
 
 // Lazy load route components for preloading
-const LazyHomePage = () => import('../pages/HomePage');
-const LazyQuestionnairePage = () => import('../pages/QuestionnairePage');
-const LazyResultsPage = () => import('../pages/ResultsPage');
-const LazyErrorPage = () => import('../pages/ErrorPage');
+const LazyHomePage = (): Promise<unknown> => import('../pages/HomePage').then(module => ({ default: module.HomePage }));
+const LazyQuestionnairePage = (): Promise<unknown> => import('../pages/QuestionnairePage').then(module => ({ default: module.QuestionnairePage }));
+const LazyResultsPage = (): Promise<unknown> => import('../pages/ResultsPage').then(module => ({ default: module.ResultsPage }));
+const LazyErrorPage = (): Promise<unknown> => import('../pages/ErrorPage').then(module => ({ default: module.ErrorPage }));
 
 /**
  * Route preloading utilities
@@ -18,10 +18,10 @@ export const RoutePreloader = {
    * Preload all routes for instant navigation
    */
   preloadAll: (): void => {
-    LazyHomePage();
-    LazyQuestionnairePage();
-    LazyResultsPage();
-    LazyErrorPage();
+    void LazyHomePage();
+    void LazyQuestionnairePage();
+    void LazyResultsPage();
+    void LazyErrorPage();
   },
 
   /**
@@ -30,16 +30,16 @@ export const RoutePreloader = {
   preloadRoute: (route: 'home' | 'questionnaire' | 'results' | 'error'): void => {
     switch (route) {
       case 'home':
-        LazyHomePage();
+        void LazyHomePage();
         break;
       case 'questionnaire':
-        LazyQuestionnairePage();
+        void LazyQuestionnairePage();
         break;
       case 'results':
-        LazyResultsPage();
+        void LazyResultsPage();
         break;
       case 'error':
-        LazyErrorPage();
+        void LazyErrorPage();
         break;
     }
   },
@@ -51,15 +51,15 @@ export const RoutePreloader = {
     switch (currentRoute) {
       case 'home':
         // User likely to go to questionnaire next
-        LazyQuestionnairePage();
+        void LazyQuestionnairePage();
         break;
       case 'questionnaire':
         // User likely to go to results next
-        LazyResultsPage();
+        void LazyResultsPage();
         break;
       case 'results':
         // User might start new assessment
-        LazyQuestionnairePage();
+        void LazyQuestionnairePage();
         break;
     }
   }
