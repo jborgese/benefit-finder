@@ -758,8 +758,10 @@ describe('App Component', () => {
         loadResult: vi.fn().mockResolvedValue(mockResults),
       });
 
-      act(() => {
+      await act(async () => {
         render(<App />);
+        // Wait for any async operations to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
       });
 
       // Test that the mock saveResults function is available and can be called
@@ -826,8 +828,10 @@ describe('App Component', () => {
         loadResult: vi.fn().mockResolvedValue(mockResults),
       });
 
-      act(() => {
+      await act(async () => {
         render(<App />);
+        // Wait for any async operations to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
       });
 
       // Test that the mock saveResults function is available and can be called

@@ -1,12 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { EnhancedQuestionnaire } from './questionnaire/ui';
-import { ResultsSummary, ProgramCard, ResultsExport, ResultsImport, QuestionnaireAnswersCard, type EligibilityResults } from './components/results';
-import { useResultsManagement } from './components/results/useResultsManagement';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Button } from './components/Button';
 import { LiveRegion } from './questionnaire/accessibility';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { useI18n } from './i18n/hooks';
-import { WelcomeTour, HelpTooltip, PrivacyExplainer, QuickStartGuide } from './components/onboarding';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TextSizeProvider } from './contexts/TextSizeContext';
@@ -14,6 +10,18 @@ import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { TextSizeControls } from './components/TextSizeControls';
 import { KeyboardShortcuts } from './components/KeyboardShortcuts';
 import { ShortcutsHelp } from './components/ShortcutsHelp';
+
+// Lazy load heavy components
+const EnhancedQuestionnaire = lazy(() => import('./questionnaire/ui').then(m => ({ default: m.EnhancedQuestionnaire })));
+const ResultsSummary = lazy(() => import('./components/results').then(m => ({ default: m.ResultsSummary })));
+const ProgramCard = lazy(() => import('./components/results').then(m => ({ default: m.ProgramCard })));
+const ResultsExport = lazy(() => import('./components/results').then(m => ({ default: m.ResultsExport })));
+const ResultsImport = lazy(() => import('./components/results').then(m => ({ default: m.ResultsImport })));
+const QuestionnaireAnswersCard = lazy(() => import('./components/results').then(m => ({ default: m.QuestionnaireAnswersCard })));
+const WelcomeTour = lazy(() => import('./components/onboarding').then(m => ({ default: m.WelcomeTour })));
+const HelpTooltip = lazy(() => import('./components/onboarding').then(m => ({ default: m.HelpTooltip })));
+const PrivacyExplainer = lazy(() => import('./components/onboarding').then(m => ({ default: m.PrivacyExplainer })));
+const QuickStartGuide = lazy(() => import('./components/onboarding').then(m => ({ default: m.QuickStartGuide })));
 
 // Import database functions
 import { clearDatabase } from './db';
@@ -29,6 +37,10 @@ import { formatCriteriaDetails } from './utils/formatCriteriaDetails';
 import { getProgramName, getProgramDescription } from './utils/programHelpers';
 import { createSampleResults as createSampleResultsData } from './utils/createSampleResults';
 import { createEnhancedFlow } from './questionnaire/enhanced-flow';
+
+// Import types
+import type { EligibilityResults } from './components/results';
+import { useResultsManagement } from './components/results/useResultsManagement';
 
 // Constants
 const US_FEDERAL_JURISDICTION = 'US-FEDERAL';
@@ -1116,12 +1128,14 @@ function App(): React.ReactElement {
                   </div>
 
                   <div className="max-w-4xl mx-auto px-4 sm:px-0 questionnaire-container">
-                    <EnhancedQuestionnaire
-                      flow={createEnhancedFlow()}
-                      onComplete={(answers): void => {
-                        void handleCompleteQuestionnaire(answers);
-                      }}
-                    />
+                    <Suspense fallback={<div className="text-center py-8">Loading questionnaire...</div>}>
+                      <EnhancedQuestionnaire
+                        flow={createEnhancedFlow()}
+                        onComplete={(answers): void => {
+                          void handleCompleteQuestionnaire(answers);
+                        }}
+                      />
+                    </Suspense>
                   </div>
                 </div>
               )}
