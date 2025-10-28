@@ -7,9 +7,9 @@
 import React from 'react';
 import { Button } from './Button';
 import { HelpTooltip } from './onboarding/HelpTooltip';
-import { LanguageSwitcher } from './LanguageSwitcher';
-import { ThemeSwitcher } from './ThemeSwitcher';
-import { TextSizeControls } from './TextSizeControls';
+import { LanguageSwitcher as _LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeSwitcher as _ThemeSwitcher } from './ThemeSwitcher';
+import { TextSizeControls as _TextSizeControls } from './TextSizeControls';
 import { useI18n } from '../i18n/hooks';
 
 interface HomePageProps {
@@ -26,10 +26,10 @@ export const HomePage: React.FC<HomePageProps> = ({
   onStartQuestionnaire,
   onViewResults,
   hasResults,
-  onStartWelcomeTour,
-  onStartPrivacyExplainer,
-  onStartQuickStartGuide,
-  onStartShortcutsHelp,
+  onStartWelcomeTour: _onStartWelcomeTour,
+  onStartPrivacyExplainer: _onStartPrivacyExplainer,
+  onStartQuickStartGuide: _onStartQuickStartGuide,
+  onStartShortcutsHelp: _onStartShortcutsHelp,
 }) => {
   const { t } = useI18n();
 

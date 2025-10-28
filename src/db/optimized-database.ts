@@ -19,10 +19,6 @@ import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-cry
 
 import { collections } from './collections';
 import type {
-  UserProfile,
-  BenefitProgram,
-  EligibilityRule,
-  EligibilityResult,
   AppSetting,
   UserProfileDocument,
   BenefitProgramDocument,
@@ -64,7 +60,7 @@ export async function initializeOptimizedDatabase(
       storage: wrappedValidateAjvStorage({
         storage: getRxStorageDexie(),
       }),
-      password: encryptionPassword || getDefaultEncryptionPassword(),
+      password: encryptionPassword ?? getDefaultEncryptionPassword(),
     }),
     // Optimized settings
     multiInstance: false, // Single instance for better performance

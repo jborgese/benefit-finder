@@ -5,38 +5,13 @@
  * to improve initial bundle size and loading performance.
  */
 
-import { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
-
-// Lazy load route components
-const LazyHomePage = lazy(() =>
-  import('../pages/HomePage').then(module => ({
-    default: module.HomePage
-  }))
-);
-
-const LazyQuestionnairePage = lazy(() =>
-  import('../pages/QuestionnairePage').then(module => ({
-    default: module.QuestionnairePage
-  }))
-);
-
-const LazyResultsPage = lazy(() =>
-  import('../pages/ResultsPage').then(module => ({
-    default: module.ResultsPage
-  }))
-);
-
-const LazyErrorPage = lazy(() =>
-  import('../pages/ErrorPage').then(module => ({
-    default: module.ErrorPage
-  }))
-);
 
 /**
  * Loading component for route transitions
  */
-const RouteLoadingFallback = () => (
+const RouteLoadingFallback = (): React.JSX.Element => (
   <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 dark:from-secondary-900 dark:to-primary-900 flex items-center justify-center">
     <div className="text-center">
       <div className="relative mb-6">
@@ -59,102 +34,19 @@ const RouteLoadingFallback = () => (
  */
 export const RouteComponent = ({
   children,
-  fallback = RouteLoadingFallback
+  _fallback = RouteLoadingFallback
 }: {
   children: React.ReactNode;
-  fallback?: React.ComponentType;
-}) => (
+  _fallback?: React.ComponentType;
+}): React.JSX.Element => (
   <ErrorBoundary
     onError={(error, errorInfo) => {
       console.error('Route Error Boundary caught an error:', error, errorInfo);
     }}
   >
-    <Suspense fallback={<fallback />}>
+    <Suspense fallback={<_fallback />}>
       {children}
     </Suspense>
   </ErrorBoundary>
 );
 
-/**
- * Route components with optimized loading
- */
-export const Routes = {
-  Home: () => (
-    <RouteComponent>
-      <LazyHomePage />
-    </RouteComponent>
-  ),
-
-  Questionnaire: () => (
-    <RouteComponent>
-      <LazyQuestionnairePage />
-    </RouteComponent>
-  ),
-
-  Results: () => (
-    <RouteComponent>
-      <LazyResultsPage />
-    </RouteComponent>
-  ),
-
-  Error: () => (
-    <RouteComponent>
-      <LazyErrorPage />
-    </RouteComponent>
-  ),
-};
-
-/**
- * Route preloading utilities
- */
-export const RoutePreloader = {
-  /**
-   * Preload all routes for instant navigation
-   */
-  preloadAll: () => {
-    LazyHomePage();
-    LazyQuestionnairePage();
-    LazyResultsPage();
-    LazyErrorPage();
-  },
-
-  /**
-   * Preload specific route
-   */
-  preloadRoute: (route: 'home' | 'questionnaire' | 'results' | 'error') => {
-    switch (route) {
-      case 'home':
-        LazyHomePage();
-        break;
-      case 'questionnaire':
-        LazyQuestionnairePage();
-        break;
-      case 'results':
-        LazyResultsPage();
-        break;
-      case 'error':
-        LazyErrorPage();
-        break;
-    }
-  },
-
-  /**
-   * Preload routes based on user journey
-   */
-  preloadUserJourney: (currentRoute: string) => {
-    switch (currentRoute) {
-      case 'home':
-        // User likely to go to questionnaire next
-        LazyQuestionnairePage();
-        break;
-      case 'questionnaire':
-        // User likely to go to results next
-        LazyResultsPage();
-        break;
-      case 'results':
-        // User might start new assessment
-        LazyQuestionnairePage();
-        break;
-    }
-  }
-};

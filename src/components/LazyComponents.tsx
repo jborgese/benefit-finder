@@ -77,43 +77,5 @@ export const LazyFlowDiagram = lazy(() =>
   }))
 );
 
-/**
- * Component loading utilities
- */
-export const ComponentLoader = {
-  /**
-   * Preload a component for better UX
-   */
-  preload: (component: () => Promise<any>) => {
-    component();
-  },
-
-  /**
-   * Preload multiple components
-   */
-  preloadMultiple: (components: (() => Promise<any>)[]) => {
-    components.forEach(component => component());
-  },
-
-  /**
-   * Preload components based on user state
-   */
-  preloadForState: (state: 'home' | 'questionnaire' | 'results') => {
-    switch (state) {
-      case 'home':
-        // Preload questionnaire components
-        LazyEnhancedQuestionnaire();
-        break;
-      case 'questionnaire':
-        // Preload results components
-        LazyResultsSummary();
-        LazyProgramCard();
-        break;
-      case 'results':
-        // Preload export/import components
-        LazyResultsExport();
-        LazyResultsImport();
-        break;
-    }
-  }
-};
+// Component loading utilities moved to separate file to fix react-refresh warning
+// See: src/utils/componentLoader.ts
