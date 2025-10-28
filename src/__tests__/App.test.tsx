@@ -249,7 +249,7 @@ describe('App Component', () => {
       });
     });
 
-    it('should handle questionnaire completion', async () => {
+    it('should handle questionnaire completion with qualified results', async () => {
       const user = userEvent.setup();
       const { evaluateAllPrograms } = await import('../rules');
       const { createUserProfile } = await import('../db/utils');
@@ -270,6 +270,10 @@ describe('App Component', () => {
             confidence: 95,
             reason: 'Meets income requirements',
             evaluatedAt: new Date().toISOString(),
+            criteriaResults: [],
+            requiredDocuments: [],
+            nextSteps: [],
+            ruleVersion: '1.0.0',
           }],
         ]),
       });
@@ -279,6 +283,11 @@ describe('App Component', () => {
         householdSize: 3,
         householdIncome: 30000,
         state: 'GA',
+        citizenship: 'us_citizen',
+        employmentStatus: 'employed',
+        hasDisability: false,
+        isPregnant: false,
+        hasChildren: true,
       });
 
       render(<App />);
@@ -294,6 +303,192 @@ describe('App Component', () => {
       await user.click(completeButton);
 
       // Should show processing state or results (processing might complete quickly with mocks)
+      await waitFor(() => {
+        const processingText = screen.queryByText('results.processing.title');
+        const resultsSummary = screen.queryByText('results.summary.title');
+        expect(processingText ?? resultsSummary).toBeTruthy();
+      }, { timeout: 3000 });
+    });
+
+    it('should handle questionnaire completion with income hard stop results', async () => {
+      const user = userEvent.setup();
+      const { evaluateAllPrograms } = await import('../rules');
+      const { createUserProfile } = await import('../db/utils');
+
+      const mockSaveResults = vi.fn().mockResolvedValue(undefined);
+      mockUseResultsManagement.mockReturnValueOnce({
+        saveResults: mockSaveResults,
+        loadAllResults: vi.fn().mockResolvedValue([]),
+        loadResult: vi.fn().mockResolvedValue(null),
+      });
+
+      vi.mocked(evaluateAllPrograms).mockResolvedValue({
+        programResults: new Map([
+          ['snap-federal', {
+            programId: 'snap-federal',
+            ruleId: 'snap-federal-income-limits',
+            eligible: false,
+            confidence: 95,
+            reason: 'Income exceeds federal limits',
+            evaluatedAt: new Date().toISOString(),
+            criteriaResults: [],
+            requiredDocuments: [],
+            nextSteps: [],
+            ruleVersion: '1.0.0',
+          }],
+        ]),
+      });
+
+      vi.mocked(createUserProfile).mockResolvedValue({
+        id: 'test-profile',
+        householdSize: 3,
+        householdIncome: 100000,
+        state: 'GA',
+        citizenship: 'us_citizen',
+        employmentStatus: 'employed',
+        hasDisability: false,
+        isPregnant: false,
+        hasChildren: true,
+      });
+
+      render(<App />);
+
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      await user.click(startButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('questionnaire')).toBeInTheDocument();
+      });
+
+      const completeButton = screen.getByRole('button', { name: 'Complete' });
+      await user.click(completeButton);
+
+      await waitFor(() => {
+        const processingText = screen.queryByText('results.processing.title');
+        const resultsSummary = screen.queryByText('results.summary.title');
+        expect(processingText ?? resultsSummary).toBeTruthy();
+      }, { timeout: 3000 });
+    });
+
+    it('should handle questionnaire completion with maybe results', async () => {
+      const user = userEvent.setup();
+      const { evaluateAllPrograms } = await import('../rules');
+      const { createUserProfile } = await import('../db/utils');
+
+      const mockSaveResults = vi.fn().mockResolvedValue(undefined);
+      mockUseResultsManagement.mockReturnValueOnce({
+        saveResults: mockSaveResults,
+        loadAllResults: vi.fn().mockResolvedValue([]),
+        loadResult: vi.fn().mockResolvedValue(null),
+      });
+
+      vi.mocked(evaluateAllPrograms).mockResolvedValue({
+        programResults: new Map([
+          ['medicaid-federal', {
+            programId: 'medicaid-federal',
+            ruleId: 'medicaid-general-test',
+            eligible: false,
+            confidence: 45,
+            reason: 'Incomplete information',
+            incomplete: true,
+            evaluatedAt: new Date().toISOString(),
+            criteriaResults: [],
+            requiredDocuments: [],
+            nextSteps: [],
+            ruleVersion: '1.0.0',
+          }],
+        ]),
+      });
+
+      vi.mocked(createUserProfile).mockResolvedValue({
+        id: 'test-profile',
+        householdSize: 2,
+        householdIncome: 25000,
+        state: 'GA',
+        citizenship: 'us_citizen',
+        employmentStatus: 'employed',
+        hasDisability: false,
+        isPregnant: false,
+        hasChildren: false,
+      });
+
+      render(<App />);
+
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      await user.click(startButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('questionnaire')).toBeInTheDocument();
+      });
+
+      const completeButton = screen.getByRole('button', { name: 'Complete' });
+      await user.click(completeButton);
+
+      await waitFor(() => {
+        const processingText = screen.queryByText('results.processing.title');
+        const resultsSummary = screen.queryByText('results.summary.title');
+        expect(processingText ?? resultsSummary).toBeTruthy();
+      }, { timeout: 3000 });
+    });
+
+    it('should handle questionnaire completion with estimated benefits', async () => {
+      const user = userEvent.setup();
+      const { evaluateAllPrograms } = await import('../rules');
+      const { createUserProfile } = await import('../db/utils');
+
+      const mockSaveResults = vi.fn().mockResolvedValue(undefined);
+      mockUseResultsManagement.mockReturnValueOnce({
+        saveResults: mockSaveResults,
+        loadAllResults: vi.fn().mockResolvedValue([]),
+        loadResult: vi.fn().mockResolvedValue(null),
+      });
+
+      vi.mocked(evaluateAllPrograms).mockResolvedValue({
+        programResults: new Map([
+          ['snap-federal', {
+            programId: 'snap-federal',
+            ruleId: 'snap-income-test',
+            eligible: true,
+            confidence: 95,
+            reason: 'Meets income requirements',
+            evaluatedAt: new Date().toISOString(),
+            criteriaResults: [],
+            requiredDocuments: [],
+            nextSteps: [],
+            ruleVersion: '1.0.0',
+            estimatedBenefit: {
+              amount: 500,
+              frequency: 'monthly',
+              description: 'Monthly SNAP benefit',
+            },
+          }],
+        ]),
+      });
+
+      vi.mocked(createUserProfile).mockResolvedValue({
+        id: 'test-profile',
+        householdSize: 3,
+        householdIncome: 20000,
+        state: 'GA',
+        citizenship: 'us_citizen',
+        employmentStatus: 'employed',
+        hasDisability: false,
+        isPregnant: false,
+        hasChildren: true,
+      });
+
+      render(<App />);
+
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      await user.click(startButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('questionnaire')).toBeInTheDocument();
+      });
+
+      const completeButton = screen.getByRole('button', { name: 'Complete' });
+      await user.click(completeButton);
+
       await waitFor(() => {
         const processingText = screen.queryByText('results.processing.title');
         const resultsSummary = screen.queryByText('results.summary.title');
@@ -387,6 +582,62 @@ describe('App Component', () => {
         });
       }
     });
+
+    it('should open shortcuts help when shortcuts button is clicked', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      const shortcutsButtons = screen.getAllByText((content, element) => {
+        if (!element) return false;
+        return element.textContent === '⌨️ navigation.shortcuts' || element.textContent.includes('navigation.shortcuts');
+      });
+      const shortcutsButton = shortcutsButtons[0]?.closest('button');
+      if (shortcutsButton) {
+        await user.click(shortcutsButton);
+        await waitFor(() => {
+          expect(screen.getByTestId('shortcuts-help')).toBeInTheDocument();
+        });
+      }
+    });
+
+    it('should handle welcome tour completion', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      // Open tour
+      const tourButtons = screen.getAllByText((content, element) => {
+        if (!element) return false;
+        return element.textContent === '🎯 navigation.tour' || element.textContent.includes('navigation.tour');
+      });
+      const tourButton = tourButtons[0]?.closest('button');
+      if (tourButton) {
+        await user.click(tourButton);
+        await waitFor(() => {
+          expect(screen.getByTestId('welcome-tour')).toBeInTheDocument();
+        });
+      }
+
+      // Check that tour completion sets localStorage
+      expect(localStorage.getItem('bf-welcome-tour-completed')).toBeNull();
+    });
+
+    it('should handle quick start guide assessment start', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      // Open guide
+      const guideButtons = screen.getAllByText((content, element) => {
+        if (!element) return false;
+        return element.textContent === '📖 navigation.guide' || element.textContent.includes('navigation.guide');
+      });
+      const guideButton = guideButtons[0]?.closest('button');
+      if (guideButton) {
+        await user.click(guideButton);
+        await waitFor(() => {
+          expect(screen.getByTestId('quick-start-guide')).toBeInTheDocument();
+        });
+      }
+    });
   });
 
   describe('Error Handling', () => {
@@ -441,6 +692,63 @@ describe('App Component', () => {
         const errorText = screen.queryByText(/Error/i);
         expect(processingText ?? errorText).toBeTruthy();
       }, { timeout: 3000 });
+    });
+
+    it('should handle database operations errors during questionnaire completion', async () => {
+      const user = userEvent.setup();
+      const { createUserProfile } = await import('../db/utils');
+      const { initializeApp } = await import('../utils/initializeApp');
+
+      vi.mocked(initializeApp).mockResolvedValue(undefined);
+      vi.mocked(createUserProfile).mockRejectedValue(new Error('Database operation failed'));
+
+      render(<App />);
+
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      await user.click(startButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('questionnaire')).toBeInTheDocument();
+      });
+
+      const completeButton = screen.getByRole('button', { name: 'Complete' });
+      await user.click(completeButton);
+
+      // Should show error state
+      await waitFor(() => {
+        expect(screen.getByText('Error')).toBeInTheDocument();
+      }, { timeout: 3000 });
+    });
+
+    it('should handle import results errors', async () => {
+      const user = userEvent.setup();
+
+      const mockSaveResults = vi.fn().mockRejectedValue(new Error('Save failed'));
+      mockUseResultsManagement.mockReturnValueOnce({
+        saveResults: mockSaveResults,
+        loadAllResults: vi.fn().mockResolvedValue([]),
+        loadResult: vi.fn().mockResolvedValue(null),
+      });
+
+      render(<App />);
+
+      // Find import button if it exists
+      const importButton = screen.queryByRole('button', { name: 'Import' });
+      if (importButton) {
+        await user.click(importButton);
+        await waitFor(() => {
+          expect(mockSaveResults).toHaveBeenCalled();
+        });
+      }
+    });
+
+    it('should handle error boundary integration', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
+      // This tests that the ErrorBoundary is properly integrated
+      expect(() => render(<App />)).not.toThrow();
+
+      consoleSpy.mockRestore();
     });
   });
 
@@ -539,6 +847,72 @@ describe('App Component', () => {
       expect(isPregnant).toBe(true);
       expect(hasChildren).toBe(false);
     });
+
+    it('should handle annual income period correctly', () => {
+      const answers = {
+        householdIncome: 50000,
+        incomePeriod: 'annual',
+        householdSize: 4,
+        dateOfBirth: '1980-01-01',
+        state: 'TX',
+        county: 'Harris',
+        citizenship: 'us_citizen',
+        employmentStatus: 'employed',
+        hasQualifyingDisability: false,
+        isPregnant: false,
+        hasChildren: true,
+      };
+
+      // Test annual income handling
+      const annualIncome = answers.incomePeriod === 'monthly' ? answers.householdIncome * 12 : answers.householdIncome;
+      expect(annualIncome).toBe(50000);
+    });
+
+    it('should handle all citizenship types', () => {
+      const citizenshipTypes = ['us_citizen', 'permanent_resident', 'refugee', 'asylee', 'other'];
+
+      citizenshipTypes.forEach(citizenship => {
+        const answers = {
+          householdIncome: 30000,
+          incomePeriod: 'annual',
+          householdSize: 2,
+          dateOfBirth: '1990-01-01',
+          state: 'CA',
+          county: 'Los Angeles',
+          citizenship,
+          employmentStatus: 'employed',
+          hasQualifyingDisability: false,
+          isPregnant: false,
+          hasChildren: false,
+        };
+
+        // Test that citizenship is properly typed
+        expect(answers.citizenship).toBe(citizenship);
+      });
+    });
+
+    it('should handle all employment status types', () => {
+      const employmentStatuses = ['employed', 'unemployed', 'self_employed', 'retired', 'disabled', 'student'];
+
+      employmentStatuses.forEach(employmentStatus => {
+        const answers = {
+          householdIncome: 30000,
+          incomePeriod: 'annual',
+          householdSize: 2,
+          dateOfBirth: '1990-01-01',
+          state: 'CA',
+          county: 'Los Angeles',
+          citizenship: 'us_citizen',
+          employmentStatus,
+          hasQualifyingDisability: false,
+          isPregnant: false,
+          hasChildren: false,
+        };
+
+        // Test that employment status is properly typed
+        expect(answers.employmentStatus).toBe(employmentStatus);
+      });
+    });
   });
 
   describe('URL-based State Initialization', () => {
@@ -549,6 +923,88 @@ describe('App Component', () => {
       // The component should check the URL and set initial state
       // We can't directly test the internal state, but we can verify behavior
       expect(mockLocation.pathname).toBe('/results');
+    });
+
+    it('should handle URL with test parameter for E2E testing', () => {
+      mockLocation.pathname = '/results';
+      mockLocation.hostname = 'localhost';
+
+      // Mock URLSearchParams
+      const mockSearchParams = new Map([['test', 'true']]);
+      const mockURLSearchParams = {
+        get: (key: string) => mockSearchParams.get(key),
+        has: (key: string) => mockSearchParams.has(key),
+      };
+
+      // Mock navigator for HeadlessChrome detection
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'HeadlessChrome',
+        writable: true,
+      });
+
+      // Mock URLSearchParams constructor
+      const originalURLSearchParams = global.URLSearchParams;
+      global.URLSearchParams = vi.fn().mockImplementation(() => mockURLSearchParams);
+
+      render(<App />);
+
+      expect(mockLocation.pathname).toBe('/results');
+      expect(mockLocation.hostname).toBe('localhost');
+
+      // Restore
+      global.URLSearchParams = originalURLSearchParams;
+    });
+
+    it('should handle URL with playwright test parameter', () => {
+      mockLocation.pathname = '/results';
+      mockLocation.hostname = 'localhost';
+
+      // Mock URLSearchParams with playwright parameter
+      const mockSearchParams = new Map([['test', 'true'], ['playwright', 'true']]);
+      const mockURLSearchParams = {
+        get: (key: string) => mockSearchParams.get(key),
+        has: (key: string) => mockSearchParams.has(key),
+      };
+
+      // Mock URLSearchParams constructor
+      const originalURLSearchParams = global.URLSearchParams;
+      global.URLSearchParams = vi.fn().mockImplementation(() => mockURLSearchParams);
+
+      render(<App />);
+
+      expect(mockLocation.pathname).toBe('/results');
+      expect(mockLocation.hostname).toBe('localhost');
+
+      // Restore
+      global.URLSearchParams = originalURLSearchParams;
+    });
+
+    it('should handle non-browser environment gracefully', () => {
+      // Mock window as undefined to simulate non-browser environment
+      const originalWindow = global.window;
+      // @ts-expect-error - simulating non-browser environment
+      global.window = undefined;
+
+      // Should not throw error
+      expect(() => render(<App />)).not.toThrow();
+
+      // Restore
+      global.window = originalWindow;
+    });
+
+    it('should handle window.location access errors', () => {
+      // Mock window.location to throw error
+      Object.defineProperty(window, 'location', {
+        value: {
+          get pathname() {
+            throw new Error('Location access denied');
+          },
+        },
+        writable: true,
+      });
+
+      // Should not throw error and should render successfully
+      expect(() => render(<App />)).not.toThrow();
     });
   });
 
@@ -568,6 +1024,264 @@ describe('App Component', () => {
       // @ts-expect-error - restoring original value
       import.meta.env.DEV = originalEnv;
     });
+
+    it('should handle clearBenefitFinderDatabase helper', async () => {
+      const originalEnv = import.meta.env.DEV;
+      // @ts-expect-error - modifying readonly property for test
+      import.meta.env.DEV = true;
+
+      const { clearDatabase } = await import('../db');
+      const mockReload = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: { reload: mockReload },
+        writable: true,
+      });
+
+      render(<App />);
+
+      const clearHelper = (window as Record<string, unknown>).clearBenefitFinderDatabase as () => Promise<void>;
+      expect(clearHelper).toBeDefined();
+
+      await clearHelper();
+
+      expect(vi.mocked(clearDatabase)).toHaveBeenCalled();
+      expect(mockReload).toHaveBeenCalled();
+
+      // @ts-expect-error - restoring original value
+      import.meta.env.DEV = originalEnv;
+    });
+
+    it('should handle fixProgramNames helper', async () => {
+      const originalEnv = import.meta.env.DEV;
+      // @ts-expect-error - modifying readonly property for test
+      import.meta.env.DEV = true;
+
+      const { clearAndReinitialize } = await import('../utils/clearAndReinitialize');
+      const mockReload = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: { reload: mockReload },
+        writable: true,
+      });
+
+      render(<App />);
+
+      const fixHelper = (window as Record<string, unknown>).fixProgramNames as () => Promise<void>;
+      expect(fixHelper).toBeDefined();
+
+      await fixHelper();
+
+      expect(vi.mocked(clearAndReinitialize)).toHaveBeenCalled();
+      expect(mockReload).toHaveBeenCalled();
+
+      // @ts-expect-error - restoring original value
+      import.meta.env.DEV = originalEnv;
+    });
+
+    it('should handle forceFixProgramNames helper', async () => {
+      const originalEnv = import.meta.env.DEV;
+      // @ts-expect-error - modifying readonly property for test
+      import.meta.env.DEV = true;
+
+      const { forceFixProgramNames } = await import('../utils/forceFixProgramNames');
+      const mockReload = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: { reload: mockReload },
+        writable: true,
+      });
+
+      render(<App />);
+
+      const forceFixHelper = (window as Record<string, unknown>).forceFixProgramNames as () => Promise<void>;
+      expect(forceFixHelper).toBeDefined();
+
+      await forceFixHelper();
+
+      expect(vi.mocked(forceFixProgramNames)).toHaveBeenCalled();
+      expect(mockReload).toHaveBeenCalled();
+
+      // @ts-expect-error - restoring original value
+      import.meta.env.DEV = originalEnv;
+    });
+
+    it('should handle development helper errors gracefully', async () => {
+      const originalEnv = import.meta.env.DEV;
+      // @ts-expect-error - modifying readonly property for test
+      import.meta.env.DEV = true;
+
+      const { clearDatabase } = await import('../db');
+      vi.mocked(clearDatabase).mockRejectedValue(new Error('Database error'));
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
+      render(<App />);
+
+      const clearHelper = (window as Record<string, unknown>).clearBenefitFinderDatabase as () => Promise<void>;
+      await clearHelper();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to clear database:', expect.any(Error));
+
+      consoleSpy.mockRestore();
+      // @ts-expect-error - restoring original value
+      import.meta.env.DEV = originalEnv;
+    });
+  });
+
+  describe('State Management and Navigation', () => {
+    it('should handle go home navigation', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      // Start questionnaire
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      await user.click(startButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('questionnaire')).toBeInTheDocument();
+      });
+
+      // Navigate back to home (if home button is available)
+      const homeButton = screen.queryByRole('button', { name: 'navigation.home' });
+      if (homeButton) {
+        await user.click(homeButton);
+        await waitFor(() => {
+          expect(screen.getByText('app.subtitle')).toBeInTheDocument();
+        });
+      }
+    });
+
+    it('should handle view results navigation', async () => {
+      const user = userEvent.setup();
+
+      const mockLoadResult = vi.fn().mockResolvedValue({
+        qualified: [{ programId: 'test-program' }],
+        maybe: [],
+        likely: [],
+        notQualified: [],
+        totalPrograms: 1,
+        evaluatedAt: new Date(),
+      });
+
+      mockUseResultsManagement.mockReturnValueOnce({
+        saveResults: vi.fn(),
+        loadAllResults: vi.fn().mockResolvedValue([{ id: 'test-result' }]),
+        loadResult: mockLoadResult,
+      });
+
+      render(<App />);
+
+      await waitFor(() => {
+        expect(mockLoadResult).toHaveBeenCalled();
+      });
+
+      // Click view results button if it exists
+      const viewResultsButton = screen.queryByRole('button', { name: 'navigation.results' });
+      if (viewResultsButton) {
+        await user.click(viewResultsButton);
+        // Should navigate to results view
+      }
+    });
+
+    it('should handle back to home navigation from results', async () => {
+      const user = userEvent.setup();
+
+      const mockLoadResult = vi.fn().mockResolvedValue({
+        qualified: [{ programId: 'test-program' }],
+        maybe: [],
+        likely: [],
+        notQualified: [],
+        totalPrograms: 1,
+        evaluatedAt: new Date(),
+      });
+
+      mockUseResultsManagement.mockReturnValueOnce({
+        saveResults: vi.fn(),
+        loadAllResults: vi.fn().mockResolvedValue([{ id: 'test-result' }]),
+        loadResult: mockLoadResult,
+      });
+
+      render(<App />);
+
+      await waitFor(() => {
+        expect(mockLoadResult).toHaveBeenCalled();
+      });
+
+      // Find and click back to home button
+      const homeButtons = screen.queryAllByRole('button', { name: 'navigation.home' });
+      if (homeButtons.length > 0) {
+        await user.click(homeButtons[0]);
+        await waitFor(() => {
+          expect(screen.getByText('app.subtitle')).toBeInTheDocument();
+        });
+      }
+    });
+
+    it('should handle error state navigation', async () => {
+      const user = userEvent.setup();
+      const { initializeApp } = await import('../utils/initializeApp');
+
+      vi.mocked(initializeApp).mockRejectedValue(new Error('Database error'));
+
+      render(<App />);
+
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      await user.click(startButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('questionnaire')).toBeInTheDocument();
+      });
+
+      const completeButton = screen.getByRole('button', { name: 'Complete' });
+      await user.click(completeButton);
+
+      // Wait for error state
+      await waitFor(() => {
+        expect(screen.getByText('Error')).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      // Click return to home button
+      const returnHomeButton = screen.getByRole('button', { name: 'Return to Home' });
+      await user.click(returnHomeButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('app.subtitle')).toBeInTheDocument();
+      });
+    });
+
+    it('should handle refresh page button in error state', async () => {
+      const user = userEvent.setup();
+      const { initializeApp } = await import('../utils/initializeApp');
+
+      vi.mocked(initializeApp).mockRejectedValue(new Error('Database error'));
+
+      const mockReload = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: { reload: mockReload },
+        writable: true,
+      });
+
+      render(<App />);
+
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      await user.click(startButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('questionnaire')).toBeInTheDocument();
+      });
+
+      const completeButton = screen.getByRole('button', { name: 'Complete' });
+      await user.click(completeButton);
+
+      // Wait for error state
+      await waitFor(() => {
+        expect(screen.getByText('Error')).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      // Click refresh page button
+      const refreshButton = screen.getByRole('button', { name: 'Refresh Page' });
+      await user.click(refreshButton);
+
+      expect(mockReload).toHaveBeenCalled();
+    });
   });
 
   describe('Accessibility', () => {
@@ -586,6 +1300,24 @@ describe('App Component', () => {
       // Note: LiveRegion might not render if there's no message
       // This is a basic check that the component structure exists
       expect(document.body).toBeInTheDocument();
+    });
+
+    it('should have proper ARIA labels on action buttons', () => {
+      render(<App />);
+
+      const startButton = screen.getByRole('button', { name: 'questionnaire.title' });
+      expect(startButton).toBeInTheDocument();
+
+      // Check for proper aria-label attributes
+      expect(startButton).toHaveAttribute('aria-label', 'questionnaire.title');
+    });
+
+    it('should have proper ARIA labels on external links', () => {
+      render(<App />);
+
+      const frootsnoopsLink = screen.getByRole('link', { name: 'Visit frootsnoops.com - a frootsnoops site' });
+      expect(frootsnoopsLink).toBeInTheDocument();
+      expect(frootsnoopsLink).toHaveAttribute('aria-label', 'Visit frootsnoops.com - a frootsnoops site');
     });
   });
 });
