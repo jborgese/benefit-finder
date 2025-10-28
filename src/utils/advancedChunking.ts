@@ -39,8 +39,7 @@ export const getAdvancedChunkForSrcPath = (id: string): string | null => {
     { pattern: 'src/utils/initializeApp', chunk: 'utils-init' },
     { pattern: 'src/utils/', chunk: 'utils' },
 
-    // Other modules
-    { pattern: 'src/i18n/', chunk: 'i18n' },
+    // Other modules - i18n handled separately to avoid conflicts
     { pattern: 'src/questionnaire/', chunk: 'questionnaire' },
     { pattern: 'src/services/', chunk: 'services' },
     { pattern: 'src/stores/', chunk: 'stores' },
@@ -57,22 +56,15 @@ export const getAdvancedChunkForSrcPath = (id: string): string | null => {
 
 export const getAdvancedChunkForLibrary = (id: string): string | null => {
   const libraryMappings = [
-    // React ecosystem
+    // React ecosystem - keep React modules together to avoid circular dependencies
     { patterns: ['react', 'react-dom', 'react-router-dom'], chunk: 'react-vendor' },
 
-    // UI libraries
-    { patterns: ['@radix-ui/react-accordion', '@radix-ui/react-alert-dialog'], chunk: 'radix-dialogs' },
-    { patterns: ['@radix-ui/react-checkbox', '@radix-ui/react-label'], chunk: 'radix-forms' },
-    { patterns: ['@radix-ui/react-dropdown-menu', '@radix-ui/react-popover'], chunk: 'radix-menus' },
-    { patterns: ['@radix-ui/react-progress', '@radix-ui/react-slider'], chunk: 'radix-controls' },
-    { patterns: ['@radix-ui/react-select', '@radix-ui/react-switch'], chunk: 'radix-selects' },
-    { patterns: ['@radix-ui/react-tabs', '@radix-ui/react-tooltip'], chunk: 'radix-navigation' },
-    { patterns: ['@radix-ui/react-icons'], chunk: 'radix-icons' },
+    // UI libraries - consolidate Radix UI to avoid circular dependencies
     { patterns: ['@radix-ui/'], chunk: 'radix-ui' },
 
-    // Database
-    { patterns: ['rxdb'], chunk: 'database-rxdb' },
-    { patterns: ['dexie'], chunk: 'database-dexie' },
+    // Database - keep RxDB and all its plugins together
+    { patterns: ['rxdb'], chunk: 'database' },
+    { patterns: ['dexie'], chunk: 'database' },
 
     // State management
     { patterns: ['zustand'], chunk: 'state-zustand' },
@@ -88,8 +80,8 @@ export const getAdvancedChunkForLibrary = (id: string): string | null => {
     { patterns: ['reactflow'], chunk: 'visualization-reactflow' },
     { patterns: ['elkjs'], chunk: 'visualization-elk' },
 
-    // Internationalization
-    { patterns: ['i18next'], chunk: 'i18n' },
+    // Internationalization - keep ALL i18n modules together (both libraries and custom files)
+    { patterns: ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'src/i18n/'], chunk: 'i18n' },
   ];
 
   for (const mapping of libraryMappings) {

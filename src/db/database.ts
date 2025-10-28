@@ -51,8 +51,8 @@ const isE2ETest = typeof window !== 'undefined' && window.location.hostname === 
                    window.navigator.webdriver === true);
 
 // Detect if we're in test environment (Vitest, Jest, etc.)
-const isTestEnvironment = typeof process !== 'undefined' && 
-                          (process.env.NODE_ENV === 'test' || 
+const isTestEnvironment = typeof process !== 'undefined' &&
+                          (process.env.NODE_ENV === 'test' ||
                            process.env.VITEST === 'true' ||
                            typeof import.meta.env.VITEST !== 'undefined');
 

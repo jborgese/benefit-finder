@@ -21,8 +21,8 @@ const PrivacyExplainer = React.lazy(() => import('./components/onboarding').then
 const QuickStartGuide = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.QuickStartGuide })));
 const ShortcutsHelp = React.lazy(() => import('./components/ShortcutsHelp').then(m => ({ default: m.ShortcutsHelp })));
 
-// Import ultra-optimized database functions
-import { clearDatabase } from './db/ultra-optimized-database';
+// Import database functions
+import { clearDatabase } from './db/database';
 import { createUserProfile } from './db/utils';
 import { clearAndReinitialize } from './utils/clearAndReinitialize';
 import { forceFixProgramNames } from './utils/forceFixProgramNames';

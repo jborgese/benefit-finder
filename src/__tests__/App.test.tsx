@@ -12,37 +12,37 @@ import App from '../App';
 import { destroyDatabase } from '../db';
 
 // Mock all dependencies
-       vi.mock('../i18n/hooks', () => ({
-         useI18n: () => ({
-           t: (key: string) => {
-             // Return actual translated text for common keys used in tests
-             const translations: Record<string, string> = {
-               'app.title': 'BenefitFinder',
-               'app.subtitle': 'Find Your Government Benefits',
-               'questionnaire.title': 'Eligibility Questionnaire',
-               'startAssessment': 'Start Assessment',
-               'processing.title': 'Processing Your Results',
-               'results.processing.title': 'Processing Your Results',
-               'results.summary.title': 'Your Benefit Eligibility Results',
-               'navigation.home': 'Home',
-               'navigation.tour': 'Tour',
-               'navigation.privacy': 'Privacy',
-               'navigation.guide': 'Guide',
-               'error': 'Error',
-               'Go Home': 'Go Home',
-               'New Assessment': 'New Assessment',
-               'Import': 'Import',
-               'Complete': 'Complete',
-             };
-             return translations[key] || key;
-           },
-           i18n: {
-             language: 'en',
-             changeLanguage: vi.fn().mockResolvedValue(undefined),
-           },
-           changeLanguage: vi.fn().mockResolvedValue(undefined),
-         }),
-       }));
+vi.mock('../i18n/hooks', () => ({
+  useI18n: () => ({
+    t: (key: string) => {
+      // Return actual translated text for common keys used in tests
+      const translations: Record<string, string> = {
+        'app.title': 'BenefitFinder',
+        'app.subtitle': 'Find Your Government Benefits',
+        'questionnaire.title': 'Eligibility Questionnaire',
+        'startAssessment': 'Start Assessment',
+        'processing.title': 'Processing Your Results',
+        'results.processing.title': 'Processing Your Results',
+        'results.summary.title': 'Your Benefit Eligibility Results',
+        'navigation.home': 'Home',
+        'navigation.tour': 'Tour',
+        'navigation.privacy': 'Privacy',
+        'navigation.guide': 'Guide',
+        'error': 'Error',
+        'Go Home': 'Go Home',
+        'New Assessment': 'New Assessment',
+        'Import': 'Import',
+        'Complete': 'Complete',
+      };
+      return translations[key] || key;
+    },
+    i18n: {
+      language: 'en',
+      changeLanguage: vi.fn().mockResolvedValue(undefined),
+    },
+    changeLanguage: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
 
 const mockUseResultsManagement = vi.fn(() => ({
   saveResults: vi.fn().mockResolvedValue(undefined),
@@ -368,7 +368,8 @@ describe('App Component', () => {
       await waitFor(() => {
         expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
       });
-      expect(screen.getByText('Find Your Government Benefits')).toBeInTheDocument();
+      // Check for Start Assessment button which is present in home state
+      expect(screen.getByRole('button', { name: 'Start Assessment' })).toBeInTheDocument();
     });
 
     it('should render navigation with home button when not on home', async () => {
@@ -487,9 +488,9 @@ describe('App Component', () => {
 
       // Should show processing state or results (processing might complete quickly with mocks)
       await waitFor(() => {
-         const processingText = screen.queryByText('New Assessment');
-         const resultsSummary = screen.queryByText('Import');
-         expect(processingText ?? resultsSummary).toBeTruthy();
+        const processingText = screen.queryByText('New Assessment');
+        const resultsSummary = screen.queryByText('Import');
+        expect(processingText ?? resultsSummary).toBeTruthy();
       }, { timeout: 3000 });
     });
 
@@ -547,9 +548,9 @@ describe('App Component', () => {
       await user.click(completeButton);
 
       await waitFor(() => {
-         const processingText = screen.queryByText('New Assessment');
-         const resultsSummary = screen.queryByText('Import');
-         expect(processingText ?? resultsSummary).toBeTruthy();
+        const processingText = screen.queryByText('New Assessment');
+        const resultsSummary = screen.queryByText('Import');
+        expect(processingText ?? resultsSummary).toBeTruthy();
       }, { timeout: 3000 });
     });
 
@@ -608,9 +609,9 @@ describe('App Component', () => {
       await user.click(completeButton);
 
       await waitFor(() => {
-         const processingText = screen.queryByText('New Assessment');
-         const resultsSummary = screen.queryByText('Import');
-         expect(processingText ?? resultsSummary).toBeTruthy();
+        const processingText = screen.queryByText('New Assessment');
+        const resultsSummary = screen.queryByText('Import');
+        expect(processingText ?? resultsSummary).toBeTruthy();
       }, { timeout: 3000 });
     });
 
@@ -673,9 +674,9 @@ describe('App Component', () => {
       await user.click(completeButton);
 
       await waitFor(() => {
-         const processingText = screen.queryByText('New Assessment');
-         const resultsSummary = screen.queryByText('Import');
-         expect(processingText ?? resultsSummary).toBeTruthy();
+        const processingText = screen.queryByText('New Assessment');
+        const resultsSummary = screen.queryByText('Import');
+        expect(processingText ?? resultsSummary).toBeTruthy();
       }, { timeout: 3000 });
     });
 
@@ -862,9 +863,9 @@ describe('App Component', () => {
       // Should handle error without crashing
       await waitFor(() => {
         // Should either show error or return to a safe state
-         const processingText = screen.queryByText('Processing Your Results');
-         const errorText = screen.queryByText('Go Home');
-         expect(processingText ?? errorText).toBeTruthy();
+        const processingText = screen.queryByText('Processing Your Results');
+        const errorText = screen.queryByText('Go Home');
+        expect(processingText ?? errorText).toBeTruthy();
       }, { timeout: 3000 });
     });
 
@@ -889,10 +890,10 @@ describe('App Component', () => {
       const completeButton = screen.getByRole('button', { name: 'Complete' });
       await user.click(completeButton);
 
-       // Should show error state
-       await waitFor(() => {
-         expect(screen.getByText('Go Home')).toBeInTheDocument();
-       }, { timeout: 3000 });
+      // Should show error state
+      await waitFor(() => {
+        expect(screen.getByText('Go Home')).toBeInTheDocument();
+      }, { timeout: 3000 });
     });
 
     it('should handle import results errors', async () => {

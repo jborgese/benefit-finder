@@ -96,8 +96,9 @@ export async function loadStateRules(stateCode: string): Promise<RuleLoadResult>
   const errors: string[] = [];
 
   try {
-    // Dynamic import based on state code
-    const stateModule = await import(`./state/${stateCode.toLowerCase()}/index.ts`);
+    // Dynamic import based on state code with proper directory mapping
+    const stateDirectory = getStateDirectory(stateCode);
+    const stateModule = await import(`./state/${stateDirectory}/index.ts`);
     const stateRules = stateModule.default;
 
     // Convert to StateRules format
@@ -368,6 +369,25 @@ async function processStateRules(
  */
 export function getAvailableStates(): string[] {
   return ['georgia', 'california', 'texas'];
+}
+
+/**
+ * Map state codes to directory names
+ */
+const STATE_CODE_MAP: Record<string, string> = {
+  'GA': 'georgia',
+  'CA': 'california',
+  'TX': 'texas',
+  'georgia': 'georgia',
+  'california': 'california',
+  'texas': 'texas'
+};
+
+/**
+ * Get directory name for state code
+ */
+function getStateDirectory(stateCode: string): string {
+  return STATE_CODE_MAP[stateCode.toUpperCase()] || stateCode.toLowerCase();
 }
 
 /**

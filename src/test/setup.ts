@@ -63,7 +63,7 @@ beforeAll(() => {
   // Set test environment variables for proper detection
   process.env.NODE_ENV = 'test';
   process.env.VITEST = 'true';
-  
+
   // Mock window.matchMedia (for responsive tests)
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

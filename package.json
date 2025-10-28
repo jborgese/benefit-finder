@@ -68,6 +68,7 @@
     "test:e2e:changed": "playwright test",
     "test:perf": "tsx scripts/performance-tests.ts",
     "kill-dev": "powershell -Command \"Get-NetTCPConnection -LocalPort 5173,5174,5175,5176,5177,5178,5179 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { taskkill /F /PID $_.OwningProcess }\"",
+    "kill-preview": "powershell -Command \"Get-NetTCPConnection -LocalPort 4173,4174,4175,4176,4177,4178,4179 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { taskkill /F /PID $_.OwningProcess }\"",
     "lint": "eslint . --no-cache",
     "lint:fix": "eslint . --fix",
     "validate-rules": "tsx scripts/validate-rules.ts"

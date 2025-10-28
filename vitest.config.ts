@@ -105,7 +105,7 @@ export default defineConfig({
     // Memory optimization for coverage
     maxConcurrency: 1,
     maxWorkers: 1,
-    
+
     // Additional memory optimization
     sequence: {
       concurrent: false, // Run tests sequentially to reduce memory pressure
@@ -121,7 +121,7 @@ export default defineConfig({
     // Timeouts
     testTimeout: 10000,
     hookTimeout: 10000,
-    
+
     // Disable retries to reduce memory usage
     retry: 0,
 

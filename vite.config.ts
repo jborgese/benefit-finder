@@ -28,27 +28,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-          // Advanced chunking strategy for maximum optimization
-          manualChunks: (id) => {
-            // Check for state-specific rules first
-            const stateChunk = getStateSpecificChunk(id);
-            if (stateChunk) return stateChunk;
-
-            // Check advanced source path mappings
-            const srcChunk = getAdvancedChunkForSrcPath(id);
-            if (srcChunk) return srcChunk;
-
-            // Check advanced library mappings
-            const libChunk = getAdvancedChunkForLibrary(id);
-            if (libChunk) return libChunk;
-
-            // Handle vendor libraries with advanced strategy
-            if (id.includes('node_modules')) {
-              return getAdvancedChunkForVendorLibrary(id);
-            }
-
-            return undefined;
-          }
+          // Disable chunking entirely to avoid module loading issues
+          // Let Vite handle chunking automatically
       }
     },
     chunkSizeWarningLimit: 500, // Reduced from 1500 for better optimization awareness
@@ -67,7 +48,21 @@ export default defineConfig({
       'nanoid',
       'crypto-js',
       'dexie',
-      'rxdb'
+      'rxdb',
+      'rxdb/plugins/storage-dexie',
+      'rxdb/plugins/dev-mode',
+      'rxdb/plugins/query-builder',
+      'rxdb/plugins/update',
+      'rxdb/plugins/migration-schema',
+      'rxdb/plugins/validate-ajv',
+      'rxdb/plugins/encryption-crypto-js',
+      // i18n modules - ensure they're pre-bundled together
+      'i18next',
+      'react-i18next',
+      'i18next-browser-languagedetector',
+      // validation modules - ensure they're pre-bundled together
+      'zod',
+      'ajv'
     ]
   }
 });

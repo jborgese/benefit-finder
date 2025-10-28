@@ -118,12 +118,42 @@ const initOptions: InitOptions = {
   cleanCode: true,
 };
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init(initOptions)
-  .catch((error) => {
-    console.error('Failed to initialize i18n:', error);
-  });
+// Initialize i18n synchronously with proper error handling
+let isInitialized = false;
 
+const initializeI18n = (): void => {
+  if (isInitialized) return;
+
+  try {
+    i18n
+      .use(LanguageDetector)
+      .use(initReactI18next)
+      .init(initOptions);
+    isInitialized = true;
+    console.log('i18n initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize i18n:', error);
+    // Fallback initialization without language detection
+    try {
+      i18n
+        .use(initReactI18next)
+        .init({
+          ...initOptions,
+          lng: 'en', // Force English as fallback
+        });
+      isInitialized = true;
+      console.log('i18n initialized with fallback');
+    } catch (fallbackError) {
+      console.error('Failed to initialize i18n with fallback:', fallbackError);
+    }
+  }
+};
+
+// Initialize immediately
+initializeI18n();
+
+// Ensure the i18n instance is properly exported
 export default i18n;
+
+// Also export the instance for explicit use
+export { i18n };
