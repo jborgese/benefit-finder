@@ -190,7 +190,7 @@ export const SnapExplanation: React.FC<SnapExplanationProps> = ({
   const requirements = getSnapRequirementsExplanation(userProfile, t);
 
   return (
-    <Dialog.Root open={true} onOpenChange={onClose}>
+    <Dialog.Root open onOpenChange={onClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
         <Dialog.Content

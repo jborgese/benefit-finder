@@ -29,63 +29,60 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
    * Get context-aware label based on eligibility status and confidence
    */
   const getContextualLabel = (): { text: string; icon: string } => {
-    // For qualified results
-    if (status === 'qualified') {
-      switch (level) {
-        case 'high':
-          return { text: t('results.confidence.strongMatch'), icon: '👍' };
-        case 'medium':
-          return { text: t('results.confidence.goodMatch'), icon: '✓' };
-        case 'low':
-          return { text: t('results.confidence.possibleMatch'), icon: '?' };
-      }
-    }
+    switch (status) {
+      case 'qualified':
+        switch (level) {
+          case 'high':
+            return { text: t('results.confidence.strongMatch'), icon: '👍' };
+          case 'medium':
+            return { text: t('results.confidence.goodMatch'), icon: '✓' };
+          case 'low':
+            return { text: t('results.confidence.possibleMatch'), icon: '?' };
+        }
+        break;
 
-    // For not qualified results
-    if (status === 'not-qualified') {
-      switch (level) {
-        case 'high':
-          return { text: t('results.confidence.clearMismatch'), icon: '' };
-        case 'medium':
-          return { text: t('results.confidence.likelyIneligible'), icon: '' };
-        case 'low':
-          return { text: t('results.confidence.insufficientData'), icon: '?' };
-      }
-    }
+      case 'not-qualified':
+        switch (level) {
+          case 'high':
+            return { text: t('results.confidence.clearMismatch'), icon: '' };
+          case 'medium':
+            return { text: t('results.confidence.likelyIneligible'), icon: '' };
+          case 'low':
+            return { text: t('results.confidence.insufficientData'), icon: '?' };
+        }
+        break;
 
-    // For uncertain results (likely, maybe, unlikely)
-    if (status === 'likely') {
-      switch (level) {
-        case 'high':
-          return { text: t('results.confidence.strongMatch'), icon: '👍' };
-        case 'medium':
-          return { text: t('results.confidence.goodMatch'), icon: '✓' };
-        case 'low':
-          return { text: t('results.confidence.needsVerification'), icon: '?' };
-      }
-    }
+      case 'likely':
+        switch (level) {
+          case 'high':
+            return { text: t('results.confidence.strongMatch'), icon: '👍' };
+          case 'medium':
+            return { text: t('results.confidence.goodMatch'), icon: '✓' };
+          case 'low':
+            return { text: t('results.confidence.needsVerification'), icon: '?' };
+        }
+        break;
 
-    if (status === 'maybe') {
-      switch (level) {
-        case 'high':
-        case 'medium':
-          return { text: t('results.confidence.needsVerification'), icon: '?' };
-        case 'low':
-          return { text: t('results.confidence.moreInfoRequired'), icon: '❓' };
-      }
-    }
+      case 'maybe':
+        switch (level) {
+          case 'high':
+          case 'medium':
+            return { text: t('results.confidence.needsVerification'), icon: '?' };
+          case 'low':
+            return { text: t('results.confidence.moreInfoRequired'), icon: '❓' };
+        }
+        break;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (status === 'unlikely') {
-      switch (level) {
-        case 'high':
-        case 'medium':
-          return { text: t('results.confidence.likelyIneligible'), icon: '' };
-        case 'low':
-          return { text: t('results.confidence.insufficientData'), icon: '?' };
-        default:
-          return { text: 'Uncertain', icon: '?' };
-      }
+      case 'unlikely':
+        switch (level) {
+          case 'high':
+          case 'medium':
+            return { text: t('results.confidence.likelyIneligible'), icon: '' };
+          case 'low':
+            return { text: t('results.confidence.insufficientData'), icon: '?' };
+          default:
+            return { text: 'Uncertain', icon: '?' };
+        }
     }
 
     // Fallback
@@ -94,25 +91,23 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
 
   const getColorClass = (): string => {
     // Color based on status, not just confidence level
-    if (status === 'qualified' || status === 'likely') {
-      return 'text-green-700 bg-green-100 border-green-300';
-    }
+    switch (status) {
+      case 'qualified':
+      case 'likely':
+        return 'text-green-700 bg-green-100 border-green-300';
 
-    if (status === 'maybe') {
-      return 'text-blue-700 bg-blue-100 border-blue-300';
-    }
+      case 'maybe':
+        return 'text-blue-700 bg-blue-100 border-blue-300';
 
-    if (status === 'unlikely') {
-      return 'text-orange-700 bg-orange-100 border-orange-300';
-    }
+      case 'unlikely':
+        return 'text-orange-700 bg-orange-100 border-orange-300';
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (status === 'not-qualified') {
-      return 'text-gray-700 bg-gray-100 border-gray-300';
-    }
+      case 'not-qualified':
+        return 'text-gray-700 bg-gray-100 border-gray-300';
 
-    // Fallback
-    return 'text-gray-600 bg-gray-100 border-gray-300';
+      default:
+        return 'text-gray-600 bg-gray-100 border-gray-300';
+    }
   };
 
   const getSizeClass = (): string => {
@@ -129,36 +124,35 @@ export const ConfidenceScore: React.FC<ConfidenceScoreProps> = ({
 
   const getTooltipText = (): string => {
     // Context-aware explanations
-    if (status === 'qualified' || status === 'likely') {
-      if (level === 'high') {
-        return 'You meet all the requirements we can verify. This is a reliable match.';
-      } else if (level === 'medium') {
-        return 'You appear to qualify, but some information may need verification during application.';
-      } else {
-        return 'You might qualify, but we need more complete information to be certain.';
-      }
-    }
+    switch (status) {
+      case 'qualified':
+      case 'likely':
+        if (level === 'high') {
+          return 'You meet all the requirements we can verify. This is a reliable match.';
+        } else if (level === 'medium') {
+          return 'You appear to qualify, but some information may need verification during application.';
+        } else {
+          return 'You might qualify, but we need more complete information to be certain.';
+        }
 
-    if (status === 'not-qualified') {
-      if (level === 'high') {
-        return 'Based on the information provided, you clearly do not meet the requirements.';
-      } else if (level === 'medium') {
-        return 'You likely do not qualify, but double-check with the program directly.';
-      } else {
-        return 'We cannot determine eligibility with the available information.';
-      }
-    }
+      case 'not-qualified':
+        if (level === 'high') {
+          return 'Based on the information provided, you clearly do not meet the requirements.';
+        } else if (level === 'medium') {
+          return 'You likely do not qualify, but double-check with the program directly.';
+        } else {
+          return 'We cannot determine eligibility with the available information.';
+        }
 
-    if (status === 'maybe') {
-      return 'Your eligibility is uncertain. Consider contacting the program for clarification or provide more information.';
-    }
+      case 'maybe':
+        return 'Your eligibility is uncertain. Consider contacting the program for clarification or provide more information.';
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (status === 'unlikely') {
-      return 'You probably do not qualify, but there may be special circumstances or additional programs to consider.';
-    }
+      case 'unlikely':
+        return 'You probably do not qualify, but there may be special circumstances or additional programs to consider.';
 
-    return 'Eligibility determination is uncertain. Contact the program for more information.';
+      default:
+        return 'Eligibility determination is uncertain. Contact the program for more information.';
+    }
   };
 
   const contextualLabel = getContextualLabel();

@@ -121,11 +121,11 @@ const initOptions: InitOptions = {
 // Initialize i18n synchronously with proper error handling
 let isInitialized = false;
 
-const initializeI18n = (): void => {
+const initializeI18n = async (): Promise<void> => {
   if (isInitialized) return;
 
   try {
-    i18n
+    await i18n
       .use(LanguageDetector)
       .use(initReactI18next)
       .init(initOptions);
@@ -135,7 +135,7 @@ const initializeI18n = (): void => {
     console.error('Failed to initialize i18n:', error);
     // Fallback initialization without language detection
     try {
-      i18n
+      await i18n
         .use(initReactI18next)
         .init({
           ...initOptions,
@@ -150,7 +150,7 @@ const initializeI18n = (): void => {
 };
 
 // Initialize immediately
-initializeI18n();
+void initializeI18n();
 
 // Ensure the i18n instance is properly exported
 export default i18n;

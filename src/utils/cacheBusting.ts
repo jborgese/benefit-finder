@@ -60,9 +60,9 @@ export function storeCurrentVersion(): void {
  */
 export async function clearAllCaches(): Promise<void> {
   try {
-    // Clear IndexedDB user data
-    const { clearUserData } = await import('@/db/utils');
-    await clearUserData();
+    // Clear IndexedDB user data using dynamic import to avoid circular dependencies
+    const dbModule = await import('@/db/database');
+    await dbModule.clearDatabase();
 
     // Clear localStorage (except version)
     const version = localStorage.getItem('bf_app_version');

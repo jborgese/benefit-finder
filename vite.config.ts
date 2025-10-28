@@ -27,8 +27,37 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        // Disable chunking entirely to avoid module loading issues
-        // Let Vite handle chunking automatically
+        // Manual chunking to optimize bundle sizes
+        manualChunks: {
+          // Vendor chunks for better caching
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-rxdb': ['rxdb', 'dexie'],
+          'vendor-ui': ['zustand', 'zod'],
+          'vendor-i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+          'vendor-logic': ['json-logic-js'],
+          'vendor-crypto': ['crypto-js', 'nanoid'],
+          // Feature-based chunks
+          'rules': [
+            './src/rules/index.ts',
+            './src/rules/core/evaluator.ts',
+            './src/rules/dynamic-loader.ts'
+          ],
+          'database': [
+            './src/db/database.ts',
+            './src/db/utils.ts',
+            './src/db/schemas.ts'
+          ],
+          'components-results': [
+            './src/components/results/index.ts',
+            './src/components/results/ResultsSummary.tsx',
+            './src/components/results/ProgramCard.tsx'
+          ],
+          'components-questionnaire': [
+            './src/questionnaire/index.ts',
+            './src/questionnaire/ui/EnhancedQuestionnaire.tsx',
+            './src/questionnaire/flow-engine.ts'
+          ]
+        }
       }
     },
     chunkSizeWarningLimit: 500, // Reduced from 1500 for better optimization awareness

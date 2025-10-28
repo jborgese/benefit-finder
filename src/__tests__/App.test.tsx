@@ -34,7 +34,9 @@ vi.mock('../i18n/hooks', () => ({
         'Import': 'Import',
         'Complete': 'Complete',
       };
-      return translations[key] || key;
+      // Use Map for secure lookup to avoid object injection
+      const translationMap = new Map(Object.entries(translations));
+      return translationMap.get(key) ?? key;
     },
     i18n: {
       language: 'en',
@@ -105,7 +107,7 @@ vi.mock('../questionnaire/accessibility', () => ({
 
 vi.mock('../db', () => ({
   clearDatabase: vi.fn().mockResolvedValue(undefined),
-  destroyDatabase: vi.fn().mockImplementation(async () => {
+  destroyDatabase: vi.fn().mockImplementation(() => {
     // Mock implementation to avoid real database operations in tests
     // This prevents memory leaks and RxDB iframe issues
     return Promise.resolve();
