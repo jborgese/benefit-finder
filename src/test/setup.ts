@@ -13,8 +13,20 @@ import { webcrypto } from 'crypto';
 import { Buffer } from 'buffer';
 
 // Cleanup after each test
-afterEach(() => {
+afterEach(async () => {
   cleanup();
+
+  // Clean up database instances to prevent memory leaks
+  // Note: destroyDatabase is mocked in individual test files
+  try {
+    const { destroyDatabase } = await import('../db');
+    await destroyDatabase();
+  } catch (error) {
+    // Ignore cleanup errors in tests - database might not be initialized or mocked
+    if (import.meta.env.DEV) {
+      console.warn('Database cleanup warning:', error);
+    }
+  }
 });
 
 // Setup Web Crypto API BEFORE all tests
