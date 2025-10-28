@@ -168,8 +168,8 @@ export async function loadProgramRules(program: string, stateCode?: string): Pro
 
     // Always load federal rules first
     const federalResult = await loadFederalRules();
-    if (federalResult.success) {
-      const federalProgramRules = federalResult.rules[program];
+    if (federalResult.success && Object.hasOwnProperty.call(federalResult.rules, program)) {
+      const federalProgramRules = federalResult.rules[program as keyof StateRules];
       // Use Object.assign for safer property assignment
       Object.assign(rules, {
         [program]: federalProgramRules,
@@ -179,8 +179,8 @@ export async function loadProgramRules(program: string, stateCode?: string): Pro
     // Load state-specific rules if state is provided
     if (stateCode) {
       const stateResult = await loadStateRules(stateCode);
-      if (stateResult.success) {
-        const stateProgramRules = stateResult.rules[program];
+      if (stateResult.success && Object.hasOwnProperty.call(stateResult.rules, program)) {
+        const stateProgramRules = stateResult.rules[program as keyof StateRules];
         // State rules override federal rules
         Object.assign(rules, {
           [program]: stateProgramRules,

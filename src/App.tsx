@@ -142,14 +142,14 @@ const importRulesWithLogging = async (state?: string): Promise<void> => {
       console.log(`✅ [DEBUG] Dynamic rule import completed successfully:`, {
         imported: result.imported,
         loadTime: `${result.loadTime.toFixed(2)}ms`,
-        state: state || 'federal-only'
+        state: state ?? 'federal-only'
       });
     } else {
       console.warn(`⚠️ [DEBUG] Dynamic rule import completed with errors:`, {
         imported: result.imported,
         errors: result.errors,
         loadTime: `${result.loadTime.toFixed(2)}ms`,
-        state: state || 'federal-only'
+        state: state ?? 'federal-only'
       });
     }
   } catch (error) {

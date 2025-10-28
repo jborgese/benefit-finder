@@ -108,7 +108,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
             </Button>
             <div className="flex flex-col sm:flex-row gap-2 order-1 sm:order-2">
               <LazyResultsExport results={currentResults} />
-              <LazyResultsImport onImport={onImportResults} />
+              <LazyResultsImport onImport={(results, _metadata) => void onImportResults(results)} />
             </div>
           </div>
         </div>
