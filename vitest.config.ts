@@ -30,8 +30,8 @@ export default defineConfig({
     // Coverage configuration
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
-      reportsDirectory: './coverage',
+      reporter: ['text', 'json'],
+      reportsDirectory: path.resolve(__dirname, 'coverage'),
       exclude: [
         '**/node_modules/**',
         '**/dist/**',
