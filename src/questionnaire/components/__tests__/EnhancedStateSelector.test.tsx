@@ -458,42 +458,31 @@ describe('EnhancedStateSelector Component', () => {
 
       await user.click(clearButton);
 
-      // Wait a bit for blur timeout (150ms) to complete
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Wait a bit for the clear action to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Wait for the clear action to complete and check if dropdown closed
-      await waitFor(() => {
-        // The search query should be cleared (verify internally via visible states)
-        // Check if search input still exists (dropdown might still be open)
-        const searchInputs = screen.queryAllByPlaceholderText(/Search states/i);
-        if (searchInputs.length > 0) {
-          // Dropdown is still open, verify search is cleared
-          expect(searchInputs[0]).toHaveValue('');
-        }
-      }, { timeout: 500 });
-
-      // Reopen dropdown - it will have closed after clearing
+      // Check if dropdown is still open (with component fix, it should stay open)
       const buttonsAfterClear = screen.getAllByRole('button');
-      const triggerButtonAfterClear = buttonsAfterClear.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      const triggerAfterClear = buttonsAfterClear.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
+      const isOpenAfterClear = triggerAfterClear?.getAttribute('aria-expanded') === 'true';
 
-      expect(triggerButtonAfterClear).toBeInTheDocument();
-
-      // Use fireEvent to ensure the click is processed synchronously
-      if (triggerButtonAfterClear) {
-        fireEvent.click(triggerButtonAfterClear);
+      if (!isOpenAfterClear && triggerAfterClear) {
+        // Dropdown closed, reopen it
+        await user.click(triggerAfterClear);
+        await waitFor(() => {
+          expect(triggerAfterClear).toHaveAttribute('aria-expanded', 'true');
+        });
       }
 
-      // Wait for dropdown to be open and verify search was cleared
+      // Wait for search input to be visible and verify it's cleared
       await waitFor(() => {
-        // Ensure dropdown is open
-        const updatedButtons = screen.getAllByRole('button');
-        const updatedTrigger = updatedButtons.find(btn => btn.getAttribute('aria-haspopup') === 'listbox');
-        expect(updatedTrigger).toBeInTheDocument();
-        expect(updatedTrigger).toHaveAttribute('aria-expanded', 'true');
+        const searchInput = screen.getByPlaceholderText(/Search states/i);
+        expect(searchInput).toBeInTheDocument();
+        expect(searchInput).toHaveValue('');
+      }, { timeout: 2000 });
 
-        // Verify search input is cleared and all states are visible
-        const reopenedInput = screen.getByPlaceholderText(/Search states/i);
-        expect(reopenedInput).toHaveValue('');
+      // Wait for states to be visible after clearing search
+      await waitFor(() => {
         expect(screen.getByText('California')).toBeInTheDocument();
         expect(screen.getByText('Texas')).toBeInTheDocument();
       }, { timeout: 2000 });

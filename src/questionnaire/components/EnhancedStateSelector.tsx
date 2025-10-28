@@ -1060,8 +1060,10 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     // Delay to allow for option clicks
     blurTimeoutRef.current = setTimeout(() => {
       setIsFocused(false);
-      // Only close if not clicking on dropdown content
-      if (!dropdownRef.current?.contains(document.activeElement)) {
+      // Only close if not clicking on dropdown content and search input is not focused
+      const isSearchInputFocused = searchInputRef.current === document.activeElement;
+      const isWithinContainer = containerRef.current?.contains(document.activeElement);
+      if (!isWithinContainer && !isSearchInputFocused) {
         setIsOpen(false);
       }
       if (hasUserInteracted || value) {
@@ -1103,8 +1105,19 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
 
   const handleClearSearch = (e?: React.MouseEvent<HTMLButtonElement>): void => {
     e?.stopPropagation(); // Prevent event from bubbling and closing dropdown
+    e?.preventDefault(); // Prevent default behavior
+    // Clear any existing blur timeout to prevent dropdown from closing
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
     setSearchQuery('');
-    searchInputRef.current?.focus();
+    // Ensure dropdown stays open when clearing search
+    setIsOpen(true);
+    // Focus the search input after clearing
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 0);
   };
 
   const handleLocationRequest = (): void => {
