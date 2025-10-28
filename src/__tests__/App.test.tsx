@@ -262,6 +262,12 @@ vi.mock('../rules', () => ({
     programResults: new Map(),
   }),
   getAllProgramRuleIds: vi.fn().mockResolvedValue([]),
+  importRulesDynamically: vi.fn().mockResolvedValue({
+    success: true,
+    imported: 0,
+    errors: [],
+    loadTime: 100,
+  }),
 }));
 
 vi.mock('../services/ImportManager', () => ({
