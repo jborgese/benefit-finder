@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from './components/Button';
 import { LiveRegion } from './questionnaire/accessibility';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
@@ -10,21 +10,19 @@ import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { TextSizeControls } from './components/TextSizeControls';
 import { KeyboardShortcuts } from './components/KeyboardShortcuts';
 
-// Lazy load heavy components
-const EnhancedQuestionnaire = lazy(() => import('./questionnaire/ui').then(m => ({ default: m.EnhancedQuestionnaire })));
-const ResultsSummary = lazy(() => import('./components/results').then(m => ({ default: m.ResultsSummary })));
-const ProgramCard = lazy(() => import('./components/results').then(m => ({ default: m.ProgramCard })));
-const ResultsExport = lazy(() => import('./components/results').then(m => ({ default: m.ResultsExport })));
-const ResultsImport = lazy(() => import('./components/results').then(m => ({ default: m.ResultsImport })));
-const QuestionnaireAnswersCard = lazy(() => import('./components/results').then(m => ({ default: m.QuestionnaireAnswersCard })));
-const WelcomeTour = lazy(() => import('./components/onboarding').then(m => ({ default: m.WelcomeTour })));
-const HelpTooltip = lazy(() => import('./components/onboarding').then(m => ({ default: m.HelpTooltip })));
-const PrivacyExplainer = lazy(() => import('./components/onboarding').then(m => ({ default: m.PrivacyExplainer })));
-const QuickStartGuide = lazy(() => import('./components/onboarding').then(m => ({ default: m.QuickStartGuide })));
-const ShortcutsHelp = lazy(() => import('./components/onboarding').then(m => ({ default: m.ShortcutsHelp })));
+// Import new route system
+import { Routes } from './components/Routes';
+import { RoutePreloader } from './components/RoutePreloader';
 
-// Import optimized database functions
-import { clearDatabase } from './db/optimized-database';
+// Lazy load heavy components (keeping these for onboarding and results components)
+const WelcomeTour = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.WelcomeTour })));
+const HelpTooltip = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.HelpTooltip })));
+const PrivacyExplainer = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.PrivacyExplainer })));
+const QuickStartGuide = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.QuickStartGuide })));
+const ShortcutsHelp = React.lazy(() => import('./components/onboarding').then(m => ({ default: m.ShortcutsHelp })));
+
+// Import ultra-optimized database functions
+import { clearDatabase } from './db/ultra-optimized-database';
 import { createUserProfile } from './db/utils';
 import { clearAndReinitialize } from './utils/clearAndReinitialize';
 import { forceFixProgramNames } from './utils/forceFixProgramNames';
@@ -35,7 +33,6 @@ import { initializeApp } from './utils/initializeApp';
 import { formatCriteriaDetails } from './utils/formatCriteriaDetails';
 import { getProgramName, getProgramDescription } from './utils/programHelpers';
 import { createSampleResults as createSampleResultsData } from './utils/createSampleResults';
-import { createEnhancedFlow } from './questionnaire/enhanced-flow';
 
 // Import types
 import type { EligibilityResults } from './components/results';
@@ -321,6 +318,11 @@ function App(): React.ReactElement {
     }
   }, [createSampleResults]);
 
+  // Intelligent route preloading based on current state
+  useEffect(() => {
+    RoutePreloader.preloadUserJourney(appState);
+  }, [appState]);
+
   // Development helper - make clearDatabase available globally
   if (import.meta.env.DEV) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -361,6 +363,8 @@ function App(): React.ReactElement {
   }
 
   const handleStartQuestionnaire = (): void => {
+    // Preload questionnaire route for instant navigation
+    RoutePreloader.preloadRoute('questionnaire');
     setAppState('questionnaire');
   };
 
@@ -645,6 +649,8 @@ function App(): React.ReactElement {
   };
 
   const handleViewResults = (): void => {
+    // Preload results route for instant navigation
+    RoutePreloader.preloadRoute('results');
     setAppState('results');
     setAnnouncementMessage('Viewing benefit eligibility results.');
   };
@@ -654,6 +660,8 @@ function App(): React.ReactElement {
   };
 
   const handleNewAssessment = (): void => {
+    // Preload questionnaire route for instant navigation
+    RoutePreloader.preloadRoute('questionnaire');
     setHasResults(false);
     setIsProcessingResults(false);
     setAppState('questionnaire');
@@ -1011,343 +1019,41 @@ function App(): React.ReactElement {
             </nav>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              {/* Use new route system */}
               {appState === 'home' && (
-                <div className="text-center animate-fade-in-up">
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6 text-secondary-900 dark:text-secondary-100 px-4">
-                    {t('app.subtitle')}
-                  </h2>
-                  <p className="text-secondary-600 dark:text-secondary-300 mb-8 sm:mb-12 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed px-4">
-                    {t('app.description')}
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
-                    <HelpTooltip
-                      content="Click here to start the benefit eligibility assessment. It takes about 5-10 minutes to complete."
-                      trigger="hover"
-                      position="bottom"
-                    >
-                      <Button
-                        onClick={handleStartQuestionnaire}
-                        size="lg"
-                        className="animate-bounce-gentle"
-                        aria-label={t('questionnaire.title')}
-                        data-tour="start-button"
-                      >
-                        {hasResults ? t('common.continue') : t('questionnaire.title')}
-                      </Button>
-                    </HelpTooltip>
-
-                    {hasResults && (
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        onClick={handleViewResults}
-                        className="animate-slide-in-right"
-                        aria-label={t('navigation.results')}
-                      >
-                        {t('navigation.results')}
-                      </Button>
-                    )}
-
-                  </div>
-
-
-                  <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4">
-                    <div
-                      className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                      data-tour="privacy-card"
-                    >
-                      <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                        <span className="text-2xl">🔒</span>
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900 dark:text-secondary-100">{t('privacy.title')}</h3>
-                      <p className="text-secondary-600 dark:text-secondary-300 text-sm leading-relaxed">
-                        {t('privacy.description')}
-                      </p>
-                    </div>
-                    <div
-                      className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                      data-tour="offline-card"
-                    >
-                      <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                        <span className="text-2xl">📱</span>
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900 dark:text-secondary-100">{t('privacy.offline')}</h3>
-                      <p className="text-secondary-600 dark:text-secondary-300 text-sm leading-relaxed">
-                        {t('privacy.localStorage')}
-                      </p>
-                    </div>
-                    <div
-                      className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 sm:col-span-2 lg:col-span-1"
-                      data-tour="encryption-card"
-                    >
-                      <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                        <span className="text-2xl">🛡️</span>
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-3 text-secondary-900 dark:text-secondary-100">{t('app.encryption')}</h3>
-                      <p className="text-secondary-600 dark:text-secondary-300 text-sm leading-relaxed">
-                        {t('privacy.encryption')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <Routes.Home
+                  onStartQuestionnaire={handleStartQuestionnaire}
+                  onViewResults={handleViewResults}
+                  hasResults={hasResults}
+                  onStartWelcomeTour={handleStartWelcomeTour}
+                  onStartPrivacyExplainer={() => setShowPrivacyExplainer(true)}
+                  onStartQuickStartGuide={handleStartQuickStartGuide}
+                  onStartShortcutsHelp={() => setShowShortcutsHelp(true)}
+                />
               )}
-
               {appState === 'questionnaire' && (
-                <div className="animate-fade-in">
-                  <div className="mb-6 sm:mb-8 text-center px-4">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-2">
-                      Benefit Eligibility Assessment
-                    </h2>
-                    <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base">
-                      Complete this questionnaire to check your eligibility for government benefits
-                    </p>
-                  </div>
-
-                  <div className="max-w-4xl mx-auto px-4 sm:px-0 questionnaire-container">
-                    <Suspense fallback={<div className="text-center py-8">Loading questionnaire...</div>}>
-                      <EnhancedQuestionnaire
-                        flow={createEnhancedFlow()}
-                        onComplete={(answers): void => {
-                          void handleCompleteQuestionnaire(answers);
-                        }}
-                      />
-                    </Suspense>
-                  </div>
-                </div>
+                <Routes.Questionnaire
+                  onComplete={(answers): void => {
+                    void handleCompleteQuestionnaire(answers);
+                  }}
+                />
               )}
-
-
-              {appState === 'error' && (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-red-400">Error</h2>
-                  </div>
-                  <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-red-400 mb-2">Unable to Process Request</h3>
-                        <p className="text-slate-300 mb-4">{errorMessage}</p>
-                        <div className="flex gap-3">
-                          <Button
-                            onClick={handleGoHome}
-                            variant="primary"
-                            aria-label="Return to home page"
-                          >
-                            Return to Home
-                          </Button>
-                          <Button
-                            onClick={() => window.location.reload()}
-                            variant="secondary"
-                            aria-label="Refresh the page"
-                          >
-                            Refresh Page
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {appState === 'results' && (
-                <div>
-                  {/* Avoid nested ternary by early return pattern */}
-                  {isProcessingResults && (
-                    <div className="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-secondary-200 dark:border-secondary-700 p-12 text-center max-w-2xl mx-auto animate-scale-in">
-                      <div className="flex items-center justify-center mb-6">
-                        <div className="relative">
-                          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200" />
-                          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 border-t-transparent absolute top-0 left-0" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
-                        </div>
-                      </div>
-                      <h2 className="text-3xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-4">
-                        {t('results.processing.title')}
-                      </h2>
-                      <p className="text-secondary-600 dark:text-secondary-300 mb-8 text-lg">
-                        {t('results.processing.description')}
-                      </p>
-                      <div className="flex items-center justify-center text-primary-600 text-lg">
-                        <div className="animate-pulse-soft">•</div>
-                        <div className="animate-pulse-soft mx-3" style={{ animationDelay: '0.2s' }}>•</div>
-                        <div className="animate-pulse-soft" style={{ animationDelay: '0.4s' }}>•</div>
-                      </div>
-                    </div>
-                  )}
-                  {(() => {
-                    if (!isProcessingResults && currentResults && (
-                      currentResults.qualified.length > 0 ||
-                      currentResults.maybe.length > 0 ||
-                      currentResults.likely.length > 0 ||
-                      currentResults.notQualified.length > 0
-                    )) {
-                      return (
-                        <div>
-                          <div className="mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
-                              <div className="text-center sm:text-left">
-                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-2">
-                                  {t('results.summary.title')}
-                                </h2>
-                                <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base">
-                                  Your personalized benefit eligibility results
-                                </p>
-                              </div>
-                              <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={handleNewAssessment}
-                                  aria-label="Start new assessment"
-                                  className="w-full sm:w-auto order-2 sm:order-1"
-                                >
-                                  {t('results.actions.newAssessment')}
-                                </Button>
-                                <div className="flex flex-col sm:flex-row gap-2 order-1 sm:order-2">
-                                  <ResultsExport results={currentResults} />
-                                  <ResultsImport onImport={(results) => void handleImportResults(results)} />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <ResultsSummary results={currentResults} />
-
-                          <QuestionnaireAnswersCard />
-
-                          <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6 px-4 sm:px-0">
-                            {/* Qualified Programs */}
-                            {currentResults.qualified.map((result) => (
-                              <ProgramCard
-                                key={result.programId}
-                                result={result}
-                                userProfile={currentUserProfile ?? undefined}
-                                className="max-w-4xl mx-auto animate-fade-in-up"
-                              />
-                            ))}
-
-                            {/* Maybe Programs */}
-                            {currentResults.maybe.map((result) => (
-                              <ProgramCard
-                                key={result.programId}
-                                result={result}
-                                userProfile={currentUserProfile ?? undefined}
-                                className="max-w-4xl mx-auto animate-fade-in-up"
-                              />
-                            ))}
-
-                            {/* Likely Programs */}
-                            {currentResults.likely.map((result) => (
-                              <ProgramCard
-                                key={result.programId}
-                                result={result}
-                                userProfile={currentUserProfile ?? undefined}
-                                className="max-w-4xl mx-auto animate-fade-in-up"
-                              />
-                            ))}
-
-                            {/* Not Qualified Programs */}
-                            {currentResults.notQualified.map((result) => (
-                              <ProgramCard
-                                key={result.programId}
-                                result={result}
-                                userProfile={currentUserProfile ?? undefined}
-                                className="max-w-4xl mx-auto animate-fade-in-up"
-                              />
-                            ))}
-                          </div>
-
-                          {/* Helpful links for accessibility */}
-                          <div className="mt-6 sm:mt-8 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-secondary-200 dark:border-secondary-700 max-w-4xl mx-auto mx-4 sm:mx-auto">
-                            <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-secondary-900 dark:text-secondary-100">{t('results.resources.title')}</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                              <div>
-                                <h4 className="font-medium mb-2">{t('results.resources.government')}</h4>
-                                <ul className="space-y-2 text-sm">
-                                  <li>
-                                    <a
-                                      href="https://www.benefits.gov"
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-400 hover:text-blue-300 underline"
-                                      aria-label="Visit Benefits.gov to learn about federal benefits"
-                                    >
-                                      {t('results.resources.benefitsGov')}
-                                    </a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="https://www.usa.gov/benefits"
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-400 hover:text-blue-300 underline"
-                                      aria-label="Visit USA.gov benefits page for comprehensive benefit information"
-                                    >
-                                      {t('results.resources.usaGov')}
-                                    </a>
-                                  </li>
-                                </ul>
-                              </div>
-                              <div>
-                                <h4 className="font-medium mb-2">{t('results.resources.support')}</h4>
-                                <ul className="space-y-2 text-sm">
-                                  <li>
-                                    <a
-                                      href="tel:211"
-                                      className="text-blue-400 hover:text-blue-300 underline"
-                                      aria-label="Call 211 for local assistance with benefits and services"
-                                    >
-                                      {t('results.resources.localAssistance')}
-                                    </a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="https://www.healthcare.gov"
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-400 hover:text-blue-300 underline"
-                                      aria-label="Visit Healthcare.gov for health insurance information"
-                                    >
-                                      {t('results.resources.healthcareGov')}
-                                    </a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    if (!isProcessingResults) {
-                      return (
-                        <div className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-8 text-center max-w-2xl mx-auto">
-                          <div className="text-6xl mb-4" aria-hidden="true">📝</div>
-                          <h2 className="text-2xl font-bold text-slate-100 mb-4">
-                            {t('results.noResults.title')}
-                          </h2>
-                          <p className="text-slate-300 mb-6">
-                            {t('results.noResults.description')}
-                          </p>
-                          <Button
-                            onClick={handleNewAssessment}
-                            variant="primary"
-                            className="inline-flex items-center gap-2"
-                          >
-                            {t('results.noResults.startAssessment')}
-                          </Button>
-                        </div>
-                      );
-                    }
-
-                    return null;
-                  })()}
-                </div>
+                <Routes.Results
+                  currentResults={currentResults}
+                  currentUserProfile={currentUserProfile}
+                  isProcessingResults={isProcessingResults}
+                  onNewAssessment={handleNewAssessment}
+                  onImportResults={(results): void => {
+                    void handleImportResults(results);
+                  }}
+                />
+              )}
+              {appState === 'error' && (
+                <Routes.Error
+                  errorMessage={errorMessage}
+                  onGoHome={handleGoHome}
+                />
               )}
             </main>
 

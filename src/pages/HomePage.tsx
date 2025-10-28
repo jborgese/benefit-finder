@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { Button } from './Button';
-import { HelpTooltip } from './onboarding/HelpTooltip';
-import { LanguageSwitcher as _LanguageSwitcher } from './LanguageSwitcher';
-import { ThemeSwitcher as _ThemeSwitcher } from './ThemeSwitcher';
-import { TextSizeControls as _TextSizeControls } from './TextSizeControls';
+import { Button } from '../components/Button';
+import { HelpTooltip } from '../components/onboarding/HelpTooltip';
+import { LanguageSwitcher as _LanguageSwitcher } from '../components/LanguageSwitcher';
+import { ThemeSwitcher as _ThemeSwitcher } from '../components/ThemeSwitcher';
+import { TextSizeControls as _TextSizeControls } from '../components/TextSizeControls';
 import { useI18n } from '../i18n/hooks';
 
 interface HomePageProps {
