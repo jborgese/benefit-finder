@@ -42,16 +42,25 @@ export async function loadFederalRules(): Promise<RuleLoadResult> {
 
     // Process each federal program
     for (const [programName, ruleData] of Object.entries(federalRules)) {
+      // Validate program name to prevent object injection
+      if (!programName || typeof programName !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(programName)) {
+        continue;
+      }
+
       if (ruleData && typeof ruleData === 'object' && 'rules' in ruleData) {
-        rules[programName] = {
-          rules: (ruleData as { rules: RuleDefinition[] }).rules,
-          metadata: {
-            state: 'FEDERAL',
-            program: programName,
-            version: '1.0.0',
-            lastUpdated: Date.now(),
+        const validatedRuleData = ruleData as { rules: RuleDefinition[] };
+        // Use Object.assign for safer property assignment
+        Object.assign(rules, {
+          [programName]: {
+            rules: validatedRuleData.rules,
+            metadata: {
+              state: 'FEDERAL',
+              program: programName,
+              version: '1.0.0',
+              lastUpdated: Date.now(),
+            },
           },
-        };
+        });
       }
     }
 
@@ -96,16 +105,25 @@ export async function loadStateRules(stateCode: string): Promise<RuleLoadResult>
 
     // Process each program in the state
     for (const [programName, ruleData] of Object.entries(stateRules)) {
+      // Validate program name to prevent object injection
+      if (!programName || typeof programName !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(programName)) {
+        continue;
+      }
+
       if (ruleData && typeof ruleData === 'object' && 'rules' in ruleData) {
-        rules[programName] = {
-          rules: (ruleData as { rules: RuleDefinition[] }).rules,
-          metadata: {
-            state: stateCode,
-            program: programName,
-            version: '1.0.0',
-            lastUpdated: Date.now(),
+        const validatedRuleData = ruleData as { rules: RuleDefinition[] };
+        // Use Object.assign for safer property assignment
+        Object.assign(rules, {
+          [programName]: {
+            rules: validatedRuleData.rules,
+            metadata: {
+              state: stateCode,
+              program: programName,
+              version: '1.0.0',
+              lastUpdated: Date.now(),
+            },
           },
-        };
+        });
       }
     }
 
@@ -141,20 +159,32 @@ export async function loadProgramRules(program: string, stateCode?: string): Pro
   const errors: string[] = [];
 
   try {
-    let rules: StateRules = {};
+    const rules: StateRules = {};
+
+    // Validate program name to prevent object injection
+    if (!program || typeof program !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(program)) {
+      throw new Error('Invalid program name');
+    }
 
     // Always load federal rules first
     const federalResult = await loadFederalRules();
-    if (federalResult.success && federalResult.rules[program]) {
-      rules[program] = federalResult.rules[program];
+    if (federalResult.success) {
+      const federalProgramRules = federalResult.rules[program];
+      // Use Object.assign for safer property assignment
+      Object.assign(rules, {
+        [program]: federalProgramRules,
+      });
     }
 
     // Load state-specific rules if state is provided
     if (stateCode) {
       const stateResult = await loadStateRules(stateCode);
-      if (stateResult.success && stateResult.rules[program]) {
+      if (stateResult.success) {
+        const stateProgramRules = stateResult.rules[program];
         // State rules override federal rules
-        rules[program] = stateResult.rules[program];
+        Object.assign(rules, {
+          [program]: stateProgramRules,
+        });
       }
     }
 
@@ -206,54 +236,12 @@ export async function importRulesDynamically(
   try {
     // Load federal rules
     const federalResult = await loadFederalRules();
-    if (federalResult.success) {
-      for (const [programName, programRules] of Object.entries(federalResult.rules)) {
-        try {
-          const importResult = await importManager.importRules(
-            `federal-${programName}`,
-            programRules.rules,
-            options
-          );
-
-          if (importResult.success) {
-            imported += importResult.imported;
-          } else {
-            errors.push(...importResult.errors.map(e => e.message));
-          }
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown import error';
-          errors.push(`Failed to import federal ${programName} rules: ${errorMessage}`);
-        }
-      }
-    } else {
-      errors.push(...federalResult.errors);
-    }
+    imported += await processFederalRules(federalResult, options, errors);
 
     // Load state-specific rules if state is provided
     if (stateCode) {
       const stateResult = await loadStateRules(stateCode);
-      if (stateResult.success) {
-        for (const [programName, programRules] of Object.entries(stateResult.rules)) {
-          try {
-            const importResult = await importManager.importRules(
-              `state-${stateCode}-${programName}`,
-              programRules.rules,
-              options
-            );
-
-            if (importResult.success) {
-              imported += importResult.imported;
-            } else {
-              errors.push(...importResult.errors.map(e => e.message));
-            }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown import error';
-            errors.push(`Failed to import ${stateCode} ${programName} rules: ${errorMessage}`);
-          }
-        }
-      } else {
-        errors.push(...stateResult.errors);
-      }
+      imported += await processStateRules(stateResult, stateCode, options, errors);
     }
 
     const loadTime = performance.now() - startTime;
@@ -278,6 +266,101 @@ export async function importRulesDynamically(
       loadTime,
     };
   }
+}
+
+/**
+ * Process federal rules import
+ */
+async function processFederalRules(
+  federalResult: RuleLoadResult,
+  options: {
+    force?: boolean;
+    retryOnFailure?: boolean;
+    maxRetries?: number;
+    timeout?: number;
+  },
+  errors: string[]
+): Promise<number> {
+  let imported = 0;
+
+  if (!federalResult.success) {
+    errors.push(...federalResult.errors);
+    return imported;
+  }
+
+  for (const [programName, programRules] of Object.entries(federalResult.rules)) {
+    // Validate program name to prevent object injection
+    if (!programName || typeof programName !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(programName)) {
+      continue;
+    }
+
+    try {
+      const importResult = await importManager.importRules(
+        `federal-${programName}`,
+        programRules.rules,
+        options
+      );
+
+      if (importResult.success) {
+        imported += importResult.imported;
+      } else {
+        errors.push(...importResult.errors.map(e => e.message));
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown import error';
+      errors.push(`Failed to import federal ${programName} rules: ${errorMessage}`);
+    }
+  }
+
+  return imported;
+}
+
+/**
+ * Process state rules import
+ */
+async function processStateRules(
+  stateResult: RuleLoadResult,
+  stateCode: string,
+  options: {
+    force?: boolean;
+    retryOnFailure?: boolean;
+    maxRetries?: number;
+    timeout?: number;
+  },
+  errors: string[]
+): Promise<number> {
+  let imported = 0;
+
+  if (!stateResult.success) {
+    errors.push(...stateResult.errors);
+    return imported;
+  }
+
+  for (const [programName, programRules] of Object.entries(stateResult.rules)) {
+    // Validate program name to prevent object injection
+    if (!programName || typeof programName !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(programName)) {
+      continue;
+    }
+
+    try {
+      const importResult = await importManager.importRules(
+        `state-${stateCode}-${programName}`,
+        programRules.rules,
+        options
+      );
+
+      if (importResult.success) {
+        imported += importResult.imported;
+      } else {
+        errors.push(...importResult.errors.map(e => e.message));
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown import error';
+      errors.push(`Failed to import ${stateCode} ${programName} rules: ${errorMessage}`);
+    }
+  }
+
+  return imported;
 }
 
 /**

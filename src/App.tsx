@@ -9,7 +9,6 @@ import { TextSizeProvider } from './contexts/TextSizeContext';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { TextSizeControls } from './components/TextSizeControls';
 import { KeyboardShortcuts } from './components/KeyboardShortcuts';
-import { ShortcutsHelp } from './components/ShortcutsHelp';
 
 // Lazy load heavy components
 const EnhancedQuestionnaire = lazy(() => import('./questionnaire/ui').then(m => ({ default: m.EnhancedQuestionnaire })));
@@ -22,9 +21,10 @@ const WelcomeTour = lazy(() => import('./components/onboarding').then(m => ({ de
 const HelpTooltip = lazy(() => import('./components/onboarding').then(m => ({ default: m.HelpTooltip })));
 const PrivacyExplainer = lazy(() => import('./components/onboarding').then(m => ({ default: m.PrivacyExplainer })));
 const QuickStartGuide = lazy(() => import('./components/onboarding').then(m => ({ default: m.QuickStartGuide })));
+const ShortcutsHelp = lazy(() => import('./components/onboarding').then(m => ({ default: m.ShortcutsHelp })));
 
-// Import database functions
-import { clearDatabase } from './db';
+// Import optimized database functions
+import { clearDatabase } from './db/optimized-database';
 import { createUserProfile } from './db/utils';
 import { clearAndReinitialize } from './utils/clearAndReinitialize';
 import { forceFixProgramNames } from './utils/forceFixProgramNames';
