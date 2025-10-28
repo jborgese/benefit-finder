@@ -1,12 +1,10 @@
-/// <reference types="vite/client" />
+/**
+ * Global type declarations for Vite build-time variables
+ */
 
-interface ImportMetaEnv {
-  readonly VITE_APP_TITLE: string
-  readonly DEV: boolean
-  readonly PROD: boolean
-  readonly SSR: boolean
+declare global {
+  const __APP_VERSION__: string;
+  const __BUILD_TIME__: string;
 }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv
-}
+export {};

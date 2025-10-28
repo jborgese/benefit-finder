@@ -1,6 +1,6 @@
 /**
  * App Settings Store
- * 
+ *
  * Manages user preferences and application settings.
  * Data persists to localStorage for user convenience.
  */
@@ -13,24 +13,24 @@ export interface AppSettingsState {
   theme: 'light' | 'dark' | 'system';
   fontSize: 'small' | 'medium' | 'large';
   highContrast: boolean;
-  
+
   // Language & Localization
   language: 'en' | 'es';
-  
+
   // Privacy & Security
   autoSaveEnabled: boolean;
   encryptionEnabled: boolean;
   sessionTimeout: number; // minutes, 0 = never
-  
+
   // Accessibility
   reduceMotion: boolean;
   screenReaderMode: boolean;
   keyboardNavigationHints: boolean;
-  
+
   // Feature Flags
   showTutorial: boolean;
   showPrivacyNotice: boolean;
-  
+
   // Actions
   setTheme: (theme: AppSettingsState['theme']) => void;
   setFontSize: (size: AppSettingsState['fontSize']) => void;
@@ -45,6 +45,7 @@ export interface AppSettingsState {
   setShowTutorial: (show: boolean) => void;
   setShowPrivacyNotice: (show: boolean) => void;
   resetSettings: () => void;
+  clearAllCaches: () => Promise<void>;
 }
 
 const defaultSettings = {
@@ -52,20 +53,20 @@ const defaultSettings = {
   theme: 'system' as const,
   fontSize: 'medium' as const,
   highContrast: false,
-  
+
   // Language & Localization
   language: 'en' as const,
-  
+
   // Privacy & Security
   autoSaveEnabled: true,
   encryptionEnabled: true,
   sessionTimeout: 30,
-  
+
   // Accessibility
   reduceMotion: false,
   screenReaderMode: false,
   keyboardNavigationHints: true,
-  
+
   // Feature Flags
   showTutorial: true,
   showPrivacyNotice: true,
@@ -75,7 +76,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
   persist(
     (set) => ({
       ...defaultSettings,
-      
+
       // Actions
       setTheme: (theme) => set({ theme }),
       setFontSize: (fontSize) => set({ fontSize }),
@@ -86,11 +87,15 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       setSessionTimeout: (sessionTimeout) => set({ sessionTimeout }),
       setReduceMotion: (reduceMotion) => set({ reduceMotion }),
       setScreenReaderMode: (screenReaderMode) => set({ screenReaderMode }),
-      setKeyboardNavigationHints: (keyboardNavigationHints) => 
+      setKeyboardNavigationHints: (keyboardNavigationHints) =>
         set({ keyboardNavigationHints }),
       setShowTutorial: (showTutorial) => set({ showTutorial }),
       setShowPrivacyNotice: (showPrivacyNotice) => set({ showPrivacyNotice }),
       resetSettings: () => set(defaultSettings),
+      clearAllCaches: async () => {
+        const { clearAllCaches } = await import('@/utils/cacheBusting');
+        await clearAllCaches();
+      },
     }),
     {
       name: 'benefit-finder-settings',

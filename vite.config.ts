@@ -1,12 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
-import {
-  getAdvancedChunkForSrcPath,
-  getAdvancedChunkForLibrary,
-  getAdvancedChunkForVendorLibrary,
-  getStateSpecificChunk
-} from './src/utils/advancedChunking';
+// Removed unused imports for better linting
 
 export default defineConfig({
   plugins: [react()],
@@ -28,14 +23,23 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-          // Disable chunking entirely to avoid module loading issues
-          // Let Vite handle chunking automatically
+        // Generate deterministic file names with content hashes for cache busting
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Disable chunking entirely to avoid module loading issues
+        // Let Vite handle chunking automatically
       }
     },
     chunkSizeWarningLimit: 500, // Reduced from 1500 for better optimization awareness
     target: 'es2020', // Modern target for better optimization
     minify: 'esbuild', // Fast minification
     sourcemap: false, // Disable sourcemaps in production for smaller bundles
+    // Add build timestamp for cache busting
+    define: {
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+      __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.1.0'),
+    },
   },
   optimizeDeps: {
     include: [

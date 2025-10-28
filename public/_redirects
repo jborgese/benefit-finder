@@ -2,8 +2,50 @@
 # Handle client-side routing - all routes should serve index.html
 /*    /index.html   200
 
-# Optional: Add security headers
+# Cache Control Headers for Static Assets
+# JavaScript and CSS files - Never cache (force fresh downloads)
+/assets/*.js
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+
+/assets/*.css
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+
+# Static assets with hashes - Cache for 1 year (immutable)
+/assets/*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images and fonts - Cache for 1 month
+/assets/*.png
+  Cache-Control: public, max-age=2592000
+
+/assets/*.jpg
+  Cache-Control: public, max-age=2592000
+
+/assets/*.jpeg
+  Cache-Control: public, max-age=2592000
+
+/assets/*.svg
+  Cache-Control: public, max-age=2592000
+
+/assets/*.woff
+  Cache-Control: public, max-age=2592000
+
+/assets/*.woff2
+  Cache-Control: public, max-age=2592000
+
+# HTML files - Never cache (always get fresh version)
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+
+# Security headers for all requests
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  X-XSS-Protection: 1; mode=block

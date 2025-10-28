@@ -52,6 +52,9 @@ export default [
         ...globals.browser,
         ...globals.es2020,
         ...globals.node,
+        // Vite build-time variables
+        __APP_VERSION__: 'readonly',
+        __BUILD_TIME__: 'readonly',
       }
     },
     plugins: {
