@@ -66,12 +66,14 @@ export default defineConfig({
     },
 
     // Performance
-    // Use forks instead of threads for better crypto compatibility
+    // Use threads for better stability and performance
     isolate: true,
-    pool: 'forks',
+    pool: 'threads',
     poolOptions: {
-      forks: {
-        singleFork: false,
+      threads: {
+        singleThread: true, // Run tests sequentially to reduce memory usage
+        maxThreads: 1,
+        minThreads: 1,
       },
     },
 
