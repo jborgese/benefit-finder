@@ -176,3 +176,15 @@ export {
   type PerformanceWarning,
 } from './core/performance';
 
+// Dynamic Rule Loading
+export {
+  loadFederalRules,
+  loadStateRules,
+  loadProgramRules,
+  importRulesDynamically,
+  getAvailableStates,
+  getAvailablePrograms,
+  type StateRules,
+  type RuleLoadResult,
+} from './dynamic-loader';
+

@@ -28,8 +28,7 @@ import { clearDatabase } from './db';
 import { createUserProfile } from './db/utils';
 import { clearAndReinitialize } from './utils/clearAndReinitialize';
 import { forceFixProgramNames } from './utils/forceFixProgramNames';
-import { evaluateAllPrograms, getAllProgramRuleIds, type EligibilityEvaluationResult } from './rules';
-import { importManager } from './services/ImportManager';
+import { evaluateAllPrograms, getAllProgramRuleIds, importRulesDynamically, type EligibilityEvaluationResult } from './rules';
 
 // Import utilities
 import { initializeApp } from './utils/initializeApp';
@@ -129,14 +128,33 @@ const convertAnswersToProfileData = (answers: Record<string, unknown>): {
 };
 
 const importRulesWithLogging = async (state?: string): Promise<void> => {
-  console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Skipping federal rules import (already imported during initialization)');
+  console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Starting dynamic rule import');
 
-  if (state) {
-    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Importing state-specific rules for:', state);
-    await importStateSpecificRules(state);
-    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: State-specific rules import completed');
-  } else {
-    console.log('🔍 [DEBUG] handleCompleteQuestionnaire: No state provided, skipping state-specific rules');
+  try {
+    const result = await importRulesDynamically(state, {
+      force: false,
+      retryOnFailure: true,
+      maxRetries: 2,
+      timeout: 15000
+    });
+
+    if (result.success) {
+      console.log(`✅ [DEBUG] Dynamic rule import completed successfully:`, {
+        imported: result.imported,
+        loadTime: `${result.loadTime.toFixed(2)}ms`,
+        state: state || 'federal-only'
+      });
+    } else {
+      console.warn(`⚠️ [DEBUG] Dynamic rule import completed with errors:`, {
+        imported: result.imported,
+        errors: result.errors,
+        loadTime: `${result.loadTime.toFixed(2)}ms`,
+        state: state || 'federal-only'
+      });
+    }
+  } catch (error) {
+    console.error('❌ [DEBUG] Dynamic rule import failed:', error);
+    // Don't throw - this shouldn't block the user's experience
   }
 };
 
@@ -220,47 +238,6 @@ const createResultFromEvaluation = (result: EligibilityEvaluationResult, program
 
 type AppState = 'home' | 'questionnaire' | 'results' | 'error';
 
-/**
- * Import state-specific rules based on the user's state
- */
-async function importStateSpecificRules(stateCode: string): Promise<void> {
-  try {
-    console.log(`[DEBUG] Importing rules for state: ${stateCode}`);
-
-    // Import state-specific rules based on state code
-    switch (stateCode) {
-      case 'GA': {
-        // Import Georgia Medicaid rules using ImportManager
-        const { default: medicaidGeorgiaRules } = await import('./rules/state/georgia/medicaid/medicaid-georgia-rules.json');
-        const georgiaResult = await importManager.importRules(
-          `state-${stateCode}-medicaid`,
-          medicaidGeorgiaRules.rules,
-          {
-            force: false,
-            retryOnFailure: true,
-            maxRetries: 2,
-            timeout: 15000
-          }
-        );
-        console.log(`[DEBUG] Georgia rules import result:`, georgiaResult);
-        break;
-      }
-
-      // Add other states as needed
-      // case 'CA':
-      //   const { default: californiaRules } = await import('./rules/state/california/medicaid/medicaid-california-rules.json');
-      //   await importRules(californiaRules, { validate: true, skipTests: false, mode: 'upsert', overwriteExisting: true });
-      //   break;
-
-      default:
-        console.log(`[DEBUG] No specific rules to import for state: ${stateCode}`);
-        break;
-    }
-  } catch (error) {
-    console.error(`[DEBUG] Failed to import rules for state ${stateCode}:`, error);
-    // Don't throw - this shouldn't block the user's experience
-  }
-}
 
 function App(): React.ReactElement {
   const { t } = useI18n();
