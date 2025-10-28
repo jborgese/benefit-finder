@@ -50,7 +50,7 @@
     "test:run": "vitest run",
     "test:related": "vitest related --run",
     "test:smart": "node scripts/test-related.js",
-    "test:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=12288\" vitest run --coverage",
+    "test:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=32768 --max-semi-space-size=256\" vitest run --coverage",
     "test:watch": "vitest watch",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

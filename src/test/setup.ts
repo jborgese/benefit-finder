@@ -23,7 +23,8 @@ afterEach(async () => {
     await destroyDatabase();
   } catch (error) {
     // Ignore cleanup errors in tests - database might not be initialized or mocked
-    if (import.meta.env.DEV) {
+    // Suppress warnings in test environment to reduce noise
+    if (import.meta.env.DEV && !process.env.VITEST) {
       console.warn('Database cleanup warning:', error);
     }
   }
@@ -59,6 +60,10 @@ if (typeof global.atob === 'undefined') {
 
 // Global test setup
 beforeAll(() => {
+  // Set test environment variables for proper detection
+  process.env.NODE_ENV = 'test';
+  process.env.VITEST = 'true';
+  
   // Mock window.matchMedia (for responsive tests)
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

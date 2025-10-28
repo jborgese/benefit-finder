@@ -44,14 +44,21 @@ interface WindowWithDevUtils extends Window {
 // Note: Encryption is handled by wrappedKeyEncryptionCryptoJsStorage wrapper
 // which is configured when creating the database with a password
 
-// Detect if running in E2E tests to avoid external iframe requests
+// Detect if running in E2E tests or test environment to avoid external iframe requests
 const isE2ETest = typeof window !== 'undefined' && window.location.hostname === 'localhost' &&
                   (window.navigator.userAgent.includes('HeadlessChrome') ||
                    window.navigator.userAgent.includes('Firefox') ||
                    window.navigator.webdriver === true);
 
+// Detect if we're in test environment (Vitest, Jest, etc.)
+const isTestEnvironment = typeof process !== 'undefined' && 
+                          (process.env.NODE_ENV === 'test' || 
+                           process.env.VITEST === 'true' ||
+                           typeof import.meta.env.VITEST !== 'undefined');
+
 // Detect if we're in development mode (needed for ignoreDuplicate option)
-const isDevMode = import.meta.env.DEV && !isE2ETest;
+// Disable dev mode plugin in test environments to prevent iframe issues
+const isDevMode = import.meta.env.DEV && !isE2ETest && !isTestEnvironment;
 
 if (isDevMode) {
   addRxPlugin(RxDBDevModePlugin);
