@@ -1,0 +1,559 @@
+{
+  "metadata": {
+    "id": "medicaid-alabama-rules-2024",
+    "name": "Alabama Medicaid Eligibility Rules (2024)",
+    "description": "Alabama-specific Medicaid eligibility rules for 2024. Alabama has NOT expanded Medicaid under the ACA, so adult eligibility is more restrictive than expansion states. These rules reflect Alabama's Medicaid and ALL Kids programs.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-AL",
+    "programs": [
+      "medicaid-alabama",
+      "all-kids-alabama"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "alabama",
+      "2024",
+      "state-specific",
+      "all-kids"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-al-no-expansion",
+      "programId": "medicaid-alabama",
+      "name": "Alabama Medicaid - No ACA Expansion Coverage Gap",
+      "description": "Identifies adults in Alabama's Medicaid coverage gap who are NOT eligible",
+      "ruleLogic": {
+        "if": [
+          {
+            "and": [
+              {
+                "var": "livesInAlabama"
+              },
+              {
+                ">=": [
+                  {
+                    "var": "age"
+                  },
+                  19
+                ]
+              },
+              {
+                "<": [
+                  {
+                    "var": "age"
+                  },
+                  65
+                ]
+              },
+              {
+                "!": {
+                  "var": "isPregnant"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasQualifyingDisability"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasChildren"
+                }
+              }
+            ]
+          },
+          false,
+          true
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "IMPORTANT: Alabama has NOT expanded Medicaid. This means most non-disabled, non-pregnant adults age 19-64 without children do NOT qualify for Medicaid in Alabama, even with very low income. The coverage gap affects approximately 300,000 Alabamians. If you fall into this gap, explore options at HealthCare.gov for marketplace plans with subsidies, or contact a Community Health Center for care on a sliding fee scale.",
+      "requiredFields": [
+        "age",
+        "isPregnant",
+        "hasQualifyingDisability",
+        "hasChildren",
+        "livesInAlabama"
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're in the coverage gap, check HealthCare.gov for marketplace plan subsidies",
+          "url": "https://www.healthcare.gov",
+          "priority": "high"
+        },
+        {
+          "step": "Find a Community Health Center that offers sliding fee scale: https://findahealthcenter.hrsa.gov",
+          "url": "https://findahealthcenter.hrsa.gov",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alabama Medicaid Expansion Status",
+          "url": "https://www.kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/",
+          "date": "2024-10-01",
+          "notes": "Alabama has not expanded Medicaid as of 2024"
+        },
+        {
+          "title": "Alabama Medicaid Eligibility",
+          "url": "https://medicaid.alabama.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-al-coverage-gap",
+          "description": "Non-disabled adult in coverage gap - NOT eligible",
+          "input": {
+            "age": 35,
+            "isPregnant": false,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "livesInAlabama": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
+        },
+        {
+          "id": "test-al-pregnant",
+          "description": "Pregnant woman - eligible under pregnancy rules (not this rule)",
+          "input": {
+            "age": 30,
+            "isPregnant": true,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "livesInAlabama": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "use-pregnancy-rules"
+          ]
+        },
+        {
+          "id": "test-al-disabled",
+          "description": "Disabled adult - eligible under disability rules (not this rule)",
+          "input": {
+            "age": 40,
+            "isPregnant": false,
+            "hasQualifyingDisability": true,
+            "hasChildren": false,
+            "livesInAlabama": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "use-disability-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "coverage-gap",
+        "adults",
+        "alabama-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AL"
+    },
+    {
+      "id": "medicaid-al-pregnant-women",
+      "programId": "medicaid-alabama",
+      "name": "Alabama Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 141% FPL qualify for Medicaid in Alabama",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInAlabama"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2090
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alabama covers pregnant women through Medicaid if household income is at or below 141% of the federal poverty level. For 2024, this means: 1 person = $2,090/month, 2 people = $2,826/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "isPregnant",
+        "householdIncome",
+        "householdSize",
+        "livesInAlabama"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-al",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-al-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at MyAlabama.gov",
+          "url": "https://www.myalabama.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alabama Medicaid Hotline: 1-800-362-1504",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local DHR office for in-person application",
+          "url": "https://dhr.alabama.gov/office-locator/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alabama Medicaid for Pregnant Women",
+          "url": "https://medicaid.alabama.gov/content/3.0_Apply/3.8_Pregnant_Women.aspx",
+          "date": "2024-10-01",
+          "notes": "Alabama covers pregnant women up to 141% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-al-pregnant-eligible",
+          "description": "Pregnant woman under 141% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "livesInAlabama": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "alabama"
+          ]
+        },
+        {
+          "id": "test-al-pregnant-ineligible",
+          "description": "Pregnant woman over 141% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInAlabama": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "women",
+        "alabama-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AL"
+    },
+    {
+      "id": "medicaid-al-children",
+      "programId": "medicaid-alabama",
+      "name": "Alabama Medicaid for Children",
+      "description": "Children up to age 19 with income up to 141% FPL qualify for Medicaid",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInAlabama"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2090
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alabama covers children under age 19 through Medicaid if household income is at or below 141% of the federal poverty level. This provides comprehensive health coverage including doctor visits, prescriptions, dental, vision, and hospital care. Children up to age 1 can qualify with income up to 141% FPL, and children ages 1-18 can qualify with income up to 141% FPL.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInAlabama"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-age-al",
+          "name": "Proof of Age",
+          "description": "Birth certificate or other official document showing child's age",
+          "required": true,
+          "alternatives": [
+            "Passport",
+            "School records"
+          ],
+          "where": "Vital records office or school"
+        },
+        {
+          "id": "proof-income-al-children",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements for all household members",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at MyAlabama.gov",
+          "url": "https://www.myalabama.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alabama Medicaid Hotline: 1-800-362-1504",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alabama Medicaid for Children",
+          "url": "https://medicaid.alabama.gov/content/3.0_Apply/3.1_Children.aspx",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-al-child-eligible",
+          "description": "Child under 141% FPL",
+          "input": {
+            "age": 8,
+            "householdIncome": 1800,
+            "householdSize": 1,
+            "livesInAlabama": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "alabama"
+          ]
+        },
+        {
+          "id": "test-al-child-ineligible-age",
+          "description": "Person age 19 or older",
+          "input": {
+            "age": 19,
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInAlabama": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "alabama-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AL"
+    },
+    {
+      "id": "medicaid-al-application-process",
+      "programId": "medicaid-alabama",
+      "name": "Alabama Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Alabama",
+      "ruleLogic": {
+        "var": "livesInAlabama"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for Medicaid in Alabama: 1) Apply online at MyAlabama.gov (fastest), 2) Apply by phone at 1-800-362-1504, 3) Visit a local Department of Human Resources (DHR) office, or 4) Download and mail a paper application. You will need to provide information about household income, assets, and household members. Processing typically takes 30-45 days for regular applications, or 24 hours for emergency situations.",
+      "requiredFields": [
+        "livesInAlabama"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "al-medicaid-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Alabama Medicaid application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at MyAlabama.gov (recommended - fastest processing)",
+          "url": "https://www.myalabama.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alabama Medicaid Hotline: 1-800-362-1504 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DHR office: https://dhr.alabama.gov/office-locator/",
+          "url": "https://dhr.alabama.gov/office-locator/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alabama Medicaid Application Information",
+          "url": "https://medicaid.alabama.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "MyAlabama.gov Online Application",
+          "url": "https://www.myalabama.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-al-medicaid-lives-in-alabama",
+          "description": "Lives in Alabama - can apply",
+          "input": {
+            "livesInAlabama": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "alabama-resident"
+          ]
+        },
+        {
+          "id": "test-al-medicaid-not-in-alabama",
+          "description": "Does not live in Alabama",
+          "input": {
+            "livesInAlabama": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "process",
+        "myalabama",
+        "dhr"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-AL"
+    }
+  ]
+}

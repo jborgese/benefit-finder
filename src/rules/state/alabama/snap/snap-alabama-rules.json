@@ -1,0 +1,769 @@
+{
+  "metadata": {
+    "id": "snap-alabama-rules-2024",
+    "name": "Alabama SNAP Eligibility Rules (2024)",
+    "description": "Alabama-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. These rules supplement federal SNAP rules and reflect Alabama's implementation of the program through the Alabama Department of Human Resources (DHR).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-AL",
+    "programs": [
+      "snap-alabama"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "alabama",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-al-standard-eligibility",
+      "programId": "snap-alabama",
+      "name": "Alabama SNAP Standard Eligibility",
+      "description": "Alabama follows federal SNAP eligibility guidelines with gross income at or below 130% of Federal Poverty Level",
+      "ruleLogic": {
+        "and": [
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1643
+                ]
+              }
+            ]
+          },
+          {
+            "==": [
+              {
+                "var": "has_eligible_citizenship"
+              },
+              true
+            ]
+          },
+          {
+            "==": [
+              {
+                "var": "state"
+              },
+              "AL"
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP in Alabama, your household gross monthly income must be at or below 130% of the Federal Poverty Level for your household size ($1,643/month for 1 person in 2024), and you must be a US citizen or eligible non-citizen. Alabama uses standard federal income limits and asset tests.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize",
+        "has_eligible_citizenship",
+        "state"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-al",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your own records"
+        },
+        {
+          "id": "proof-identity-al",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID for all household members applying",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "Birth certificate"
+          ],
+          "where": "DMV or vital records office"
+        },
+        {
+          "id": "proof-residency-al",
+          "name": "Proof of Alabama Residency",
+          "description": "Document showing you live in Alabama",
+          "required": true,
+          "alternatives": [
+            "Utility bill",
+            "Lease agreement",
+            "Rent receipt",
+            "Mortgage statement"
+          ],
+          "where": "Utility company, landlord, or mortgage company"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at MyAlabama.gov or visit your local DHR office",
+          "url": "https://www.myalabama.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alabama DHR SNAP Hotline: 1-800-410-5827",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DHR office: https://dhr.alabama.gov/office-locator/",
+          "url": "https://dhr.alabama.gov/office-locator/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alabama SNAP (Food Assistance)",
+          "url": "https://dhr.alabama.gov/food-assistance/",
+          "date": "2024-10-01",
+          "notes": "Alabama Department of Human Resources Food Assistance Program"
+        },
+        {
+          "title": "USDA FNS SNAP Eligibility",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 100,
+      "testCases": [
+        {
+          "id": "test-al-eligible-low-income",
+          "description": "Household under 130% FPL with eligible citizenship",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "AL"
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "alabama",
+            "low-income"
+          ]
+        },
+        {
+          "id": "test-al-ineligible-high-income",
+          "description": "Income above 130% FPL",
+          "input": {
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "AL"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-al-ineligible-citizenship",
+          "description": "Under income limit but not eligible citizenship",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "has_eligible_citizenship": false,
+            "state": "AL"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "citizenship"
+          ]
+        },
+        {
+          "id": "test-al-ineligible-wrong-state",
+          "description": "Qualified household but not in Alabama",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "GA"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "wrong-state"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income",
+        "eligibility",
+        "alabama-specific"
+      ],
+      "category": "eligibility",
+      "jurisdiction": "US-AL"
+    },
+    {
+      "id": "snap-al-standard-deduction",
+      "programId": "snap-alabama",
+      "name": "Alabama SNAP Standard Deduction",
+      "description": "Alabama uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              3
+            ]
+          },
+          193,
+          {
+            "if": [
+              {
+                "==": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4
+                ]
+              },
+              195,
+              {
+                "if": [
+                  {
+                    "==": [
+                      {
+                        "var": "householdSize"
+                      },
+                      5
+                    ]
+                  },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "Alabama follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": [
+        "householdSize"
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-al-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": [
+            "deduction",
+            "small-household"
+          ]
+        },
+        {
+          "id": "test-al-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": [
+            "deduction",
+            "medium-household"
+          ]
+        },
+        {
+          "id": "test-al-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": [
+            "deduction",
+            "large-household"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "deductions",
+        "net-income",
+        "calculation"
+      ],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-AL"
+    },
+    {
+      "id": "snap-al-abawd-requirements",
+      "programId": "snap-alabama",
+      "name": "Alabama ABAWD Work Requirements",
+      "description": "Alabama implements federal ABAWD time limit and work requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alabama implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements. If you're 18-49, able-bodied, and without dependents, you must work or participate in work activities at least 80 hours per month to continue receiving SNAP after 3 months in a 36-month period. Exemptions include: age under 18 or over 49, pregnant, caring for a child under 6, physically or mentally unable to work, receiving disability benefits, or meeting other exemptions. Check with your local DHR office for current exemption status.",
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activity",
+          "name": "Proof of Work Activity",
+          "description": "Pay stubs, employer letter, or documentation of work activities",
+          "required": false,
+          "alternatives": [
+            "Timesheet",
+            "Job training certificate",
+            "Community service verification"
+          ],
+          "where": "Employer or program administrator"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Contact your local DHR office to verify ABAWD status and exemptions",
+          "priority": "high"
+        },
+        {
+          "step": "If subject to work requirements, register with Alabama JobLink for work activities",
+          "url": "https://joblink.alabama.gov/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alabama SNAP Work Requirements",
+          "url": "https://dhr.alabama.gov/food-assistance/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "USDA FNS ABAWD Requirements",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-al-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-al-abawd-exempt",
+          "description": "ABAWD exempt from work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-al-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        },
+        {
+          "id": "test-al-not-abawd",
+          "description": "Not an ABAWD - eligible",
+          "input": {
+            "isABAWD": false,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "not-abawd"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "abawd",
+        "work-requirements",
+        "alabama-specific"
+      ],
+      "category": "work-requirement",
+      "jurisdiction": "US-AL"
+    },
+    {
+      "id": "snap-al-student-eligibility",
+      "programId": "snap-alabama",
+      "name": "Alabama SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isStudent"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              18
+            ]
+          },
+          {
+            ">": [
+              {
+                "var": "age"
+              },
+              49
+            ]
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "hasChildUnder6"
+          },
+          {
+            "var": "hasChildUnder12AndNoChildcare"
+          },
+          {
+            "var": "receivesWorkStudy"
+          },
+          {
+            "var": "inEmploymentTraining"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alabama follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, receive TANF, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status-al",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification",
+          "required": false,
+          "alternatives": [
+            "Class schedule",
+            "Student ID",
+            "Enrollment letter"
+          ],
+          "where": "College registrar or student services"
+        },
+        {
+          "id": "proof-student-work-al",
+          "name": "Proof of Work or Work-Study",
+          "description": "Pay stubs or work-study award letter",
+          "required": false,
+          "alternatives": [
+            "Employer letter",
+            "Work-study documentation"
+          ],
+          "where": "Employer or financial aid office"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "legalReference": "7 CFR § 273.5",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 16,
+      "testCases": [
+        {
+          "id": "test-al-student-not-student",
+          "description": "Not a student - eligible",
+          "input": {
+            "isStudent": false,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "not-student"
+          ]
+        },
+        {
+          "id": "test-al-student-working",
+          "description": "Student working 20+ hours",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "working"
+          ]
+        },
+        {
+          "id": "test-al-student-with-child",
+          "description": "Student with child under 6",
+          "input": {
+            "isStudent": true,
+            "age": 25,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": true,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "parent"
+          ]
+        },
+        {
+          "id": "test-al-student-not-compliant",
+          "description": "Student not meeting exemption criteria",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "student",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "students",
+        "college",
+        "work-requirements"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-AL"
+    },
+    {
+      "id": "snap-al-application-process",
+      "programId": "snap-alabama",
+      "name": "Alabama SNAP Application Process",
+      "description": "Information about applying for SNAP in Alabama",
+      "ruleLogic": {
+        "var": "livesInAlabama"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for SNAP in Alabama: 1) Apply online at MyAlabama.gov (fastest), 2) Apply by phone at 1-800-410-5827, 3) Visit a local Department of Human Resources (DHR) office, or 4) Download and mail a paper application. You will have an interview (phone or in-person) within 30 days. Expedited service (within 7 days) is available for households with very low income or urgent need. Bring proof of identity, income, expenses, and household composition to your interview.",
+      "requiredFields": [
+        "livesInAlabama"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "al-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Alabama SNAP application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at MyAlabama.gov (recommended - fastest processing)",
+          "url": "https://www.myalabama.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alabama DHR SNAP Hotline: 1-800-410-5827 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DHR office: https://dhr.alabama.gov/office-locator/",
+          "url": "https://dhr.alabama.gov/office-locator/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alabama SNAP Application Information",
+          "url": "https://dhr.alabama.gov/food-assistance/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "MyAlabama.gov Online Application",
+          "url": "https://www.myalabama.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-al-lives-in-alabama",
+          "description": "Lives in Alabama - can apply",
+          "input": {
+            "livesInAlabama": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "alabama-resident"
+          ]
+        },
+        {
+          "id": "test-al-not-in-alabama",
+          "description": "Does not live in Alabama",
+          "input": {
+            "livesInAlabama": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "process",
+        "myalabama",
+        "dhr"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-AL"
+    }
+  ]
+}
