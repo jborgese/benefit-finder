@@ -1,0 +1,589 @@
+{
+  "metadata": {
+    "id": "medicaid-arizona-rules-2024",
+    "name": "Arizona Medicaid Eligibility Rules (2024)",
+    "description": "Arizona-specific Medicaid eligibility rules for 2024. Arizona HAS expanded Medicaid under the ACA, providing coverage to adults with income up to 138% of the Federal Poverty Level. These rules reflect Arizona's Medicaid program (AHCCCS - Arizona Health Care Cost Containment System).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-AZ",
+    "programs": [
+      "medicaid-arizona",
+      "ahcccs-arizona"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "arizona",
+      "2024",
+      "state-specific",
+      "ahcccs",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-az-expansion-adults",
+      "programId": "medicaid-arizona",
+      "name": "Arizona Medicaid Expansion - Adults",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid under Arizona's ACA expansion",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInArizona"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1746
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arizona has expanded Medicaid under the Affordable Care Act. Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage through AHCCCS (Arizona Health Care Cost Containment System). This means: 1 person = $1,746/month, 2 people = $2,359/month. This provides comprehensive health coverage including doctor visits, prescriptions, hospital care, and preventive services.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInArizona"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-az-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-az-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport"
+          ],
+          "where": "DMV or vital records office"
+        },
+        {
+          "id": "proof-citizenship-az",
+          "name": "Proof of Citizenship or Legal Status",
+          "description": "Birth certificate, passport, or immigration documents",
+          "required": true,
+          "alternatives": [
+            "Naturalization certificate",
+            "Permanent resident card"
+          ],
+          "where": "Vital records office or immigration services"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Health-e-Arizona Plus",
+          "url": "https://www.healthearizonaplus.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call AHCCCS Member Services: 1-855-432-7587",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local DES office for in-person application",
+          "url": "https://www.azahcccs.gov/Members/GetStarted/HowToApply.html",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arizona Medicaid Expansion",
+          "url": "https://www.azahcccs.gov/",
+          "date": "2024-10-01",
+          "notes": "Arizona expanded Medicaid in 2013 under the ACA"
+        },
+        {
+          "title": "AHCCCS Eligibility",
+          "url": "https://www.azahcccs.gov/Members/GetStarted/Eligibility.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-az-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArizona": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
+        },
+        {
+          "id": "test-az-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "livesInArizona": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-az-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArizona": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "arizona-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AZ"
+    },
+    {
+      "id": "medicaid-az-pregnant-women",
+      "programId": "medicaid-arizona",
+      "name": "Arizona Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 160% FPL qualify for Medicaid in Arizona",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInArizona"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2023
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arizona covers pregnant women through Medicaid if household income is at or below 160% of the federal poverty level. This means: 1 person = $2,023/month, 2 people = $2,735/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "isPregnant",
+        "householdIncome",
+        "householdSize",
+        "livesInArizona"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-az",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-az-pregnant",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Health-e-Arizona Plus",
+          "url": "https://www.healthearizonaplus.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call AHCCCS Member Services: 1-855-432-7587",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arizona Medicaid for Pregnant Women",
+          "url": "https://www.azahcccs.gov/Members/GetStarted/Eligibility.html",
+          "date": "2024-10-01",
+          "notes": "Arizona covers pregnant women up to 160% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-az-pregnant-eligible",
+          "description": "Pregnant woman under 160% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInArizona": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "arizona"
+          ]
+        },
+        {
+          "id": "test-az-pregnant-ineligible",
+          "description": "Pregnant woman over 160% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 2200,
+            "householdSize": 1,
+            "livesInArizona": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "women",
+        "arizona-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AZ"
+    },
+    {
+      "id": "medicaid-az-children",
+      "programId": "medicaid-arizona",
+      "name": "Arizona Medicaid for Children",
+      "description": "Children up to age 19 with income up to 141% FPL qualify for Medicaid",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInArizona"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1782
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arizona covers children under age 19 through Medicaid if household income is at or below 141% of the federal poverty level. This means: 1 person = $1,782/month, 2 people = $2,410/month. This provides comprehensive health coverage including doctor visits, prescriptions, dental, vision, and hospital care through AHCCCS KidsCare or KidsCare Plus programs.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInArizona"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-age-az",
+          "name": "Proof of Age",
+          "description": "Birth certificate or other official document showing child's age",
+          "required": true,
+          "alternatives": [
+            "Passport",
+            "School records"
+          ],
+          "where": "Vital records office or school"
+        },
+        {
+          "id": "proof-income-az-children",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements for all household members",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Health-e-Arizona Plus",
+          "url": "https://www.healthearizonaplus.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call AHCCCS Member Services: 1-855-432-7587",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arizona Medicaid for Children (KidsCare)",
+          "url": "https://www.azahcccs.gov/Members/GetStarted/Eligibility.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-az-child-eligible",
+          "description": "Child under 141% FPL",
+          "input": {
+            "age": 8,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArizona": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "arizona"
+          ]
+        },
+        {
+          "id": "test-az-child-ineligible-age",
+          "description": "Person age 19 or older",
+          "input": {
+            "age": 19,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArizona": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "kidscare",
+        "arizona-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AZ"
+    },
+    {
+      "id": "medicaid-az-application-process",
+      "programId": "medicaid-arizona",
+      "name": "Arizona Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Arizona",
+      "ruleLogic": {
+        "var": "livesInArizona"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for Medicaid (AHCCCS) in Arizona: 1) Apply online at Health-e-Arizona Plus (fastest), 2) Apply by phone at 1-855-432-7587, 3) Visit a local DES office, or 4) Download and mail a paper application. You will need to provide information about household income, assets, and household members. Processing typically takes 45 days for regular applications, or 24 hours for emergency situations. Once approved, you'll receive an AHCCCS ID card in the mail.",
+      "requiredFields": [
+        "livesInArizona"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "az-medicaid-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Arizona Medicaid (AHCCCS) application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Health-e-Arizona Plus (recommended - fastest processing)",
+          "url": "https://www.healthearizonaplus.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call AHCCCS Member Services: 1-855-432-7587 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DES office: https://www.azahcccs.gov/Members/GetStarted/HowToApply.html",
+          "url": "https://www.azahcccs.gov/Members/GetStarted/HowToApply.html",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arizona Medicaid (AHCCCS) Application Information",
+          "url": "https://www.azahcccs.gov/Members/GetStarted/HowToApply.html",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Health-e-Arizona Plus",
+          "url": "https://www.healthearizonaplus.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-az-medicaid-lives-in-arizona",
+          "description": "Lives in Arizona - can apply",
+          "input": {
+            "livesInArizona": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "arizona-resident"
+          ]
+        },
+        {
+          "id": "test-az-medicaid-not-in-arizona",
+          "description": "Does not live in Arizona",
+          "input": {
+            "livesInArizona": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "process",
+        "healthearizona",
+        "ahcccs",
+        "des"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-AZ"
+    }
+  ]
+}

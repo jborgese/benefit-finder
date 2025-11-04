@@ -1,0 +1,769 @@
+{
+  "metadata": {
+    "id": "snap-arizona-rules-2024",
+    "name": "Arizona SNAP Eligibility Rules (2024)",
+    "description": "Arizona-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. These rules supplement federal SNAP rules and reflect Arizona's implementation of the program through the Arizona Department of Economic Security (DES).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-AZ",
+    "programs": [
+      "snap-arizona"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "arizona",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-az-standard-eligibility",
+      "programId": "snap-arizona",
+      "name": "Arizona SNAP Standard Eligibility",
+      "description": "Arizona follows federal SNAP eligibility guidelines with gross income at or below 130% of Federal Poverty Level",
+      "ruleLogic": {
+        "and": [
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1643
+                ]
+              }
+            ]
+          },
+          {
+            "==": [
+              {
+                "var": "has_eligible_citizenship"
+              },
+              true
+            ]
+          },
+          {
+            "==": [
+              {
+                "var": "state"
+              },
+              "AZ"
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP in Arizona, your household gross monthly income must be at or below 130% of the Federal Poverty Level for your household size ($1,643/month for 1 person in 2024), and you must be a US citizen or eligible non-citizen. Arizona uses standard federal income limits and asset tests.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize",
+        "has_eligible_citizenship",
+        "state"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-az",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your own records"
+        },
+        {
+          "id": "proof-identity-az",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID for all household members applying",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "Birth certificate"
+          ],
+          "where": "DMV or vital records office"
+        },
+        {
+          "id": "proof-residency-az",
+          "name": "Proof of Arizona Residency",
+          "description": "Document showing you live in Arizona",
+          "required": true,
+          "alternatives": [
+            "Utility bill",
+            "Lease agreement",
+            "Rent receipt",
+            "Mortgage statement"
+          ],
+          "where": "Utility company, landlord, or mortgage company"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Health-e-Arizona Plus or visit your local DES office",
+          "url": "https://www.healthearizonaplus.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Arizona DES Information Line: 1-855-432-7587",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DES office: https://des.az.gov/services/basic-needs/food-assistance",
+          "url": "https://des.az.gov/services/basic-needs/food-assistance",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arizona SNAP (Food Assistance)",
+          "url": "https://des.az.gov/services/basic-needs/food-assistance",
+          "date": "2024-10-01",
+          "notes": "Arizona Department of Economic Security Food Assistance Program"
+        },
+        {
+          "title": "USDA FNS SNAP Eligibility",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 100,
+      "testCases": [
+        {
+          "id": "test-az-eligible-low-income",
+          "description": "Household under 130% FPL with eligible citizenship",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "AZ"
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "arizona",
+            "low-income"
+          ]
+        },
+        {
+          "id": "test-az-ineligible-high-income",
+          "description": "Income above 130% FPL",
+          "input": {
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "AZ"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-az-ineligible-citizenship",
+          "description": "Under income limit but not eligible citizenship",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "has_eligible_citizenship": false,
+            "state": "AZ"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "citizenship"
+          ]
+        },
+        {
+          "id": "test-az-ineligible-wrong-state",
+          "description": "Qualified household but not in Arizona",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "CA"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "wrong-state"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income",
+        "eligibility",
+        "arizona-specific"
+      ],
+      "category": "eligibility",
+      "jurisdiction": "US-AZ"
+    },
+    {
+      "id": "snap-az-standard-deduction",
+      "programId": "snap-arizona",
+      "name": "Arizona SNAP Standard Deduction",
+      "description": "Arizona uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              3
+            ]
+          },
+          193,
+          {
+            "if": [
+              {
+                "==": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4
+                ]
+              },
+              195,
+              {
+                "if": [
+                  {
+                    "==": [
+                      {
+                        "var": "householdSize"
+                      },
+                      5
+                    ]
+                  },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "Arizona follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": [
+        "householdSize"
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-az-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": [
+            "deduction",
+            "small-household"
+          ]
+        },
+        {
+          "id": "test-az-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": [
+            "deduction",
+            "medium-household"
+          ]
+        },
+        {
+          "id": "test-az-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": [
+            "deduction",
+            "large-household"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "deductions",
+        "net-income",
+        "calculation"
+      ],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-AZ"
+    },
+    {
+      "id": "snap-az-abawd-requirements",
+      "programId": "snap-arizona",
+      "name": "Arizona ABAWD Work Requirements",
+      "description": "Arizona implements federal ABAWD time limit and work requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arizona implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements. If you're 18-49, able-bodied, and without dependents, you must work or participate in work activities at least 80 hours per month to continue receiving SNAP after 3 months in a 36-month period. Exemptions include: age under 18 or over 49, pregnant, caring for a child under 6, physically or mentally unable to work, receiving disability benefits, or meeting other exemptions. Check with your local DES office for current exemption status.",
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activity-az",
+          "name": "Proof of Work Activity",
+          "description": "Pay stubs, employer letter, or documentation of work activities",
+          "required": false,
+          "alternatives": [
+            "Timesheet",
+            "Job training certificate",
+            "Community service verification"
+          ],
+          "where": "Employer or program administrator"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Contact your local DES office to verify ABAWD status and exemptions",
+          "priority": "high"
+        },
+        {
+          "step": "If subject to work requirements, register with Arizona Job Connection for work activities",
+          "url": "https://arizonajobconnection.az.gov/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arizona SNAP Work Requirements",
+          "url": "https://des.az.gov/services/basic-needs/food-assistance",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "USDA FNS ABAWD Requirements",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-az-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-az-abawd-exempt",
+          "description": "ABAWD exempt from work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-az-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        },
+        {
+          "id": "test-az-not-abawd",
+          "description": "Not an ABAWD - eligible",
+          "input": {
+            "isABAWD": false,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "not-abawd"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "abawd",
+        "work-requirements",
+        "arizona-specific"
+      ],
+      "category": "work-requirement",
+      "jurisdiction": "US-AZ"
+    },
+    {
+      "id": "snap-az-student-eligibility",
+      "programId": "snap-arizona",
+      "name": "Arizona SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isStudent"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              18
+            ]
+          },
+          {
+            ">": [
+              {
+                "var": "age"
+              },
+              49
+            ]
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "hasChildUnder6"
+          },
+          {
+            "var": "hasChildUnder12AndNoChildcare"
+          },
+          {
+            "var": "receivesWorkStudy"
+          },
+          {
+            "var": "inEmploymentTraining"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arizona follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, receive TANF, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status-az",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification",
+          "required": false,
+          "alternatives": [
+            "Class schedule",
+            "Student ID",
+            "Enrollment letter"
+          ],
+          "where": "College registrar or student services"
+        },
+        {
+          "id": "proof-student-work-az",
+          "name": "Proof of Work or Work-Study",
+          "description": "Pay stubs or work-study award letter",
+          "required": false,
+          "alternatives": [
+            "Employer letter",
+            "Work-study documentation"
+          ],
+          "where": "Employer or financial aid office"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "legalReference": "7 CFR § 273.5",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 16,
+      "testCases": [
+        {
+          "id": "test-az-student-not-student",
+          "description": "Not a student - eligible",
+          "input": {
+            "isStudent": false,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "not-student"
+          ]
+        },
+        {
+          "id": "test-az-student-working",
+          "description": "Student working 20+ hours",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "working"
+          ]
+        },
+        {
+          "id": "test-az-student-with-child",
+          "description": "Student with child under 6",
+          "input": {
+            "isStudent": true,
+            "age": 25,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": true,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "parent"
+          ]
+        },
+        {
+          "id": "test-az-student-not-compliant",
+          "description": "Student not meeting exemption criteria",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "student",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "students",
+        "college",
+        "work-requirements"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-AZ"
+    },
+    {
+      "id": "snap-az-application-process",
+      "programId": "snap-arizona",
+      "name": "Arizona SNAP Application Process",
+      "description": "Information about applying for SNAP in Arizona",
+      "ruleLogic": {
+        "var": "livesInArizona"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for SNAP in Arizona: 1) Apply online at Health-e-Arizona Plus (fastest), 2) Apply by phone at 1-855-432-7587, 3) Visit a local DES office, or 4) Download and mail a paper application. You will have an interview (phone or in-person) within 30 days. Expedited service (within 7 days) is available for households with very low income or urgent need. Bring proof of identity, income, expenses, and household composition to your interview.",
+      "requiredFields": [
+        "livesInArizona"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "az-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Arizona SNAP application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Health-e-Arizona Plus (recommended - fastest processing)",
+          "url": "https://www.healthearizonaplus.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Arizona DES Information Line: 1-855-432-7587 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DES office: https://des.az.gov/services/basic-needs/food-assistance",
+          "url": "https://des.az.gov/services/basic-needs/food-assistance",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arizona SNAP Application Information",
+          "url": "https://des.az.gov/services/basic-needs/food-assistance",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Health-e-Arizona Plus",
+          "url": "https://www.healthearizonaplus.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-az-lives-in-arizona",
+          "description": "Lives in Arizona - can apply",
+          "input": {
+            "livesInArizona": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "arizona-resident"
+          ]
+        },
+        {
+          "id": "test-az-not-in-arizona",
+          "description": "Does not live in Arizona",
+          "input": {
+            "livesInArizona": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "process",
+        "healthearizona",
+        "des"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-AZ"
+    }
+  ]
+}
