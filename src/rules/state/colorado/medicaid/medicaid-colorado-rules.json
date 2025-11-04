@@ -1,0 +1,634 @@
+{
+  "metadata": {
+    "id": "medicaid-colorado-rules-2024",
+    "name": "Colorado Medicaid Eligibility Rules (2024)",
+    "description": "Colorado-specific Medicaid eligibility rules for 2024. Colorado HAS expanded Medicaid under the ACA, providing coverage to adults with income up to 138% of the Federal Poverty Level. These rules reflect Colorado's Medicaid program (Health First Colorado).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-CO",
+    "programs": [
+      "medicaid-colorado",
+      "health-first-colorado"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "colorado",
+      "2024",
+      "state-specific",
+      "health-first-colorado",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-co-expansion-adults",
+      "programId": "medicaid-colorado",
+      "name": "Colorado Medicaid Expansion - Adults",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid under Colorado's ACA expansion",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInColorado"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Colorado has expanded Medicaid under the Affordable Care Act. Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage through Health First Colorado. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. This provides comprehensive health coverage including doctor visits, prescriptions, hospital care, mental health services, and preventive care. Colorado has NO asset test for most adults.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInColorado"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-co-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-co-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "School ID with photo"
+          ],
+          "where": "DMV or issuing agency"
+        },
+        {
+          "id": "proof-residence-co",
+          "name": "Proof of Colorado Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing Colorado address",
+          "required": true,
+          "alternatives": [
+            "Colorado driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
+          "where": "Varies by document type"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Colorado PEAK (recommended - fastest method)",
+          "url": "https://www.colorado.gov/peak",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Health First Colorado Customer Service: 1-800-221-3943",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local county Department of Human Services office for in-person application",
+          "url": "https://www.colorado.gov/pacific/cdhs/county-department-human-services-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Colorado Medicaid Expansion",
+          "url": "https://www.colorado.gov/pacific/hcpf/health-first-colorado-medicaid",
+          "date": "2024-10-01",
+          "notes": "Colorado expanded Medicaid in 2013 under the ACA"
+        },
+        {
+          "title": "Health First Colorado Eligibility",
+          "url": "https://www.colorado.gov/pacific/hcpf/eligibility",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-co-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInColorado": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
+        },
+        {
+          "id": "test-co-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInColorado": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-co-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInColorado": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        },
+        {
+          "id": "test-co-adult-too-young",
+          "description": "Age under 19 not eligible under adult expansion",
+          "input": {
+            "age": 17,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInColorado": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age",
+            "use-children-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "colorado-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CO"
+    },
+    {
+      "id": "medicaid-co-pregnant-women",
+      "programId": "medicaid-colorado",
+      "name": "Colorado Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 200% FPL qualify for Medicaid in Colorado",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInColorado"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2959
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Colorado covers pregnant women through Health First Colorado if household income is at or below 200% of the federal poverty level. For 2024, this means: 1 person = $2,959/month, 2 people = $4,004/month, 3 people = $5,048/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInColorado",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-co",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-co",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online at Colorado PEAK",
+          "url": "https://www.colorado.gov/peak",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Colorado offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Colorado Medicaid for Pregnant Women",
+          "url": "https://www.colorado.gov/pacific/hcpf/pregnancy-services",
+          "date": "2024-10-01",
+          "notes": "Colorado covers pregnant women up to 200% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-co-pregnant-eligible",
+          "description": "Pregnant woman under 200% FPL",
+          "input": {
+            "livesInColorado": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-co-pregnant-high-income",
+          "description": "Pregnant woman over 200% FPL",
+          "input": {
+            "livesInColorado": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-co-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInColorado": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "200-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CO"
+    },
+    {
+      "id": "medicaid-co-children",
+      "programId": "medicaid-colorado",
+      "name": "Colorado Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 142% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInColorado"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2101
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Colorado covers children under age 19 through Health First Colorado if household income is at or below 142% of the federal poverty level. For 2024, this means: 1 child = $2,101/month, 2 children = $2,845/month, 3 children = $3,588/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInColorado",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-co",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-co",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Colorado PEAK",
+          "url": "https://www.colorado.gov/peak",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Colorado Medicaid for Children",
+          "url": "https://www.colorado.gov/pacific/hcpf/children-services",
+          "date": "2024-10-01",
+          "notes": "Colorado children covered up to 142% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-co-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInColorado": true,
+            "age": 10,
+            "householdIncome": 2000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "142-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-co-child-high-income",
+          "description": "Child with family income above 142% FPL",
+          "input": {
+            "livesInColorado": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-co-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInColorado": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "142-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CO"
+    },
+    {
+      "id": "medicaid-co-application-process",
+      "programId": "medicaid-colorado",
+      "name": "Colorado Medicaid Application Process",
+      "description": "Information about applying for Medicaid (Health First Colorado) in Colorado",
+      "ruleLogic": {
+        "var": "livesInColorado"
+      },
+      "ruleType": "conditional",
+      "explanation": "Colorado uses the PEAK (Program Eligibility and Application Kit) system for all Medicaid applications. You can apply: 1) **Online at Colorado.gov/PEAK** (recommended - fastest, available 24/7), 2) **By phone** at 1-800-221-3943 (Health First Colorado Customer Service), 3) **In-person** at your local county Department of Human Services office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Colorado offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInColorado"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at Colorado PEAK (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://www.colorado.gov/peak",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Health First Colorado Customer Service: 1-800-221-3943",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local county Department of Human Services office",
+          "url": "https://www.colorado.gov/pacific/cdhs/county-department-human-services-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Health First Colorado",
+          "url": "https://www.colorado.gov/pacific/hcpf/eligibility",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Colorado PEAK Application Portal",
+          "url": "https://www.colorado.gov/peak",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-co-resident",
+          "description": "Lives in Colorado - can apply",
+          "input": {
+            "livesInColorado": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "colorado-resident"
+          ]
+        },
+        {
+          "id": "test-co-non-resident",
+          "description": "Does not live in Colorado",
+          "input": {
+            "livesInColorado": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "peak",
+        "health-first-colorado",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-CO"
+    }
+  ]
+}
