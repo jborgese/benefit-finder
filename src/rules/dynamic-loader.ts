@@ -305,7 +305,11 @@ async function processFederalRules(
       if (importResult.success) {
         imported += importResult.imported;
       } else {
-        errors.push(...importResult.errors.map(e => e.message));
+        errors.push(
+          ...importResult.errors.map((err: { message: string }) =>
+            typeof err.message === 'string' ? err.message : 'Unknown import error'
+          )
+        );
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown import error';
@@ -353,7 +357,11 @@ async function processStateRules(
       if (importResult.success) {
         imported += importResult.imported;
       } else {
-        errors.push(...importResult.errors.map(e => e.message));
+        errors.push(
+          ...importResult.errors.map((err: { message: string }) =>
+            typeof err.message === 'string' ? err.message : 'Unknown import error'
+          )
+        );
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown import error';
