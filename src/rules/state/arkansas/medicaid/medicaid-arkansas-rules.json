@@ -1,0 +1,590 @@
+{
+  "metadata": {
+    "id": "medicaid-arkansas-rules-2024",
+    "name": "Arkansas Medicaid Eligibility Rules (2024)",
+    "description": "Arkansas-specific Medicaid eligibility rules for 2024. Arkansas HAS expanded Medicaid under the ACA, providing coverage to adults with income up to 138% of the Federal Poverty Level. These rules reflect Arkansas's Medicaid program (ARHOME - Arkansas Health and Opportunity for Me).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-AR",
+    "programs": [
+      "medicaid-arkansas",
+      "arhome-arkansas"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "arkansas",
+      "2024",
+      "state-specific",
+      "arhome",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ar-expansion-adults",
+      "programId": "medicaid-arkansas",
+      "name": "Arkansas Medicaid Expansion - Adults",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid under Arkansas's ACA expansion (ARHOME)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInArkansas"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1746
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arkansas has expanded Medicaid under the Affordable Care Act through the ARHOME program (Arkansas Health and Opportunity for Me). Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage. This means: 1 person = $1,746/month, 2 people = $2,359/month. This provides comprehensive health coverage including doctor visits, prescriptions, hospital care, and preventive services.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInArkansas"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-ar-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-ar-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport"
+          ],
+          "where": "DMV or vital records office"
+        },
+        {
+          "id": "proof-citizenship-ar",
+          "name": "Proof of Citizenship or Legal Status",
+          "description": "Birth certificate, passport, or immigration documents",
+          "required": true,
+          "alternatives": [
+            "Naturalization certificate",
+            "Permanent resident card"
+          ],
+          "where": "Vital records office or immigration services"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at access.arkansas.gov",
+          "url": "https://access.arkansas.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Arkansas DHS Information Line: 1-855-372-1084",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local DHS office for in-person application",
+          "url": "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/medicaid",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arkansas Medicaid Expansion (ARHOME)",
+          "url": "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/medicaid",
+          "date": "2024-10-01",
+          "notes": "Arkansas expanded Medicaid in 2014 under the ACA, currently operates ARHOME program"
+        },
+        {
+          "title": "ARHOME Eligibility",
+          "url": "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/medicaid",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ar-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArkansas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
+        },
+        {
+          "id": "test-ar-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "livesInArkansas": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ar-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArkansas": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "arhome",
+        "arkansas-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AR"
+    },
+    {
+      "id": "medicaid-ar-pregnant-women",
+      "programId": "medicaid-arkansas",
+      "name": "Arkansas Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 214% FPL qualify for Medicaid in Arkansas",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInArkansas"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2705
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arkansas covers pregnant women through Medicaid if household income is at or below 214% of the federal poverty level. This means: 1 person = $2,705/month, 2 people = $3,658/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "isPregnant",
+        "householdIncome",
+        "householdSize",
+        "livesInArkansas"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ar",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-ar-pregnant",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at access.arkansas.gov",
+          "url": "https://access.arkansas.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Arkansas DHS Information Line: 1-855-372-1084",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arkansas Medicaid for Pregnant Women",
+          "url": "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/medicaid",
+          "date": "2024-10-01",
+          "notes": "Arkansas covers pregnant women up to 214% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ar-pregnant-eligible",
+          "description": "Pregnant woman under 214% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInArkansas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "arkansas"
+          ]
+        },
+        {
+          "id": "test-ar-pregnant-ineligible",
+          "description": "Pregnant woman over 214% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1,
+            "livesInArkansas": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "women",
+        "arkansas-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AR"
+    },
+    {
+      "id": "medicaid-ar-children",
+      "programId": "medicaid-arkansas",
+      "name": "Arkansas Medicaid for Children",
+      "description": "Children up to age 19 with income up to 142% FPL qualify for Medicaid",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInArkansas"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1794
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Arkansas covers children under age 19 through Medicaid if household income is at or below 142% of the federal poverty level. This means: 1 person = $1,794/month, 2 people = $2,427/month. This provides comprehensive health coverage including doctor visits, prescriptions, dental, vision, and hospital care through ARKids First program.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInArkansas"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-age-ar",
+          "name": "Proof of Age",
+          "description": "Birth certificate or other official document showing child's age",
+          "required": true,
+          "alternatives": [
+            "Passport",
+            "School records"
+          ],
+          "where": "Vital records office or school"
+        },
+        {
+          "id": "proof-income-ar-children",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements for all household members",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at access.arkansas.gov",
+          "url": "https://access.arkansas.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Arkansas DHS Information Line: 1-855-372-1084",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arkansas Medicaid for Children (ARKids First)",
+          "url": "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/medicaid",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ar-child-eligible",
+          "description": "Child under 142% FPL",
+          "input": {
+            "age": 8,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArkansas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "arkansas"
+          ]
+        },
+        {
+          "id": "test-ar-child-ineligible-age",
+          "description": "Person age 19 or older",
+          "input": {
+            "age": 19,
+            "householdIncome": 1600,
+            "householdSize": 1,
+            "livesInArkansas": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "arkids-first",
+        "arkansas-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AR"
+    },
+    {
+      "id": "medicaid-ar-application-process",
+      "programId": "medicaid-arkansas",
+      "name": "Arkansas Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Arkansas",
+      "ruleLogic": {
+        "var": "livesInArkansas"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for Medicaid (ARHOME/ARKids First) in Arkansas: 1) Apply online at access.arkansas.gov (fastest), 2) Apply by phone at 1-855-372-1084, 3) Visit a local DHS office, or 4) Download and mail a paper application. You will need to provide information about household income, assets, and household members. Processing typically takes 45 days for regular applications, or 24 hours for emergency situations. Once approved, you'll receive an Arkansas Medicaid ID card in the mail.",
+      "requiredFields": [
+        "livesInArkansas"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "ar-medicaid-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Arkansas Medicaid application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at access.arkansas.gov (recommended - fastest processing)",
+          "url": "https://access.arkansas.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Arkansas DHS Information Line: 1-855-372-1084 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local DHS office: https://www.dhs.arkansas.gov/dco/Pages/default.aspx",
+          "url": "https://www.dhs.arkansas.gov/dco/Pages/default.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Arkansas Medicaid Application Information",
+          "url": "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/medicaid",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Access Arkansas",
+          "url": "https://access.arkansas.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ar-medicaid-lives-in-arkansas",
+          "description": "Lives in Arkansas - can apply",
+          "input": {
+            "livesInArkansas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "arkansas-resident"
+          ]
+        },
+        {
+          "id": "test-ar-medicaid-not-in-arkansas",
+          "description": "Does not live in Arkansas",
+          "input": {
+            "livesInArkansas": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "process",
+        "access-arkansas",
+        "arhome",
+        "dhs"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-AR"
+    }
+  ]
+}
