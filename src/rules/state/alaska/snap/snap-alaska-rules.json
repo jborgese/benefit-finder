@@ -1,0 +1,794 @@
+{
+  "metadata": {
+    "id": "snap-alaska-rules-2024",
+    "name": "Alaska SNAP Eligibility Rules (2024)",
+    "description": "Alaska-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. These rules supplement federal SNAP rules and reflect Alaska's implementation of the program through the Alaska Department of Health. Note: Alaska uses higher poverty guidelines due to the higher cost of living.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-AK",
+    "programs": [
+      "snap-alaska"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "alaska",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-ak-standard-eligibility",
+      "programId": "snap-alaska",
+      "name": "Alaska SNAP Standard Eligibility",
+      "description": "Alaska follows federal SNAP eligibility guidelines with gross income at or below 130% of Federal Poverty Level (Alaska uses higher poverty guidelines)",
+      "ruleLogic": {
+        "and": [
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2050
+                ]
+              }
+            ]
+          },
+          {
+            "==": [
+              {
+                "var": "has_eligible_citizenship"
+              },
+              true
+            ]
+          },
+          {
+            "==": [
+              {
+                "var": "state"
+              },
+              "AK"
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP in Alaska, your household gross monthly income must be at or below 130% of the Federal Poverty Level for your household size. Alaska uses higher poverty guidelines due to the higher cost of living ($2,050/month for 1 person in 2024, compared to $1,643 in most states). You must be a US citizen or eligible non-citizen. Alaska uses standard federal asset tests.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize",
+        "has_eligible_citizenship",
+        "state"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-ak",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your own records"
+        },
+        {
+          "id": "proof-identity-ak",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID for all household members applying",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "Birth certificate"
+          ],
+          "where": "DMV or vital records office"
+        },
+        {
+          "id": "proof-residency-ak",
+          "name": "Proof of Alaska Residency",
+          "description": "Document showing you live in Alaska",
+          "required": true,
+          "alternatives": [
+            "Utility bill",
+            "Lease agreement",
+            "Rent receipt",
+            "Mortgage statement"
+          ],
+          "where": "Utility company, landlord, or mortgage company"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at myAlaska.gov or visit your local Public Assistance office",
+          "url": "https://myalaska.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alaska Public Assistance Information Line: 1-800-478-7778",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local Public Assistance office: https://dhss.alaska.gov/dpa/Pages/contact/default.aspx",
+          "url": "https://dhss.alaska.gov/dpa/Pages/contact/default.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alaska SNAP (Food Assistance)",
+          "url": "https://dhss.alaska.gov/dpa/Pages/fssd/food-assistance/default.aspx",
+          "date": "2024-10-01",
+          "notes": "Alaska Department of Health and Social Services Food Assistance Program"
+        },
+        {
+          "title": "USDA FNS SNAP Eligibility",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 100,
+      "testCases": [
+        {
+          "id": "test-ak-eligible-low-income",
+          "description": "Household under 130% FPL with eligible citizenship",
+          "input": {
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "AK"
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "alaska",
+            "low-income"
+          ]
+        },
+        {
+          "id": "test-ak-ineligible-high-income",
+          "description": "Income above 130% FPL",
+          "input": {
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "AK"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ak-ineligible-citizenship",
+          "description": "Under income limit but not eligible citizenship",
+          "input": {
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "has_eligible_citizenship": false,
+            "state": "AK"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "citizenship"
+          ]
+        },
+        {
+          "id": "test-ak-ineligible-wrong-state",
+          "description": "Qualified household but not in Alaska",
+          "input": {
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "has_eligible_citizenship": true,
+            "state": "CA"
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "wrong-state"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income",
+        "eligibility",
+        "alaska-specific"
+      ],
+      "category": "eligibility",
+      "jurisdiction": "US-AK"
+    },
+    {
+      "id": "snap-ak-standard-deduction",
+      "programId": "snap-alaska",
+      "name": "Alaska SNAP Standard Deduction",
+      "description": "Alaska uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              3
+            ]
+          },
+          193,
+          {
+            "if": [
+              {
+                "==": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4
+                ]
+              },
+              195,
+              {
+                "if": [
+                  {
+                    "==": [
+                      {
+                        "var": "householdSize"
+                      },
+                      5
+                    ]
+                  },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "Alaska follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": [
+        "householdSize"
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-ak-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": [
+            "deduction",
+            "small-household"
+          ]
+        },
+        {
+          "id": "test-ak-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": [
+            "deduction",
+            "medium-household"
+          ]
+        },
+        {
+          "id": "test-ak-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": [
+            "deduction",
+            "large-household"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "deductions",
+        "net-income",
+        "calculation"
+      ],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-AK"
+    },
+    {
+      "id": "snap-ak-abawd-requirements",
+      "programId": "snap-alaska",
+      "name": "Alaska ABAWD Work Requirements",
+      "description": "Alaska implements federal ABAWD time limit and work requirements with some rural area exemptions",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          },
+          {
+            "var": "livesInRuralArea"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alaska implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements. If you're 18-49, able-bodied, and without dependents, you must work or participate in work activities at least 80 hours per month to continue receiving SNAP after 3 months in a 36-month period. Some rural areas in Alaska may have exemptions from work requirements. Exemptions include: age under 18 or over 49, pregnant, caring for a child under 6, physically or mentally unable to work, receiving disability benefits, or meeting other exemptions. Check with your local Public Assistance office for current exemption status.",
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork",
+        "livesInRuralArea"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activity-ak",
+          "name": "Proof of Work Activity",
+          "description": "Pay stubs, employer letter, or documentation of work activities",
+          "required": false,
+          "alternatives": [
+            "Timesheet",
+            "Job training certificate",
+            "Community service verification"
+          ],
+          "where": "Employer or program administrator"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Contact your local Public Assistance office to verify ABAWD status and exemptions",
+          "priority": "high"
+        },
+        {
+          "step": "If subject to work requirements, register with Alaska Job Center for work activities",
+          "url": "https://www.jobs.state.ak.us/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alaska SNAP Work Requirements",
+          "url": "https://dhss.alaska.gov/dpa/Pages/fssd/food-assistance/default.aspx",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "USDA FNS ABAWD Requirements",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-ak-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false,
+            "livesInRuralArea": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-ak-abawd-exempt",
+          "description": "ABAWD exempt from work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true,
+            "livesInRuralArea": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-ak-abawd-rural-exempt",
+          "description": "ABAWD in rural area with exemption",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false,
+            "livesInRuralArea": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "rural-exempt"
+          ]
+        },
+        {
+          "id": "test-ak-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false,
+            "livesInRuralArea": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        },
+        {
+          "id": "test-ak-not-abawd",
+          "description": "Not an ABAWD - eligible",
+          "input": {
+            "isABAWD": false,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false,
+            "livesInRuralArea": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "not-abawd"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "abawd",
+        "work-requirements",
+        "alaska-specific",
+        "rural-exemptions"
+      ],
+      "category": "work-requirement",
+      "jurisdiction": "US-AK"
+    },
+    {
+      "id": "snap-ak-student-eligibility",
+      "programId": "snap-alaska",
+      "name": "Alaska SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isStudent"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              18
+            ]
+          },
+          {
+            ">": [
+              {
+                "var": "age"
+              },
+              49
+            ]
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "hasChildUnder6"
+          },
+          {
+            "var": "hasChildUnder12AndNoChildcare"
+          },
+          {
+            "var": "receivesWorkStudy"
+          },
+          {
+            "var": "inEmploymentTraining"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alaska follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, receive TANF, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status-ak",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification",
+          "required": false,
+          "alternatives": [
+            "Class schedule",
+            "Student ID",
+            "Enrollment letter"
+          ],
+          "where": "College registrar or student services"
+        },
+        {
+          "id": "proof-student-work-ak",
+          "name": "Proof of Work or Work-Study",
+          "description": "Pay stubs or work-study award letter",
+          "required": false,
+          "alternatives": [
+            "Employer letter",
+            "Work-study documentation"
+          ],
+          "where": "Employer or financial aid office"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "legalReference": "7 CFR § 273.5",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 16,
+      "testCases": [
+        {
+          "id": "test-ak-student-not-student",
+          "description": "Not a student - eligible",
+          "input": {
+            "isStudent": false,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "not-student"
+          ]
+        },
+        {
+          "id": "test-ak-student-working",
+          "description": "Student working 20+ hours",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "working"
+          ]
+        },
+        {
+          "id": "test-ak-student-with-child",
+          "description": "Student with child under 6",
+          "input": {
+            "isStudent": true,
+            "age": 25,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": true,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "parent"
+          ]
+        },
+        {
+          "id": "test-ak-student-not-compliant",
+          "description": "Student not meeting exemption criteria",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "student",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "students",
+        "college",
+        "work-requirements"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-AK"
+    },
+    {
+      "id": "snap-ak-application-process",
+      "programId": "snap-alaska",
+      "name": "Alaska SNAP Application Process",
+      "description": "Information about applying for SNAP in Alaska",
+      "ruleLogic": {
+        "var": "livesInAlaska"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for SNAP in Alaska: 1) Apply online at myAlaska.gov (fastest), 2) Apply by phone at 1-800-478-7778, 3) Visit a local Public Assistance office, or 4) Download and mail a paper application. You will have an interview (phone or in-person) within 30 days. Expedited service (within 7 days) is available for households with very low income or urgent need. Bring proof of identity, income, expenses, and household composition to your interview.",
+      "requiredFields": [
+        "livesInAlaska"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "ak-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Alaska SNAP application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at myAlaska.gov (recommended - fastest processing)",
+          "url": "https://myalaska.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alaska Public Assistance Information Line: 1-800-478-7778 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local Public Assistance office: https://dhss.alaska.gov/dpa/Pages/contact/default.aspx",
+          "url": "https://dhss.alaska.gov/dpa/Pages/contact/default.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alaska SNAP Application Information",
+          "url": "https://dhss.alaska.gov/dpa/Pages/fssd/food-assistance/default.aspx",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "myAlaska.gov Online Application",
+          "url": "https://myalaska.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ak-lives-in-alaska",
+          "description": "Lives in Alaska - can apply",
+          "input": {
+            "livesInAlaska": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "alaska-resident"
+          ]
+        },
+        {
+          "id": "test-ak-not-in-alaska",
+          "description": "Does not live in Alaska",
+          "input": {
+            "livesInAlaska": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "process",
+        "myalaska",
+        "public-assistance"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-AK"
+    }
+  ]
+}

@@ -1,0 +1,557 @@
+{
+  "metadata": {
+    "id": "medicaid-alaska-rules-2024",
+    "name": "Alaska Medicaid Eligibility Rules (2024)",
+    "description": "Alaska-specific Medicaid eligibility rules for 2024. Alaska has NOT expanded Medicaid under the ACA, so adult eligibility is more restrictive than expansion states. These rules reflect Alaska's Medicaid program. Note: Alaska uses higher poverty guidelines due to the higher cost of living.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-AK",
+    "programs": [
+      "medicaid-alaska"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "alaska",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ak-no-expansion",
+      "programId": "medicaid-alaska",
+      "name": "Alaska Medicaid - No ACA Expansion Coverage Gap",
+      "description": "Identifies adults in Alaska's Medicaid coverage gap who are NOT eligible",
+      "ruleLogic": {
+        "if": [
+          {
+            "and": [
+              {
+                "var": "livesInAlaska"
+              },
+              {
+                ">=": [
+                  {
+                    "var": "age"
+                  },
+                  19
+                ]
+              },
+              {
+                "<": [
+                  {
+                    "var": "age"
+                  },
+                  65
+                ]
+              },
+              {
+                "!": {
+                  "var": "isPregnant"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasQualifyingDisability"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasChildren"
+                }
+              }
+            ]
+          },
+          false,
+          true
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "IMPORTANT: Alaska has NOT expanded Medicaid. This means most non-disabled, non-pregnant adults age 19-64 without children do NOT qualify for Medicaid in Alaska, even with very low income. The coverage gap affects approximately 20,000 Alaskans. If you fall into this gap, explore options at HealthCare.gov for marketplace plans with subsidies, or contact a Community Health Center for care on a sliding fee scale.",
+      "requiredFields": [
+        "age",
+        "isPregnant",
+        "hasQualifyingDisability",
+        "hasChildren",
+        "livesInAlaska"
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're in the coverage gap, check HealthCare.gov for marketplace plan subsidies",
+          "url": "https://www.healthcare.gov",
+          "priority": "high"
+        },
+        {
+          "step": "Find a Community Health Center that offers sliding fee scale: https://findahealthcenter.hrsa.gov",
+          "url": "https://findahealthcenter.hrsa.gov",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alaska Medicaid Expansion Status",
+          "url": "https://www.kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/",
+          "date": "2024-10-01",
+          "notes": "Alaska has not expanded Medicaid as of 2024"
+        },
+        {
+          "title": "Alaska Medicaid Eligibility",
+          "url": "https://dhss.alaska.gov/dpa/Pages/medicaid/default.aspx",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-ak-coverage-gap",
+          "description": "Non-disabled adult in coverage gap - NOT eligible",
+          "input": {
+            "age": 35,
+            "isPregnant": false,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "livesInAlaska": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
+        },
+        {
+          "id": "test-ak-pregnant",
+          "description": "Pregnant woman - eligible under pregnancy rules (not this rule)",
+          "input": {
+            "age": 30,
+            "isPregnant": true,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "livesInAlaska": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "use-pregnancy-rules"
+          ]
+        },
+        {
+          "id": "test-ak-disabled",
+          "description": "Disabled adult - eligible under disability rules (not this rule)",
+          "input": {
+            "age": 40,
+            "isPregnant": false,
+            "hasQualifyingDisability": true,
+            "hasChildren": false,
+            "livesInAlaska": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "use-disability-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "coverage-gap",
+        "adults",
+        "alaska-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AK"
+    },
+    {
+      "id": "medicaid-ak-pregnant-women",
+      "programId": "medicaid-alaska",
+      "name": "Alaska Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 200% FPL qualify for Medicaid in Alaska (Alaska uses higher poverty guidelines)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInAlaska"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3016
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alaska covers pregnant women through Medicaid if household income is at or below 200% of the federal poverty level. Due to Alaska's higher poverty guidelines, this means: 1 person = $3,016/month, 2 people = $4,080/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "isPregnant",
+        "householdIncome",
+        "householdSize",
+        "livesInAlaska"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ak",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-ak-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at myAlaska.gov",
+          "url": "https://myalaska.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alaska Public Assistance Information Line: 1-800-478-7778",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local Public Assistance office for in-person application",
+          "url": "https://dhss.alaska.gov/dpa/Pages/contact/default.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alaska Medicaid for Pregnant Women",
+          "url": "https://dhss.alaska.gov/dpa/Pages/medicaid/default.aspx",
+          "date": "2024-10-01",
+          "notes": "Alaska covers pregnant women up to 200% FPL (using Alaska poverty guidelines)"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ak-pregnant-eligible",
+          "description": "Pregnant woman under 200% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 2800,
+            "householdSize": 1,
+            "livesInAlaska": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "alaska"
+          ]
+        },
+        {
+          "id": "test-ak-pregnant-ineligible",
+          "description": "Pregnant woman over 200% FPL",
+          "input": {
+            "isPregnant": true,
+            "householdIncome": 3500,
+            "householdSize": 1,
+            "livesInAlaska": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "women",
+        "alaska-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AK"
+    },
+    {
+      "id": "medicaid-ak-children",
+      "programId": "medicaid-alaska",
+      "name": "Alaska Medicaid for Children",
+      "description": "Children up to age 19 with income up to 200% FPL qualify for Medicaid (Alaska uses higher poverty guidelines)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInAlaska"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3016
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Alaska covers children under age 19 through Medicaid if household income is at or below 200% of the federal poverty level. Due to Alaska's higher poverty guidelines, this means: 1 person = $3,016/month, 2 people = $4,080/month. This provides comprehensive health coverage including doctor visits, prescriptions, dental, vision, and hospital care.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInAlaska"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-age-ak",
+          "name": "Proof of Age",
+          "description": "Birth certificate or other official document showing child's age",
+          "required": true,
+          "alternatives": [
+            "Passport",
+            "School records"
+          ],
+          "where": "Vital records office or school"
+        },
+        {
+          "id": "proof-income-ak-children",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements for all household members",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at myAlaska.gov",
+          "url": "https://myalaska.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alaska Public Assistance Information Line: 1-800-478-7778",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alaska Medicaid for Children",
+          "url": "https://dhss.alaska.gov/dpa/Pages/medicaid/default.aspx",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ak-child-eligible",
+          "description": "Child under 200% FPL",
+          "input": {
+            "age": 8,
+            "householdIncome": 2700,
+            "householdSize": 1,
+            "livesInAlaska": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "alaska"
+          ]
+        },
+        {
+          "id": "test-ak-child-ineligible-age",
+          "description": "Person age 19 or older",
+          "input": {
+            "age": 19,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInAlaska": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "alaska-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-AK"
+    },
+    {
+      "id": "medicaid-ak-application-process",
+      "programId": "medicaid-alaska",
+      "name": "Alaska Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Alaska",
+      "ruleLogic": {
+        "var": "livesInAlaska"
+      },
+      "ruleType": "conditional",
+      "explanation": "To apply for Medicaid in Alaska: 1) Apply online at myAlaska.gov (fastest), 2) Apply by phone at 1-800-478-7778, 3) Visit a local Public Assistance office, or 4) Download and mail a paper application. You will need to provide information about household income, assets, and household members. Processing typically takes 30-45 days for regular applications, or 24 hours for emergency situations.",
+      "requiredFields": [
+        "livesInAlaska"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "ak-medicaid-application-documents",
+          "name": "Application Documents Package",
+          "description": "Comprehensive document list for Alaska Medicaid application",
+          "required": true,
+          "alternatives": [],
+          "where": "Various sources"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online at myAlaska.gov (recommended - fastest processing)",
+          "url": "https://myalaska.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Alaska Public Assistance Information Line: 1-800-478-7778 for phone application",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local Public Assistance office: https://dhss.alaska.gov/dpa/Pages/contact/default.aspx",
+          "url": "https://dhss.alaska.gov/dpa/Pages/contact/default.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Alaska Medicaid Application Information",
+          "url": "https://dhss.alaska.gov/dpa/Pages/medicaid/default.aspx",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "myAlaska.gov Online Application",
+          "url": "https://myalaska.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ak-medicaid-lives-in-alaska",
+          "description": "Lives in Alaska - can apply",
+          "input": {
+            "livesInAlaska": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "alaska-resident"
+          ]
+        },
+        {
+          "id": "test-ak-medicaid-not-in-alaska",
+          "description": "Does not live in Alaska",
+          "input": {
+            "livesInAlaska": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "process",
+        "myalaska",
+        "public-assistance"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-AK"
+    }
+  ]
+}

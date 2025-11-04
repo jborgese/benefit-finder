@@ -368,7 +368,7 @@ async function processStateRules(
  * Get available states for rule loading
  */
 export function getAvailableStates(): string[] {
-  return ['georgia', 'california', 'texas', 'alabama'];
+  return ['georgia', 'california', 'texas', 'alabama', 'alaska'];
 }
 
 /**
@@ -379,10 +379,12 @@ const STATE_CODE_MAP: Record<string, string> = {
   'CA': 'california',
   'TX': 'texas',
   'AL': 'alabama',
+  'AK': 'alaska',
   'georgia': 'georgia',
   'california': 'california',
   'texas': 'texas',
-  'alabama': 'alabama'
+  'alabama': 'alabama',
+  'alaska': 'alaska'
 };
 
 /**
