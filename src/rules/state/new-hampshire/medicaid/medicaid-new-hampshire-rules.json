@@ -1,0 +1,604 @@
+{
+  "metadata": {
+    "id": "medicaid-new-hampshire-rules-2024",
+    "name": "New Hampshire Medicaid Eligibility Rules (2024)",
+    "description": "New Hampshire-specific Medicaid eligibility rules for 2024. New Hampshire expanded Medicaid under the ACA in 2014 (Granite Advantage), so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-NH",
+    "programs": [
+      "medicaid-new-hampshire"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "new-hampshire",
+      "2024",
+      "state-specific",
+      "expansion",
+      "granite-advantage"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-nh-expansion-adults",
+      "programId": "medicaid-new-hampshire",
+      "name": "New Hampshire Medicaid for ACA Expansion Adults (Granite Advantage)",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewHampshire"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Hampshire expanded Medicaid under the Affordable Care Act in 2014 (Granite Advantage). Adults age 19-64 are eligible for Medicaid if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through NH EASY or NH Health Protection.",
+      "requiredFields": [
+        "livesInNewHampshire",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-nh-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-nh-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through NH EASY (recommended)",
+          "url": "https://nheasy.nh.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through NH Health Protection",
+          "url": "https://nheasy.nh.gov/",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local District Office",
+          "url": "https://www.dhhs.nh.gov/contact-us/district-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Granite Advantage (New Hampshire Medicaid Expansion)",
+          "url": "https://www.dhhs.nh.gov/programs-services/medicaid/granite-advantage-health-care-program",
+          "date": "2024-10-01",
+          "notes": "New Hampshire expanded Medicaid in 2014, adults eligible up to 138% FPL through Granite Advantage"
+        },
+        {
+          "title": "NH EASY",
+          "url": "https://nheasy.nh.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-nh-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInNewHampshire": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nh-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInNewHampshire": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nh-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInNewHampshire": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl",
+        "granite-advantage"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NH"
+    },
+    {
+      "id": "medicaid-nh-pregnant-women",
+      "programId": "medicaid-new-hampshire",
+      "name": "New Hampshire Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 196% FPL qualify for Medicaid in New Hampshire",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewHampshire"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2898
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Hampshire covers pregnant women through Medicaid if household income is at or below 196% of the federal poverty level. For 2024, this means: 1 person = $2,898/month, 2 people = $3,925/month, 3 people = $4,952/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInNewHampshire",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-nh",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-nh",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through NH EASY",
+          "url": "https://nheasy.nh.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "New Hampshire offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "New Hampshire Medicaid for Pregnant Women",
+          "url": "https://www.dhhs.nh.gov/programs-services/medicaid",
+          "date": "2024-10-01",
+          "notes": "New Hampshire covers pregnant women up to 196% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-nh-pregnant-eligible",
+          "description": "Pregnant woman under 196% FPL",
+          "input": {
+            "livesInNewHampshire": true,
+            "isPregnant": true,
+            "householdIncome": 2800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "196-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nh-pregnant-high-income",
+          "description": "Pregnant woman over 196% FPL",
+          "input": {
+            "livesInNewHampshire": true,
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nh-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInNewHampshire": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "196-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NH"
+    },
+    {
+      "id": "medicaid-nh-children",
+      "programId": "medicaid-new-hampshire",
+      "name": "New Hampshire Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 318% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewHampshire"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4700
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Hampshire covers children under age 19 through Medicaid if household income is at or below 318% of the federal poverty level. For 2024, this means: 1 child = $4,700/month, 2 children = $6,366/month, 3 children = $8,032/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInNewHampshire",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-nh",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-nh",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through NH EASY",
+          "url": "https://nheasy.nh.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "New Hampshire Medicaid for Children",
+          "url": "https://www.dhhs.nh.gov/programs-services/medicaid",
+          "date": "2024-10-01",
+          "notes": "New Hampshire children covered up to 318% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-nh-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInNewHampshire": true,
+            "age": 10,
+            "householdIncome": 4500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "318-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nh-child-high-income",
+          "description": "Child with family income above 318% FPL",
+          "input": {
+            "livesInNewHampshire": true,
+            "age": 12,
+            "householdIncome": 8000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nh-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInNewHampshire": true,
+            "age": 19,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "318-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NH"
+    },
+    {
+      "id": "medicaid-nh-application-process",
+      "programId": "medicaid-new-hampshire",
+      "name": "New Hampshire Medicaid Application Process",
+      "description": "Information about applying for Medicaid in New Hampshire",
+      "ruleLogic": {
+        "var": "livesInNewHampshire"
+      },
+      "ruleType": "conditional",
+      "explanation": "New Hampshire uses NH EASY for all Medicaid applications. You can apply: 1) **Online through NH EASY** (recommended - fastest, available 24/7), 2) **By phone** at 1-844-275-3447, 3) **In-person** at your local District Office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. New Hampshire offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInNewHampshire"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through NH EASY (recommended)",
+          "url": "https://nheasy.nh.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call New Hampshire DHHS: 1-844-275-3447",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local District Office",
+          "url": "https://www.dhhs.nh.gov/contact-us/district-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for New Hampshire Medicaid",
+          "url": "https://www.dhhs.nh.gov/programs-services/medicaid",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "NH EASY",
+          "url": "https://nheasy.nh.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-nh-resident",
+          "description": "Lives in New Hampshire - can apply",
+          "input": {
+            "livesInNewHampshire": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "new-hampshire-resident"
+          ]
+        },
+        {
+          "id": "test-nh-non-resident",
+          "description": "Does not live in New Hampshire",
+          "input": {
+            "livesInNewHampshire": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "nh-easy",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-NH"
+    }
+  ]
+}
