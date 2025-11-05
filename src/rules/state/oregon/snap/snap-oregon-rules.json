@@ -1,0 +1,670 @@
+{
+  "metadata": {
+    "id": "snap-oregon-rules-2024",
+    "name": "Oregon SNAP Eligibility Rules (2024)",
+    "description": "Oregon-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. Oregon follows federal SNAP guidelines with state-specific application processes through the ONE system.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-OR",
+    "programs": [
+      "snap-oregon"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "oregon",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-or-standard-eligibility",
+      "programId": "snap-oregon",
+      "name": "Oregon SNAP Standard Eligibility",
+      "description": "Standard SNAP eligibility based on household income and size",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInOregon"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1643
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP in Oregon, your household gross monthly income must be at or below 130% of the Federal Poverty Level. For 2024: 1 person = $1,643/month, 2 people = $2,226/month, 3 people = $2,808/month, 4 people = $3,390/month. Oregon follows federal SNAP income guidelines. After applying the standard deduction and other deductions, your net income must be at or below 100% FPL to qualify.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize",
+        "livesInOregon"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-or",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-or",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "School ID with photo"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ONE.Oregon.gov",
+          "url": "https://one.oregon.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply by phone at 1-800-699-9075 or visit your local Oregon Department of Human Services office",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Oregon SNAP Eligibility",
+          "url": "https://www.oregon.gov/odhs/food/pages/snap.aspx",
+          "date": "2024-10-01",
+          "notes": "Oregon SNAP follows federal income guidelines: 130% FPL gross income limit"
+        },
+        {
+          "title": "ONE.Oregon.gov",
+          "url": "https://one.oregon.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-or-standard-eligible",
+          "description": "Household under 130% FPL",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInOregon": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "standard",
+            "oregon"
+          ]
+        },
+        {
+          "id": "test-or-standard-ineligible-income",
+          "description": "Income above 130% FPL",
+          "input": {
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "livesInOregon": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-or-non-resident",
+          "description": "Does not live in Oregon",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInOregon": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income-eligibility",
+        "federal-guidelines",
+        "oregon"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-OR"
+    },
+    {
+      "id": "snap-or-standard-deduction",
+      "programId": "snap-oregon",
+      "name": "Oregon SNAP Standard Deduction",
+      "description": "Oregon uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              3
+            ]
+          },
+          193,
+          {
+            "if": [
+              {
+                "==": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4
+                ]
+              },
+              195,
+              {
+                "if": [
+                  {
+                    "==": [
+                      {
+                        "var": "householdSize"
+                      },
+                      5
+                    ]
+                  },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "Oregon follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": [
+        "householdSize"
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-or-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": [
+            "deduction",
+            "small-household"
+          ]
+        },
+        {
+          "id": "test-or-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": [
+            "deduction",
+            "medium-household"
+          ]
+        },
+        {
+          "id": "test-or-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": [
+            "deduction",
+            "large-household"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "deductions",
+        "net-income",
+        "calculation"
+      ],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-OR"
+    },
+    {
+      "id": "snap-or-abawd-work-requirements",
+      "programId": "snap-oregon",
+      "name": "Oregon SNAP ABAWD Work Requirements",
+      "description": "Able-Bodied Adults Without Dependents must meet work requirements or face time limits",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Oregon implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements. If you're 18-49, able-bodied, and don't have dependents, you must work or participate in work activities for at least 80 hours per month to receive SNAP beyond 3 months in a 36-month period. Some areas of Oregon may have waivers based on unemployment rates. Exemptions include: students, people with disabilities, pregnant women, caregivers of children under 6, and people receiving unemployment benefits.",
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activity-or",
+          "name": "Proof of Work Activity",
+          "description": "Pay stubs, employer verification, or documentation of work program participation",
+          "required": false,
+          "alternatives": [
+            "Employment verification letter",
+            "Work program enrollment"
+          ],
+          "where": "Employer or work program"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If subject to ABAWD rules, contact your local Oregon Department of Human Services office to learn about available work programs",
+          "priority": "medium"
+        },
+        {
+          "step": "Check if your area has a waiver from ABAWD time limits due to high unemployment",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Oregon SNAP Work Requirements",
+          "url": "https://www.oregon.gov/odhs/food/pages/snap.aspx",
+          "date": "2024-10-01",
+          "notes": "Oregon follows federal ABAWD work requirements"
+        },
+        {
+          "title": "USDA FNS ABAWD Information",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-or-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-or-abawd-exempt",
+          "description": "ABAWD exempt from work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-or-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "abawd",
+        "work-requirements",
+        "oregon"
+      ],
+      "category": "work-requirement",
+      "jurisdiction": "US-OR"
+    },
+    {
+      "id": "snap-or-student-eligibility",
+      "programId": "snap-oregon",
+      "name": "Oregon SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isStudent"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              18
+            ]
+          },
+          {
+            ">": [
+              {
+                "var": "age"
+              },
+              49
+            ]
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "hasChildUnder6"
+          },
+          {
+            "var": "hasChildUnder12AndNoChildcare"
+          },
+          {
+            "var": "receivesWorkStudy"
+          },
+          {
+            "var": "inEmploymentTraining"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Oregon follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status-or",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification, class schedule",
+          "required": false,
+          "alternatives": [
+            "Student ID",
+            "Enrollment letter",
+            "Class schedule"
+          ],
+          "where": "College registrar"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're a student, check if you meet one of the exemptions (working 20+ hours, work-study, childcare responsibilities, etc.)",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "date": "2024-10-01",
+          "notes": "Oregon follows federal student eligibility rules"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-or-student-working",
+          "description": "Student working 20+ hours (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "working"
+          ]
+        },
+        {
+          "id": "test-or-student-work-study",
+          "description": "Student with work-study (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 20,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": true,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "work-study"
+          ]
+        },
+        {
+          "id": "test-or-student-not-compliant",
+          "description": "Student not meeting any exemption",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "student",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "students",
+        "college",
+        "exemptions",
+        "oregon"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-OR"
+    },
+    {
+      "id": "snap-or-application-process",
+      "programId": "snap-oregon",
+      "name": "Oregon SNAP Application Process",
+      "description": "Information about applying for SNAP in Oregon through the Department of Human Services",
+      "ruleLogic": {
+        "var": "livesInOregon"
+      },
+      "ruleType": "conditional",
+      "explanation": "Oregon uses the ONE system (ONE.Oregon.gov) for benefit applications. You can apply: 1) **Online through ONE.Oregon.gov** (recommended - fastest, available 24/7), 2) **By phone** at 1-800-699-9075, 3) **In-person** at your local Oregon Department of Human Services office. Most applications are processed within 30 days. Expedited service (within 7 days) is available for households with urgent need and less than $150 in monthly gross income and liquid resources under $100, or if your rent/mortgage and utilities are more than your income and liquid resources.",
+      "requiredFields": [
+        "livesInOregon"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ONE.Oregon.gov (recommended - fastest method)",
+          "url": "https://one.oregon.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply by phone: 1-800-699-9075",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Oregon Department of Human Services office",
+          "url": "https://www.oregon.gov/odhs/Pages/contact.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "ONE.Oregon.gov",
+          "url": "https://one.oregon.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Oregon SNAP Application Information",
+          "url": "https://www.oregon.gov/odhs/food/pages/snap.aspx",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-or-resident",
+          "description": "Lives in Oregon - can apply",
+          "input": {
+            "livesInOregon": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "oregon-resident"
+          ]
+        },
+        {
+          "id": "test-or-non-resident",
+          "description": "Does not live in Oregon",
+          "input": {
+            "livesInOregon": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "one-oregon",
+        "process",
+        "oregon"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-OR"
+    }
+  ]
+}

@@ -376,7 +376,7 @@ async function processStateRules(
  * Get available states for rule loading
  */
 export function getAvailableStates(): string[] {
-  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new-hampshire', 'new-jersey', 'new-mexico', 'north-carolina', 'north-dakota', 'ohio', 'oklahoma'];
+  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new-hampshire', 'new-jersey', 'new-mexico', 'north-carolina', 'north-dakota', 'ohio', 'oklahoma', 'oregon'];
 }
 
 /**
@@ -419,6 +419,7 @@ const STATE_CODE_MAP: Record<string, string> = {
   'ND': 'north-dakota',
   'OH': 'ohio',
   'OK': 'oklahoma',
+  'OR': 'oregon',
   'georgia': 'georgia',
   'california': 'california',
   'texas': 'texas',
@@ -454,7 +455,8 @@ const STATE_CODE_MAP: Record<string, string> = {
   'north-carolina': 'north-carolina',
   'north-dakota': 'north-dakota',
   'ohio': 'ohio',
-  'oklahoma': 'oklahoma'
+  'oklahoma': 'oklahoma',
+  'oregon': 'oregon'
 };
 
 /**
