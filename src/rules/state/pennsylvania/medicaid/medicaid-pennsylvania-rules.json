@@ -1,0 +1,597 @@
+{
+  "metadata": {
+    "id": "medicaid-pennsylvania-rules-2024",
+    "name": "Pennsylvania Medicaid Eligibility Rules (2024)",
+    "description": "Pennsylvania-specific Medicaid eligibility rules for 2024. Pennsylvania expanded Medicaid under the ACA in 2015, so adults up to 138% FPL are eligible through Medical Assistance. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-PA",
+    "programs": [
+      "medicaid-pennsylvania"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "pennsylvania",
+      "2024",
+      "state-specific",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-pa-expansion-adults",
+      "programId": "medicaid-pennsylvania",
+      "name": "Pennsylvania Medicaid for ACA Expansion Adults",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInPennsylvania"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Pennsylvania expanded Medicaid under the Affordable Care Act in 2015. Adults age 19-64 are eligible for Medical Assistance (Medicaid) if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through COMPASS.",
+      "requiredFields": [
+        "livesInPennsylvania",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-pa-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-pa-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through COMPASS (recommended)",
+          "url": "https://www.compass.state.pa.us/compass.web/Public/CMPHome",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Find your local County Assistance Office",
+          "url": "https://www.dhs.pa.gov/Services/Assistance/Pages/CAO-Contact.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Pennsylvania Medicaid Expansion",
+          "url": "https://www.dhs.pa.gov/Services/Assistance/Pages/Medical-Assistance.aspx",
+          "date": "2024-10-01",
+          "notes": "Pennsylvania expanded Medicaid in 2015, adults eligible up to 138% FPL"
+        },
+        {
+          "title": "COMPASS",
+          "url": "https://www.compass.state.pa.us/compass.web/Public/CMPHome",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-pa-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInPennsylvania": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-pa-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInPennsylvania": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-pa-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInPennsylvania": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-PA"
+    },
+    {
+      "id": "medicaid-pa-pregnant-women",
+      "programId": "medicaid-pennsylvania",
+      "name": "Pennsylvania Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 215% FPL qualify for Medicaid in Pennsylvania",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInPennsylvania"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3180
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Pennsylvania covers pregnant women through Medical Assistance (Medicaid) if household income is at or below 215% of the federal poverty level. For 2024, this means: 1 person = $3,180/month, 2 people = $4,307/month, 3 people = $5,434/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInPennsylvania",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-pa",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-pa",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through COMPASS",
+          "url": "https://www.compass.state.pa.us/compass.web/Public/CMPHome",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Pennsylvania offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Pennsylvania Medicaid for Pregnant Women",
+          "url": "https://www.dhs.pa.gov/Services/Assistance/Pages/Medical-Assistance.aspx",
+          "date": "2024-10-01",
+          "notes": "Pennsylvania covers pregnant women up to 215% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-pa-pregnant-eligible",
+          "description": "Pregnant woman under 215% FPL",
+          "input": {
+            "livesInPennsylvania": true,
+            "isPregnant": true,
+            "householdIncome": 3100,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "215-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-pa-pregnant-high-income",
+          "description": "Pregnant woman over 215% FPL",
+          "input": {
+            "livesInPennsylvania": true,
+            "isPregnant": true,
+            "householdIncome": 3300,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-pa-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInPennsylvania": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "215-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-PA"
+    },
+    {
+      "id": "medicaid-pa-children",
+      "programId": "medicaid-pennsylvania",
+      "name": "Pennsylvania Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 317% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInPennsylvania"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4686
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Pennsylvania covers children under age 19 through Medical Assistance (Medicaid) if household income is at or below 317% of the federal poverty level. For 2024, this means: 1 child = $4,686/month, 2 children = $6,347/month, 3 children = $8,008/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInPennsylvania",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-pa",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-pa",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through COMPASS",
+          "url": "https://www.compass.state.pa.us/compass.web/Public/CMPHome",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Pennsylvania Medicaid for Children",
+          "url": "https://www.dhs.pa.gov/Services/Assistance/Pages/Medical-Assistance.aspx",
+          "date": "2024-10-01",
+          "notes": "Pennsylvania children covered up to 317% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-pa-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInPennsylvania": true,
+            "age": 10,
+            "householdIncome": 4500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "317-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-pa-child-high-income",
+          "description": "Child with family income above 317% FPL",
+          "input": {
+            "livesInPennsylvania": true,
+            "age": 12,
+            "householdIncome": 8000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-pa-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInPennsylvania": true,
+            "age": 19,
+            "householdIncome": 4500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "317-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-PA"
+    },
+    {
+      "id": "medicaid-pa-application-process",
+      "programId": "medicaid-pennsylvania",
+      "name": "Pennsylvania Medicaid Application Process",
+      "description": "Information about applying for Medicaid (Medical Assistance) in Pennsylvania",
+      "ruleLogic": {
+        "var": "livesInPennsylvania"
+      },
+      "ruleType": "conditional",
+      "explanation": "Pennsylvania uses COMPASS for Medical Assistance (Medicaid) applications. You can apply: 1) **Online through COMPASS** (recommended - fastest, available 24/7), 2) **By phone** at 1-866-550-4355, 3) **In-person** at your local County Assistance Office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Pennsylvania offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInPennsylvania"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through COMPASS (recommended)",
+          "url": "https://www.compass.state.pa.us/compass.web/Public/CMPHome",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Pennsylvania Department of Human Services: 1-866-550-4355",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local County Assistance Office",
+          "url": "https://www.dhs.pa.gov/Services/Assistance/Pages/CAO-Contact.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Medical Assistance",
+          "url": "https://www.dhs.pa.gov/Services/Assistance/Pages/Medical-Assistance.aspx",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "COMPASS",
+          "url": "https://www.compass.state.pa.us/compass.web/Public/CMPHome",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-pa-resident",
+          "description": "Lives in Pennsylvania - can apply",
+          "input": {
+            "livesInPennsylvania": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pennsylvania-resident"
+          ]
+        },
+        {
+          "id": "test-pa-non-resident",
+          "description": "Does not live in Pennsylvania",
+          "input": {
+            "livesInPennsylvania": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "compass",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-PA"
+    }
+  ]
+}
