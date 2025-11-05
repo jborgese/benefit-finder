@@ -1,0 +1,606 @@
+{
+  "metadata": {
+    "id": "medicaid-massachusetts-rules-2024",
+    "name": "Massachusetts Medicaid Eligibility Rules (2024)",
+    "description": "Massachusetts-specific Medicaid eligibility rules for 2024. Massachusetts has expanded Medicaid under the ACA (MassHealth), so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-MA",
+    "programs": [
+      "medicaid-massachusetts"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "massachusetts",
+      "2024",
+      "state-specific",
+      "expansion",
+      "masshealth"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ma-expansion-adults",
+      "programId": "medicaid-massachusetts",
+      "name": "Massachusetts Medicaid for ACA Expansion Adults (MassHealth)",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMassachusetts"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Massachusetts has expanded Medicaid under the Affordable Care Act (MassHealth). Adults age 19-64 are eligible for MassHealth if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through the Massachusetts Health Connector or MassHealth Enrollment Center.",
+      "requiredFields": [
+        "livesInMassachusetts",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-ma-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-ma-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Massachusetts Health Connector (recommended - integrated marketplace and MassHealth)",
+          "url": "https://www.mahealthconnector.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or call MassHealth Enrollment Center: 1-888-665-9993",
+          "priority": "high"
+        },
+        {
+          "step": "Find a MassHealth Enrollment Center near you",
+          "url": "https://www.mass.gov/locations/masshealth-enrollment-center",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "MassHealth Expansion",
+          "url": "https://www.mass.gov/info-details/masshealth-coverage-types-and-eligibility",
+          "date": "2024-10-01",
+          "notes": "Massachusetts expanded Medicaid in 2006 (pre-ACA), adults eligible up to 138% FPL"
+        },
+        {
+          "title": "Massachusetts Health Connector",
+          "url": "https://www.mahealthconnector.org/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-ma-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInMassachusetts": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ma-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInMassachusetts": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ma-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInMassachusetts": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl",
+        "masshealth"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MA"
+    },
+    {
+      "id": "medicaid-ma-pregnant-women",
+      "programId": "medicaid-massachusetts",
+      "name": "MassHealth for Pregnant Women",
+      "description": "Pregnant women with income up to 200% FPL qualify for MassHealth in Massachusetts",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMassachusetts"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2956
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Massachusetts covers pregnant women through MassHealth if household income is at or below 200% of the federal poverty level. For 2024, this means: 1 person = $2,956/month, 2 people = $4,004/month, 3 people = $5,052/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInMassachusetts",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ma",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ma",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through Massachusetts Health Connector",
+          "url": "https://www.mahealthconnector.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Massachusetts offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "MassHealth for Pregnant Women",
+          "url": "https://www.mass.gov/info-details/masshealth-coverage-types-and-eligibility",
+          "date": "2024-10-01",
+          "notes": "Massachusetts covers pregnant women up to 200% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ma-pregnant-eligible",
+          "description": "Pregnant woman under 200% FPL",
+          "input": {
+            "livesInMassachusetts": true,
+            "isPregnant": true,
+            "householdIncome": 2800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ma-pregnant-high-income",
+          "description": "Pregnant woman over 200% FPL",
+          "input": {
+            "livesInMassachusetts": true,
+            "isPregnant": true,
+            "householdIncome": 3100,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ma-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInMassachusetts": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "200-percent-fpl",
+        "masshealth"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MA"
+    },
+    {
+      "id": "medicaid-ma-children",
+      "programId": "medicaid-massachusetts",
+      "name": "MassHealth for Children",
+      "description": "Children under 19 qualify for MassHealth with income up to 300% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMassachusetts"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4435
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Massachusetts covers children under age 19 through MassHealth if household income is at or below 300% of the federal poverty level. For 2024, this means: 1 child = $4,435/month, 2 children = $6,006/month, 3 children = $7,577/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInMassachusetts",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ma",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ma",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Massachusetts Health Connector",
+          "url": "https://www.mahealthconnector.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "MassHealth for Children",
+          "url": "https://www.mass.gov/info-details/masshealth-coverage-types-and-eligibility",
+          "date": "2024-10-01",
+          "notes": "Massachusetts children covered up to 300% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ma-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInMassachusetts": true,
+            "age": 10,
+            "householdIncome": 4200,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "300-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ma-child-high-income",
+          "description": "Child with family income above 300% FPL",
+          "input": {
+            "livesInMassachusetts": true,
+            "age": 12,
+            "householdIncome": 7000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ma-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInMassachusetts": true,
+            "age": 19,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "300-percent-fpl",
+        "year-round-enrollment",
+        "masshealth"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MA"
+    },
+    {
+      "id": "medicaid-ma-application-process",
+      "programId": "medicaid-massachusetts",
+      "name": "MassHealth Application Process",
+      "description": "Information about applying for MassHealth in Massachusetts",
+      "ruleLogic": {
+        "var": "livesInMassachusetts"
+      },
+      "ruleType": "conditional",
+      "explanation": "Massachusetts uses the Massachusetts Health Connector for MassHealth and marketplace applications. You can apply: 1) **Online through Massachusetts Health Connector** (recommended - fastest, available 24/7, integrated marketplace and MassHealth), 2) **By phone** at MassHealth Enrollment Center: 1-888-665-9993, 3) **In-person** at a MassHealth Enrollment Center. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Massachusetts offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInMassachusetts"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Massachusetts Health Connector (recommended - handles both MassHealth and marketplace plans)",
+          "url": "https://www.mahealthconnector.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call MassHealth Enrollment Center: 1-888-665-9993",
+          "priority": "high"
+        },
+        {
+          "step": "Find a MassHealth Enrollment Center near you",
+          "url": "https://www.mass.gov/locations/masshealth-enrollment-center",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for MassHealth",
+          "url": "https://www.mass.gov/info-details/masshealth-coverage-types-and-eligibility",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Massachusetts Health Connector",
+          "url": "https://www.mahealthconnector.org/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ma-resident",
+          "description": "Lives in Massachusetts - can apply",
+          "input": {
+            "livesInMassachusetts": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "massachusetts-resident"
+          ]
+        },
+        {
+          "id": "test-ma-non-resident",
+          "description": "Does not live in Massachusetts",
+          "input": {
+            "livesInMassachusetts": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "masshealth",
+        "health-connector",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-MA"
+    }
+  ]
+}
