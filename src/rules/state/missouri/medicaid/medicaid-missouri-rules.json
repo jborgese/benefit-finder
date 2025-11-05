@@ -1,0 +1,603 @@
+{
+  "metadata": {
+    "id": "medicaid-missouri-rules-2024",
+    "name": "Missouri Medicaid Eligibility Rules (2024)",
+    "description": "Missouri-specific Medicaid eligibility rules for 2024. Missouri expanded Medicaid under the ACA in 2021 (MO HealthNet), so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-MO",
+    "programs": [
+      "medicaid-missouri"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "missouri",
+      "2024",
+      "state-specific",
+      "expansion",
+      "mo-healthnet"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-mo-expansion-adults",
+      "programId": "medicaid-missouri",
+      "name": "Missouri Medicaid for ACA Expansion Adults (MO HealthNet)",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMissouri"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Missouri expanded Medicaid under the Affordable Care Act in 2021 through a ballot initiative (MO HealthNet). Adults age 19-64 are eligible for Medicaid if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through myDSS.",
+      "requiredFields": [
+        "livesInMissouri",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-mo-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-mo-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through myDSS (recommended)",
+          "url": "https://mydss.mo.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or call Missouri Family Support Division: 1-855-373-4636",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Family Support Division office",
+          "url": "https://dss.mo.gov/fsd/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "MO HealthNet (Missouri Medicaid)",
+          "url": "https://dss.mo.gov/mhd/",
+          "date": "2024-10-01",
+          "notes": "Missouri expanded Medicaid in 2021, adults eligible up to 138% FPL through MO HealthNet"
+        },
+        {
+          "title": "myDSS",
+          "url": "https://mydss.mo.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-mo-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInMissouri": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-mo-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInMissouri": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-mo-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInMissouri": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl",
+        "mo-healthnet"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MO"
+    },
+    {
+      "id": "medicaid-mo-pregnant-women",
+      "programId": "medicaid-missouri",
+      "name": "Missouri Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 196% FPL qualify for Medicaid in Missouri",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMissouri"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2898
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Missouri covers pregnant women through Medicaid if household income is at or below 196% of the federal poverty level. For 2024, this means: 1 person = $2,898/month, 2 people = $3,925/month, 3 people = $4,952/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInMissouri",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-mo",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-mo",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through myDSS",
+          "url": "https://mydss.mo.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Missouri offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Missouri Medicaid for Pregnant Women",
+          "url": "https://dss.mo.gov/mhd/",
+          "date": "2024-10-01",
+          "notes": "Missouri covers pregnant women up to 196% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-mo-pregnant-eligible",
+          "description": "Pregnant woman under 196% FPL",
+          "input": {
+            "livesInMissouri": true,
+            "isPregnant": true,
+            "householdIncome": 2800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "196-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-mo-pregnant-high-income",
+          "description": "Pregnant woman over 196% FPL",
+          "input": {
+            "livesInMissouri": true,
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-mo-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInMissouri": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "196-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MO"
+    },
+    {
+      "id": "medicaid-mo-children",
+      "programId": "medicaid-missouri",
+      "name": "Missouri Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 150% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMissouri"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2258
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Missouri covers children under age 19 through Medicaid if household income is at or below 150% of the federal poverty level. For 2024, this means: 1 child = $2,258/month, 2 children = $3,058/month, 3 children = $3,858/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInMissouri",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-mo",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-mo",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through myDSS",
+          "url": "https://mydss.mo.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Missouri Medicaid for Children",
+          "url": "https://dss.mo.gov/mhd/",
+          "date": "2024-10-01",
+          "notes": "Missouri children covered up to 150% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-mo-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInMissouri": true,
+            "age": 10,
+            "householdIncome": 2200,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "150-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-mo-child-high-income",
+          "description": "Child with family income above 150% FPL",
+          "input": {
+            "livesInMissouri": true,
+            "age": 12,
+            "householdIncome": 4000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-mo-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInMissouri": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "150-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MO"
+    },
+    {
+      "id": "medicaid-mo-application-process",
+      "programId": "medicaid-missouri",
+      "name": "Missouri Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Missouri",
+      "ruleLogic": {
+        "var": "livesInMissouri"
+      },
+      "ruleType": "conditional",
+      "explanation": "Missouri uses myDSS for all Medicaid applications. You can apply: 1) **Online through myDSS** (recommended - fastest, available 24/7), 2) **By phone** at 1-855-373-4636, 3) **In-person** at your local Family Support Division office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Missouri offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInMissouri"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through myDSS (recommended)",
+          "url": "https://mydss.mo.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Missouri Family Support Division: 1-855-373-4636",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Family Support Division office",
+          "url": "https://dss.mo.gov/fsd/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Missouri Medicaid",
+          "url": "https://dss.mo.gov/mhd/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "myDSS",
+          "url": "https://mydss.mo.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-mo-resident",
+          "description": "Lives in Missouri - can apply",
+          "input": {
+            "livesInMissouri": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "missouri-resident"
+          ]
+        },
+        {
+          "id": "test-mo-non-resident",
+          "description": "Does not live in Missouri",
+          "input": {
+            "livesInMissouri": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "mydss",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-MO"
+    }
+  ]
+}

@@ -1,0 +1,670 @@
+{
+  "metadata": {
+    "id": "snap-missouri-rules-2024",
+    "name": "Missouri SNAP Eligibility Rules (2024)",
+    "description": "Missouri-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. Missouri follows federal SNAP guidelines with state-specific application processes through myDSS.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-MO",
+    "programs": [
+      "snap-missouri"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "missouri",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-mo-standard-eligibility",
+      "programId": "snap-missouri",
+      "name": "Missouri SNAP Standard Eligibility",
+      "description": "Standard SNAP eligibility based on household income and size",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMissouri"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1643
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP in Missouri, your household gross monthly income must be at or below 130% of the Federal Poverty Level. For 2024: 1 person = $1,643/month, 2 people = $2,226/month, 3 people = $2,808/month, 4 people = $3,390/month. Missouri follows federal SNAP income guidelines. After applying the standard deduction and other deductions, your net income must be at or below 100% FPL to qualify.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize",
+        "livesInMissouri"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-mo",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-mo",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "School ID with photo"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through myDSS",
+          "url": "https://mydss.mo.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply by phone at 1-855-373-4636 or visit your local Family Support Division office",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Missouri SNAP Eligibility",
+          "url": "https://dss.mo.gov/fsd/",
+          "date": "2024-10-01",
+          "notes": "Missouri SNAP follows federal income guidelines: 130% FPL gross income limit"
+        },
+        {
+          "title": "myDSS",
+          "url": "https://mydss.mo.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-mo-standard-eligible",
+          "description": "Household under 130% FPL",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInMissouri": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "standard",
+            "missouri"
+          ]
+        },
+        {
+          "id": "test-mo-standard-ineligible-income",
+          "description": "Income above 130% FPL",
+          "input": {
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "livesInMissouri": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-mo-non-resident",
+          "description": "Does not live in Missouri",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInMissouri": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income-eligibility",
+        "federal-guidelines",
+        "missouri"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-MO"
+    },
+    {
+      "id": "snap-mo-standard-deduction",
+      "programId": "snap-missouri",
+      "name": "Missouri SNAP Standard Deduction",
+      "description": "Missouri uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              3
+            ]
+          },
+          193,
+          {
+            "if": [
+              {
+                "==": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4
+                ]
+              },
+              195,
+              {
+                "if": [
+                  {
+                    "==": [
+                      {
+                        "var": "householdSize"
+                      },
+                      5
+                    ]
+                  },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "Missouri follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": [
+        "householdSize"
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-mo-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": [
+            "deduction",
+            "small-household"
+          ]
+        },
+        {
+          "id": "test-mo-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": [
+            "deduction",
+            "medium-household"
+          ]
+        },
+        {
+          "id": "test-mo-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": [
+            "deduction",
+            "large-household"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "deductions",
+        "net-income",
+        "calculation"
+      ],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-MO"
+    },
+    {
+      "id": "snap-mo-abawd-work-requirements",
+      "programId": "snap-missouri",
+      "name": "Missouri SNAP ABAWD Work Requirements",
+      "description": "Able-Bodied Adults Without Dependents must meet work requirements or face time limits",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Missouri implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements. If you're 18-49, able-bodied, and don't have dependents, you must work or participate in work activities for at least 80 hours per month to receive SNAP beyond 3 months in a 36-month period. Some areas of Missouri may have waivers based on unemployment rates. Exemptions include: students, people with disabilities, pregnant women, caregivers of children under 6, and people receiving unemployment benefits.",
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activity-mo",
+          "name": "Proof of Work Activity",
+          "description": "Pay stubs, employer verification, or documentation of work program participation",
+          "required": false,
+          "alternatives": [
+            "Employment verification letter",
+            "Work program enrollment"
+          ],
+          "where": "Employer or work program"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If subject to ABAWD rules, contact your local Family Support Division office to learn about available work programs",
+          "priority": "medium"
+        },
+        {
+          "step": "Check if your area has a waiver from ABAWD time limits due to high unemployment",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Missouri SNAP Work Requirements",
+          "url": "https://dss.mo.gov/fsd/",
+          "date": "2024-10-01",
+          "notes": "Missouri follows federal ABAWD work requirements"
+        },
+        {
+          "title": "USDA FNS ABAWD Information",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-mo-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-mo-abawd-exempt",
+          "description": "ABAWD exempt from work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-mo-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "abawd",
+        "work-requirements",
+        "missouri"
+      ],
+      "category": "work-requirement",
+      "jurisdiction": "US-MO"
+    },
+    {
+      "id": "snap-mo-student-eligibility",
+      "programId": "snap-missouri",
+      "name": "Missouri SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isStudent"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              18
+            ]
+          },
+          {
+            ">": [
+              {
+                "var": "age"
+              },
+              49
+            ]
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "hasChildUnder6"
+          },
+          {
+            "var": "hasChildUnder12AndNoChildcare"
+          },
+          {
+            "var": "receivesWorkStudy"
+          },
+          {
+            "var": "inEmploymentTraining"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Missouri follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status-mo",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification, class schedule",
+          "required": false,
+          "alternatives": [
+            "Student ID",
+            "Enrollment letter",
+            "Class schedule"
+          ],
+          "where": "College registrar"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're a student, check if you meet one of the exemptions (working 20+ hours, work-study, childcare responsibilities, etc.)",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "date": "2024-10-01",
+          "notes": "Missouri follows federal student eligibility rules"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-mo-student-working",
+          "description": "Student working 20+ hours (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "working"
+          ]
+        },
+        {
+          "id": "test-mo-student-work-study",
+          "description": "Student with work-study (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 20,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": true,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "work-study"
+          ]
+        },
+        {
+          "id": "test-mo-student-not-compliant",
+          "description": "Student not meeting any exemption",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "student",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "students",
+        "college",
+        "exemptions",
+        "missouri"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-MO"
+    },
+    {
+      "id": "snap-mo-application-process",
+      "programId": "snap-missouri",
+      "name": "Missouri SNAP Application Process",
+      "description": "Information about applying for SNAP in Missouri through the Family Support Division",
+      "ruleLogic": {
+        "var": "livesInMissouri"
+      },
+      "ruleType": "conditional",
+      "explanation": "Missouri uses myDSS for benefit applications. You can apply: 1) **Online through myDSS** (recommended - fastest, available 24/7), 2) **By phone** at 1-855-373-4636, 3) **In-person** at your local Family Support Division office. Most applications are processed within 30 days. Expedited service (within 7 days) is available for households with urgent need and less than $150 in monthly gross income and liquid resources under $100, or if your rent/mortgage and utilities are more than your income and liquid resources.",
+      "requiredFields": [
+        "livesInMissouri"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through myDSS (recommended - fastest method)",
+          "url": "https://mydss.mo.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply by phone: 1-855-373-4636",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Family Support Division office",
+          "url": "https://dss.mo.gov/fsd/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "myDSS",
+          "url": "https://mydss.mo.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Missouri SNAP Application Information",
+          "url": "https://dss.mo.gov/fsd/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-mo-resident",
+          "description": "Lives in Missouri - can apply",
+          "input": {
+            "livesInMissouri": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "missouri-resident"
+          ]
+        },
+        {
+          "id": "test-mo-non-resident",
+          "description": "Does not live in Missouri",
+          "input": {
+            "livesInMissouri": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "mydss",
+        "process",
+        "missouri"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-MO"
+    }
+  ]
+}
