@@ -1,0 +1,634 @@
+{
+  "metadata": {
+    "id": "medicaid-connecticut-rules-2024",
+    "name": "Connecticut Medicaid Eligibility Rules (2024)",
+    "description": "Connecticut-specific Medicaid eligibility rules for 2024. Connecticut HAS expanded Medicaid under the ACA, providing coverage to adults with income up to 138% of the Federal Poverty Level. These rules reflect Connecticut's Medicaid program (HUSKY Health).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-CT",
+    "programs": [
+      "medicaid-connecticut",
+      "husky-health-connecticut"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "connecticut",
+      "2024",
+      "state-specific",
+      "husky-health",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ct-expansion-adults",
+      "programId": "medicaid-connecticut",
+      "name": "Connecticut Medicaid Expansion - Adults",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid under Connecticut's ACA expansion",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInConnecticut"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Connecticut has expanded Medicaid under the Affordable Care Act. Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage through HUSKY Health. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. This provides comprehensive health coverage including doctor visits, prescriptions, hospital care, mental health services, and preventive care. Connecticut has NO asset test for most adults.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInConnecticut"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-ct-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-ct-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "School ID with photo"
+          ],
+          "where": "DMV or issuing agency"
+        },
+        {
+          "id": "proof-residence-ct",
+          "name": "Proof of Connecticut Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing Connecticut address",
+          "required": true,
+          "alternatives": [
+            "Connecticut driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
+          "where": "Varies by document type"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the ConneCT system (recommended - fastest method)",
+          "url": "https://www.ct.gov/dss/site/default.asp",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call HUSKY Health Customer Service: 1-855-805-4325",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local Department of Social Services office for in-person application",
+          "url": "https://portal.ct.gov/DSS/Local-Offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Connecticut Medicaid Expansion",
+          "url": "https://portal.ct.gov/DSS/Health-And-Home-Care/Medical-Programs/HUSKY-Health",
+          "date": "2024-10-01",
+          "notes": "Connecticut expanded Medicaid in 2010 under the ACA"
+        },
+        {
+          "title": "HUSKY Health Eligibility",
+          "url": "https://portal.ct.gov/DSS/Health-And-Home-Care/Medical-Programs/HUSKY-Health",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-ct-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInConnecticut": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
+        },
+        {
+          "id": "test-ct-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInConnecticut": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ct-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInConnecticut": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        },
+        {
+          "id": "test-ct-adult-too-young",
+          "description": "Age under 19 not eligible under adult expansion",
+          "input": {
+            "age": 17,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInConnecticut": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age",
+            "use-children-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "connecticut-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CT"
+    },
+    {
+      "id": "medicaid-ct-pregnant-women",
+      "programId": "medicaid-connecticut",
+      "name": "Connecticut Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 200% FPL qualify for Medicaid in Connecticut",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInConnecticut"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2959
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Connecticut covers pregnant women through HUSKY Health if household income is at or below 200% of the federal poverty level. For 2024, this means: 1 person = $2,959/month, 2 people = $4,004/month, 3 people = $5,048/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInConnecticut",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ct",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ct",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through the ConneCT system",
+          "url": "https://www.ct.gov/dss/site/default.asp",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Connecticut offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Connecticut Medicaid for Pregnant Women",
+          "url": "https://portal.ct.gov/DSS/Health-And-Home-Care/Medical-Programs/HUSKY-Health",
+          "date": "2024-10-01",
+          "notes": "Connecticut covers pregnant women up to 200% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ct-pregnant-eligible",
+          "description": "Pregnant woman under 200% FPL",
+          "input": {
+            "livesInConnecticut": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ct-pregnant-high-income",
+          "description": "Pregnant woman over 200% FPL",
+          "input": {
+            "livesInConnecticut": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ct-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInConnecticut": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "200-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CT"
+    },
+    {
+      "id": "medicaid-ct-children",
+      "programId": "medicaid-connecticut",
+      "name": "Connecticut Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 185% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInConnecticut"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Connecticut covers children under age 19 through HUSKY Health if household income is at or below 185% of the federal poverty level. For 2024, this means: 1 child = $2,738/month, 2 children = $3,705/month, 3 children = $4,672/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInConnecticut",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ct",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ct",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the ConneCT system",
+          "url": "https://www.ct.gov/dss/site/default.asp",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Connecticut Medicaid for Children",
+          "url": "https://portal.ct.gov/DSS/Health-And-Home-Care/Medical-Programs/HUSKY-Health",
+          "date": "2024-10-01",
+          "notes": "Connecticut children covered up to 185% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ct-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInConnecticut": true,
+            "age": 10,
+            "householdIncome": 2500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ct-child-high-income",
+          "description": "Child with family income above 185% FPL",
+          "input": {
+            "livesInConnecticut": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ct-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInConnecticut": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "185-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-CT"
+    },
+    {
+      "id": "medicaid-ct-application-process",
+      "programId": "medicaid-connecticut",
+      "name": "Connecticut Medicaid Application Process",
+      "description": "Information about applying for Medicaid (HUSKY Health) in Connecticut",
+      "ruleLogic": {
+        "var": "livesInConnecticut"
+      },
+      "ruleType": "conditional",
+      "explanation": "Connecticut uses the ConneCT system for all Medicaid applications. You can apply: 1) **Online through the ConneCT portal** (recommended - fastest, available 24/7), 2) **By phone** at 1-855-805-4325 (HUSKY Health Customer Service), 3) **In-person** at your local Department of Social Services office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Connecticut offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInConnecticut"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the ConneCT system (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://www.ct.gov/dss/site/default.asp",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call HUSKY Health Customer Service: 1-855-805-4325",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Social Services office",
+          "url": "https://portal.ct.gov/DSS/Local-Offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for HUSKY Health",
+          "url": "https://portal.ct.gov/DSS/Health-And-Home-Care/Medical-Programs/HUSKY-Health",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Connecticut DSS ConneCT Portal",
+          "url": "https://www.ct.gov/dss/site/default.asp",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ct-resident",
+          "description": "Lives in Connecticut - can apply",
+          "input": {
+            "livesInConnecticut": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "connecticut-resident"
+          ]
+        },
+        {
+          "id": "test-ct-non-resident",
+          "description": "Does not live in Connecticut",
+          "input": {
+            "livesInConnecticut": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "connect",
+        "husky-health",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-CT"
+    }
+  ]
+}
