@@ -1,0 +1,637 @@
+{
+  "metadata": {
+    "id": "medicaid-indiana-rules-2024",
+    "name": "Indiana Medicaid Eligibility Rules (2024)",
+    "description": "Indiana-specific Medicaid eligibility rules for 2024. Indiana HAS expanded Medicaid under the ACA through HIP 2.0 (Healthy Indiana Plan), providing coverage to adults with income up to 138% of the Federal Poverty Level.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-IN",
+    "programs": [
+      "medicaid-indiana",
+      "hip-2-indiana"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "indiana",
+      "2024",
+      "state-specific",
+      "hip-2",
+      "healthy-indiana-plan",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-in-expansion-adults",
+      "programId": "medicaid-indiana",
+      "name": "Indiana Medicaid Expansion - Adults (HIP 2.0)",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid through HIP 2.0",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIndiana"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Indiana has expanded Medicaid under the Affordable Care Act through HIP 2.0 (Healthy Indiana Plan). Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. HIP 2.0 provides comprehensive health coverage including doctor visits, prescriptions, hospital care, mental health services, and preventive care. Indiana has NO asset test for most adults. Note: HIP 2.0 includes a POWER Account requirement for most enrollees above the federal poverty level, which requires small monthly contributions (typically $1-$27).",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInIndiana"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-in-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-in-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "School ID with photo"
+          ],
+          "where": "DMV or issuing agency"
+        },
+        {
+          "id": "proof-residence-in",
+          "name": "Proof of Indiana Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing Indiana address",
+          "required": true,
+          "alternatives": [
+            "Indiana driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
+          "where": "Varies by document type"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the FSSA Benefits Portal (recommended - fastest method)",
+          "url": "https://www.in.gov/fssa/dfr/dfr-applications-and-forms/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Indiana FSSA: 1-800-403-0864",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local Division of Family Resources office for in-person application",
+          "url": "https://www.in.gov/fssa/dfr/2997.htm",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Indiana HIP 2.0 Medicaid Expansion",
+          "url": "https://www.in.gov/fssa/hip/",
+          "date": "2024-10-01",
+          "notes": "Indiana expanded Medicaid in 2015 through HIP 2.0"
+        },
+        {
+          "title": "HIP 2.0 Eligibility Information",
+          "url": "https://www.in.gov/fssa/hip/hip-eligibility/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-in-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIndiana": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult",
+            "hip-2"
+          ]
+        },
+        {
+          "id": "test-in-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInIndiana": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-in-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIndiana": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        },
+        {
+          "id": "test-in-adult-too-young",
+          "description": "Age under 19 not eligible under adult expansion",
+          "input": {
+            "age": 17,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIndiana": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age",
+            "use-children-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "hip-2",
+        "indiana-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-IN"
+    },
+    {
+      "id": "medicaid-in-pregnant-women",
+      "programId": "medicaid-indiana",
+      "name": "Indiana Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 208% FPL qualify for Medicaid in Indiana",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIndiana"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3071
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Indiana covers pregnant women through Medicaid if household income is at or below 208% of the federal poverty level. For 2024, this means: 1 person = $3,071/month, 2 people = $4,159/month, 3 people = $5,247/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInIndiana",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-in",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-in",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through the FSSA Benefits Portal",
+          "url": "https://www.in.gov/fssa/dfr/dfr-applications-and-forms/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Indiana offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Indiana Medicaid for Pregnant Women",
+          "url": "https://www.in.gov/fssa/dfr/2998.htm",
+          "date": "2024-10-01",
+          "notes": "Indiana covers pregnant women up to 208% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-in-pregnant-eligible",
+          "description": "Pregnant woman under 208% FPL",
+          "input": {
+            "livesInIndiana": true,
+            "isPregnant": true,
+            "householdIncome": 2900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "208-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-in-pregnant-high-income",
+          "description": "Pregnant woman over 208% FPL",
+          "input": {
+            "livesInIndiana": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-in-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInIndiana": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "208-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-IN"
+    },
+    {
+      "id": "medicaid-in-children",
+      "programId": "medicaid-indiana",
+      "name": "Indiana Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 255% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIndiana"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3769
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Indiana covers children under age 19 through Medicaid if household income is at or below 255% of the federal poverty level. For 2024, this means: 1 child = $3,769/month, 2 children = $5,103/month, 3 children = $6,437/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInIndiana",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-in",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-in",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the FSSA Benefits Portal",
+          "url": "https://www.in.gov/fssa/dfr/dfr-applications-and-forms/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Indiana Medicaid for Children",
+          "url": "https://www.in.gov/fssa/dfr/2998.htm",
+          "date": "2024-10-01",
+          "notes": "Indiana children covered up to 255% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-in-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInIndiana": true,
+            "age": 10,
+            "householdIncome": 3500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "255-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-in-child-high-income",
+          "description": "Child with family income above 255% FPL",
+          "input": {
+            "livesInIndiana": true,
+            "age": 12,
+            "householdIncome": 6000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-in-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInIndiana": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "255-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-IN"
+    },
+    {
+      "id": "medicaid-in-application-process",
+      "programId": "medicaid-indiana",
+      "name": "Indiana Medicaid Application Process",
+      "description": "Information about applying for Medicaid (HIP 2.0) in Indiana",
+      "ruleLogic": {
+        "var": "livesInIndiana"
+      },
+      "ruleType": "conditional",
+      "explanation": "Indiana uses the FSSA Benefits Portal for all Medicaid applications. You can apply: 1) **Online through the FSSA Benefits Portal** (recommended - fastest, available 24/7), 2) **By phone** at 1-800-403-0864, 3) **In-person** at your local Division of Family Resources office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Indiana offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInIndiana"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the FSSA Benefits Portal (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://www.in.gov/fssa/dfr/dfr-applications-and-forms/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Indiana FSSA: 1-800-403-0864",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Division of Family Resources office",
+          "url": "https://www.in.gov/fssa/dfr/2997.htm",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Indiana Medicaid",
+          "url": "https://www.in.gov/fssa/dfr/2998.htm",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Indiana FSSA Benefits Portal",
+          "url": "https://www.in.gov/fssa/dfr/dfr-applications-and-forms/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-in-resident",
+          "description": "Lives in Indiana - can apply",
+          "input": {
+            "livesInIndiana": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "indiana-resident"
+          ]
+        },
+        {
+          "id": "test-in-non-resident",
+          "description": "Does not live in Indiana",
+          "input": {
+            "livesInIndiana": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "fssa",
+        "hip-2",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-IN"
+    }
+  ]
+}
