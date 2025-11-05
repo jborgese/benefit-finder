@@ -1,0 +1,581 @@
+{
+  "metadata": {
+    "id": "medicaid-florida-rules-2024",
+    "name": "Florida Medicaid Eligibility Rules (2024)",
+    "description": "Florida-specific Medicaid eligibility rules for 2024. Florida has NOT expanded Medicaid under the ACA, so adult eligibility is more restrictive than expansion states. These rules reflect Florida's Medicaid program.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-FL",
+    "programs": [
+      "medicaid-florida"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "florida",
+      "2024",
+      "state-specific",
+      "non-expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-fl-no-expansion",
+      "programId": "medicaid-florida",
+      "name": "Florida Medicaid - No ACA Expansion Coverage Gap",
+      "description": "Identifies adults in Florida's Medicaid coverage gap who are NOT eligible",
+      "ruleLogic": {
+        "if": [
+          {
+            "and": [
+              {
+                "var": "livesInFlorida"
+              },
+              {
+                ">=": [
+                  {
+                    "var": "age"
+                  },
+                  19
+                ]
+              },
+              {
+                "<": [
+                  {
+                    "var": "age"
+                  },
+                  65
+                ]
+              },
+              {
+                "!": {
+                  "var": "isPregnant"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasQualifyingDisability"
+                }
+              },
+              {
+                "!": {
+                  "var": "hasChildren"
+                }
+              }
+            ]
+          },
+          false,
+          true
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "IMPORTANT: Florida has NOT expanded Medicaid. This means most non-disabled, non-pregnant adults age 19-64 without children do NOT qualify for Medicaid in Florida, even with very low income. The coverage gap affects approximately 1.9 million Floridians. If you fall into this gap, explore options at HealthCare.gov for marketplace plans with subsidies, or contact a Community Health Center for care on a sliding fee scale.",
+      "requiredFields": [
+        "age",
+        "isPregnant",
+        "hasQualifyingDisability",
+        "hasChildren",
+        "livesInFlorida"
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're in the coverage gap, check HealthCare.gov for marketplace plan subsidies",
+          "url": "https://www.healthcare.gov",
+          "priority": "high"
+        },
+        {
+          "step": "Find a Community Health Center that offers sliding fee scale: https://findahealthcenter.hrsa.gov",
+          "url": "https://findahealthcenter.hrsa.gov",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Florida Medicaid Expansion Status",
+          "url": "https://www.kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/",
+          "date": "2024-10-01",
+          "notes": "Florida has not expanded Medicaid as of 2024"
+        },
+        {
+          "title": "Florida Medicaid Eligibility",
+          "url": "https://www.myflorida.com/accessflorida/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-fl-coverage-gap",
+          "description": "Non-disabled adult in coverage gap - NOT eligible",
+          "input": {
+            "age": 35,
+            "isPregnant": false,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "livesInFlorida": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
+        },
+        {
+          "id": "test-fl-pregnant",
+          "description": "Pregnant woman - eligible under pregnancy rules (not this rule)",
+          "input": {
+            "age": 30,
+            "isPregnant": true,
+            "hasQualifyingDisability": false,
+            "hasChildren": false,
+            "livesInFlorida": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "use-pregnancy-rules"
+          ]
+        },
+        {
+          "id": "test-fl-disabled",
+          "description": "Disabled adult - eligible under disability rules (not this rule)",
+          "input": {
+            "age": 40,
+            "isPregnant": false,
+            "hasQualifyingDisability": true,
+            "hasChildren": false,
+            "livesInFlorida": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "disabled",
+            "use-disability-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "coverage-gap",
+        "non-expansion",
+        "adults"
+      ],
+      "category": "eligibility-gap",
+      "jurisdiction": "US-FL"
+    },
+    {
+      "id": "medicaid-fl-pregnant-women",
+      "programId": "medicaid-florida",
+      "name": "Florida Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 185% FPL qualify for Medicaid in Florida",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInFlorida"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2738
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Florida covers pregnant women through Medicaid if household income is at or below 185% of the federal poverty level. For 2024, this means: 1 person = $2,738/month, 2 people = $3,705/month, 3 people = $4,672/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInFlorida",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-fl",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-fl",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through ACCESS Florida",
+          "url": "https://www.myflfamilies.com/service-programs/access",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Florida offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Florida Medicaid for Pregnant Women",
+          "url": "https://www.myflorida.com/accessflorida/",
+          "date": "2024-10-01",
+          "notes": "Florida covers pregnant women up to 185% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-fl-pregnant-eligible",
+          "description": "Pregnant woman under 185% FPL",
+          "input": {
+            "livesInFlorida": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "185-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-fl-pregnant-high-income",
+          "description": "Pregnant woman over 185% FPL",
+          "input": {
+            "livesInFlorida": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-fl-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInFlorida": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "185-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-FL"
+    },
+    {
+      "id": "medicaid-fl-children",
+      "programId": "medicaid-florida",
+      "name": "Florida Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 133% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInFlorida"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1975
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Florida covers children under age 19 through Medicaid if household income is at or below 133% of the federal poverty level. For 2024, this means: 1 child = $1,975/month, 2 children = $2,673/month, 3 children = $3,371/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInFlorida",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-fl",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-fl",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ACCESS Florida",
+          "url": "https://www.myflfamilies.com/service-programs/access",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Florida Medicaid for Children",
+          "url": "https://www.myflorida.com/accessflorida/",
+          "date": "2024-10-01",
+          "notes": "Florida children covered up to 133% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-fl-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInFlorida": true,
+            "age": 10,
+            "householdIncome": 1800,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "133-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-fl-child-high-income",
+          "description": "Child with family income above 133% FPL",
+          "input": {
+            "livesInFlorida": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-fl-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInFlorida": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "133-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-FL"
+    },
+    {
+      "id": "medicaid-fl-application-process",
+      "programId": "medicaid-florida",
+      "name": "Florida Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Florida",
+      "ruleLogic": {
+        "var": "livesInFlorida"
+      },
+      "ruleType": "conditional",
+      "explanation": "Florida uses the ACCESS Florida system for all Medicaid applications. You can apply: 1) **Online through ACCESS Florida** (recommended - fastest, available 24/7), 2) **By phone** at 1-866-762-2237, 3) **In-person** at your local Department of Children and Families office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Florida offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInFlorida"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ACCESS Florida (recommended - handles both Medicaid and other benefits)",
+          "url": "https://www.myflfamilies.com/service-programs/access",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call ACCESS Florida: 1-866-762-2237",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Children and Families office",
+          "url": "https://www.myflfamilies.com/service-programs/access/community-partners",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Florida Medicaid",
+          "url": "https://www.myflorida.com/accessflorida/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "ACCESS Florida Portal",
+          "url": "https://www.myflfamilies.com/service-programs/access",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-fl-resident",
+          "description": "Lives in Florida - can apply",
+          "input": {
+            "livesInFlorida": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "florida-resident"
+          ]
+        },
+        {
+          "id": "test-fl-non-resident",
+          "description": "Does not live in Florida",
+          "input": {
+            "livesInFlorida": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "access-florida",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-FL"
+    }
+  ]
+}
