@@ -1,0 +1,614 @@
+{
+  "metadata": {
+    "id": "medicaid-montana-rules-2024",
+    "name": "Montana Medicaid Eligibility Rules (2024)",
+    "description": "Montana-specific Medicaid eligibility rules for 2024. Montana expanded Medicaid under the ACA in 2016, so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-MT",
+    "programs": [
+      "medicaid-montana"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "montana",
+      "2024",
+      "state-specific",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-mt-expansion-adults",
+      "programId": "medicaid-montana",
+      "name": "Montana Medicaid for ACA Expansion Adults",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMontana"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Montana expanded Medicaid under the Affordable Care Act in 2016. Adults age 19-64 are eligible for Medicaid if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through Montana ACCESS or HELP Link.",
+      "requiredFields": [
+        "livesInMontana",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-mt-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-mt-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Montana ACCESS (recommended)",
+          "url": "https://apply.mt.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through HELP Link for health coverage",
+          "url": "https://helplink.mt.gov/",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Office of Public Assistance",
+          "url": "https://dphhs.mt.gov/hcsd/contactus/publicassistance",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Montana Medicaid Expansion",
+          "url": "https://dphhs.mt.gov/hcsd/medicaid",
+          "date": "2024-10-01",
+          "notes": "Montana expanded Medicaid in 2016, adults eligible up to 138% FPL"
+        },
+        {
+          "title": "Montana ACCESS",
+          "url": "https://apply.mt.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "HELP Link",
+          "url": "https://helplink.mt.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-mt-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInMontana": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-mt-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInMontana": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-mt-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInMontana": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MT"
+    },
+    {
+      "id": "medicaid-mt-pregnant-women",
+      "programId": "medicaid-montana",
+      "name": "Montana Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 157% FPL qualify for Medicaid in Montana",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMontana"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2320
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Montana covers pregnant women through Medicaid if household income is at or below 157% of the federal poverty level. For 2024, this means: 1 person = $2,320/month, 2 people = $3,142/month, 3 people = $3,964/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInMontana",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-mt",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-mt",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through Montana ACCESS or HELP Link",
+          "url": "https://apply.mt.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Montana offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Montana Medicaid for Pregnant Women",
+          "url": "https://dphhs.mt.gov/hcsd/medicaid",
+          "date": "2024-10-01",
+          "notes": "Montana covers pregnant women up to 157% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-mt-pregnant-eligible",
+          "description": "Pregnant woman under 157% FPL",
+          "input": {
+            "livesInMontana": true,
+            "isPregnant": true,
+            "householdIncome": 2200,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "157-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-mt-pregnant-high-income",
+          "description": "Pregnant woman over 157% FPL",
+          "input": {
+            "livesInMontana": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-mt-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInMontana": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "157-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MT"
+    },
+    {
+      "id": "medicaid-mt-children",
+      "programId": "medicaid-montana",
+      "name": "Montana Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 143% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMontana"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2152
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Montana covers children under age 19 through Medicaid if household income is at or below 143% of the federal poverty level. For 2024, this means: 1 child = $2,152/month, 2 children = $2,914/month, 3 children = $3,676/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInMontana",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-mt",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-mt",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Montana ACCESS or HELP Link",
+          "url": "https://apply.mt.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Montana Medicaid for Children",
+          "url": "https://dphhs.mt.gov/hcsd/medicaid",
+          "date": "2024-10-01",
+          "notes": "Montana children covered up to 143% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-mt-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInMontana": true,
+            "age": 10,
+            "householdIncome": 2100,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "143-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-mt-child-high-income",
+          "description": "Child with family income above 143% FPL",
+          "input": {
+            "livesInMontana": true,
+            "age": 12,
+            "householdIncome": 4000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-mt-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInMontana": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "143-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MT"
+    },
+    {
+      "id": "medicaid-mt-application-process",
+      "programId": "medicaid-montana",
+      "name": "Montana Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Montana",
+      "ruleLogic": {
+        "var": "livesInMontana"
+      },
+      "ruleType": "conditional",
+      "explanation": "Montana uses Montana ACCESS and HELP Link for Medicaid applications. You can apply: 1) **Online through Montana ACCESS** (recommended - fastest, available 24/7), 2) **Online through HELP Link** for health coverage specifically, 3) **In-person** at your local Office of Public Assistance. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Montana offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInMontana"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Montana ACCESS (recommended)",
+          "url": "https://apply.mt.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through HELP Link for health coverage",
+          "url": "https://helplink.mt.gov/",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Office of Public Assistance",
+          "url": "https://dphhs.mt.gov/hcsd/contactus/publicassistance",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Montana Medicaid",
+          "url": "https://dphhs.mt.gov/hcsd/medicaid",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Montana ACCESS",
+          "url": "https://apply.mt.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "HELP Link",
+          "url": "https://helplink.mt.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-mt-resident",
+          "description": "Lives in Montana - can apply",
+          "input": {
+            "livesInMontana": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "montana-resident"
+          ]
+        },
+        {
+          "id": "test-mt-non-resident",
+          "description": "Does not live in Montana",
+          "input": {
+            "livesInMontana": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "montana-access",
+        "helplink",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-MT"
+    }
+  ]
+}
