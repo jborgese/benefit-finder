@@ -1,0 +1,548 @@
+{
+  "metadata": {
+    "id": "medicaid-mississippi-rules-2024",
+    "name": "Mississippi Medicaid Eligibility Rules (2024)",
+    "description": "Mississippi-specific Medicaid eligibility rules for 2024. Mississippi has NOT expanded Medicaid under the ACA, creating a coverage gap for adults. Coverage is available for pregnant women, children, people with disabilities, and certain other categories.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-MS",
+    "programs": [
+      "medicaid-mississippi"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "mississippi",
+      "2024",
+      "state-specific",
+      "non-expansion",
+      "coverage-gap"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ms-coverage-gap",
+      "programId": "medicaid-mississippi",
+      "name": "Mississippi Medicaid Coverage Gap",
+      "description": "Mississippi has not expanded Medicaid, creating a coverage gap for adults without dependents",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMississippi"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "!": {
+              "var": "hasDisability"
+            }
+          },
+          {
+            "!": {
+              "var": "isPregnant"
+            }
+          },
+          {
+            ">": [
+              {
+                "var": "householdIncome"
+              },
+              0
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Mississippi has NOT expanded Medicaid under the Affordable Care Act. This creates a coverage gap for adults age 19-64 who don't have dependents, aren't pregnant, and don't have a disability. If you're in this situation and have income below 138% FPL ($2,040/month for 1 person), you may not be eligible for Medicaid or subsidized marketplace insurance. You may qualify for: marketplace coverage without subsidies, or other programs if you meet specific criteria (disability, pregnancy, etc.).",
+      "requiredFields": [
+        "livesInMississippi",
+        "age",
+        "hasDisability",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "nextSteps": [
+        {
+          "step": "Check if you qualify for other Medicaid categories (pregnancy, disability, children)",
+          "priority": "high"
+        },
+        {
+          "step": "Explore marketplace health insurance options (may not have subsidies due to income level)",
+          "priority": "medium"
+        },
+        {
+          "step": "Contact your local MDHS office to discuss all available options",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Mississippi Medicaid Expansion Status",
+          "url": "https://www.kff.org/medicaid/state-indicator/medicaid-expansion/",
+          "date": "2024-10-01",
+          "notes": "Mississippi has not expanded Medicaid under the ACA"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 20,
+      "testCases": [
+        {
+          "id": "test-ms-gap-adult",
+          "description": "Adult in coverage gap",
+          "input": {
+            "livesInMississippi": true,
+            "age": 35,
+            "hasDisability": false,
+            "isPregnant": false,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "coverage-gap",
+        "non-expansion",
+        "adults"
+      ],
+      "category": "eligibility-limitation",
+      "jurisdiction": "US-MS"
+    },
+    {
+      "id": "medicaid-ms-pregnant-women",
+      "programId": "medicaid-mississippi",
+      "name": "Mississippi Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 194% FPL qualify for Medicaid in Mississippi",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMississippi"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2867
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Mississippi covers pregnant women through Medicaid if household income is at or below 194% of the federal poverty level. For 2024, this means: 1 person = $2,867/month, 2 people = $3,882/month, 3 people = $4,897/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInMississippi",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ms",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ms",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Contact your local MDHS office or apply online",
+          "url": "https://www.mdhs.ms.gov/",
+          "priority": "high"
+        },
+        {
+          "step": "Mississippi offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Mississippi Medicaid for Pregnant Women",
+          "url": "https://www.mdhs.ms.gov/medicaid/",
+          "date": "2024-10-01",
+          "notes": "Mississippi covers pregnant women up to 194% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ms-pregnant-eligible",
+          "description": "Pregnant woman under 194% FPL",
+          "input": {
+            "livesInMississippi": true,
+            "isPregnant": true,
+            "householdIncome": 2800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "194-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ms-pregnant-high-income",
+          "description": "Pregnant woman over 194% FPL",
+          "input": {
+            "livesInMississippi": true,
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ms-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInMississippi": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "194-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MS"
+    },
+    {
+      "id": "medicaid-ms-children",
+      "programId": "medicaid-mississippi",
+      "name": "Mississippi Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 209% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMississippi"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3087
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Mississippi covers children under age 19 through Medicaid if household income is at or below 209% of the federal poverty level. For 2024, this means: 1 child = $3,087/month, 2 children = $4,180/month, 3 children = $5,273/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInMississippi",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ms",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ms",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply through your local MDHS office or online",
+          "url": "https://www.mdhs.ms.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Mississippi Medicaid for Children",
+          "url": "https://www.mdhs.ms.gov/medicaid/",
+          "date": "2024-10-01",
+          "notes": "Mississippi children covered up to 209% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ms-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInMississippi": true,
+            "age": 10,
+            "householdIncome": 3000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "209-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ms-child-high-income",
+          "description": "Child with family income above 209% FPL",
+          "input": {
+            "livesInMississippi": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ms-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInMississippi": true,
+            "age": 19,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "209-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-MS"
+    },
+    {
+      "id": "medicaid-ms-application-process",
+      "programId": "medicaid-mississippi",
+      "name": "Mississippi Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Mississippi",
+      "ruleLogic": {
+        "var": "livesInMississippi"
+      },
+      "ruleType": "conditional",
+      "explanation": "Mississippi uses the Mississippi Department of Human Services (MDHS) for Medicaid applications. You can apply: 1) **Online** (if available), 2) **By phone**, 3) **In-person** at your local MDHS office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs, especially for pregnant women and children.",
+      "requiredFields": [
+        "livesInMississippi"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply through your local MDHS office or online",
+          "url": "https://www.mdhs.ms.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Find your local MDHS office",
+          "url": "https://www.mdhs.ms.gov/field-offices/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Mississippi Medicaid",
+          "url": "https://www.mdhs.ms.gov/medicaid/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ms-resident",
+          "description": "Lives in Mississippi - can apply",
+          "input": {
+            "livesInMississippi": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "mississippi-resident"
+          ]
+        },
+        {
+          "id": "test-ms-non-resident",
+          "description": "Does not live in Mississippi",
+          "input": {
+            "livesInMississippi": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "mdhs",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-MS"
+    }
+  ]
+}
