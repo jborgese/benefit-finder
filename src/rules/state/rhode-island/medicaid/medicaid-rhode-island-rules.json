@@ -1,0 +1,618 @@
+{
+  "metadata": {
+    "id": "medicaid-rhode-island-rules-2024",
+    "name": "Rhode Island Medicaid Eligibility Rules (2024)",
+    "description": "Rhode Island-specific Medicaid eligibility rules for 2024. Rhode Island expanded Medicaid under the ACA in 2014, so adults up to 138% FPL are eligible through Rhode Island Medical Assistance. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-RI",
+    "programs": [
+      "medicaid-rhode-island"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "rhode-island",
+      "2024",
+      "state-specific",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ri-expansion-adults",
+      "programId": "medicaid-rhode-island",
+      "name": "Rhode Island Medicaid for ACA Expansion Adults",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInRhodeIsland"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Rhode Island expanded Medicaid under the Affordable Care Act in 2014. Adults age 19-64 are eligible for Rhode Island Medical Assistance (Medicaid) if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through DHS Connect or HealthSource RI.",
+      "requiredFields": [
+        "livesInRhodeIsland",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-ri-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-ri-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through DHS Connect (recommended)",
+          "url": "https://dhsconnect.ri.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through HealthSource RI",
+          "url": "https://healthsourceri.com/",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Human Services office",
+          "url": "https://dhs.ri.gov/contact-us",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Rhode Island Medicaid Expansion",
+          "url": "https://dhs.ri.gov/programs-and-services/medical-assistance-medicaid",
+          "date": "2024-10-01",
+          "notes": "Rhode Island expanded Medicaid in 2014, adults eligible up to 138% FPL"
+        },
+        {
+          "title": "DHS Connect",
+          "url": "https://dhsconnect.ri.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "HealthSource RI",
+          "url": "https://healthsourceri.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-ri-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInRhodeIsland": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ri-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInRhodeIsland": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ri-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInRhodeIsland": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-RI"
+    },
+    {
+      "id": "medicaid-ri-pregnant-women",
+      "programId": "medicaid-rhode-island",
+      "name": "Rhode Island Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 253% FPL qualify for Medicaid in Rhode Island",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInRhodeIsland"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3743
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Rhode Island covers pregnant women through Rhode Island Medical Assistance (Medicaid) if household income is at or below 253% of the federal poverty level. For 2024, this means: 1 person = $3,743/month, 2 people = $5,068/month, 3 people = $6,393/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInRhodeIsland",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ri",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ri",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through DHS Connect",
+          "url": "https://dhsconnect.ri.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Rhode Island offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Rhode Island Medicaid for Pregnant Women",
+          "url": "https://dhs.ri.gov/programs-and-services/medical-assistance-medicaid",
+          "date": "2024-10-01",
+          "notes": "Rhode Island covers pregnant women up to 253% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ri-pregnant-eligible",
+          "description": "Pregnant woman under 253% FPL",
+          "input": {
+            "livesInRhodeIsland": true,
+            "isPregnant": true,
+            "householdIncome": 3700,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "253-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ri-pregnant-high-income",
+          "description": "Pregnant woman over 253% FPL",
+          "input": {
+            "livesInRhodeIsland": true,
+            "isPregnant": true,
+            "householdIncome": 3800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ri-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInRhodeIsland": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "253-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-RI"
+    },
+    {
+      "id": "medicaid-ri-children",
+      "programId": "medicaid-rhode-island",
+      "name": "Rhode Island Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 261% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInRhodeIsland"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3859
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Rhode Island covers children under age 19 through Rhode Island Medical Assistance (Medicaid) if household income is at or below 261% of the federal poverty level. For 2024, this means: 1 child = $3,859/month, 2 children = $5,226/month, 3 children = $6,593/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInRhodeIsland",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ri",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ri",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through DHS Connect",
+          "url": "https://dhsconnect.ri.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Rhode Island Medicaid for Children",
+          "url": "https://dhs.ri.gov/programs-and-services/medical-assistance-medicaid",
+          "date": "2024-10-01",
+          "notes": "Rhode Island children covered up to 261% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ri-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInRhodeIsland": true,
+            "age": 10,
+            "householdIncome": 3500,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "261-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ri-child-high-income",
+          "description": "Child with family income above 261% FPL",
+          "input": {
+            "livesInRhodeIsland": true,
+            "age": 12,
+            "householdIncome": 6000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ri-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInRhodeIsland": true,
+            "age": 19,
+            "householdIncome": 3500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "261-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-RI"
+    },
+    {
+      "id": "medicaid-ri-application-process",
+      "programId": "medicaid-rhode-island",
+      "name": "Rhode Island Medicaid Application Process",
+      "description": "Information about applying for Medicaid (Rhode Island Medical Assistance) in Rhode Island",
+      "ruleLogic": {
+        "var": "livesInRhodeIsland"
+      },
+      "ruleType": "conditional",
+      "explanation": "Rhode Island uses DHS Connect or HealthSource RI for Medical Assistance (Medicaid) applications. You can apply: 1) **Online through DHS Connect** (recommended - fastest, available 24/7), 2) **Online through HealthSource RI** (health insurance marketplace), 3) **By phone** at (401) 462-5300, 4) **In-person** at your local Department of Human Services office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Rhode Island offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInRhodeIsland"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through DHS Connect (recommended)",
+          "url": "https://dhsconnect.ri.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through HealthSource RI",
+          "url": "https://healthsourceri.com/",
+          "priority": "high"
+        },
+        {
+          "step": "Call Rhode Island Department of Human Services: (401) 462-5300",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Human Services office",
+          "url": "https://dhs.ri.gov/contact-us",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Medical Assistance",
+          "url": "https://dhs.ri.gov/programs-and-services/medical-assistance-medicaid",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "DHS Connect",
+          "url": "https://dhsconnect.ri.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "HealthSource RI",
+          "url": "https://healthsourceri.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ri-resident",
+          "description": "Lives in Rhode Island - can apply",
+          "input": {
+            "livesInRhodeIsland": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "rhode-island-resident"
+          ]
+        },
+        {
+          "id": "test-ri-non-resident",
+          "description": "Does not live in Rhode Island",
+          "input": {
+            "livesInRhodeIsland": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "dhs-connect",
+        "healthsource-ri",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-RI"
+    }
+  ]
+}
