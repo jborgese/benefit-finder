@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "id": "medicaid-kansas-rules-2024",
+    "name": "Kansas Medicaid Eligibility Rules (2024)",
+    "description": "Kansas-specific Medicaid eligibility rules for 2024. Kansas has NOT expanded Medicaid under the ACA, so most adults without dependents are not eligible. Coverage is available for pregnant women, children, parents with dependent children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-KS",
+    "programs": [
+      "medicaid-kansas"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "kansas",
+      "2024",
+      "state-specific",
+      "non-expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ks-coverage-gap",
+      "programId": "medicaid-kansas",
+      "name": "Kansas Medicaid Coverage Gap",
+      "description": "Most adults without dependents are not eligible for Medicaid in Kansas due to non-expansion",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInKansas"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "!": {
+              "var": "hasDependentChildren"
+            }
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Kansas has NOT expanded Medicaid under the Affordable Care Act. This means most adults age 19-64 without dependent children are not eligible for Medicaid, even if their income is below 138% of the Federal Poverty Level. If your income is between 100% and 138% FPL, you may be eligible for subsidized health insurance through the federal Health Insurance Marketplace instead. However, you may still be eligible for Medicaid if you: are pregnant, have dependent children, have a disability, or meet other categorical eligibility requirements.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "hasDependentChildren",
+        "livesInKansas"
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're not eligible for Medicaid, check if you qualify for subsidized health insurance through the Health Insurance Marketplace",
+          "url": "https://www.healthcare.gov/",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Contact the Kansas Department of Health and Environment or visit your local DCF office to discuss other options",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Kansas Medicaid Expansion Status",
+          "url": "https://www.kdhe.ks.gov/1221/Kansas-Medicaid",
+          "date": "2024-10-01",
+          "notes": "Kansas has not expanded Medicaid under the ACA"
+        },
+        {
+          "title": "Health Insurance Marketplace",
+          "url": "https://www.healthcare.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-ks-coverage-gap-adult",
+          "description": "Adult without children in coverage gap - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "hasDependentChildren": false,
+            "livesInKansas": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
+        },
+        {
+          "id": "test-ks-adult-with-children",
+          "description": "Adult with children may be eligible under different rules",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 2,
+            "hasDependentChildren": true,
+            "livesInKansas": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "use-parent-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "coverage-gap",
+        "non-expansion",
+        "adults",
+        "kansas-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-KS"
+    },
+    {
+      "id": "medicaid-ks-pregnant-women",
+      "programId": "medicaid-kansas",
+      "name": "Kansas Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 171% FPL qualify for Medicaid in Kansas",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInKansas"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2528
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Kansas covers pregnant women through Medicaid if household income is at or below 171% of the federal poverty level. For 2024, this means: 1 person = $2,528/month, 2 people = $3,423/month, 3 people = $4,318/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInKansas",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ks",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ks",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through the Kansas Self-Service Portal",
+          "url": "https://cssp.kees.ks.gov/apspssp/cnsld/mnu",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Kansas offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Kansas Medicaid for Pregnant Women",
+          "url": "https://www.kdhe.ks.gov/1221/Kansas-Medicaid",
+          "date": "2024-10-01",
+          "notes": "Kansas covers pregnant women up to 171% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ks-pregnant-eligible",
+          "description": "Pregnant woman under 171% FPL",
+          "input": {
+            "livesInKansas": true,
+            "isPregnant": true,
+            "householdIncome": 2400,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "171-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ks-pregnant-high-income",
+          "description": "Pregnant woman over 171% FPL",
+          "input": {
+            "livesInKansas": true,
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ks-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInKansas": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "171-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-KS"
+    },
+    {
+      "id": "medicaid-ks-children",
+      "programId": "medicaid-kansas",
+      "name": "Kansas Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 238% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInKansas"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3519
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Kansas covers children under age 19 through Medicaid if household income is at or below 238% of the federal poverty level. For 2024, this means: 1 child = $3,519/month, 2 children = $4,764/month, 3 children = $6,009/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInKansas",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ks",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ks",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the Kansas Self-Service Portal",
+          "url": "https://cssp.kees.ks.gov/apspssp/cnsld/mnu",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Kansas Medicaid for Children",
+          "url": "https://www.kdhe.ks.gov/1221/Kansas-Medicaid",
+          "date": "2024-10-01",
+          "notes": "Kansas children covered up to 238% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ks-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInKansas": true,
+            "age": 10,
+            "householdIncome": 3200,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "238-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ks-child-high-income",
+          "description": "Child with family income above 238% FPL",
+          "input": {
+            "livesInKansas": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ks-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInKansas": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "238-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-KS"
+    },
+    {
+      "id": "medicaid-ks-application-process",
+      "programId": "medicaid-kansas",
+      "name": "Kansas Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Kansas",
+      "ruleLogic": {
+        "var": "livesInKansas"
+      },
+      "ruleType": "conditional",
+      "explanation": "Kansas uses the Kansas Self-Service Portal for all Medicaid applications. You can apply: 1) **Online through the Kansas Self-Service Portal** (recommended - fastest, available 24/7), 2) **By phone** at 1-888-369-4777, 3) **In-person** at your local Kansas DCF office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Kansas offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInKansas"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the Kansas Self-Service Portal (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://cssp.kees.ks.gov/apspssp/cnsld/mnu",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Kansas DCF: 1-888-369-4777",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Kansas DCF office",
+          "url": "https://www.dcf.ks.gov/services/Pages/DCFOfficeLocator.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Kansas Medicaid",
+          "url": "https://www.kdhe.ks.gov/1221/Kansas-Medicaid",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Kansas Self-Service Portal",
+          "url": "https://cssp.kees.ks.gov/apspssp/cnsld/mnu",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ks-resident",
+          "description": "Lives in Kansas - can apply",
+          "input": {
+            "livesInKansas": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "kansas-resident"
+          ]
+        },
+        {
+          "id": "test-ks-non-resident",
+          "description": "Does not live in Kansas",
+          "input": {
+            "livesInKansas": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "kansas-self-service-portal",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-KS"
+    }
+  ]
+}
