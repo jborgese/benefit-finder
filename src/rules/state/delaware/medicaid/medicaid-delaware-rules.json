@@ -1,0 +1,634 @@
+{
+  "metadata": {
+    "id": "medicaid-delaware-rules-2024",
+    "name": "Delaware Medicaid Eligibility Rules (2024)",
+    "description": "Delaware-specific Medicaid eligibility rules for 2024. Delaware HAS expanded Medicaid under the ACA, providing coverage to adults with income up to 138% of the Federal Poverty Level. These rules reflect Delaware's Medicaid program (Diamond State Health Plan).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-DE",
+    "programs": [
+      "medicaid-delaware",
+      "diamond-state-health-plan"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "delaware",
+      "2024",
+      "state-specific",
+      "diamond-state-health-plan",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-de-expansion-adults",
+      "programId": "medicaid-delaware",
+      "name": "Delaware Medicaid Expansion - Adults",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid under Delaware's ACA expansion",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInDelaware"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Delaware has expanded Medicaid under the Affordable Care Act. Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage through the Diamond State Health Plan. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. This provides comprehensive health coverage including doctor visits, prescriptions, hospital care, mental health services, and preventive care. Delaware has NO asset test for most adults.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInDelaware"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-de-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-de-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "School ID with photo"
+          ],
+          "where": "DMV or issuing agency"
+        },
+        {
+          "id": "proof-residence-de",
+          "name": "Proof of Delaware Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing Delaware address",
+          "required": true,
+          "alternatives": [
+            "Delaware driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
+          "where": "Varies by document type"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Delaware ASSIST (recommended - fastest method)",
+          "url": "https://assist.dhss.delaware.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Delaware Medicaid Customer Service: 1-800-372-2022",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local Division of Social Services office for in-person application",
+          "url": "https://www.dhss.delaware.gov/dhss/dss/dss_office_locations.html",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Delaware Medicaid Expansion",
+          "url": "https://www.dhss.delaware.gov/dhss/dmma/home.html",
+          "date": "2024-10-01",
+          "notes": "Delaware expanded Medicaid in 2014 under the ACA"
+        },
+        {
+          "title": "Diamond State Health Plan Eligibility",
+          "url": "https://www.dhss.delaware.gov/dhss/dmma/home.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-de-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInDelaware": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
+        },
+        {
+          "id": "test-de-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInDelaware": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-de-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInDelaware": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        },
+        {
+          "id": "test-de-adult-too-young",
+          "description": "Age under 19 not eligible under adult expansion",
+          "input": {
+            "age": 17,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInDelaware": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age",
+            "use-children-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "delaware-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-DE"
+    },
+    {
+      "id": "medicaid-de-pregnant-women",
+      "programId": "medicaid-delaware",
+      "name": "Delaware Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 200% FPL qualify for Medicaid in Delaware",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInDelaware"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2959
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Delaware covers pregnant women through the Diamond State Health Plan if household income is at or below 200% of the federal poverty level. For 2024, this means: 1 person = $2,959/month, 2 people = $4,004/month, 3 people = $5,048/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInDelaware",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-de",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-de",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through Delaware ASSIST",
+          "url": "https://assist.dhss.delaware.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Delaware offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Delaware Medicaid for Pregnant Women",
+          "url": "https://www.dhss.delaware.gov/dhss/dmma/home.html",
+          "date": "2024-10-01",
+          "notes": "Delaware covers pregnant women up to 200% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-de-pregnant-eligible",
+          "description": "Pregnant woman under 200% FPL",
+          "input": {
+            "livesInDelaware": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-de-pregnant-high-income",
+          "description": "Pregnant woman over 200% FPL",
+          "input": {
+            "livesInDelaware": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-de-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInDelaware": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "200-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-DE"
+    },
+    {
+      "id": "medicaid-de-children",
+      "programId": "medicaid-delaware",
+      "name": "Delaware Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 142% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInDelaware"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2101
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Delaware covers children under age 19 through the Diamond State Health Plan if household income is at or below 142% of the federal poverty level. For 2024, this means: 1 child = $2,101/month, 2 children = $2,845/month, 3 children = $3,588/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInDelaware",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-de",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-de",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Delaware ASSIST",
+          "url": "https://assist.dhss.delaware.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Delaware Medicaid for Children",
+          "url": "https://www.dhss.delaware.gov/dhss/dmma/home.html",
+          "date": "2024-10-01",
+          "notes": "Delaware children covered up to 142% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-de-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInDelaware": true,
+            "age": 10,
+            "householdIncome": 2000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "142-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-de-child-high-income",
+          "description": "Child with family income above 142% FPL",
+          "input": {
+            "livesInDelaware": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-de-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInDelaware": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "142-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-DE"
+    },
+    {
+      "id": "medicaid-de-application-process",
+      "programId": "medicaid-delaware",
+      "name": "Delaware Medicaid Application Process",
+      "description": "Information about applying for Medicaid (Diamond State Health Plan) in Delaware",
+      "ruleLogic": {
+        "var": "livesInDelaware"
+      },
+      "ruleType": "conditional",
+      "explanation": "Delaware uses the ASSIST (Application for Social Services Internet Technology) system for all Medicaid applications. You can apply: 1) **Online through Delaware ASSIST** (recommended - fastest, available 24/7), 2) **By phone** at 1-800-372-2022 (Delaware Medicaid Customer Service), 3) **In-person** at your local Division of Social Services office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Delaware offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInDelaware"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Delaware ASSIST (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://assist.dhss.delaware.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Delaware Medicaid Customer Service: 1-800-372-2022",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Division of Social Services office",
+          "url": "https://www.dhss.delaware.gov/dhss/dss/dss_office_locations.html",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Delaware Medicaid",
+          "url": "https://www.dhss.delaware.gov/dhss/dmma/home.html",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Delaware ASSIST Portal",
+          "url": "https://assist.dhss.delaware.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-de-resident",
+          "description": "Lives in Delaware - can apply",
+          "input": {
+            "livesInDelaware": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "delaware-resident"
+          ]
+        },
+        {
+          "id": "test-de-non-resident",
+          "description": "Does not live in Delaware",
+          "input": {
+            "livesInDelaware": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "assist",
+        "diamond-state-health-plan",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-DE"
+    }
+  ]
+}

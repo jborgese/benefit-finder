@@ -1,0 +1,670 @@
+{
+  "metadata": {
+    "id": "snap-delaware-rules-2024",
+    "name": "Delaware SNAP Eligibility Rules (2024)",
+    "description": "Delaware-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. Delaware follows federal SNAP guidelines with state-specific application processes through the Delaware Department of Health and Social Services.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-DE",
+    "programs": [
+      "snap-delaware"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "delaware",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-de-standard-eligibility",
+      "programId": "snap-delaware",
+      "name": "Delaware SNAP Standard Eligibility",
+      "description": "Standard SNAP eligibility based on household income and size",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInDelaware"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1643
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP in Delaware, your household gross monthly income must be at or below 130% of the Federal Poverty Level. For 2024: 1 person = $1,643/month, 2 people = $2,226/month, 3 people = $2,808/month, 4 people = $3,390/month. Delaware follows federal SNAP income guidelines. After applying the standard deduction and other deductions, your net income must be at or below 100% FPL to qualify.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize",
+        "livesInDelaware"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-de",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-de",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "School ID with photo"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Delaware ASSIST (Application for Social Services Internet Technology)",
+          "url": "https://assist.dhss.delaware.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply by phone at 1-866-843-7212 or visit your local Division of Social Services office",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Delaware SNAP Eligibility",
+          "url": "https://www.dhss.delaware.gov/dhss/dss/foodstamps.html",
+          "date": "2024-10-01",
+          "notes": "Delaware SNAP follows federal income guidelines: 130% FPL gross income limit"
+        },
+        {
+          "title": "Delaware ASSIST Portal",
+          "url": "https://assist.dhss.delaware.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-de-standard-eligible",
+          "description": "Household under 130% FPL",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInDelaware": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "standard",
+            "delaware"
+          ]
+        },
+        {
+          "id": "test-de-standard-ineligible-income",
+          "description": "Income above 130% FPL",
+          "input": {
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "livesInDelaware": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-de-non-resident",
+          "description": "Does not live in Delaware",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInDelaware": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income-eligibility",
+        "federal-guidelines",
+        "delaware"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-DE"
+    },
+    {
+      "id": "snap-de-standard-deduction",
+      "programId": "snap-delaware",
+      "name": "Delaware SNAP Standard Deduction",
+      "description": "Delaware uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              3
+            ]
+          },
+          193,
+          {
+            "if": [
+              {
+                "==": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4
+                ]
+              },
+              195,
+              {
+                "if": [
+                  {
+                    "==": [
+                      {
+                        "var": "householdSize"
+                      },
+                      5
+                    ]
+                  },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "Delaware follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": [
+        "householdSize"
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-de-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": [
+            "deduction",
+            "small-household"
+          ]
+        },
+        {
+          "id": "test-de-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": [
+            "deduction",
+            "medium-household"
+          ]
+        },
+        {
+          "id": "test-de-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": [
+            "deduction",
+            "large-household"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "deductions",
+        "net-income",
+        "calculation"
+      ],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-DE"
+    },
+    {
+      "id": "snap-de-abawd-work-requirements",
+      "programId": "snap-delaware",
+      "name": "Delaware SNAP ABAWD Work Requirements",
+      "description": "Able-Bodied Adults Without Dependents must meet work requirements or face time limits",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Delaware implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements. If you're 18-49, able-bodied, and don't have dependents, you must work or participate in work activities for at least 80 hours per month to receive SNAP beyond 3 months in a 36-month period. Some areas of Delaware may have waivers based on unemployment rates. Exemptions include: students, people with disabilities, pregnant women, caregivers of children under 6, and people receiving unemployment benefits.",
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activity-de",
+          "name": "Proof of Work Activity",
+          "description": "Pay stubs, employer verification, or documentation of work program participation",
+          "required": false,
+          "alternatives": [
+            "Employment verification letter",
+            "Work program enrollment"
+          ],
+          "where": "Employer or work program"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If subject to ABAWD rules, contact your local Division of Social Services office to learn about available work programs",
+          "priority": "medium"
+        },
+        {
+          "step": "Check if your area has a waiver from ABAWD time limits due to high unemployment",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Delaware SNAP Work Requirements",
+          "url": "https://www.dhss.delaware.gov/dhss/dss/foodstamps.html",
+          "date": "2024-10-01",
+          "notes": "Delaware follows federal ABAWD work requirements"
+        },
+        {
+          "title": "USDA FNS ABAWD Information",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-de-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-de-abawd-exempt",
+          "description": "ABAWD exempt from work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-de-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "abawd",
+        "work-requirements",
+        "delaware"
+      ],
+      "category": "work-requirement",
+      "jurisdiction": "US-DE"
+    },
+    {
+      "id": "snap-de-student-eligibility",
+      "programId": "snap-delaware",
+      "name": "Delaware SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isStudent"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              18
+            ]
+          },
+          {
+            ">": [
+              {
+                "var": "age"
+              },
+              49
+            ]
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "hasChildUnder6"
+          },
+          {
+            "var": "hasChildUnder12AndNoChildcare"
+          },
+          {
+            "var": "receivesWorkStudy"
+          },
+          {
+            "var": "inEmploymentTraining"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Delaware follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status-de",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification, class schedule",
+          "required": false,
+          "alternatives": [
+            "Student ID",
+            "Enrollment letter",
+            "Class schedule"
+          ],
+          "where": "College registrar"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're a student, check if you meet one of the exemptions (working 20+ hours, work-study, childcare responsibilities, etc.)",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "date": "2024-10-01",
+          "notes": "Delaware follows federal student eligibility rules"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-de-student-working",
+          "description": "Student working 20+ hours (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "working"
+          ]
+        },
+        {
+          "id": "test-de-student-work-study",
+          "description": "Student with work-study (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 20,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": true,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "work-study"
+          ]
+        },
+        {
+          "id": "test-de-student-not-compliant",
+          "description": "Student not meeting any exemption",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "student",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "students",
+        "college",
+        "exemptions",
+        "delaware"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-DE"
+    },
+    {
+      "id": "snap-de-application-process",
+      "programId": "snap-delaware",
+      "name": "Delaware SNAP Application Process",
+      "description": "Information about applying for SNAP in Delaware through the Department of Health and Social Services",
+      "ruleLogic": {
+        "var": "livesInDelaware"
+      },
+      "ruleType": "conditional",
+      "explanation": "Delaware uses the ASSIST (Application for Social Services Internet Technology) system for benefit applications. You can apply: 1) **Online through Delaware ASSIST** (recommended - fastest, available 24/7), 2) **By phone** at 1-866-843-7212, 3) **In-person** at your local Division of Social Services office. Most applications are processed within 30 days. Expedited service (within 7 days) is available for households with urgent need and less than $150 in monthly gross income and liquid resources under $100, or if your rent/mortgage and utilities are more than your income and liquid resources.",
+      "requiredFields": [
+        "livesInDelaware"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Delaware ASSIST (recommended - fastest method)",
+          "url": "https://assist.dhss.delaware.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply by phone: 1-866-843-7212",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Division of Social Services office",
+          "url": "https://www.dhss.delaware.gov/dhss/dss/dss_office_locations.html",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Delaware ASSIST Portal",
+          "url": "https://assist.dhss.delaware.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Delaware SNAP Application Information",
+          "url": "https://www.dhss.delaware.gov/dhss/dss/foodstamps.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-de-resident",
+          "description": "Lives in Delaware - can apply",
+          "input": {
+            "livesInDelaware": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "delaware-resident"
+          ]
+        },
+        {
+          "id": "test-de-non-resident",
+          "description": "Does not live in Delaware",
+          "input": {
+            "livesInDelaware": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "assist",
+        "process",
+        "delaware"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-DE"
+    }
+  ]
+}
