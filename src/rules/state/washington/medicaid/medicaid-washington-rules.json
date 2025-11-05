@@ -1,0 +1,592 @@
+{
+  "metadata": {
+    "id": "medicaid-washington-rules-2024",
+    "name": "Washington Medicaid Eligibility Rules (2024)",
+    "description": "Washington-specific Medicaid eligibility rules for 2024. Washington expanded Medicaid under the ACA, so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-WA",
+    "programs": [
+      "medicaid-washington"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "washington",
+      "2024",
+      "state-specific",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-wa-expansion-adults",
+      "programId": "medicaid-washington",
+      "name": "Washington Medicaid for ACA Expansion Adults",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWashington"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Washington expanded Medicaid under the Affordable Care Act. Adults age 19-64 are eligible for Medicaid (Apple Health) if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through Washington Healthplanfinder.",
+      "requiredFields": [
+        "livesInWashington",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-wa-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-wa-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Washington Healthplanfinder (recommended)",
+          "url": "https://www.wahealthplanfinder.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Find your local Community Services Office",
+          "url": "https://www.dshs.wa.gov/esa/community-services-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Washington Medicaid Expansion",
+          "url": "https://www.hca.wa.gov/health-care-services-supports/apple-health-medicaid-coverage",
+          "date": "2024-10-01",
+          "notes": "Washington expanded Medicaid under the ACA, adults eligible up to 138% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-wa-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInWashington": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wa-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInWashington": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-wa-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInWashington": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WA"
+    },
+    {
+      "id": "medicaid-wa-pregnant-women",
+      "programId": "medicaid-washington",
+      "name": "Washington Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 302% FPL qualify for Medicaid in Washington",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWashington"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4471
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Washington covers pregnant women through Medicaid (Apple Health) if household income is at or below 302% of the federal poverty level. For 2024, this means: 1 person = $4,471/month, 2 people = $6,054/month, 3 people = $7,637/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInWashington",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-wa",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-wa",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through Washington Healthplanfinder",
+          "url": "https://www.wahealthplanfinder.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Washington offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Washington Medicaid for Pregnant Women",
+          "url": "https://www.hca.wa.gov/health-care-services-supports/apple-health-medicaid-coverage",
+          "date": "2024-10-01",
+          "notes": "Washington covers pregnant women up to 302% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-wa-pregnant-eligible",
+          "description": "Pregnant woman under 302% FPL",
+          "input": {
+            "livesInWashington": true,
+            "isPregnant": true,
+            "householdIncome": 4200,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "302-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wa-pregnant-high-income",
+          "description": "Pregnant woman over 302% FPL",
+          "input": {
+            "livesInWashington": true,
+            "isPregnant": true,
+            "householdIncome": 4800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-wa-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInWashington": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "302-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WA"
+    },
+    {
+      "id": "medicaid-wa-children",
+      "programId": "medicaid-washington",
+      "name": "Washington Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 318% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWashington"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4704
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Washington covers children under age 19 through Medicaid (Apple Health) if household income is at or below 318% of the federal poverty level. For 2024, this means: 1 child = $4,704/month, 2 children = $6,371/month, 3 children = $8,038/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInWashington",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-wa",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-wa",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Washington Healthplanfinder",
+          "url": "https://www.wahealthplanfinder.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Washington Medicaid for Children",
+          "url": "https://www.hca.wa.gov/health-care-services-supports/apple-health-medicaid-coverage",
+          "date": "2024-10-01",
+          "notes": "Washington children covered up to 318% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-wa-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInWashington": true,
+            "age": 10,
+            "householdIncome": 4200,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "318-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wa-child-high-income",
+          "description": "Child with family income above 318% FPL",
+          "input": {
+            "livesInWashington": true,
+            "age": 12,
+            "householdIncome": 8000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-wa-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInWashington": true,
+            "age": 19,
+            "householdIncome": 4200,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "318-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WA"
+    },
+    {
+      "id": "medicaid-wa-application-process",
+      "programId": "medicaid-washington",
+      "name": "Washington Medicaid Application Process",
+      "description": "Information about applying for Medicaid (Apple Health) in Washington",
+      "ruleLogic": {
+        "var": "livesInWashington"
+      },
+      "ruleType": "conditional",
+      "explanation": "Washington uses Washington Healthplanfinder for Medicaid applications. You can apply: 1) **Online through Washington Healthplanfinder** (recommended - fastest, available 24/7), 2) **By phone** at 1-855-923-4633, 3) **In-person** at your local Community Services Office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Washington offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInWashington"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Washington Healthplanfinder (recommended)",
+          "url": "https://www.wahealthplanfinder.org/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Washington Health Benefit Exchange: 1-855-923-4633",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Community Services Office",
+          "url": "https://www.dshs.wa.gov/esa/community-services-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Medicaid",
+          "url": "https://www.hca.wa.gov/health-care-services-supports/apple-health-medicaid-coverage",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Washington Healthplanfinder",
+          "url": "https://www.wahealthplanfinder.org/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-wa-resident",
+          "description": "Lives in Washington - can apply",
+          "input": {
+            "livesInWashington": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "washington-resident"
+          ]
+        },
+        {
+          "id": "test-wa-non-resident",
+          "description": "Does not live in Washington",
+          "input": {
+            "livesInWashington": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "washington-healthplanfinder",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-WA"
+    }
+  ]
+}
