@@ -1,0 +1,598 @@
+{
+  "metadata": {
+    "id": "medicaid-kentucky-rules-2024",
+    "name": "Kentucky Medicaid Eligibility Rules (2024)",
+    "description": "Kentucky-specific Medicaid eligibility rules for 2024. Kentucky has expanded Medicaid under the ACA (Kentucky HEALTH program), so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-KY",
+    "programs": [
+      "medicaid-kentucky"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "kentucky",
+      "2024",
+      "state-specific",
+      "expansion",
+      "kentucky-health"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-ky-expansion-adults",
+      "programId": "medicaid-kentucky",
+      "name": "Kentucky Medicaid for ACA Expansion Adults",
+      "description": "Adults 19-64 eligible through Kentucky HEALTH expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInKentucky"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Kentucky has expanded Medicaid under the Affordable Care Act through the Kentucky HEALTH (Helping to Engage and Achieve Long Term Health) program. Adults age 19-64 are eligible for Medicaid if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Kentucky HEALTH includes health savings accounts and community engagement requirements. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care.",
+      "requiredFields": [
+        "livesInKentucky",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-ky-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-ky-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the Kentucky Benefits portal",
+          "url": "https://benefind.ky.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Kentucky HEALTH includes community engagement requirements - check with your local office for details",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Kentucky HEALTH Medicaid Expansion",
+          "url": "https://chfs.ky.gov/agencies/dms/health/Pages/kyhealth.aspx",
+          "date": "2024-10-01",
+          "notes": "Kentucky expanded Medicaid in 2014, adults eligible up to 138% FPL"
+        },
+        {
+          "title": "Kentucky Benefits Portal",
+          "url": "https://benefind.ky.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-ky-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInKentucky": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ky-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInKentucky": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ky-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInKentucky": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl",
+        "kentucky-health"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-KY"
+    },
+    {
+      "id": "medicaid-ky-pregnant-women",
+      "programId": "medicaid-kentucky",
+      "name": "Kentucky Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 195% FPL qualify for Medicaid in Kentucky",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInKentucky"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2882
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Kentucky covers pregnant women through Medicaid if household income is at or below 195% of the federal poverty level. For 2024, this means: 1 person = $2,882/month, 2 people = $3,904/month, 3 people = $4,926/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInKentucky",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-ky",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-ky",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through the Kentucky Benefits portal",
+          "url": "https://benefind.ky.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Kentucky offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Kentucky Medicaid for Pregnant Women",
+          "url": "https://chfs.ky.gov/agencies/dms/health/Pages/default.aspx",
+          "date": "2024-10-01",
+          "notes": "Kentucky covers pregnant women up to 195% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-ky-pregnant-eligible",
+          "description": "Pregnant woman under 195% FPL",
+          "input": {
+            "livesInKentucky": true,
+            "isPregnant": true,
+            "householdIncome": 2700,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "195-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ky-pregnant-high-income",
+          "description": "Pregnant woman over 195% FPL",
+          "input": {
+            "livesInKentucky": true,
+            "isPregnant": true,
+            "householdIncome": 3200,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ky-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInKentucky": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "195-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-KY"
+    },
+    {
+      "id": "medicaid-ky-children",
+      "programId": "medicaid-kentucky",
+      "name": "Kentucky Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 159% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInKentucky"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2351
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Kentucky covers children under age 19 through Medicaid if household income is at or below 159% of the federal poverty level. For 2024, this means: 1 child = $2,351/month, 2 children = $3,184/month, 3 children = $4,017/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInKentucky",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-ky",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-ky",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the Kentucky Benefits portal",
+          "url": "https://benefind.ky.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Kentucky Medicaid for Children",
+          "url": "https://chfs.ky.gov/agencies/dms/health/Pages/default.aspx",
+          "date": "2024-10-01",
+          "notes": "Kentucky children covered up to 159% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-ky-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInKentucky": true,
+            "age": 10,
+            "householdIncome": 2200,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "159-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-ky-child-high-income",
+          "description": "Child with family income above 159% FPL",
+          "input": {
+            "livesInKentucky": true,
+            "age": 12,
+            "householdIncome": 4000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-ky-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInKentucky": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "159-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-KY"
+    },
+    {
+      "id": "medicaid-ky-application-process",
+      "programId": "medicaid-kentucky",
+      "name": "Kentucky Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Kentucky",
+      "ruleLogic": {
+        "var": "livesInKentucky"
+      },
+      "ruleType": "conditional",
+      "explanation": "Kentucky uses the Kentucky Benefits portal for all Medicaid applications. You can apply: 1) **Online through the Kentucky Benefits portal** (recommended - fastest, available 24/7), 2) **By phone** at 1-855-306-8959, 3) **In-person** at your local Kentucky Cabinet for Health and Family Services office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Kentucky offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInKentucky"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through the Kentucky Benefits portal (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://benefind.ky.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Kentucky Cabinet for Health and Family Services: 1-855-306-8959",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Kentucky Cabinet for Health and Family Services office",
+          "url": "https://chfs.ky.gov/agencies/dms/health/Pages/default.aspx",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Kentucky Medicaid",
+          "url": "https://chfs.ky.gov/agencies/dms/health/Pages/default.aspx",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Kentucky Benefits Portal",
+          "url": "https://benefind.ky.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-ky-resident",
+          "description": "Lives in Kentucky - can apply",
+          "input": {
+            "livesInKentucky": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "kentucky-resident"
+          ]
+        },
+        {
+          "id": "test-ky-non-resident",
+          "description": "Does not live in Kentucky",
+          "input": {
+            "livesInKentucky": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "kentucky-benefits",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-KY"
+    }
+  ]
+}
