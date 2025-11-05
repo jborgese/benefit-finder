@@ -1,0 +1,631 @@
+{
+  "metadata": {
+    "id": "medicaid-idaho-rules-2024",
+    "name": "Idaho Medicaid Eligibility Rules (2024)",
+    "description": "Idaho-specific Medicaid eligibility rules for 2024. Idaho HAS expanded Medicaid under the ACA, providing coverage to adults with income up to 138% of the Federal Poverty Level. These rules reflect Idaho's Medicaid program.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-ID",
+    "programs": [
+      "medicaid-idaho"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "idaho",
+      "2024",
+      "state-specific",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-id-expansion-adults",
+      "programId": "medicaid-idaho",
+      "name": "Idaho Medicaid Expansion - Adults",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid under Idaho's ACA expansion",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIdaho"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Idaho has expanded Medicaid under the Affordable Care Act. Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. This provides comprehensive health coverage including doctor visits, prescriptions, hospital care, mental health services, and preventive care. Idaho has NO asset test for most adults.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInIdaho"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-id-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-id-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "School ID with photo"
+          ],
+          "where": "DMV or issuing agency"
+        },
+        {
+          "id": "proof-residence-id",
+          "name": "Proof of Idaho Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing Idaho address",
+          "required": true,
+          "alternatives": [
+            "Idaho driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
+          "where": "Varies by document type"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Idalink (recommended - fastest method)",
+          "url": "https://www.idalink.idaho.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Idaho Health and Welfare: 1-877-456-1233",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local Health and Welfare office for in-person application",
+          "url": "https://healthandwelfare.idaho.gov/about/regional-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Idaho Medicaid Expansion",
+          "url": "https://healthandwelfare.idaho.gov/services/medicaid",
+          "date": "2024-10-01",
+          "notes": "Idaho expanded Medicaid in 2020 under the ACA"
+        },
+        {
+          "title": "Idaho Medicaid Eligibility",
+          "url": "https://healthandwelfare.idaho.gov/services/medicaid/eligibility",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-id-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIdaho": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
+        },
+        {
+          "id": "test-id-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInIdaho": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-id-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIdaho": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        },
+        {
+          "id": "test-id-adult-too-young",
+          "description": "Age under 19 not eligible under adult expansion",
+          "input": {
+            "age": 17,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIdaho": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age",
+            "use-children-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "idaho-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-ID"
+    },
+    {
+      "id": "medicaid-id-pregnant-women",
+      "programId": "medicaid-idaho",
+      "name": "Idaho Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 138% FPL qualify for Medicaid in Idaho",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIdaho"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Idaho covers pregnant women through Medicaid if household income is at or below 138% of the federal poverty level (same as adult expansion). For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInIdaho",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-id",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-id",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through Idalink",
+          "url": "https://www.idalink.idaho.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Idaho offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Idaho Medicaid for Pregnant Women",
+          "url": "https://healthandwelfare.idaho.gov/services/medicaid/eligibility",
+          "date": "2024-10-01",
+          "notes": "Idaho covers pregnant women up to 138% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-id-pregnant-eligible",
+          "description": "Pregnant woman under 138% FPL",
+          "input": {
+            "livesInIdaho": true,
+            "isPregnant": true,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-id-pregnant-high-income",
+          "description": "Pregnant woman over 138% FPL",
+          "input": {
+            "livesInIdaho": true,
+            "isPregnant": true,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-id-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInIdaho": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "138-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-ID"
+    },
+    {
+      "id": "medicaid-id-children",
+      "programId": "medicaid-idaho",
+      "name": "Idaho Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 142% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIdaho"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2101
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Idaho covers children under age 19 through Medicaid if household income is at or below 142% of the federal poverty level. For 2024, this means: 1 child = $2,101/month, 2 children = $2,846/month, 3 children = $3,591/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInIdaho",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-id",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-id",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Idalink",
+          "url": "https://www.idalink.idaho.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Idaho Medicaid for Children",
+          "url": "https://healthandwelfare.idaho.gov/services/medicaid/eligibility",
+          "date": "2024-10-01",
+          "notes": "Idaho children covered up to 142% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-id-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInIdaho": true,
+            "age": 10,
+            "householdIncome": 2000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "142-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-id-child-high-income",
+          "description": "Child with family income above 142% FPL",
+          "input": {
+            "livesInIdaho": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-id-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInIdaho": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "142-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-ID"
+    },
+    {
+      "id": "medicaid-id-application-process",
+      "programId": "medicaid-idaho",
+      "name": "Idaho Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Idaho",
+      "ruleLogic": {
+        "var": "livesInIdaho"
+      },
+      "ruleType": "conditional",
+      "explanation": "Idaho uses the Idalink online portal for all Medicaid applications. You can apply: 1) **Online through Idalink** (recommended - fastest, available 24/7), 2) **By phone** at 1-877-456-1233, 3) **In-person** at your local Health and Welfare office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Idaho offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInIdaho"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through Idalink (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://www.idalink.idaho.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Idaho Health and Welfare: 1-877-456-1233",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Health and Welfare office",
+          "url": "https://healthandwelfare.idaho.gov/about/regional-offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Idaho Medicaid",
+          "url": "https://healthandwelfare.idaho.gov/services/medicaid/eligibility",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Idalink Portal",
+          "url": "https://www.idalink.idaho.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-id-resident",
+          "description": "Lives in Idaho - can apply",
+          "input": {
+            "livesInIdaho": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "idaho-resident"
+          ]
+        },
+        {
+          "id": "test-id-non-resident",
+          "description": "Does not live in Idaho",
+          "input": {
+            "livesInIdaho": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "idalink",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-ID"
+    }
+  ]
+}
