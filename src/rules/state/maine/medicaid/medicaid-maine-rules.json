@@ -1,0 +1,596 @@
+{
+  "metadata": {
+    "id": "medicaid-maine-rules-2024",
+    "name": "Maine Medicaid Eligibility Rules (2024)",
+    "description": "Maine-specific Medicaid eligibility rules for 2024. Maine has expanded Medicaid under the ACA, so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-ME",
+    "programs": [
+      "medicaid-maine"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "maine",
+      "2024",
+      "state-specific",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-me-expansion-adults",
+      "programId": "medicaid-maine",
+      "name": "Maine Medicaid for ACA Expansion Adults",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMaine"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Maine has expanded Medicaid under the Affordable Care Act. Adults age 19-64 are eligible for Medicaid if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care.",
+      "requiredFields": [
+        "livesInMaine",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-me-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-me-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through My Maine Connection",
+          "url": "https://www1.maine.gov/benefits/account/login.html",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply by phone: 1-855-797-4357",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Maine Medicaid Expansion",
+          "url": "https://www.maine.gov/dhhs/oms/medicaid-expansion",
+          "date": "2024-10-01",
+          "notes": "Maine expanded Medicaid in 2019, adults eligible up to 138% FPL"
+        },
+        {
+          "title": "My Maine Connection",
+          "url": "https://www1.maine.gov/benefits/account/login.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-me-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInMaine": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-me-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInMaine": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-me-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInMaine": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-ME"
+    },
+    {
+      "id": "medicaid-me-pregnant-women",
+      "programId": "medicaid-maine",
+      "name": "Maine Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 209% FPL qualify for Medicaid in Maine",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMaine"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3089
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Maine covers pregnant women through Medicaid if household income is at or below 209% of the federal poverty level. For 2024, this means: 1 person = $3,089/month, 2 people = $4,183/month, 3 people = $5,277/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInMaine",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-me",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-me",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through My Maine Connection",
+          "url": "https://www1.maine.gov/benefits/account/login.html",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Maine offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Maine Medicaid for Pregnant Women",
+          "url": "https://www.maine.gov/dhhs/oms/medicaid-expansion",
+          "date": "2024-10-01",
+          "notes": "Maine covers pregnant women up to 209% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-me-pregnant-eligible",
+          "description": "Pregnant woman under 209% FPL",
+          "input": {
+            "livesInMaine": true,
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "209-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-me-pregnant-high-income",
+          "description": "Pregnant woman over 209% FPL",
+          "input": {
+            "livesInMaine": true,
+            "isPregnant": true,
+            "householdIncome": 3200,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-me-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInMaine": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "209-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-ME"
+    },
+    {
+      "id": "medicaid-me-children",
+      "programId": "medicaid-maine",
+      "name": "Maine Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 200% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInMaine"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2956
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Maine covers children under age 19 through Medicaid if household income is at or below 200% of the federal poverty level. For 2024, this means: 1 child = $2,956/month, 2 children = $4,004/month, 3 children = $5,052/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInMaine",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-me",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-me",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through My Maine Connection",
+          "url": "https://www1.maine.gov/benefits/account/login.html",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Maine Medicaid for Children",
+          "url": "https://www.maine.gov/dhhs/oms/medicaid-expansion",
+          "date": "2024-10-01",
+          "notes": "Maine children covered up to 200% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-me-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInMaine": true,
+            "age": 10,
+            "householdIncome": 2800,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-me-child-high-income",
+          "description": "Child with family income above 200% FPL",
+          "input": {
+            "livesInMaine": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-me-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInMaine": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "200-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-ME"
+    },
+    {
+      "id": "medicaid-me-application-process",
+      "programId": "medicaid-maine",
+      "name": "Maine Medicaid Application Process",
+      "description": "Information about applying for Medicaid in Maine",
+      "ruleLogic": {
+        "var": "livesInMaine"
+      },
+      "ruleType": "conditional",
+      "explanation": "Maine uses My Maine Connection for all Medicaid applications. You can apply: 1) **Online through My Maine Connection** (recommended - fastest, available 24/7), 2) **By phone** at 1-855-797-4357, 3) **In-person** at your local Maine DHHS office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Maine offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInMaine"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through My Maine Connection (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://www1.maine.gov/benefits/account/login.html",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Maine DHHS: 1-855-797-4357",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Maine DHHS office",
+          "url": "https://www.maine.gov/dhhs/ofi/about-us/office-locations",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Maine Medicaid",
+          "url": "https://www.maine.gov/dhhs/oms/medicaid-expansion",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "My Maine Connection",
+          "url": "https://www1.maine.gov/benefits/account/login.html",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-me-resident",
+          "description": "Lives in Maine - can apply",
+          "input": {
+            "livesInMaine": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "maine-resident"
+          ]
+        },
+        {
+          "id": "test-me-non-resident",
+          "description": "Does not live in Maine",
+          "input": {
+            "livesInMaine": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "my-maine-connection",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-ME"
+    }
+  ]
+}
