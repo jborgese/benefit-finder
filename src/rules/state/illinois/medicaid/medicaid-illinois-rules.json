@@ -1,0 +1,634 @@
+{
+  "metadata": {
+    "id": "medicaid-illinois-rules-2024",
+    "name": "Illinois Medicaid Eligibility Rules (2024)",
+    "description": "Illinois-specific Medicaid eligibility rules for 2024. Illinois HAS expanded Medicaid under the ACA, providing coverage to adults with income up to 138% of the Federal Poverty Level. These rules reflect Illinois's Medicaid program (HealthChoice Illinois).",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-IL",
+    "programs": [
+      "medicaid-illinois",
+      "healthchoice-illinois"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "illinois",
+      "2024",
+      "state-specific",
+      "healthchoice",
+      "expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-il-expansion-adults",
+      "programId": "medicaid-illinois",
+      "name": "Illinois Medicaid Expansion - Adults",
+      "description": "Adults age 19-64 with income up to 138% FPL qualify for Medicaid under Illinois's ACA expansion",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIllinois"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Illinois has expanded Medicaid under the Affordable Care Act. Adults age 19-64 with household income at or below 138% of the Federal Poverty Level qualify for Medicaid coverage through HealthChoice Illinois. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,485/month, 4 people = $4,208/month. This provides comprehensive health coverage including doctor visits, prescriptions, hospital care, mental health services, and preventive care. Illinois has NO asset test for most adults.",
+      "requiredFields": [
+        "age",
+        "householdIncome",
+        "householdSize",
+        "livesInIllinois"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-il-medicaid",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-il-medicaid",
+          "name": "Proof of Identity",
+          "description": "Valid photo ID",
+          "required": true,
+          "alternatives": [
+            "Driver's license",
+            "State ID",
+            "Passport",
+            "School ID with photo"
+          ],
+          "where": "DMV or issuing agency"
+        },
+        {
+          "id": "proof-residence-il",
+          "name": "Proof of Illinois Residence",
+          "description": "Mail, utility bill, lease, or employer letter showing Illinois address",
+          "required": true,
+          "alternatives": [
+            "Illinois driver's license",
+            "Homeless shelter statement",
+            "Statement from person you live with"
+          ],
+          "where": "Varies by document type"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ABE (recommended - fastest method)",
+          "url": "https://abe.illinois.gov/abe/access/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Illinois Department of Healthcare and Family Services: 1-800-843-6154",
+          "priority": "high"
+        },
+        {
+          "step": "Visit your local Family Community Resource Center for in-person application",
+          "url": "https://www.dhs.state.il.us/page.aspx?module=12&officetype=1&county=",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Illinois Medicaid Expansion",
+          "url": "https://www.dhs.state.il.us/page.aspx?item=30355",
+          "date": "2024-10-01",
+          "notes": "Illinois expanded Medicaid in 2014 under the ACA"
+        },
+        {
+          "title": "HealthChoice Illinois Eligibility",
+          "url": "https://www.dhs.state.il.us/page.aspx?item=30355",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-il-adult-expansion-eligible",
+          "description": "Adult under 138% FPL - eligible",
+          "input": {
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIllinois": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "adult"
+          ]
+        },
+        {
+          "id": "test-il-adult-expansion-ineligible-high-income",
+          "description": "Adult over 138% FPL - not eligible for Medicaid",
+          "input": {
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1,
+            "livesInIllinois": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-il-adult-too-old",
+          "description": "Age 65+ not eligible under expansion (eligible for Medicare)",
+          "input": {
+            "age": 67,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIllinois": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age"
+          ]
+        },
+        {
+          "id": "test-il-adult-too-young",
+          "description": "Age under 19 not eligible under adult expansion",
+          "input": {
+            "age": 17,
+            "householdIncome": 1900,
+            "householdSize": 1,
+            "livesInIllinois": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age",
+            "use-children-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "aca",
+        "illinois-specific"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-IL"
+    },
+    {
+      "id": "medicaid-il-pregnant-women",
+      "programId": "medicaid-illinois",
+      "name": "Illinois Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 213% FPL qualify for Medicaid in Illinois",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIllinois"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3147
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Illinois covers pregnant women through Medicaid if household income is at or below 213% of the federal poverty level. For 2024, this means: 1 person = $3,147/month, 2 people = $4,261/month, 3 people = $5,375/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInIllinois",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-il",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-il",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through ABE",
+          "url": "https://abe.illinois.gov/abe/access/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Illinois offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Illinois Medicaid for Pregnant Women",
+          "url": "https://www.dhs.state.il.us/page.aspx?item=30355",
+          "date": "2024-10-01",
+          "notes": "Illinois covers pregnant women up to 213% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-il-pregnant-eligible",
+          "description": "Pregnant woman under 213% FPL",
+          "input": {
+            "livesInIllinois": true,
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "213-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-il-pregnant-high-income",
+          "description": "Pregnant woman over 213% FPL",
+          "input": {
+            "livesInIllinois": true,
+            "isPregnant": true,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-il-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInIllinois": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "213-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-IL"
+    },
+    {
+      "id": "medicaid-il-children",
+      "programId": "medicaid-illinois",
+      "name": "Illinois Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 318% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInIllinois"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4701
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Illinois covers children under age 19 through Medicaid if household income is at or below 318% of the federal poverty level. For 2024, this means: 1 child = $4,701/month, 2 children = $6,365/month, 3 children = $8,029/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInIllinois",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-il",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-il",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ABE",
+          "url": "https://abe.illinois.gov/abe/access/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Illinois Medicaid for Children",
+          "url": "https://www.dhs.state.il.us/page.aspx?item=30355",
+          "date": "2024-10-01",
+          "notes": "Illinois children covered up to 318% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-il-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInIllinois": true,
+            "age": 10,
+            "householdIncome": 4000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "318-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-il-child-high-income",
+          "description": "Child with family income above 318% FPL",
+          "input": {
+            "livesInIllinois": true,
+            "age": 12,
+            "householdIncome": 9000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-il-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInIllinois": true,
+            "age": 19,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "318-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-IL"
+    },
+    {
+      "id": "medicaid-il-application-process",
+      "programId": "medicaid-illinois",
+      "name": "Illinois Medicaid Application Process",
+      "description": "Information about applying for Medicaid (HealthChoice Illinois) in Illinois",
+      "ruleLogic": {
+        "var": "livesInIllinois"
+      },
+      "ruleType": "conditional",
+      "explanation": "Illinois uses the ABE (Application for Benefits Eligibility) online portal for all Medicaid applications. You can apply: 1) **Online through ABE** (recommended - fastest, available 24/7), 2) **By phone** at 1-800-843-6154, 3) **In-person** at your local Family Community Resource Center. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Illinois offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInIllinois"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ABE (recommended - handles both Medicaid and marketplace plans)",
+          "url": "https://abe.illinois.gov/abe/access/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Illinois Department of Healthcare and Family Services: 1-800-843-6154",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Family Community Resource Center",
+          "url": "https://www.dhs.state.il.us/page.aspx?module=12&officetype=1&county=",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Illinois Medicaid",
+          "url": "https://www.dhs.state.il.us/page.aspx?item=30355",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "Illinois ABE Portal",
+          "url": "https://abe.illinois.gov/abe/access/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-il-resident",
+          "description": "Lives in Illinois - can apply",
+          "input": {
+            "livesInIllinois": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "illinois-resident"
+          ]
+        },
+        {
+          "id": "test-il-non-resident",
+          "description": "Does not live in Illinois",
+          "input": {
+            "livesInIllinois": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "abe",
+        "healthchoice",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-IL"
+    }
+  ]
+}

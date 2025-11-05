@@ -376,7 +376,7 @@ async function processStateRules(
  * Get available states for rule loading
  */
 export function getAvailableStates(): string[] {
-  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho'];
+  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho', 'illinois'];
 }
 
 /**
@@ -396,6 +396,7 @@ const STATE_CODE_MAP: Record<string, string> = {
   'FL': 'florida',
   'HI': 'hawaii',
   'ID': 'idaho',
+  'IL': 'illinois',
   'georgia': 'georgia',
   'california': 'california',
   'texas': 'texas',
@@ -408,7 +409,8 @@ const STATE_CODE_MAP: Record<string, string> = {
   'delaware': 'delaware',
   'florida': 'florida',
   'hawaii': 'hawaii',
-  'idaho': 'idaho'
+  'idaho': 'idaho',
+  'illinois': 'illinois'
 };
 
 /**
