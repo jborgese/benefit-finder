@@ -1,0 +1,562 @@
+{
+  "metadata": {
+    "id": "medicaid-south-carolina-rules-2024",
+    "name": "South Carolina Medicaid Eligibility Rules (2024)",
+    "description": "South Carolina-specific Medicaid eligibility rules for 2024. South Carolina has NOT expanded Medicaid under the ACA, so adults 19-64 without children or disabilities generally fall into a coverage gap. Coverage is available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-SC",
+    "programs": [
+      "medicaid-south-carolina"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "south-carolina",
+      "2024",
+      "state-specific",
+      "non-expansion",
+      "coverage-gap"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-sc-coverage-gap-adults",
+      "programId": "medicaid-south-carolina",
+      "name": "South Carolina Medicaid Coverage Gap for Adults",
+      "description": "Adults 19-64 without children or disabilities are generally not eligible for Medicaid (coverage gap)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInSouthCarolina"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "!": {
+              "var": "hasDisability"
+            }
+          },
+          {
+            "!": {
+              "var": "isPregnant"
+            }
+          },
+          {
+            ">": [
+              {
+                "var": "householdIncome"
+              },
+              0
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "South Carolina has NOT expanded Medicaid under the Affordable Care Act. This means adults age 19-64 who don't have children, aren't pregnant, and don't have a qualifying disability generally cannot get Medicaid coverage, even if their income is very low. This is called the 'coverage gap.' If you're in this situation, you may qualify for coverage through the Health Insurance Marketplace (HealthCare.gov) or may need to seek other healthcare options. Children, pregnant women, parents with dependent children, and people with disabilities may still qualify for Medicaid.",
+      "requiredFields": [
+        "livesInSouthCarolina",
+        "age",
+        "hasDisability",
+        "isPregnant",
+        "householdIncome"
+      ],
+      "requiredDocuments": [],
+      "nextSteps": [
+        {
+          "step": "Check if you qualify for coverage through the Health Insurance Marketplace at HealthCare.gov",
+          "url": "https://www.healthcare.gov/",
+          "priority": "high",
+          "estimatedTime": "30-60 minutes"
+        },
+        {
+          "step": "Contact your local Department of Health and Human Services office to discuss other healthcare options",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "South Carolina Medicaid Eligibility",
+          "url": "https://www.scdhhs.gov/apply",
+          "date": "2024-10-01",
+          "notes": "South Carolina has not expanded Medicaid under the ACA"
+        },
+        {
+          "title": "HealthCare.gov - Coverage Gap",
+          "url": "https://www.healthcare.gov/medicaid-chip/medicaid-expansion-and-you/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-sc-coverage-gap-adult",
+          "description": "Adult 19-64 without disability or pregnancy (coverage gap)",
+          "input": {
+            "livesInSouthCarolina": true,
+            "age": 35,
+            "hasDisability": false,
+            "isPregnant": false,
+            "householdIncome": 1000
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
+        },
+        {
+          "id": "test-sc-adult-with-disability",
+          "description": "Adult with disability may qualify (check disability rules)",
+          "input": {
+            "livesInSouthCarolina": true,
+            "age": 35,
+            "hasDisability": true,
+            "isPregnant": false,
+            "householdIncome": 1000
+          },
+          "expected": false,
+          "tags": [
+            "check-disability-rules",
+            "may-qualify"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "coverage-gap",
+        "non-expansion",
+        "adults"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-SC"
+    },
+    {
+      "id": "medicaid-sc-pregnant-women",
+      "programId": "medicaid-south-carolina",
+      "name": "South Carolina Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 194% FPL qualify for Medicaid in South Carolina",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInSouthCarolina"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2870
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "South Carolina covers pregnant women through Medicaid if household income is at or below 194% of the federal poverty level. For 2024, this means: 1 person = $2,870/month, 2 people = $3,886/month, 3 people = $4,902/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInSouthCarolina",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-sc",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-sc",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through SC Connect",
+          "url": "https://ssp.sc.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "South Carolina offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "South Carolina Medicaid for Pregnant Women",
+          "url": "https://www.scdhhs.gov/apply",
+          "date": "2024-10-01",
+          "notes": "South Carolina covers pregnant women up to 194% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-sc-pregnant-eligible",
+          "description": "Pregnant woman under 194% FPL",
+          "input": {
+            "livesInSouthCarolina": true,
+            "isPregnant": true,
+            "householdIncome": 2800,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "194-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-sc-pregnant-high-income",
+          "description": "Pregnant woman over 194% FPL",
+          "input": {
+            "livesInSouthCarolina": true,
+            "isPregnant": true,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-sc-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInSouthCarolina": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "194-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-SC"
+    },
+    {
+      "id": "medicaid-sc-children",
+      "programId": "medicaid-south-carolina",
+      "name": "South Carolina Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 213% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInSouthCarolina"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3150
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "South Carolina covers children under age 19 through Medicaid if household income is at or below 213% of the federal poverty level. For 2024, this means: 1 child = $3,150/month, 2 children = $4,266/month, 3 children = $5,382/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInSouthCarolina",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-sc",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-sc",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through SC Connect",
+          "url": "https://ssp.sc.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "South Carolina Medicaid for Children",
+          "url": "https://www.scdhhs.gov/apply",
+          "date": "2024-10-01",
+          "notes": "South Carolina children covered up to 213% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-sc-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInSouthCarolina": true,
+            "age": 10,
+            "householdIncome": 3000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "213-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-sc-child-high-income",
+          "description": "Child with family income above 213% FPL",
+          "input": {
+            "livesInSouthCarolina": true,
+            "age": 12,
+            "householdIncome": 5000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-sc-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInSouthCarolina": true,
+            "age": 19,
+            "householdIncome": 3000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "213-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-SC"
+    },
+    {
+      "id": "medicaid-sc-application-process",
+      "programId": "medicaid-south-carolina",
+      "name": "South Carolina Medicaid Application Process",
+      "description": "Information about applying for Medicaid in South Carolina",
+      "ruleLogic": {
+        "var": "livesInSouthCarolina"
+      },
+      "ruleType": "conditional",
+      "explanation": "South Carolina uses SC Connect for Medicaid applications. You can apply: 1) **Online through SC Connect** (recommended - fastest, available 24/7), 2) **By phone** at 1-888-549-0820, 3) **In-person** at your local Department of Health and Human Services office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. South Carolina offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInSouthCarolina"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through SC Connect (recommended)",
+          "url": "https://ssp.sc.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call South Carolina Department of Health and Human Services: 1-888-549-0820",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Health and Human Services office",
+          "url": "https://www.scdhhs.gov/offices",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Medicaid",
+          "url": "https://www.scdhhs.gov/apply",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "SC Connect",
+          "url": "https://ssp.sc.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-sc-resident",
+          "description": "Lives in South Carolina - can apply",
+          "input": {
+            "livesInSouthCarolina": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "south-carolina-resident"
+          ]
+        },
+        {
+          "id": "test-sc-non-resident",
+          "description": "Does not live in South Carolina",
+          "input": {
+            "livesInSouthCarolina": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "sc-connect",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-SC"
+    }
+  ]
+}

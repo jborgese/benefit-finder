@@ -1,0 +1,670 @@
+{
+  "metadata": {
+    "id": "snap-south-carolina-rules-2024",
+    "name": "South Carolina SNAP Eligibility Rules (2024)",
+    "description": "South Carolina-specific SNAP (Supplemental Nutrition Assistance Program) eligibility rules for 2024. South Carolina follows federal SNAP guidelines with state-specific application processes through SC Connect.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-SC",
+    "programs": [
+      "snap-south-carolina"
+    ],
+    "tags": [
+      "snap",
+      "food-assistance",
+      "south-carolina",
+      "2024",
+      "state-specific"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "snap-sc-standard-eligibility",
+      "programId": "snap-south-carolina",
+      "name": "South Carolina SNAP Standard Eligibility",
+      "description": "Standard SNAP eligibility based on household income and size",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInSouthCarolina"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1643
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "To qualify for SNAP in South Carolina, your household gross monthly income must be at or below 130% of the Federal Poverty Level. For 2024: 1 person = $1,643/month, 2 people = $2,226/month, 3 people = $2,808/month, 4 people = $3,390/month. South Carolina follows federal SNAP income guidelines. After applying the standard deduction and other deductions, your net income must be at or below 100% FPL to qualify.",
+      "requiredFields": [
+        "householdIncome",
+        "householdSize",
+        "livesInSouthCarolina"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-sc",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Bank statements",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-sc",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "School ID with photo"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through SC Connect",
+          "url": "https://ssp.sc.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Alternative: Apply by phone at 1-800-616-1309 or visit your local Department of Social Services office",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "South Carolina SNAP Eligibility",
+          "url": "https://dss.sc.gov/assistance-programs/food-assistance/",
+          "date": "2024-10-01",
+          "notes": "South Carolina SNAP follows federal income guidelines: 130% FPL gross income limit"
+        },
+        {
+          "title": "SC Connect",
+          "url": "https://ssp.sc.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-sc-standard-eligible",
+          "description": "Household under 130% FPL",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInSouthCarolina": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "standard",
+            "south-carolina"
+          ]
+        },
+        {
+          "id": "test-sc-standard-ineligible-income",
+          "description": "Income above 130% FPL",
+          "input": {
+            "householdIncome": 2000,
+            "householdSize": 1,
+            "livesInSouthCarolina": true
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-sc-non-resident",
+          "description": "Does not live in South Carolina",
+          "input": {
+            "householdIncome": 1500,
+            "householdSize": 1,
+            "livesInSouthCarolina": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "income-eligibility",
+        "federal-guidelines",
+        "south-carolina"
+      ],
+      "category": "financial-eligibility",
+      "jurisdiction": "US-SC"
+    },
+    {
+      "id": "snap-sc-standard-deduction",
+      "programId": "snap-south-carolina",
+      "name": "South Carolina SNAP Standard Deduction",
+      "description": "South Carolina uses federal standard deductions for net income calculation",
+      "ruleLogic": {
+        "if": [
+          {
+            "<=": [
+              {
+                "var": "householdSize"
+              },
+              3
+            ]
+          },
+          193,
+          {
+            "if": [
+              {
+                "==": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4
+                ]
+              },
+              195,
+              {
+                "if": [
+                  {
+                    "==": [
+                      {
+                        "var": "householdSize"
+                      },
+                      5
+                    ]
+                  },
+                  228,
+                  266
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "benefit_amount",
+      "explanation": "South Carolina follows federal standard deduction amounts when calculating net income: Households of 1-3 people: $193/month, 4 people: $195/month, 5 people: $228/month, 6+ people: $266/month. This deduction is automatically applied to your gross income to calculate net income for eligibility determination.",
+      "requiredFields": [
+        "householdSize"
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Deductions",
+          "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "legalReference": "7 CFR § 273.9",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 15,
+      "testCases": [
+        {
+          "id": "test-sc-deduction-small",
+          "description": "Standard deduction for household of 2",
+          "input": {
+            "householdSize": 2
+          },
+          "expected": 193,
+          "tags": [
+            "deduction",
+            "small-household"
+          ]
+        },
+        {
+          "id": "test-sc-deduction-medium",
+          "description": "Standard deduction for household of 4",
+          "input": {
+            "householdSize": 4
+          },
+          "expected": 195,
+          "tags": [
+            "deduction",
+            "medium-household"
+          ]
+        },
+        {
+          "id": "test-sc-deduction-large",
+          "description": "Standard deduction for household of 6+",
+          "input": {
+            "householdSize": 7
+          },
+          "expected": 266,
+          "tags": [
+            "deduction",
+            "large-household"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "deductions",
+        "net-income",
+        "calculation"
+      ],
+      "category": "benefit-calculation",
+      "jurisdiction": "US-SC"
+    },
+    {
+      "id": "snap-sc-abawd-work-requirements",
+      "programId": "snap-south-carolina",
+      "name": "South Carolina SNAP ABAWD Work Requirements",
+      "description": "Able-Bodied Adults Without Dependents must meet work requirements or face time limits",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isABAWD"
+            }
+          },
+          {
+            "var": "meetsWorkRequirement"
+          },
+          {
+            "var": "isExemptFromWork"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "South Carolina implements federal ABAWD (Able-Bodied Adults Without Dependents) work requirements. If you're 18-49, able-bodied, and don't have dependents, you must work or participate in work activities for at least 80 hours per month to receive SNAP beyond 3 months in a 36-month period. Some areas of South Carolina may have waivers based on unemployment rates. Exemptions include: students, people with disabilities, pregnant women, caregivers of children under 6, and people receiving unemployment benefits.",
+      "requiredFields": [
+        "isABAWD",
+        "meetsWorkRequirement",
+        "isExemptFromWork"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-work-activity-sc",
+          "name": "Proof of Work Activity",
+          "description": "Pay stubs, employer verification, or documentation of work program participation",
+          "required": false,
+          "alternatives": [
+            "Employment verification letter",
+            "Work program enrollment"
+          ],
+          "where": "Employer or work program"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If subject to ABAWD rules, contact your local Department of Social Services office to learn about available work programs",
+          "priority": "medium"
+        },
+        {
+          "step": "Check if your area has a waiver from ABAWD time limits due to high unemployment",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "South Carolina SNAP Work Requirements",
+          "url": "https://dss.sc.gov/assistance-programs/food-assistance/",
+          "date": "2024-10-01",
+          "notes": "South Carolina follows federal ABAWD work requirements"
+        },
+        {
+          "title": "USDA FNS ABAWD Information",
+          "url": "https://www.fns.usda.gov/snap/able-bodied-adults-without-dependents-abawds",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 18,
+      "testCases": [
+        {
+          "id": "test-sc-abawd-working",
+          "description": "ABAWD meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": true,
+            "isExemptFromWork": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "working"
+          ]
+        },
+        {
+          "id": "test-sc-abawd-exempt",
+          "description": "ABAWD exempt from work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "abawd",
+            "exempt"
+          ]
+        },
+        {
+          "id": "test-sc-abawd-not-compliant",
+          "description": "ABAWD not meeting work requirement",
+          "input": {
+            "isABAWD": true,
+            "meetsWorkRequirement": false,
+            "isExemptFromWork": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "abawd",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "abawd",
+        "work-requirements",
+        "south-carolina"
+      ],
+      "category": "work-requirement",
+      "jurisdiction": "US-SC"
+    },
+    {
+      "id": "snap-sc-student-eligibility",
+      "programId": "snap-south-carolina",
+      "name": "South Carolina SNAP Student Eligibility",
+      "description": "College students age 18-49 enrolled at least half-time have additional eligibility requirements",
+      "ruleLogic": {
+        "or": [
+          {
+            "!": {
+              "var": "isStudent"
+            }
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              18
+            ]
+          },
+          {
+            ">": [
+              {
+                "var": "age"
+              },
+              49
+            ]
+          },
+          {
+            "var": "worksAtLeast20Hours"
+          },
+          {
+            "var": "hasChildUnder6"
+          },
+          {
+            "var": "hasChildUnder12AndNoChildcare"
+          },
+          {
+            "var": "receivesWorkStudy"
+          },
+          {
+            "var": "inEmploymentTraining"
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "South Carolina follows federal rules for college students. If you're 18-49 and enrolled at least half-time in college, you must also: work at least 20 hours/week, participate in work-study, care for a child under 6, care for a child 6-12 with inadequate childcare, or participate in an employment training program. High school students, students under 18, and students over 49 are exempt from these additional requirements.",
+      "requiredFields": [
+        "isStudent",
+        "age",
+        "worksAtLeast20Hours",
+        "hasChildUnder6",
+        "hasChildUnder12AndNoChildcare",
+        "receivesWorkStudy",
+        "inEmploymentTraining"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-student-status-sc",
+          "name": "Proof of Student Status",
+          "description": "School enrollment verification, class schedule",
+          "required": false,
+          "alternatives": [
+            "Student ID",
+            "Enrollment letter",
+            "Class schedule"
+          ],
+          "where": "College registrar"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "If you're a student, check if you meet one of the exemptions (working 20+ hours, work-study, childcare responsibilities, etc.)",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SNAP Student Eligibility",
+          "url": "https://www.fns.usda.gov/snap/students",
+          "date": "2024-10-01",
+          "notes": "South Carolina follows federal student eligibility rules"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-sc-student-working",
+          "description": "Student working 20+ hours (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": true,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "working"
+          ]
+        },
+        {
+          "id": "test-sc-student-work-study",
+          "description": "Student with work-study (exempt)",
+          "input": {
+            "isStudent": true,
+            "age": 20,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": true,
+            "inEmploymentTraining": false
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "student",
+            "work-study"
+          ]
+        },
+        {
+          "id": "test-sc-student-not-compliant",
+          "description": "Student not meeting any exemption",
+          "input": {
+            "isStudent": true,
+            "age": 22,
+            "worksAtLeast20Hours": false,
+            "hasChildUnder6": false,
+            "hasChildUnder12AndNoChildcare": false,
+            "receivesWorkStudy": false,
+            "inEmploymentTraining": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "student",
+            "not-compliant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "students",
+        "college",
+        "exemptions",
+        "south-carolina"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-SC"
+    },
+    {
+      "id": "snap-sc-application-process",
+      "programId": "snap-south-carolina",
+      "name": "South Carolina SNAP Application Process",
+      "description": "Information about applying for SNAP in South Carolina through the Department of Social Services",
+      "ruleLogic": {
+        "var": "livesInSouthCarolina"
+      },
+      "ruleType": "conditional",
+      "explanation": "South Carolina uses SC Connect for benefit applications. You can apply: 1) **Online through SC Connect** (recommended - fastest, available 24/7), 2) **By phone** at 1-800-616-1309, 3) **In-person** at your local Department of Social Services office. Most applications are processed within 30 days. Expedited service (within 7 days) is available for households with urgent need and less than $150 in monthly gross income and liquid resources under $100, or if your rent/mortgage and utilities are more than your income and liquid resources.",
+      "requiredFields": [
+        "livesInSouthCarolina"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through SC Connect (recommended - fastest method)",
+          "url": "https://ssp.sc.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply by phone: 1-800-616-1309",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Social Services office",
+          "url": "https://dss.sc.gov/about/office-locations/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "SC Connect",
+          "url": "https://ssp.sc.gov/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "South Carolina SNAP Application Information",
+          "url": "https://dss.sc.gov/assistance-programs/food-assistance/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-sc-resident",
+          "description": "Lives in South Carolina - can apply",
+          "input": {
+            "livesInSouthCarolina": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "south-carolina-resident"
+          ]
+        },
+        {
+          "id": "test-sc-non-resident",
+          "description": "Does not live in South Carolina",
+          "input": {
+            "livesInSouthCarolina": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "sc-connect",
+        "process",
+        "south-carolina"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-SC"
+    }
+  ]
+}
