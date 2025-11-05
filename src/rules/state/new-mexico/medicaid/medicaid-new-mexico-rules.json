@@ -1,0 +1,615 @@
+{
+  "metadata": {
+    "id": "medicaid-new-mexico-rules-2024",
+    "name": "New Mexico Medicaid Eligibility Rules (2024)",
+    "description": "New Mexico-specific Medicaid eligibility rules for 2024. New Mexico expanded Medicaid under the ACA in 2014 (Centennial Care), so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-NM",
+    "programs": [
+      "medicaid-new-mexico"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "new-mexico",
+      "2024",
+      "state-specific",
+      "expansion",
+      "centennial-care"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-nm-expansion-adults",
+      "programId": "medicaid-new-mexico",
+      "name": "New Mexico Medicaid for ACA Expansion Adults (Centennial Care)",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewMexico"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Mexico expanded Medicaid under the Affordable Care Act in 2014 (Centennial Care). Adults age 19-64 are eligible for Medicaid if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through YESNM or beWellnm.",
+      "requiredFields": [
+        "livesInNewMexico",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-nm-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-nm-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through YESNM (recommended)",
+          "url": "https://www.yes.state.nm.us/yesnm/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through beWellnm",
+          "url": "https://www.bewellnm.com/",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Income Support Division office",
+          "url": "https://www.hsd.state.nm.us/isd/offices/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Centennial Care (New Mexico Medicaid Expansion)",
+          "url": "https://www.hsd.state.nm.us/isd/benefits/medicaid/",
+          "date": "2024-10-01",
+          "notes": "New Mexico expanded Medicaid in 2014, adults eligible up to 138% FPL through Centennial Care"
+        },
+        {
+          "title": "YESNM",
+          "url": "https://www.yes.state.nm.us/yesnm/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "beWellnm",
+          "url": "https://www.bewellnm.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-nm-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInNewMexico": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nm-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInNewMexico": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nm-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInNewMexico": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl",
+        "centennial-care"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NM"
+    },
+    {
+      "id": "medicaid-nm-pregnant-women",
+      "programId": "medicaid-new-mexico",
+      "name": "New Mexico Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 250% FPL qualify for Medicaid in New Mexico",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewMexico"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  3695
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Mexico covers pregnant women through Medicaid if household income is at or below 250% of the federal poverty level. For 2024, this means: 1 person = $3,695/month, 2 people = $5,005/month, 3 people = $6,315/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInNewMexico",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-nm",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-nm",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through YESNM or beWellnm",
+          "url": "https://www.yes.state.nm.us/yesnm/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "New Mexico offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "New Mexico Medicaid for Pregnant Women",
+          "url": "https://www.hsd.state.nm.us/isd/benefits/medicaid/",
+          "date": "2024-10-01",
+          "notes": "New Mexico covers pregnant women up to 250% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-nm-pregnant-eligible",
+          "description": "Pregnant woman under 250% FPL",
+          "input": {
+            "livesInNewMexico": true,
+            "isPregnant": true,
+            "householdIncome": 3600,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "250-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nm-pregnant-high-income",
+          "description": "Pregnant woman over 250% FPL",
+          "input": {
+            "livesInNewMexico": true,
+            "isPregnant": true,
+            "householdIncome": 3800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nm-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInNewMexico": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "250-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NM"
+    },
+    {
+      "id": "medicaid-nm-children",
+      "programId": "medicaid-new-mexico",
+      "name": "New Mexico Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 300% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewMexico"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4434
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Mexico covers children under age 19 through Medicaid if household income is at or below 300% of the federal poverty level. For 2024, this means: 1 child = $4,434/month, 2 children = $6,006/month, 3 children = $7,578/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInNewMexico",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-nm",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-nm",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through YESNM or beWellnm",
+          "url": "https://www.yes.state.nm.us/yesnm/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "New Mexico Medicaid for Children",
+          "url": "https://www.hsd.state.nm.us/isd/benefits/medicaid/",
+          "date": "2024-10-01",
+          "notes": "New Mexico children covered up to 300% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-nm-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInNewMexico": true,
+            "age": 10,
+            "householdIncome": 4200,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "300-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nm-child-high-income",
+          "description": "Child with family income above 300% FPL",
+          "input": {
+            "livesInNewMexico": true,
+            "age": 12,
+            "householdIncome": 7000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nm-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInNewMexico": true,
+            "age": 19,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "300-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NM"
+    },
+    {
+      "id": "medicaid-nm-application-process",
+      "programId": "medicaid-new-mexico",
+      "name": "New Mexico Medicaid Application Process",
+      "description": "Information about applying for Medicaid in New Mexico",
+      "ruleLogic": {
+        "var": "livesInNewMexico"
+      },
+      "ruleType": "conditional",
+      "explanation": "New Mexico uses YESNM and beWellnm for Medicaid applications. You can apply: 1) **Online through YESNM** (recommended - fastest, available 24/7), 2) **Online through beWellnm** for health coverage, 3) **By phone** at 1-888-997-2583, 4) **In-person** at your local Income Support Division office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. New Mexico offers language assistance for non-English speakers, including Spanish.",
+      "requiredFields": [
+        "livesInNewMexico"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through YESNM (recommended)",
+          "url": "https://www.yes.state.nm.us/yesnm/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through beWellnm",
+          "url": "https://www.bewellnm.com/",
+          "priority": "high"
+        },
+        {
+          "step": "Call New Mexico Medicaid: 1-888-997-2583",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for New Mexico Medicaid",
+          "url": "https://www.hsd.state.nm.us/isd/benefits/medicaid/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "YESNM",
+          "url": "https://www.yes.state.nm.us/yesnm/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "beWellnm",
+          "url": "https://www.bewellnm.com/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-nm-resident",
+          "description": "Lives in New Mexico - can apply",
+          "input": {
+            "livesInNewMexico": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "new-mexico-resident"
+          ]
+        },
+        {
+          "id": "test-nm-non-resident",
+          "description": "Does not live in New Mexico",
+          "input": {
+            "livesInNewMexico": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "yesnm",
+        "bewellnm",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-NM"
+    }
+  ]
+}
