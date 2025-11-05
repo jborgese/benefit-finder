@@ -6,6 +6,7 @@
  */
 
 import type { JsonLogicRule, JsonLogicData } from './types';
+import { evaluateRule } from './evaluator';
 
 // ============================================================================
 // TYPES
@@ -481,8 +482,6 @@ export async function profileRule(
     const startTime = performance.now();
 
     try {
-      // Import evaluateRule to avoid circular dependency
-      const { evaluateRule } = await import('./evaluator');
       await evaluateRule(rule, data, { measureTime: false });
     } catch {
       // Ignore errors during profiling
@@ -658,8 +657,6 @@ export async function benchmarkRule(
 }> {
   const startTime = performance.now();
   const dataSetResults: Array<{ index: number; time: number; result: unknown }> = [];
-
-  const { evaluateRule } = await import('./evaluator');
 
   for (let i = 0; i < testDataSets.length; i++) {
     const evalStart = performance.now();
