@@ -376,7 +376,7 @@ async function processStateRules(
  * Get available states for rule loading
  */
 export function getAvailableStates(): string[] {
-  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new-hampshire'];
+  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new-hampshire', 'new-jersey'];
 }
 
 /**
@@ -413,6 +413,7 @@ const STATE_CODE_MAP: Record<string, string> = {
   'NE': 'nebraska',
   'NV': 'nevada',
   'NH': 'new-hampshire',
+  'NJ': 'new-jersey',
   'georgia': 'georgia',
   'california': 'california',
   'texas': 'texas',
@@ -442,7 +443,8 @@ const STATE_CODE_MAP: Record<string, string> = {
   'montana': 'montana',
   'nebraska': 'nebraska',
   'nevada': 'nevada',
-  'new-hampshire': 'new-hampshire'
+  'new-hampshire': 'new-hampshire',
+  'new-jersey': 'new-jersey'
 };
 
 /**

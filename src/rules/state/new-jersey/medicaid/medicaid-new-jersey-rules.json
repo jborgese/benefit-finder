@@ -1,0 +1,615 @@
+{
+  "metadata": {
+    "id": "medicaid-new-jersey-rules-2024",
+    "name": "New Jersey Medicaid Eligibility Rules (2024)",
+    "description": "New Jersey-specific Medicaid eligibility rules for 2024. New Jersey expanded Medicaid under the ACA in 2014 (NJ FamilyCare), so adults up to 138% FPL are eligible. Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-NJ",
+    "programs": [
+      "medicaid-new-jersey"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "new-jersey",
+      "2024",
+      "state-specific",
+      "expansion",
+      "nj-familycare"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-nj-expansion-adults",
+      "programId": "medicaid-new-jersey",
+      "name": "New Jersey Medicaid for ACA Expansion Adults (NJ FamilyCare)",
+      "description": "Adults 19-64 eligible through Medicaid expansion up to 138% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewJersey"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2040
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Jersey expanded Medicaid under the Affordable Care Act in 2014 (NJ FamilyCare). Adults age 19-64 are eligible for Medicaid if household income is at or below 138% of the federal poverty level. For 2024, this means: 1 person = $2,040/month, 2 people = $2,763/month, 3 people = $3,486/month, 4 people = $4,209/month. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through NJOneApp or GetCoveredNJ.",
+      "requiredFields": [
+        "livesInNewJersey",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-nj-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-nj-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through NJOneApp (recommended)",
+          "url": "https://njoneapp.dhs.state.nj.us/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through GetCoveredNJ",
+          "url": "https://www.getcovered.nj.gov/",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Board of Social Services",
+          "url": "https://www.nj.gov/humanservices/dfd/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "NJ FamilyCare (New Jersey Medicaid Expansion)",
+          "url": "https://www.nj.gov/humanservices/dmahs/clients/medicaid/",
+          "date": "2024-10-01",
+          "notes": "New Jersey expanded Medicaid in 2014, adults eligible up to 138% FPL through NJ FamilyCare"
+        },
+        {
+          "title": "NJOneApp",
+          "url": "https://njoneapp.dhs.state.nj.us/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "GetCoveredNJ",
+          "url": "https://www.getcovered.nj.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-nj-expansion-eligible",
+          "description": "Adult under 138% FPL",
+          "input": {
+            "livesInNewJersey": true,
+            "age": 35,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "expansion",
+            "138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nj-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInNewJersey": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nj-expansion-age-limit",
+          "description": "Person under 19 not eligible under expansion rules",
+          "input": {
+            "livesInNewJersey": true,
+            "age": 18,
+            "householdIncome": 1900,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit",
+            "use-child-rules"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "expansion",
+        "adults",
+        "138-percent-fpl",
+        "nj-familycare"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NJ"
+    },
+    {
+      "id": "medicaid-nj-pregnant-women",
+      "programId": "medicaid-new-jersey",
+      "name": "New Jersey Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 200% FPL qualify for Medicaid in New Jersey",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewJersey"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2956
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Jersey covers pregnant women through Medicaid if household income is at or below 200% of the federal poverty level. For 2024, this means: 1 person = $2,956/month, 2 people = $4,004/month, 3 people = $5,052/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInNewJersey",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-nj",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-nj",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through NJOneApp or GetCoveredNJ",
+          "url": "https://njoneapp.dhs.state.nj.us/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "New Jersey offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "New Jersey Medicaid for Pregnant Women",
+          "url": "https://www.nj.gov/humanservices/dmahs/clients/medicaid/",
+          "date": "2024-10-01",
+          "notes": "New Jersey covers pregnant women up to 200% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-nj-pregnant-eligible",
+          "description": "Pregnant woman under 200% FPL",
+          "input": {
+            "livesInNewJersey": true,
+            "isPregnant": true,
+            "householdIncome": 2900,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "200-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nj-pregnant-high-income",
+          "description": "Pregnant woman over 200% FPL",
+          "input": {
+            "livesInNewJersey": true,
+            "isPregnant": true,
+            "householdIncome": 3100,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nj-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInNewJersey": true,
+            "isPregnant": false,
+            "householdIncome": 2000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "200-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NJ"
+    },
+    {
+      "id": "medicaid-nj-children",
+      "programId": "medicaid-new-jersey",
+      "name": "New Jersey Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 355% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInNewJersey"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  5248
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "New Jersey covers children under age 19 through Medicaid if household income is at or below 355% of the federal poverty level. For 2024, this means: 1 child = $5,248/month, 2 children = $7,109/month, 3 children = $8,970/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInNewJersey",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-nj",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-nj",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through NJOneApp or GetCoveredNJ",
+          "url": "https://njoneapp.dhs.state.nj.us/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "New Jersey Medicaid for Children",
+          "url": "https://www.nj.gov/humanservices/dmahs/clients/medicaid/",
+          "date": "2024-10-01",
+          "notes": "New Jersey children covered up to 355% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-nj-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInNewJersey": true,
+            "age": 10,
+            "householdIncome": 5000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "355-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-nj-child-high-income",
+          "description": "Child with family income above 355% FPL",
+          "input": {
+            "livesInNewJersey": true,
+            "age": 12,
+            "householdIncome": 9000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-nj-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInNewJersey": true,
+            "age": 19,
+            "householdIncome": 5000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "355-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-NJ"
+    },
+    {
+      "id": "medicaid-nj-application-process",
+      "programId": "medicaid-new-jersey",
+      "name": "New Jersey Medicaid Application Process",
+      "description": "Information about applying for Medicaid in New Jersey",
+      "ruleLogic": {
+        "var": "livesInNewJersey"
+      },
+      "ruleType": "conditional",
+      "explanation": "New Jersey uses NJOneApp and GetCoveredNJ for Medicaid applications. You can apply: 1) **Online through NJOneApp** (recommended - fastest, available 24/7), 2) **Online through GetCoveredNJ** for health coverage, 3) **By phone** at 1-800-701-0710, 4) **In-person** at your local Board of Social Services. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. New Jersey offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInNewJersey"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through NJOneApp (recommended)",
+          "url": "https://njoneapp.dhs.state.nj.us/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Or apply through GetCoveredNJ",
+          "url": "https://www.getcovered.nj.gov/",
+          "priority": "high"
+        },
+        {
+          "step": "Call New Jersey Medicaid: 1-800-701-0710",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for New Jersey Medicaid",
+          "url": "https://www.nj.gov/humanservices/dmahs/clients/medicaid/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "NJOneApp",
+          "url": "https://njoneapp.dhs.state.nj.us/",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "GetCoveredNJ",
+          "url": "https://www.getcovered.nj.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-nj-resident",
+          "description": "Lives in New Jersey - can apply",
+          "input": {
+            "livesInNewJersey": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "new-jersey-resident"
+          ]
+        },
+        {
+          "id": "test-nj-non-resident",
+          "description": "Does not live in New Jersey",
+          "input": {
+            "livesInNewJersey": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "njoneapp",
+        "getcoverednj",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-NJ"
+    }
+  ]
+}
