@@ -1,0 +1,551 @@
+{
+  "metadata": {
+    "id": "medicaid-wyoming-rules-2024",
+    "name": "Wyoming Medicaid Eligibility Rules (2024)",
+    "description": "Wyoming-specific Medicaid eligibility rules for 2024. Wyoming did NOT expand Medicaid under the ACA, creating a coverage gap for many adults. Coverage is available for pregnant women, children, parents with dependent children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-WY",
+    "programs": [
+      "medicaid-wyoming"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "wyoming",
+      "2024",
+      "state-specific",
+      "non-expansion",
+      "coverage-gap"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-wy-coverage-gap-adults",
+      "programId": "medicaid-wyoming",
+      "name": "Wyoming Medicaid Coverage Gap for Adults",
+      "description": "Wyoming did NOT expand Medicaid - adults 19-64 without dependents or disabilities face a coverage gap",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWyoming"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "!": {
+              "var": "isPregnant"
+            }
+          },
+          {
+            "!": {
+              "var": "hasDependentChildren"
+            }
+          },
+          {
+            "!": {
+              "var": "hasDisability"
+            }
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Wyoming did NOT expand Medicaid under the Affordable Care Act. This means adults age 19-64 who are not pregnant, don't have dependent children, and don't have disabilities typically face a coverage gap - they are NOT eligible for Medicaid regardless of income level. If you're in this situation and your income is below 100% FPL, you may not be eligible for Medicaid OR Marketplace subsidies. You may need to explore other coverage options or wait for Wyoming to expand Medicaid.",
+      "requiredFields": [
+        "livesInWyoming",
+        "age",
+        "isPregnant",
+        "hasDependentChildren",
+        "hasDisability"
+      ],
+      "requiredDocuments": [],
+      "nextSteps": [
+        {
+          "step": "If you're in the coverage gap, consider contacting Wyoming Department of Health to discuss your options",
+          "priority": "medium"
+        },
+        {
+          "step": "Check if you qualify for other assistance programs or charity care",
+          "priority": "medium"
+        },
+        {
+          "step": "Monitor for potential Medicaid expansion in Wyoming",
+          "priority": "low"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Wyoming Medicaid Non-Expansion Status",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "date": "2024-10-01",
+          "notes": "Wyoming did not expand Medicaid under the ACA, creating a coverage gap for many adults"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-wy-coverage-gap-adult",
+          "description": "Adult in coverage gap (non-expansion state)",
+          "input": {
+            "livesInWyoming": true,
+            "age": 35,
+            "isPregnant": false,
+            "hasDependentChildren": false,
+            "hasDisability": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "non-expansion"
+          ]
+        },
+        {
+          "id": "test-wy-pregnant-not-gap",
+          "description": "Pregnant woman not in coverage gap",
+          "input": {
+            "livesInWyoming": true,
+            "age": 28,
+            "isPregnant": true,
+            "hasDependentChildren": false,
+            "hasDisability": false
+          },
+          "expected": false,
+          "tags": [
+            "not-gap",
+            "pregnant-women-rule-applies"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "coverage-gap",
+        "non-expansion",
+        "adults"
+      ],
+      "category": "eligibility-requirement",
+      "jurisdiction": "US-WY"
+    },
+    {
+      "id": "medicaid-wy-pregnant-women",
+      "programId": "medicaid-wyoming",
+      "name": "Wyoming Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 154% FPL qualify for Medicaid in Wyoming",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWyoming"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  2279
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Wyoming covers pregnant women through Medicaid if household income is at or below 154% of the federal poverty level. For 2024, this means: 1 person = $2,279/month, 2 people = $3,087/month, 3 people = $3,895/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInWyoming",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-wy",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-wy",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply through Wyoming Department of Health",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Wyoming offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Wyoming Medicaid for Pregnant Women",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "date": "2024-10-01",
+          "notes": "Wyoming covers pregnant women up to 154% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-wy-pregnant-eligible",
+          "description": "Pregnant woman under 154% FPL",
+          "input": {
+            "livesInWyoming": true,
+            "isPregnant": true,
+            "householdIncome": 2100,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "154-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wy-pregnant-high-income",
+          "description": "Pregnant woman over 154% FPL",
+          "input": {
+            "livesInWyoming": true,
+            "isPregnant": true,
+            "householdIncome": 2400,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-wy-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInWyoming": true,
+            "isPregnant": false,
+            "householdIncome": 1500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "154-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WY"
+    },
+    {
+      "id": "medicaid-wy-children",
+      "programId": "medicaid-wyoming",
+      "name": "Wyoming Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 133% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWyoming"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1967
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Wyoming covers children under age 19 through Medicaid if household income is at or below 133% of the federal poverty level. For 2024, this means: 1 child = $1,967/month, 2 children = $2,664/month, 3 children = $3,361/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInWyoming",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-wy",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-wy",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply through Wyoming Department of Health",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Wyoming Medicaid for Children",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "date": "2024-10-01",
+          "notes": "Wyoming children covered up to 133% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-wy-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInWyoming": true,
+            "age": 10,
+            "householdIncome": 1800,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "133-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wy-child-high-income",
+          "description": "Child with family income above 133% FPL",
+          "input": {
+            "livesInWyoming": true,
+            "age": 12,
+            "householdIncome": 3000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-wy-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInWyoming": true,
+            "age": 19,
+            "householdIncome": 1800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "133-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WY"
+    },
+    {
+      "id": "medicaid-wy-application-process",
+      "programId": "medicaid-wyoming",
+      "name": "Wyoming Medicaid Application Process",
+      "description": "Information about applying for Medicaid (EqualityCare) in Wyoming",
+      "ruleLogic": {
+        "var": "livesInWyoming"
+      },
+      "ruleType": "conditional",
+      "explanation": "Wyoming uses the Department of Health for Medicaid (EqualityCare) applications. You can apply: 1) **Online through the Wyoming Department of Health portal**, 2) **By phone** at 1-800-246-4221, 3) **In-person** at your local Department of Health office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Wyoming offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInWyoming"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply through Wyoming Department of Health (recommended)",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Wyoming Department of Health: 1-800-246-4221",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Health office",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for Medicaid",
+          "url": "https://health.wyo.gov/healthcarefin/equalitycare/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-wy-resident",
+          "description": "Lives in Wyoming - can apply",
+          "input": {
+            "livesInWyoming": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "wyoming-resident"
+          ]
+        },
+        {
+          "id": "test-wy-non-resident",
+          "description": "Does not live in Wyoming",
+          "input": {
+            "livesInWyoming": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "equalitycare",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-WY"
+    }
+  ]
+}
