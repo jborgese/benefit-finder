@@ -376,7 +376,7 @@ async function processStateRules(
  * Get available states for rule loading
  */
 export function getAvailableStates(): string[] {
-  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new-hampshire', 'new-jersey', 'new-mexico', 'north-carolina', 'north-dakota', 'ohio', 'oklahoma', 'oregon', 'pennsylvania', 'rhode-island', 'south-carolina', 'south-dakota', 'tennessee', 'utah', 'vermont', 'virginia', 'washington'];
+  return ['georgia', 'california', 'texas', 'alabama', 'alaska', 'arizona', 'arkansas', 'colorado', 'connecticut', 'delaware', 'florida', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new-hampshire', 'new-jersey', 'new-mexico', 'north-carolina', 'north-dakota', 'ohio', 'oklahoma', 'oregon', 'pennsylvania', 'rhode-island', 'south-carolina', 'south-dakota', 'tennessee', 'utah', 'vermont', 'virginia', 'washington', 'west-virginia'];
 }
 
 /**
@@ -429,6 +429,7 @@ const STATE_CODE_MAP: Record<string, string> = {
   'VT': 'vermont',
   'VA': 'virginia',
   'WA': 'washington',
+  'WV': 'west-virginia',
   'georgia': 'georgia',
   'california': 'california',
   'texas': 'texas',
@@ -474,7 +475,8 @@ const STATE_CODE_MAP: Record<string, string> = {
   'utah': 'utah',
   'vermont': 'vermont',
   'virginia': 'virginia',
-  'washington': 'washington'
+  'washington': 'washington',
+  'west-virginia': 'west-virginia'
 };
 
 /**
