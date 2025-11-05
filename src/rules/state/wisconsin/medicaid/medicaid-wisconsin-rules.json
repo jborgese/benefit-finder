@@ -1,0 +1,597 @@
+{
+  "metadata": {
+    "id": "medicaid-wisconsin-rules-2024",
+    "name": "Wisconsin Medicaid Eligibility Rules (2024)",
+    "description": "Wisconsin-specific Medicaid (BadgerCare Plus) eligibility rules for 2024. Wisconsin has partial Medicaid expansion - adults up to 100% FPL are eligible (not 138% like full expansion states). Coverage is also available for pregnant women, children, and people with disabilities.",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "author": {
+      "name": "BenefitFinder Team",
+      "organization": "BenefitFinder"
+    },
+    "jurisdiction": "US-WI",
+    "programs": [
+      "medicaid-wisconsin"
+    ],
+    "tags": [
+      "medicaid",
+      "healthcare",
+      "wisconsin",
+      "2024",
+      "state-specific",
+      "partial-expansion"
+    ],
+    "createdAt": 1728777600000,
+    "updatedAt": 1728777600000
+  },
+  "rules": [
+    {
+      "id": "medicaid-wi-partial-expansion-adults",
+      "programId": "medicaid-wisconsin",
+      "name": "Wisconsin Medicaid for Adults (Partial Expansion)",
+      "description": "Adults 19-64 eligible through BadgerCare Plus up to 100% FPL (Wisconsin has partial expansion, not full ACA expansion)",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWisconsin"
+          },
+          {
+            ">=": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              65
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  1480
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Wisconsin has partial Medicaid expansion through BadgerCare Plus. Adults age 19-64 are eligible if household income is at or below 100% of the federal poverty level (NOT 138% like full expansion states). For 2024, this means: 1 person = $1,480/month, 2 people = $2,004/month, 3 people = $2,528/month, 4 people = $3,052/month. This creates a coverage gap for adults with income between 100-138% FPL. Coverage includes doctor visits, prescriptions, hospital care, mental health services, and preventive care. You can apply through ACCESS Wisconsin.",
+      "requiredFields": [
+        "livesInWisconsin",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-income-wi-adult",
+          "name": "Proof of Income",
+          "description": "Pay stubs from last 30 days, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records",
+            "Bank statements"
+          ],
+          "where": "Employer or your records"
+        },
+        {
+          "id": "proof-identity-wi-adult",
+          "name": "Proof of Identity",
+          "description": "Driver's license, state ID, or passport",
+          "required": true,
+          "alternatives": [
+            "Birth certificate",
+            "Social Security card"
+          ],
+          "where": "DMV or State Department"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ACCESS Wisconsin (recommended)",
+          "url": "https://access.wisconsin.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Note: If your income is between 100-138% FPL, you may need to apply for Marketplace coverage with subsidies",
+          "priority": "medium"
+        },
+        {
+          "step": "Find your local Department of Health Services office",
+          "url": "https://www.dhs.wisconsin.gov/forwardhealth/findoffices.htm",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Wisconsin BadgerCare Plus (Partial Expansion)",
+          "url": "https://www.dhs.wisconsin.gov/badgercareplus/index.htm",
+          "date": "2024-10-01",
+          "notes": "Wisconsin covers adults up to 100% FPL through BadgerCare Plus - partial expansion, not full ACA expansion"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 30,
+      "testCases": [
+        {
+          "id": "test-wi-partial-expansion-eligible",
+          "description": "Adult under 100% FPL",
+          "input": {
+            "livesInWisconsin": true,
+            "age": 35,
+            "householdIncome": 1400,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "partial-expansion",
+            "100-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wi-partial-expansion-coverage-gap",
+          "description": "Adult in coverage gap (100-138% FPL)",
+          "input": {
+            "livesInWisconsin": true,
+            "age": 35,
+            "householdIncome": 1700,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "coverage-gap",
+            "100-138-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wi-partial-expansion-high-income",
+          "description": "Adult over 138% FPL",
+          "input": {
+            "livesInWisconsin": true,
+            "age": 35,
+            "householdIncome": 2500,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "partial-expansion",
+        "adults",
+        "100-percent-fpl",
+        "coverage-gap"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WI"
+    },
+    {
+      "id": "medicaid-wi-pregnant-women",
+      "programId": "medicaid-wisconsin",
+      "name": "Wisconsin Medicaid for Pregnant Women",
+      "description": "Pregnant women with income up to 306% FPL qualify for Medicaid in Wisconsin",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWisconsin"
+          },
+          {
+            "var": "isPregnant"
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4529
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Wisconsin covers pregnant women through BadgerCare Plus if household income is at or below 306% of the federal poverty level. For 2024, this means: 1 person = $4,529/month, 2 people = $6,132/month, 3 people = $7,735/month. Coverage includes prenatal care, delivery, and postpartum care for 60 days after pregnancy ends. Apply immediately when you learn you're pregnant - coverage can start right away.",
+      "requiredFields": [
+        "livesInWisconsin",
+        "isPregnant",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-pregnancy-wi",
+          "name": "Proof of Pregnancy",
+          "description": "Doctor's note, positive pregnancy test, or prenatal clinic verification",
+          "required": true,
+          "alternatives": [
+            "Ultrasound results",
+            "Prenatal appointment records"
+          ],
+          "where": "Healthcare provider or clinic"
+        },
+        {
+          "id": "proof-income-pregnant-wi",
+          "name": "Proof of Income",
+          "description": "Pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Employer or your records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply immediately when you learn you're pregnant - coverage can start right away",
+          "priority": "high",
+          "estimatedTime": "Same day to 2 weeks"
+        },
+        {
+          "step": "Apply online through ACCESS Wisconsin",
+          "url": "https://access.wisconsin.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Wisconsin offers presumptive eligibility for pregnant women - temporary coverage while application is processed",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Wisconsin Medicaid for Pregnant Women",
+          "url": "https://www.dhs.wisconsin.gov/badgercareplus/pregnant-women.htm",
+          "date": "2024-10-01",
+          "notes": "Wisconsin covers pregnant women up to 306% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 25,
+      "testCases": [
+        {
+          "id": "test-wi-pregnant-eligible",
+          "description": "Pregnant woman under 306% FPL",
+          "input": {
+            "livesInWisconsin": true,
+            "isPregnant": true,
+            "householdIncome": 4200,
+            "householdSize": 1
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "pregnant",
+            "306-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wi-pregnant-high-income",
+          "description": "Pregnant woman over 306% FPL",
+          "input": {
+            "livesInWisconsin": true,
+            "isPregnant": true,
+            "householdIncome": 4800,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-wi-not-pregnant",
+          "description": "Not pregnant",
+          "input": {
+            "livesInWisconsin": true,
+            "isPregnant": false,
+            "householdIncome": 1400,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "not-pregnant"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "pregnancy",
+        "maternal-health",
+        "306-percent-fpl"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WI"
+    },
+    {
+      "id": "medicaid-wi-children",
+      "programId": "medicaid-wisconsin",
+      "name": "Wisconsin Medicaid for Children",
+      "description": "Children under 19 qualify for Medicaid with income up to 306% FPL",
+      "ruleLogic": {
+        "and": [
+          {
+            "var": "livesInWisconsin"
+          },
+          {
+            "<": [
+              {
+                "var": "age"
+              },
+              19
+            ]
+          },
+          {
+            "<=": [
+              {
+                "var": "householdIncome"
+              },
+              {
+                "*": [
+                  {
+                    "var": "householdSize"
+                  },
+                  4529
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ruleType": "eligibility",
+      "explanation": "Wisconsin covers children under age 19 through BadgerCare Plus if household income is at or below 306% of the federal poverty level. For 2024, this means: 1 child = $4,529/month, 2 children = $6,132/month, 3 children = $7,735/month. Children can enroll year-round, not just during open enrollment periods. Coverage includes doctor visits, prescriptions, dental care, vision care, and immunizations.",
+      "requiredFields": [
+        "livesInWisconsin",
+        "age",
+        "householdIncome",
+        "householdSize"
+      ],
+      "requiredDocuments": [
+        {
+          "id": "proof-child-age-wi",
+          "name": "Proof of Child's Age",
+          "description": "Birth certificate, hospital records, or passport",
+          "required": true,
+          "alternatives": [
+            "School records",
+            "Adoption papers",
+            "Religious records"
+          ],
+          "where": "Vital records office, hospital, or school"
+        },
+        {
+          "id": "proof-household-income-wi",
+          "name": "Proof of Household Income",
+          "description": "Parents' pay stubs, tax returns, or benefit statements",
+          "required": true,
+          "alternatives": [
+            "W-2",
+            "1099",
+            "Self-employment records"
+          ],
+          "where": "Parents' employers or tax records"
+        }
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ACCESS Wisconsin",
+          "url": "https://access.wisconsin.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Children can enroll year-round - no waiting for open enrollment",
+          "priority": "high"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "Wisconsin Medicaid for Children",
+          "url": "https://www.dhs.wisconsin.gov/badgercareplus/children.htm",
+          "date": "2024-10-01",
+          "notes": "Wisconsin children covered up to 306% FPL"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 28,
+      "testCases": [
+        {
+          "id": "test-wi-child-eligible",
+          "description": "Child under 19 with qualifying income",
+          "input": {
+            "livesInWisconsin": true,
+            "age": 10,
+            "householdIncome": 4000,
+            "householdSize": 3
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "child",
+            "306-percent-fpl"
+          ]
+        },
+        {
+          "id": "test-wi-child-high-income",
+          "description": "Child with family income above 306% FPL",
+          "input": {
+            "livesInWisconsin": true,
+            "age": 12,
+            "householdIncome": 7000,
+            "householdSize": 2
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "high-income"
+          ]
+        },
+        {
+          "id": "test-wi-child-age-limit",
+          "description": "Person age 19 or older not eligible under children's rules",
+          "input": {
+            "livesInWisconsin": true,
+            "age": 19,
+            "householdIncome": 4000,
+            "householdSize": 1
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "age-limit"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "children",
+        "306-percent-fpl",
+        "year-round-enrollment"
+      ],
+      "category": "categorical-eligibility",
+      "jurisdiction": "US-WI"
+    },
+    {
+      "id": "medicaid-wi-application-process",
+      "programId": "medicaid-wisconsin",
+      "name": "Wisconsin Medicaid Application Process",
+      "description": "Information about applying for Medicaid (BadgerCare Plus) in Wisconsin",
+      "ruleLogic": {
+        "var": "livesInWisconsin"
+      },
+      "ruleType": "conditional",
+      "explanation": "Wisconsin uses ACCESS Wisconsin for Medicaid (BadgerCare Plus) applications. You can apply: 1) **Online through ACCESS Wisconsin** (recommended - fastest, available 24/7), 2) **By phone** at 1-888-794-5780, 3) **In-person** at your local Department of Health Services office. Most applications are processed within 45 days. Expedited processing is available for urgent medical needs. Wisconsin offers language assistance for non-English speakers.",
+      "requiredFields": [
+        "livesInWisconsin"
+      ],
+      "nextSteps": [
+        {
+          "step": "Apply online through ACCESS Wisconsin (recommended)",
+          "url": "https://access.wisconsin.gov/",
+          "priority": "high",
+          "estimatedTime": "30-45 minutes"
+        },
+        {
+          "step": "Call Wisconsin Department of Health Services: 1-888-794-5780",
+          "priority": "high"
+        },
+        {
+          "step": "Find your local Department of Health Services office",
+          "url": "https://www.dhs.wisconsin.gov/forwardhealth/findoffices.htm",
+          "priority": "medium"
+        }
+      ],
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "citations": [
+        {
+          "title": "How to Apply for BadgerCare Plus",
+          "url": "https://www.dhs.wisconsin.gov/badgercareplus/index.htm",
+          "date": "2024-10-01"
+        },
+        {
+          "title": "ACCESS Wisconsin",
+          "url": "https://access.wisconsin.gov/",
+          "date": "2024-10-01"
+        }
+      ],
+      "active": true,
+      "draft": false,
+      "priority": 10,
+      "testCases": [
+        {
+          "id": "test-wi-resident",
+          "description": "Lives in Wisconsin - can apply",
+          "input": {
+            "livesInWisconsin": true
+          },
+          "expected": true,
+          "tags": [
+            "eligible",
+            "wisconsin-resident"
+          ]
+        },
+        {
+          "id": "test-wi-non-resident",
+          "description": "Does not live in Wisconsin",
+          "input": {
+            "livesInWisconsin": false
+          },
+          "expected": false,
+          "tags": [
+            "ineligible",
+            "non-resident"
+          ]
+        }
+      ],
+      "createdAt": 1728777600000,
+      "updatedAt": 1728777600000,
+      "tags": [
+        "application",
+        "access-wisconsin",
+        "process"
+      ],
+      "category": "administrative-requirement",
+      "jurisdiction": "US-WI"
+    }
+  ]
+}
