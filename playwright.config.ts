@@ -14,10 +14,11 @@ export default defineConfig({
   testMatch: '**/*.e2e.{ts,tsx}',
 
   // Timeouts
-  timeout: 30 * 1000, // 30 seconds per test
+  timeout: 20 * 1000, // 20 seconds per test
   expect: {
-    timeout: 5 * 1000, // 5 seconds for assertions
+    timeout: 5 * 1000, // 5 seconds for assertions (keep this shorter)
   },
+  globalTimeout: 60 * 60 * 1000, // 1 hour for entire test run (prevents infinite hangs)
 
   // Parallel execution
   fullyParallel: true,

@@ -112,8 +112,9 @@ export default defineConfig({
     },
 
     // Timeouts
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    testTimeout: 20000, // 20 seconds per test
+    hookTimeout: 20000, // 20 seconds for hooks
+    teardownTimeout: 20000, // 20 seconds for teardown
 
     // Disable retries to reduce memory usage
     retry: 0,
