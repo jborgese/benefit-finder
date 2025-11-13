@@ -7,6 +7,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { isTestEnvironment } from './persist-helper';
 import {
   deriveKeyFromPassphrase,
   isEncryptionEnabled,
@@ -163,16 +164,17 @@ const getInitialState = (): EncryptionState => ({
  * await enablePassphraseEncryption('my-secure-passphrase', 'my pet name');
  * ```
  */
-export const useEncryptionStore = create<EncryptionStore>()(
-  persist(
-    (set, get) => ({
-      ...getInitialState(),
+const encryptionStoreCreator = (
+  set: (partial: Partial<EncryptionStore> | ((state: EncryptionStore) => Partial<EncryptionStore>)) => void,
+  get: () => EncryptionStore
+) => ({
+  ...getInitialState(),
 
-      // ======================================================================
-      // ACTIONS
-      // ======================================================================
+  // ======================================================================
+  // ACTIONS
+  // ======================================================================
 
-      enablePassphraseEncryption: async (
+  enablePassphraseEncryption: async (
         passphrase: string,
         hint?: string
       ): Promise<boolean> => {
@@ -318,28 +320,34 @@ export const useEncryptionStore = create<EncryptionStore>()(
           _salt: null,
         });
       },
-    }),
-    {
-      name: 'bf-encryption-store',
-      // Only persist non-sensitive fields
-      // NOTE: Salt is also stored in localStorage separately for additional security layer
-      partialize: (state) => ({
-        mode: state.mode,
-        isEnabled: state.isEnabled,
-        passphraseHint: state.passphraseHint,
-        _salt: state._salt, // Store salt reference (also in localStorage)
-        // NEVER persist the encryption key or isKeyLoaded
-      }),
-      // After rehydration, ensure sensitive fields are cleared
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          // Clear sensitive fields that should never be persisted
-          state.isKeyLoaded = false;
-          state._encryptionKey = null;
-        }
-      },
-    }
-  )
+    });
+
+const isTest = isTestEnvironment();
+console.log('[PERSIST DEBUG] encryptionStore: isTestEnvironment() =', isTest, '-', isTest ? 'persist DISABLED' : 'persist ENABLED');
+
+export const useEncryptionStore = create<EncryptionStore>()(
+  isTest
+    ? encryptionStoreCreator
+    : persist(encryptionStoreCreator, {
+        name: 'bf-encryption-store',
+        // Only persist non-sensitive fields
+        // NOTE: Salt is also stored in localStorage separately for additional security layer
+        partialize: (state) => ({
+          mode: state.mode,
+          isEnabled: state.isEnabled,
+          passphraseHint: state.passphraseHint,
+          _salt: state._salt, // Store salt reference (also in localStorage)
+          // NEVER persist the encryption key or isKeyLoaded
+        }),
+        // After rehydration, ensure sensitive fields are cleared
+        onRehydrateStorage: () => (state) => {
+          if (state) {
+            // Clear sensitive fields that should never be persisted
+            state.isKeyLoaded = false;
+            state._encryptionKey = null;
+          }
+        },
+      })
 );
 
 // ============================================================================

@@ -7,6 +7,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { isTestEnvironment } from '../stores/persist-helper';
 import { nanoid } from 'nanoid';
 import { NavigationManager } from './navigation';
 import { CheckpointManager, TimeTracker, calculateProgress, isFlowComplete } from './progress';
@@ -233,10 +234,11 @@ const initialState: QuestionFlowState = {
 // STORE DEFINITION
 // ============================================================================
 
-export const useQuestionFlowStore = create<QuestionFlowStore>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+const questionFlowStoreCreator = (
+  set: (partial: Partial<QuestionFlowStore> | ((state: QuestionFlowStore) => Partial<QuestionFlowStore>)) => void,
+  get: () => QuestionFlowStore
+) => ({
+  ...initialState,
 
       // ====================================================================
       // ACTIONS
@@ -865,45 +867,51 @@ export const useQuestionFlowStore = create<QuestionFlowStore>()(
           ],
         });
       },
-    }),
-    {
-      name: 'bf-question-flow-store',
-      // Only persist essential data
-      partialize: (state) => ({
-        sessionId: state.sessionId,
-        flowId: state.flowId,
-        // Note: flow definition should be loaded fresh, not persisted
-        currentNodeId: state.currentNodeId,
-        history: state.history,
-        // Convert Maps to arrays for persistence
-        answers: Array.from(state.answers.entries()),
-        started: state.started,
-        completed: state.completed,
-        paused: state.paused,
-        startedAt: state.startedAt,
-        updatedAt: state.updatedAt,
-        completedAt: state.completedAt,
-      }),
-      // Hydration function to restore Maps
-      onRehydrateStorage: () => (state) => {
-        if (state && Array.isArray(state.answers)) {
-          // Convert persisted array back to Map
-          state.answers = new Map(state.answers as Array<[string, QuestionAnswer]>);
-        }
-        // Reset flow state on rehydration to ensure proper initialization
-        if (state) {
-          state.flow = null;
-          state.questionStates = new Map();
-          state.currentNodeId = null;
-          state.started = false;
-          state.completed = false;
-          state._navigationManager = null;
-          state._checkpointManager = null;
-          state._timeTracker = null;
-        }
-      },
-    }
-  )
+    });
+
+const isTest = isTestEnvironment();
+console.log('[PERSIST DEBUG] questionFlowStore: isTestEnvironment() =', isTest, '-', isTest ? 'persist DISABLED' : 'persist ENABLED');
+
+export const useQuestionFlowStore = create<QuestionFlowStore>()(
+  isTest
+    ? questionFlowStoreCreator
+    : persist(questionFlowStoreCreator, {
+        name: 'bf-question-flow-store',
+        // Only persist essential data
+        partialize: (state) => ({
+          sessionId: state.sessionId,
+          flowId: state.flowId,
+          // Note: flow definition should be loaded fresh, not persisted
+          currentNodeId: state.currentNodeId,
+          history: state.history,
+          // Convert Maps to arrays for persistence
+          answers: Array.from(state.answers.entries()),
+          started: state.started,
+          completed: state.completed,
+          paused: state.paused,
+          startedAt: state.startedAt,
+          updatedAt: state.updatedAt,
+          completedAt: state.completedAt,
+        }),
+        // Hydration function to restore Maps
+        onRehydrateStorage: () => (state) => {
+          if (state && Array.isArray(state.answers)) {
+            // Convert persisted array back to Map
+            state.answers = new Map(state.answers as Array<[string, QuestionAnswer]>);
+          }
+          // Reset flow state on rehydration to ensure proper initialization
+          if (state) {
+            state.flow = null;
+            state.questionStates = new Map();
+            state.currentNodeId = null;
+            state.started = false;
+            state.completed = false;
+            state._navigationManager = null;
+            state._checkpointManager = null;
+            state._timeTracker = null;
+          }
+        },
+      })
 );
 
 // ============================================================================

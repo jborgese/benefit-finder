@@ -4,7 +4,7 @@
  * Manages saving, loading, and managing eligibility results in RxDB
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import type { EligibilityResults } from './types';
 import type { EligibilityResultsDocument } from './resultsSchema';
@@ -37,8 +37,8 @@ interface UseResultsManagementReturn {
   isLoading: boolean;
   error: Error | null;
   saveResults: (options: SaveResultsOptions) => Promise<string>;
-  loadResult: (id: string) => Promise<EligibilityResults | null>;
-  loadAllResults: () => Promise<SavedResult[]>;
+  loadResult: (id: string, signal?: AbortSignal) => Promise<EligibilityResults | null>;
+  loadAllResults: (signal?: AbortSignal) => Promise<SavedResult[]>;
   deleteResult: (id: string) => Promise<void>;
   updateResult: (id: string, updates: { notes?: string; tags?: string[] }) => Promise<void>;
 }
@@ -137,88 +137,180 @@ export function useResultsManagement(): UseResultsManagementReturn {
 
   /**
    * Load a specific saved result
+   * Uses refs for setState functions to prevent memory leaks from Promise closures
    */
-  const loadResult = useCallback((id: string): Promise<EligibilityResults | null> => {
+  const loadResult = useCallback((id: string, signal?: AbortSignal): Promise<EligibilityResults | null> => {
     return new Promise((resolve, reject) => {
-      setIsLoading(true);
-      setError(null);
+      // Check if already aborted
+      if (signal?.aborted) {
+        reject(new Error('Operation cancelled'));
+        return;
+      }
 
-      try {
-        // TODO: Replace with actual RxDB query
-        // const doc = await db.eligibility_results.findOne(id).exec();
+      // Use refs instead of direct setState to avoid closure capturing
+      setLoadingRef.current(true);
+      setErrorRef.current(null);
+      loadingRef.current = true;
 
-        // Mock: Load from localStorage
-        const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
-        const doc = existing.find((d) => d.id === id);
-
-        if (!doc?.results) {
-          setIsLoading(false);
-          resolve(null);
+      // Use Promise.resolve().then() instead of queueMicrotask to allow proper cancellation
+      // This prevents closure memory leaks by ensuring the Promise can be properly rejected on abort
+      Promise.resolve().then(() => {
+        // Check if aborted before processing
+        if (signal?.aborted || !loadingRef.current) {
+          setLoadingRef.current(false);
+          loadingRef.current = false;
+          reject(new Error('Operation cancelled'));
           return;
         }
 
-        const results: EligibilityResults = {
-          qualified: doc.results.qualified,
-          likely: doc.results.likely,
-          maybe: doc.results.maybe,
-          notQualified: doc.results.notQualified,
-          totalPrograms: doc.results.totalPrograms,
-          evaluatedAt: new Date(doc.results.evaluatedAt),
-        };
+        try {
+          // TODO: Replace with actual RxDB query
+          // const doc = await db.eligibility_results.findOne(id).exec();
 
-        setIsLoading(false);
-        resolve(results);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to load results');
-        setError(error);
-        setIsLoading(false);
-        reject(error);
-      }
+          // Mock: Load from localStorage (synchronous operation)
+          const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
+          const doc = existing.find((d) => d.id === id);
+
+          if (!doc?.results) {
+            if (!signal?.aborted && loadingRef.current) {
+              setLoadingRef.current(false);
+              loadingRef.current = false;
+              resolve(null);
+            } else {
+              setLoadingRef.current(false);
+              loadingRef.current = false;
+              reject(new Error('Operation cancelled'));
+            }
+            return;
+          }
+
+          const results: EligibilityResults = {
+            qualified: doc.results.qualified,
+            likely: doc.results.likely,
+            maybe: doc.results.maybe,
+            notQualified: doc.results.notQualified,
+            totalPrograms: doc.results.totalPrograms,
+            evaluatedAt: new Date(doc.results.evaluatedAt),
+          };
+
+          // Check again before setting state
+          if (!signal?.aborted && loadingRef.current) {
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            resolve(results);
+          } else {
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            reject(new Error('Operation cancelled'));
+          }
+        } catch (err) {
+          if (!signal?.aborted && loadingRef.current) {
+            const error = err instanceof Error ? err : new Error('Failed to load results');
+            setErrorRef.current(error);
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            reject(error);
+          } else {
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            reject(new Error('Operation cancelled'));
+          }
+        }
+      });
     });
   }, []);
 
   /**
    * Load all saved results (summary only)
+   * Uses refs for setState functions to prevent memory leaks from Promise closures
    */
-  const loadAllResults = useCallback((): Promise<SavedResult[]> => {
+  const loadingRef = useRef(false);
+  const setLoadingRef = useRef(setIsLoading);
+  const setErrorRef = useRef(setError);
+  const setSavedResultsRef = useRef(setSavedResults);
+
+  // Keep refs updated with latest setState functions
+  // This ensures Promises always use the current setState, not stale closures
+  useEffect(() => {
+    setLoadingRef.current = setIsLoading;
+    setErrorRef.current = setError;
+    setSavedResultsRef.current = setSavedResults;
+  }, [setIsLoading, setError, setSavedResults]);
+
+  const loadAllResults = useCallback((signal?: AbortSignal): Promise<SavedResult[]> => {
     return new Promise((resolve, reject) => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // TODO: Replace with actual RxDB query
-        // const docs = await db.eligibility_results
-        //   .find()
-        //   .sort({ evaluatedAt: 'desc' })
-        //   .exec();
-
-        // Mock: Load from localStorage
-        const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
-
-        const results: SavedResult[] = existing
-          .filter((doc) => doc.id && doc.qualifiedCount !== undefined && doc.results && doc.evaluatedAt)
-          .map((doc) => ({
-            id: doc.id as string,
-            qualifiedCount: doc.qualifiedCount as number,
-            totalPrograms: doc.results?.totalPrograms ?? 0,
-            evaluatedAt: new Date(doc.evaluatedAt as number),
-            state: doc.state,
-            tags: doc.tags,
-            notes: doc.notes,
-          }));
-
-        // Sort by date descending
-        results.sort((a, b) => b.evaluatedAt.getTime() - a.evaluatedAt.getTime());
-
-        setSavedResults(results);
-        setIsLoading(false);
-        resolve(results);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to load results');
-        setError(error);
-        setIsLoading(false);
-        reject(error);
+      // Check if already aborted
+      if (signal?.aborted) {
+        reject(new Error('Operation cancelled'));
+        return;
       }
+
+      // Use refs instead of direct setState to avoid closure capturing
+      setLoadingRef.current(true);
+      setErrorRef.current(null);
+      loadingRef.current = true;
+
+      // Use Promise.resolve().then() instead of queueMicrotask to allow proper cancellation
+      // This prevents closure memory leaks by ensuring the Promise can be properly rejected on abort
+      Promise.resolve().then(() => {
+        // Check if aborted before processing
+        if (signal?.aborted || !loadingRef.current) {
+          setLoadingRef.current(false);
+          loadingRef.current = false;
+          reject(new Error('Operation cancelled'));
+          return;
+        }
+
+        try {
+          // TODO: Replace with actual RxDB query
+          // const docs = await db.eligibility_results
+          //   .find()
+          //   .sort({ evaluatedAt: 'desc' })
+          //   .exec();
+
+          // Mock: Load from localStorage (synchronous operation)
+          const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
+
+          const results: SavedResult[] = existing
+            .filter((doc) => doc.id && doc.qualifiedCount !== undefined && doc.results && doc.evaluatedAt)
+            .map((doc) => ({
+              id: doc.id as string,
+              qualifiedCount: doc.qualifiedCount as number,
+              totalPrograms: doc.results?.totalPrograms ?? 0,
+              evaluatedAt: new Date(doc.evaluatedAt as number),
+              state: doc.state,
+              tags: doc.tags,
+              notes: doc.notes,
+            }));
+
+          // Sort by date descending
+          results.sort((a, b) => b.evaluatedAt.getTime() - a.evaluatedAt.getTime());
+
+          // Check again before setting state
+          if (!signal?.aborted && loadingRef.current) {
+            setSavedResultsRef.current(results);
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            resolve(results);
+          } else {
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            reject(new Error('Operation cancelled'));
+          }
+        } catch (err) {
+          if (!signal?.aborted && loadingRef.current) {
+            const error = err instanceof Error ? err : new Error('Failed to load results');
+            setErrorRef.current(error);
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            reject(error);
+          } else {
+            setLoadingRef.current(false);
+            loadingRef.current = false;
+            reject(new Error('Operation cancelled'));
+          }
+        }
+      });
     });
   }, []);
 
@@ -312,10 +404,41 @@ export function useResultsManagement(): UseResultsManagementReturn {
 
   /**
    * Load saved results on mount
+   * Only run once on initial mount to prevent memory leaks from repeated calls
+   * Uses AbortController to cancel pending operations on unmount
    */
+  const hasLoadedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
-    loadAllResults().catch(console.error);
-  }, [loadAllResults]);
+    // Only load once per component instance to prevent memory leaks
+    if (hasLoadedRef.current) return;
+
+    hasLoadedRef.current = true;
+
+    // Create AbortController for this operation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    loadAllResults(abortController.signal)
+      .then(() => {
+        // Promise resolved successfully
+      })
+      .catch((error) => {
+        // Only log error if it's not a cancellation
+        if (error.message !== 'Operation cancelled') {
+          console.error(error);
+        }
+      });
+
+    return () => {
+      // Cancel any pending operations on unmount
+      abortController.abort();
+      abortControllerRef.current = null;
+      hasLoadedRef.current = false; // Reset for potential remount
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run on mount, not when loadAllResults changes
 
   return {
     // State

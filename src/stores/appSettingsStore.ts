@@ -7,6 +7,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { isTestEnvironment } from './persist-helper';
 
 export interface AppSettingsState {
   // Appearance
@@ -72,35 +73,39 @@ const defaultSettings = {
   showPrivacyNotice: true,
 };
 
-export const useAppSettingsStore = create<AppSettingsState>()(
-  persist(
-    (set) => ({
-      ...defaultSettings,
+const storeCreator = (set: (partial: Partial<AppSettingsState> | ((state: AppSettingsState) => Partial<AppSettingsState>)) => void) => ({
+  ...defaultSettings,
 
-      // Actions
-      setTheme: (theme) => set({ theme }),
-      setFontSize: (fontSize) => set({ fontSize }),
-      setHighContrast: (highContrast) => set({ highContrast }),
-      setLanguage: (language) => set({ language }),
-      setAutoSave: (autoSaveEnabled) => set({ autoSaveEnabled }),
-      setEncryption: (encryptionEnabled) => set({ encryptionEnabled }),
-      setSessionTimeout: (sessionTimeout) => set({ sessionTimeout }),
-      setReduceMotion: (reduceMotion) => set({ reduceMotion }),
-      setScreenReaderMode: (screenReaderMode) => set({ screenReaderMode }),
-      setKeyboardNavigationHints: (keyboardNavigationHints) =>
-        set({ keyboardNavigationHints }),
-      setShowTutorial: (showTutorial) => set({ showTutorial }),
-      setShowPrivacyNotice: (showPrivacyNotice) => set({ showPrivacyNotice }),
-      resetSettings: () => set(defaultSettings),
-      clearAllCaches: async () => {
-        const { clearAllCaches } = await import('@/utils/cacheBusting');
-        await clearAllCaches();
-      },
-    }),
-    {
-      name: 'benefit-finder-settings',
-      version: 1,
-    }
-  )
+  // Actions
+  setTheme: (theme: AppSettingsState['theme']) => set({ theme }),
+  setFontSize: (fontSize: AppSettingsState['fontSize']) => set({ fontSize }),
+  setHighContrast: (highContrast: boolean) => set({ highContrast }),
+  setLanguage: (language: AppSettingsState['language']) => set({ language }),
+  setAutoSave: (autoSaveEnabled: boolean) => set({ autoSaveEnabled }),
+  setEncryption: (encryptionEnabled: boolean) => set({ encryptionEnabled }),
+  setSessionTimeout: (sessionTimeout: number) => set({ sessionTimeout }),
+  setReduceMotion: (reduceMotion: boolean) => set({ reduceMotion }),
+  setScreenReaderMode: (screenReaderMode: boolean) => set({ screenReaderMode }),
+  setKeyboardNavigationHints: (keyboardNavigationHints: boolean) =>
+    set({ keyboardNavigationHints }),
+  setShowTutorial: (showTutorial: boolean) => set({ showTutorial }),
+  setShowPrivacyNotice: (showPrivacyNotice: boolean) => set({ showPrivacyNotice }),
+  resetSettings: () => set(defaultSettings),
+  clearAllCaches: async () => {
+    const { clearAllCaches } = await import('@/utils/cacheBusting');
+    await clearAllCaches();
+  },
+});
+
+const isTest = isTestEnvironment();
+console.log('[PERSIST DEBUG] appSettingsStore: isTestEnvironment() =', isTest, '-', isTest ? 'persist DISABLED' : 'persist ENABLED');
+
+export const useAppSettingsStore = create<AppSettingsState>()(
+  isTest
+    ? storeCreator
+    : persist(storeCreator, {
+        name: 'benefit-finder-settings',
+        version: 1,
+      })
 );
 

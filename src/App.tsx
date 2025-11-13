@@ -275,26 +275,59 @@ function App(): React.ReactElement {
   }, [saveResults]);
 
   // Check for existing results on app startup
+  // Use refs to store functions and prevent dependency-triggered re-runs
+  // Use AbortController to cancel pending operations on unmount
+  const loadAllResultsRef = React.useRef(loadAllResults);
+  const loadResultRef = React.useRef(loadResult);
+  const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  // Keep refs updated with latest functions
+  React.useEffect(() => {
+    loadAllResultsRef.current = loadAllResults;
+    loadResultRef.current = loadResult;
+  }, [loadAllResults, loadResult]);
+
   useEffect(() => {
+    // Create AbortController for this operation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const checkExistingResults = async (): Promise<void> => {
       try {
-        const results = await loadAllResults();
+        const results = await loadAllResultsRef.current(abortController.signal);
+        // Check if aborted before proceeding
+        if (abortController.signal.aborted) return;
+
         if (results.length > 0) {
           setHasResults(true);
           // Load the most recent results for display
           const mostRecent = results[0]; // loadAllResults should return sorted by date
-          const actualResults = await loadResult(mostRecent.id);
+          const actualResults = await loadResultRef.current(mostRecent.id, abortController.signal);
+          // Check if aborted before proceeding
+          if (abortController.signal.aborted) return;
+
           if (actualResults) {
             setCurrentResults(actualResults);
           }
         }
       } catch (error) {
+        // Ignore cancellation errors
+        if (error instanceof Error && error.message === 'Operation cancelled') {
+          return;
+        }
+        // Only log other errors
         console.error('Failed to check for existing results:', error);
       }
     };
 
     void checkExistingResults();
-  }, [loadAllResults, loadResult]);
+
+    return () => {
+      // Cancel any pending operations on unmount
+      abortController.abort();
+      abortControllerRef.current = null;
+    };
+  }, []); // Empty deps - use refs to access latest functions
 
   // Lightweight routing: if URL path includes "results", show results view immediately
   useEffect(() => {
@@ -398,13 +431,12 @@ function App(): React.ReactElement {
   const handleCompleteQuestionnaire = async (answers: Record<string, unknown>): Promise<void> => {
     console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Function called with answers:', answers);
 
-    try {
-      // Immediately transition to results UI; perform work in background
-      console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Setting app state to results');
-      setAppState('results');
-      setIsProcessingResults(true);
-      setAnnouncementMessage('Assessment completed. Preparing results...');
+    // Set processing state but DON'T switch to results state yet
+    // This prevents the Results component from mounting prematurely and creating subscriptions
+    setIsProcessingResults(true);
+    setAnnouncementMessage('Assessment completed. Preparing results...');
 
+    try {
       // Initialize database and load sample data if needed (background)
       await initializeApp();
     } catch (dbError) {
@@ -455,10 +487,15 @@ function App(): React.ReactElement {
         batchResult = await evaluateAllPrograms(profile.id);
         console.log('🔍 [DEBUG] handleCompleteQuestionnaire: Program evaluation completed');
       } catch (dbError) {
-        console.error('Database operations failed:', dbError);
+        console.error('[TEST DEBUG] Database operations failed:', dbError);
+        console.log('[TEST DEBUG] handleCompleteQuestionnaire: Setting error state');
+        console.log('[TEST DEBUG] handleCompleteQuestionnaire: Setting error message');
         setErrorMessage('Unable to calculate eligibility results at this time. Please try refreshing the page or contact support if the issue persists.');
+        console.log('[TEST DEBUG] handleCompleteQuestionnaire: Setting isProcessingResults to false');
         setIsProcessingResults(false);
+        console.log('[TEST DEBUG] handleCompleteQuestionnaire: Setting appState to error');
         setAppState('error');
+        console.log('[TEST DEBUG] handleCompleteQuestionnaire: Error state set, returning early');
         return;
       }
 
@@ -641,6 +678,8 @@ function App(): React.ReactElement {
       setHasResults(true);
       setIsProcessingResults(false);
       setAnnouncementMessage('Results are ready.');
+      // Only switch to results state AFTER we have results - prevents premature component mounting
+      setAppState('results');
     } catch (error) {
       console.error('Error evaluating eligibility:', error);
       setIsProcessingResults(false);
