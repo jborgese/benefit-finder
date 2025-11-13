@@ -51,9 +51,7 @@ describe('App Component - Accessibility', () => {
     }
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should have proper ARIA labels on navigation buttons', () => {
+  it('should have proper ARIA labels on navigation buttons', () => {
     render(<App />);
 
     const homeButton = screen.queryByRole('button', { name: 'navigation.home' });
@@ -61,9 +59,7 @@ describe('App Component - Accessibility', () => {
     expect(homeButton).not.toBeInTheDocument();
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should have live region for announcements', () => {
+  it('should have live region for announcements', () => {
     render(<App />);
 
     // The LiveRegion component should be rendered
@@ -72,9 +68,7 @@ describe('App Component - Accessibility', () => {
     expect(document.body).toBeInTheDocument();
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should have proper ARIA labels on action buttons', () => {
+  it('should have proper ARIA labels on action buttons', () => {
     render(<App />);
 
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
@@ -84,9 +78,7 @@ describe('App Component - Accessibility', () => {
     expect(startButton).toHaveAttribute('aria-label', 'Start Assessment');
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should have proper ARIA labels on external links', () => {
+  it('should have proper ARIA labels on external links', () => {
     render(<App />);
 
     const frootsnoopsLink = screen.getByRole('link', { name: 'Visit frootsnoops.com - a frootsnoops site' });

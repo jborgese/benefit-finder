@@ -1,6 +1,6 @@
 /**
  * Shared test setup for App component tests
- * 
+ *
  * Contains all mocks and utilities used across App test files
  */
 
@@ -404,8 +404,10 @@ export const mockLocation = {
   hostname: 'localhost',
 };
 
+// Make window.location configurable so tests can override it
 Object.defineProperty(window, 'location', {
   value: mockLocation,
   writable: true,
+  configurable: true, // Allow tests to redefine it
 });
 

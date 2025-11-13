@@ -52,9 +52,7 @@ describe('App Component - State Management and Navigation', () => {
     }
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should handle go home navigation', async () => {
+  it('should handle go home navigation', async () => {
     const user = userEvent.setup();
     render(<App />);
 
@@ -76,9 +74,7 @@ describe('App Component - State Management and Navigation', () => {
     }
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should handle view results navigation', async () => {
+  it('should handle view results navigation', async () => {
     const user = userEvent.setup();
 
     const mockLoadResult = vi.fn().mockResolvedValue({
@@ -115,9 +111,7 @@ describe('App Component - State Management and Navigation', () => {
     }
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should handle back to home navigation from results', async () => {
+  it('should handle back to home navigation from results', async () => {
     const user = userEvent.setup();
 
     const mockLoadResult = vi.fn().mockResolvedValue({
@@ -156,9 +150,7 @@ describe('App Component - State Management and Navigation', () => {
     }
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should handle error state navigation', async () => {
+  it('should handle error state navigation', async () => {
     const user = userEvent.setup();
     const { initializeApp } = await import('../utils/initializeApp');
 
@@ -190,9 +182,7 @@ describe('App Component - State Management and Navigation', () => {
     });
   });
 
-  // SKIPPED: All tests that render <App /> are being skipped due to accumulating memory leaks.
-  // Skip until root cause is resolved.
-  it.skip('should handle refresh page button in error state', async () => {
+  it('should handle refresh page button in error state', async () => {
     const user = userEvent.setup();
     const { initializeApp } = await import('../utils/initializeApp');
 

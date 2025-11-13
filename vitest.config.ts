@@ -19,7 +19,10 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
 
     // Include/Exclude patterns
-    include: ['src/__tests__/App.test.tsx'], // Only run App tests for now
+    include: [
+      'src/__tests__/**/*.test.{ts,tsx}',
+      'src/**/__tests__/**/*.test.{ts,tsx}',
+    ],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

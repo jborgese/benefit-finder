@@ -132,10 +132,7 @@ describe('App Component - Helper Functions', () => {
     });
   });
 
-  // SKIPPED: This test causes a persistent memory leak (30+ seconds hang).
-  // Even though it doesn't render the App component, it still triggers cleanup issues
-  // that cause the test to hang in afterEach. Skip until root cause is resolved.
-  it.skip('should handle all employment status types', () => {
+  it('should handle all employment status types', () => {
     const employmentStatuses = ['employed', 'unemployed', 'self_employed', 'retired', 'disabled', 'student'];
 
     employmentStatuses.forEach(employmentStatus => {
