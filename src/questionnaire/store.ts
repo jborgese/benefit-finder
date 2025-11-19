@@ -237,7 +237,7 @@ const initialState: QuestionFlowState = {
 const questionFlowStoreCreator = (
   set: (partial: Partial<QuestionFlowStore> | ((state: QuestionFlowStore) => Partial<QuestionFlowStore>)) => void,
   get: () => QuestionFlowStore
-) => ({
+): QuestionFlowStore => ({
   ...initialState,
 
       // ====================================================================

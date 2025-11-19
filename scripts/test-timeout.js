@@ -97,11 +97,11 @@ const killProcess = () => {
         try {
           // Kill the entire process group
           process.kill(-childPid, 'SIGTERM');
-        } catch (error) {
+        } catch {
           // Fallback to regular kill
           try {
             process.kill(childPid, 'SIGTERM');
-          } catch (err) {
+          } catch {
             // Process might already be dead
           }
         }
@@ -110,10 +110,10 @@ const killProcess = () => {
         setTimeout(() => {
           try {
             process.kill(-childPid, 'SIGKILL');
-          } catch (error) {
+          } catch {
             try {
               process.kill(childPid, 'SIGKILL');
-            } catch (err) {
+            } catch {
               // Process might already be dead
             }
           }
@@ -213,7 +213,7 @@ const killOrphanedTestProcesses = async () => {
 
       // Timeout for orphaned process cleanup
       setTimeout(() => resolve(), 3000);
-    } catch (error) {
+    } catch {
       // Ignore errors - cleanup is best-effort
       resolve();
     }
@@ -335,15 +335,15 @@ const cleanup = () => {
         // On Unix-like systems, kill process group
         try {
           process.kill(-child.pid, 'SIGTERM');
-        } catch (error) {
+        } catch {
           try {
             process.kill(child.pid, 'SIGTERM');
-          } catch (err) {
+          } catch {
             // Process might already be dead
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore errors during cleanup
     }
   }

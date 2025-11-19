@@ -50,7 +50,7 @@ async function killTestProcesses() {
           testPids.push(pid);
           console.log(`  Found test process: PID ${pid}`);
         }
-      } catch (error) {
+      } catch {
         // Process might have exited, ignore
       }
     }
@@ -66,7 +66,7 @@ async function killTestProcesses() {
       try {
         await execAsync(`taskkill /F /T /PID ${pid}`);
         console.log(`  ✓ Killed process tree for PID ${pid}`);
-      } catch (error) {
+      } catch {
         console.log(`  ⚠ Could not kill PID ${pid} (might already be dead)`);
       }
     }

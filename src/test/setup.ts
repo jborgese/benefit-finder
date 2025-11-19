@@ -20,45 +20,113 @@ if (typeof process !== 'undefined') {
 
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { afterEach, beforeAll, vi } from 'vitest';
 
 // CRITICAL: Mock database module at global setup level to prevent ANY RxDB initialization
 // This must happen before any test files import modules that use the database
 // Mock the database module globally to prevent RxDB instances from being created
 // This is a critical fix for memory leaks - RxDB creates IndexedDB connections
 // and storage event listeners that accumulate across tests
-vi.mock('../db/database', async () => {
+vi.mock('../db/database', () => {
+  // Store programs in memory for the mock
+  const mockPrograms: Array<{ id: string; [key: string]: unknown }> = [];
+
+  // Safe property access helper to prevent object injection
+  const safeGet = (obj: Record<string, unknown>, key: string): unknown => {
+    if (typeof key !== 'string' || key.length === 0) {
+      return undefined;
+    }
+    // Use hasOwnProperty check to prevent prototype pollution
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // eslint-disable-next-line security/detect-object-injection
+      return obj[key];
+    }
+    return undefined;
+  };
+
   const mockDb = {
     name: 'benefitfinder',
     user_profiles: {
-      find: () => ({ exec: async () => [] }),
-      findOne: () => ({ exec: async () => null }),
-      insert: async () => ({}),
+      find: () => ({ exec: () => Promise.resolve([]) }),
+      findOne: () => ({ exec: () => Promise.resolve(null) }),
+      insert: () => Promise.resolve({}),
     },
     benefit_programs: {
-      find: () => ({ exec: async () => [] }),
-      findOne: () => ({ exec: async () => null }),
+      find: () => ({
+        exec: () =>
+          Promise.resolve(
+            mockPrograms.map(p => ({
+              ...p,
+              toJSON: () => p,
+              get: (key: string) => safeGet(p, key),
+            })),
+          ),
+      }),
+      findOne: (query?: { selector?: { id?: string } }) => ({
+        exec: () => {
+          if (query?.selector?.id) {
+            const program = mockPrograms.find(p => p.id === query.selector.id);
+            return Promise.resolve(
+              program
+                ? { ...program, toJSON: () => program, get: (key: string) => safeGet(program, key) }
+                : null,
+            );
+          }
+          return Promise.resolve(null);
+        },
+      }),
+      insert: (data: { id: string; [key: string]: unknown }) => {
+        // Check if program already exists
+        const existing = mockPrograms.find(p => p.id === data.id);
+        if (existing) {
+          // Update existing program
+          Object.assign(existing, data);
+          return Promise.resolve({
+            ...existing,
+            toJSON: () => existing,
+            get: (key: string) => safeGet(existing, key),
+          });
+        }
+        // Add new program
+        mockPrograms.push(data);
+        return Promise.resolve({
+          ...data,
+          toJSON: () => data,
+          get: (key: string) => safeGet(data, key),
+        });
+      },
     },
     eligibility_rules: {
-      find: () => ({ exec: async () => [] }),
+      find: () => ({ exec: () => Promise.resolve([]) }),
     },
     eligibility_results: {
-      find: () => ({ exec: async () => [] }),
-      insert: async () => ({}),
+      find: () => ({ exec: () => Promise.resolve([]) }),
+      insert: () => Promise.resolve({}),
     },
     app_settings: {
-      find: () => ({ exec: async () => [] }),
+      find: () => ({ exec: () => Promise.resolve([]) }),
     },
   };
 
   return {
-    initializeDatabase: async () => mockDb,
+    initializeDatabase: () => {
+      // Clear programs on each initialization to simulate fresh database
+      mockPrograms.length = 0;
+      return Promise.resolve(mockDb);
+    },
     getDatabase: () => mockDb,
     isDatabaseInitialized: () => true,
-    clearDatabase: async () => undefined,
-    destroyDatabase: async () => undefined,
-    exportDatabase: async () => ({ version: '1.0.0', timestamp: Date.now(), collections: {} }),
-    importDatabase: async () => undefined,
+    clearDatabase: () => {
+      mockPrograms.length = 0;
+      return Promise.resolve();
+    },
+    destroyDatabase: () => {
+      mockPrograms.length = 0;
+      return Promise.resolve();
+    },
+    exportDatabase: () =>
+      Promise.resolve({ version: '1.0.0', timestamp: Date.now(), collections: {} }),
+    importDatabase: () => Promise.resolve(undefined),
   };
 });
 import 'fake-indexeddb/auto';
@@ -83,54 +151,50 @@ let storeModules: {
 } = {};
 
 // Lazy load stores on first afterEach call
-function ensureStoresLoaded(): void {
+// Currently unused but kept for potential future use
+async function _ensureStoresLoaded(): Promise<void> {
   if (questionFlowStore === null) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const mod = require('../questionnaire/store');
+      const mod = await import('../questionnaire/store');
       storeModules.questionFlow = mod;
       questionFlowStore = mod.useQuestionFlowStore.getState();
-    } catch (e) {
+    } catch {
       // Store not available
     }
   }
   if (questionnaireStore === null) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const mod = require('../stores/questionnaireStore');
+      const mod = await import('../stores/questionnaireStore');
       storeModules.questionnaire = mod;
       questionnaireStore = mod.useQuestionnaireStore.getState();
-    } catch (e) {
+    } catch {
       // Store not available
     }
   }
   if (encryptionStore === null) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const mod = require('../stores/encryptionStore');
+      const mod = await import('../stores/encryptionStore');
       storeModules.encryption = mod;
       encryptionStore = mod.useEncryptionStore.getState();
-    } catch (e) {
+    } catch {
       // Store not available
     }
   }
   if (uiStore === null) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const mod = require('../stores/uiStore');
+      const mod = await import('../stores/uiStore');
       storeModules.ui = mod;
       uiStore = mod.useUIStore.getState();
-    } catch (e) {
+    } catch {
       // Store not available
     }
   }
   if (appSettingsStore === null) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const mod = require('../stores/appSettingsStore');
+      const mod = await import('../stores/appSettingsStore');
       storeModules.appSettings = mod;
       appSettingsStore = mod.useAppSettingsStore.getState();
-    } catch (e) {
+    } catch {
       // Store not available
     }
   }
@@ -146,87 +210,135 @@ function resetStoreReferences(): void {
   storeModules = {};
 }
 
-// Cleanup after each test
-afterEach(() => {
-  console.log('[GLOBAL SETUP DEBUG] Global afterEach starting');
-  const globalAfterEachStartTime = Date.now();
-
-  // Clean up React components - this is synchronous and safe
-  cleanup();
-  console.log('[GLOBAL SETUP DEBUG] React cleanup completed');
-
-  // Aggressive cleanup to prevent memory leaks
-  if (typeof document !== 'undefined') {
-    // Remove any iframes (RxDB might create these in dev mode)
-    const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(iframe => {
-      try {
-        const container = document.getElementById('root') || document.body;
-        if (container && !container.contains(iframe)) {
-          iframe.remove();
-        }
-      } catch (e) {
-        // Ignore errors during cleanup
-      }
-    });
+// Helper functions to reduce cognitive complexity
+function cleanupIframes(): void {
+  if (typeof document === 'undefined') {
+    return;
   }
+  // Remove any iframes (RxDB might create these in dev mode)
+  const iframes = document.querySelectorAll('iframe');
+  iframes.forEach(iframe => {
+    try {
+      const container = document.getElementById('root') ?? document.body;
+      // container is always truthy (either root element or body)
+      if (!container.contains(iframe)) {
+        iframe.remove();
+      }
+    } catch {
+      // Ignore errors during cleanup
+    }
+  });
+}
 
-  // Clear localStorage to prevent accumulation across tests
-  // This is important because RxDB and other code may store data
+function cleanupStorage(): void {
   try {
     localStorage.clear();
-  } catch (e) {
+  } catch {
     // Ignore errors if localStorage is not available
   }
-
-  // Clear sessionStorage
   try {
     sessionStorage.clear();
-  } catch (e) {
+  } catch {
     // Ignore errors if sessionStorage is not available
   }
+}
 
-  // Force garbage collection hint (if available)
-  // This helps Node.js clean up memory between tests
+function forceGarbageCollection(): void {
   if (global.gc && typeof global.gc === 'function') {
     try {
       global.gc();
-    } catch (e) {
+    } catch {
       // Ignore if GC is not available
     }
   }
+}
 
-  // Reset all Zustand stores to prevent state accumulation across tests
-  // This is critical because Zustand stores are module-level singletons that persist
+// Helper function to reset a single store if it has a reset method
+function resetStoreIfAvailable<T extends { reset?: () => void }>(
+  store: T | null,
+  resetMethod: (store: T) => void,
+): void {
+  if (store) {
+    resetMethod(store);
+  }
+}
+
+// Helper function to reset UIStore with its specific methods
+function resetUIStore(): void {
+  if (!uiStore) {
+    return;
+  }
+  if (typeof uiStore.closeAllModals === 'function') {
+    uiStore.closeAllModals();
+  }
+  if (typeof uiStore.clearToasts === 'function') {
+    uiStore.clearToasts();
+  }
+  if (typeof uiStore.setLoading === 'function') {
+    uiStore.setLoading(false);
+  }
+}
+
+// Helper function to clear Zustand persist storage keys
+function clearZustandPersistKeys(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
   try {
-    ensureStoresLoaded();
+    // Clear all Zustand persist keys to prevent rehydration
+    const persistKeys = [
+      'bf-question-flow-store',
+      'bf-app-settings-store',
+      'bf-encryption-store',
+    ];
+    persistKeys.forEach(key => {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        // Ignore errors
+      }
+    });
+  } catch {
+    // Ignore errors - this is best-effort cleanup
+  }
+}
+
+function resetZustandStores(): void {
+  try {
+    // Reset stores if they're already loaded (they should be from previous tests)
+    // We don't await ensureStoresLoaded() here because cleanup should be synchronous
+    // and stores should already be loaded from the test itself
 
     // Reset QuestionFlowStore
-    if (questionFlowStore && typeof questionFlowStore.reset === 'function') {
-      questionFlowStore.reset();
-    }
+    resetStoreIfAvailable(questionFlowStore, store => {
+      if (typeof store.reset === 'function') {
+        store.reset();
+      }
+    });
 
     // Reset QuestionnaireStore
-    if (questionnaireStore && typeof questionnaireStore.resetQuestionnaire === 'function') {
-      questionnaireStore.resetQuestionnaire();
-    }
+    resetStoreIfAvailable(questionnaireStore, store => {
+      if (typeof store.resetQuestionnaire === 'function') {
+        store.resetQuestionnaire();
+      }
+    });
 
     // Reset EncryptionStore
-    if (encryptionStore && typeof encryptionStore.reset === 'function') {
-      encryptionStore.reset();
-    }
+    resetStoreIfAvailable(encryptionStore, store => {
+      if (typeof store.reset === 'function') {
+        store.reset();
+      }
+    });
 
     // Reset UIStore (has individual cleanup methods)
-    if (uiStore) {
-      if (typeof uiStore.closeAllModals === 'function') uiStore.closeAllModals();
-      if (typeof uiStore.clearToasts === 'function') uiStore.clearToasts();
-      if (typeof uiStore.setLoading === 'function') uiStore.setLoading(false);
-    }
+    resetUIStore();
 
     // Reset AppSettingsStore
-    if (appSettingsStore && typeof appSettingsStore.resetSettings === 'function') {
-      appSettingsStore.resetSettings();
-    }
+    resetStoreIfAvailable(appSettingsStore, store => {
+      if (typeof store.resetSettings === 'function') {
+        store.resetSettings();
+      }
+    });
 
     // Clear Zustand devtools state if present
     if (typeof window !== 'undefined' && (window as Record<string, unknown>).__ZUSTAND_STORES__) {
@@ -237,30 +349,14 @@ afterEach(() => {
     // This prevents persist middleware from creating subscriptions to localStorage changes
     // Zustand persist middleware subscribes to storage events, and clearing localStorage
     // before the middleware processes changes helps prevent memory leaks
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        // Clear all Zustand persist keys to prevent rehydration
-        const persistKeys = [
-          'bf-question-flow-store',
-          'bf-app-settings-store',
-          'bf-encryption-store',
-        ];
-        persistKeys.forEach(key => {
-          try {
-            window.localStorage.removeItem(key);
-          } catch (e) {
-            // Ignore errors
-          }
-        });
-      } catch (e) {
-        // Ignore errors - this is best-effort cleanup
-      }
-    }
-  } catch (e) {
+    clearZustandPersistKeys();
+  } catch (error) {
     // Ignore errors during cleanup - don't let store cleanup break tests
-    console.warn('[GLOBAL SETUP DEBUG] Error during Zustand store cleanup:', e);
+    console.warn('[GLOBAL SETUP DEBUG] Error during Zustand store cleanup:', error);
   }
+}
 
+function cleanupRxDB(): void {
   // Cleanup RxDB database instances to prevent memory leaks
   // This is critical because RxDB creates IndexedDB connections that accumulate
   // We do this asynchronously without awaiting to avoid blocking test cleanup
@@ -268,20 +364,19 @@ afterEach(() => {
     try {
       // Dynamically import to avoid issues with test file mocks
       const dbModule = await import('../db/database');
-      if (dbModule.isDatabaseInitialized && dbModule.isDatabaseInitialized()) {
+      if (dbModule.isDatabaseInitialized()) {
         // Destroy database - this closes IndexedDB connections
         await dbModule.destroyDatabase().catch(() => {
           // Ignore errors - database might already be destroyed or mocked
         });
       }
-    } catch (e) {
+    } catch {
       // Ignore errors - database module might not be available or might be mocked
     }
   })();
+}
 
-  // CRITICAL: Clear module cache to prevent state accumulation across test runs
-  // This ensures that Zustand stores and other module-level singletons are recreated
-  // fresh for each test, preventing memory leaks from cached module instances
+function cleanupModuleCache(): void {
   try {
     // Clear all registered mocks to prevent stale references
     vi.clearAllMocks();
@@ -301,7 +396,7 @@ afterEach(() => {
 
     // Clear Node.js require cache if available (for any CommonJS dependencies)
     // This is a best-effort attempt - most code uses ES modules
-    if (typeof require !== 'undefined' && require.cache) {
+    if (typeof require !== 'undefined') {
       const storePaths = [
         '../questionnaire/store',
         '../stores/questionnaireStore',
@@ -315,11 +410,15 @@ afterEach(() => {
       storePaths.forEach(path => {
         try {
           const resolvedPath = require.resolve(path);
-          if (require.cache[resolvedPath]) {
+          // require.cache is always truthy when require is defined
+          // eslint-disable-next-line security/detect-object-injection
+          const cacheEntry = require.cache[resolvedPath];
+          if (cacheEntry) {
+            // eslint-disable-next-line security/detect-object-injection
             delete require.cache[resolvedPath];
             clearedCount++;
           }
-        } catch (e) {
+        } catch {
           // Path might not resolve or module might not be in cache (expected for ES modules)
         }
       });
@@ -329,18 +428,35 @@ afterEach(() => {
     }
 
     // Force garbage collection hint if available
-    // This helps Node.js release memory between tests
-    if (global.gc && typeof global.gc === 'function') {
-      try {
-        global.gc();
-      } catch (e) {
-        // Ignore if GC is not available
-      }
-    }
-  } catch (e) {
+    forceGarbageCollection();
+  } catch (error) {
     // Ignore errors during module cleanup
-    console.warn('[GLOBAL SETUP DEBUG] Error during module cache cleanup:', e);
+    console.warn('[GLOBAL SETUP DEBUG] Error during module cache cleanup:', error);
   }
+}
+
+// Cleanup after each test
+afterEach(() => {
+  console.log('[GLOBAL SETUP DEBUG] Global afterEach starting');
+  const globalAfterEachStartTime = Date.now();
+
+  // Clean up React components - this is synchronous and safe
+  cleanup();
+  console.log('[GLOBAL SETUP DEBUG] React cleanup completed');
+
+  // Aggressive cleanup to prevent memory leaks
+  cleanupIframes();
+  cleanupStorage();
+  forceGarbageCollection();
+
+  // Reset all Zustand stores to prevent state accumulation across tests
+  resetZustandStores();
+
+  // Cleanup RxDB database instances
+  cleanupRxDB();
+
+  // Clear module cache to prevent state accumulation across test runs
+  cleanupModuleCache();
 
   const globalAfterEachElapsed = Date.now() - globalAfterEachStartTime;
   console.log(`[GLOBAL SETUP DEBUG] Global afterEach completed in ${globalAfterEachElapsed}ms`);
@@ -348,7 +464,7 @@ afterEach(() => {
 
 // Setup Web Crypto API BEFORE all tests
 // This needs to happen at module load time, not in beforeAll
-if (!('crypto' in global) || !(global as any).crypto?.subtle) {
+if (!('crypto' in global) || !(global as Record<string, unknown>).crypto?.subtle) {
   Object.defineProperty(global, 'crypto', {
     value: webcrypto as unknown as Crypto,
     writable: false,
@@ -357,7 +473,7 @@ if (!('crypto' in global) || !(global as any).crypto?.subtle) {
 }
 
 // Also set on window for jsdom
-if (typeof window !== 'undefined' && (!('crypto' in window) || !(window as any).crypto?.subtle)) {
+if (typeof window !== 'undefined' && (!('crypto' in window) || !(window as Record<string, unknown>).crypto?.subtle)) {
   Object.defineProperty(window, 'crypto', {
     value: webcrypto as unknown as Crypto,
     writable: false,

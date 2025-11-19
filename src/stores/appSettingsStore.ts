@@ -73,7 +73,7 @@ const defaultSettings = {
   showPrivacyNotice: true,
 };
 
-const storeCreator = (set: (partial: Partial<AppSettingsState> | ((state: AppSettingsState) => Partial<AppSettingsState>)) => void) => ({
+const storeCreator = (set: (partial: Partial<AppSettingsState> | ((state: AppSettingsState) => Partial<AppSettingsState>)) => void): AppSettingsState => ({
   ...defaultSettings,
 
   // Actions

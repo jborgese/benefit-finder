@@ -5,7 +5,7 @@
  * and import their rules into the database.
  */
 
-import { getDatabase } from '../db';
+import { getDatabase, isDatabaseInitialized } from '../db';
 import { importManager } from '../services/ImportManager';
 import type { RuleDefinition } from '../rules/core/schema';
 // Removed unused import: BenefitProgram
@@ -491,8 +491,14 @@ function extractApplicationUrl(programId: string): string {
 
 /**
  * Create benefit program from discovered rule file
+ * @returns true if a new program was created, false if it already existed
  */
-async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise<void> {
+async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise<boolean> {
+  // Ensure database is initialized
+  if (!isDatabaseInitialized()) {
+    throw new Error('Database is not initialized. Call initializeDatabase() first.');
+  }
+
   const db = getDatabase();
   const { programInfo } = discoveredFile;
 
@@ -506,6 +512,25 @@ async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise
   });
 
   try {
+    // Verify insert method exists
+    if (typeof db.benefit_programs.insert !== 'function') {
+      const collectionType = typeof db.benefit_programs;
+      const collectionMethods = Object.keys(db.benefit_programs);
+      throw new Error(`benefit_programs.insert is not a function. Collection type: ${collectionType}, Available methods: ${collectionMethods.join(', ')}`);
+    }
+
+    // Check if program already exists
+    const existingProgram = await db.benefit_programs.findOne({ selector: { id: programInfo.id } }).exec();
+
+    if (existingProgram) {
+      console.log('🔍 [PROGRAM CREATION DEBUG] Program already exists, skipping creation', {
+        programId: programInfo.id,
+        existingProgramId: existingProgram.id,
+        existingProgramName: existingProgram.name
+      });
+      return false;
+    }
+
     const programData = {
       id: programInfo.id,
       name: programInfo.name,
@@ -571,6 +596,8 @@ async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise
     if (import.meta.env.DEV) {
       console.warn(`[DEBUG] Rule Discovery: Created benefit program ${programInfo.id}`);
     }
+
+    return true;
   } catch (error) {
     console.log('🔍 [PROGRAM CREATION DEBUG] Error creating program', {
       programId: programInfo.id,
@@ -784,10 +811,10 @@ async function processDiscoveredFile(discoveredFile: DiscoveredRuleFile): Promis
   logSnapSsiProcessing(discoveredFile);
 
   try {
-    // Create benefit program
+    // Create benefit program (returns true if created, false if already exists)
     console.log(`🔍 [MAIN DISCOVERY DEBUG] Creating benefit program for ${discoveredFile.programInfo.id}`);
-    await createBenefitProgram(discoveredFile);
-    console.log(`✅ [MAIN DISCOVERY DEBUG] Created benefit program for ${discoveredFile.programInfo.id}`);
+    const wasCreated = await createBenefitProgram(discoveredFile);
+    console.log(`✅ [MAIN DISCOVERY DEBUG] Benefit program for ${discoveredFile.programInfo.id} - created: ${wasCreated}`);
 
     // Import rules
     console.log(`🔍 [MAIN DISCOVERY DEBUG] Importing rules for ${discoveredFile.programInfo.id}`);
@@ -796,7 +823,7 @@ async function processDiscoveredFile(discoveredFile: DiscoveredRuleFile): Promis
 
     logSnapSsiSuccess(discoveredFile);
 
-    return { created: true, imported: true };
+    return { created: wasCreated, imported: true };
   } catch (error) {
     const errorMsg = `Failed to process ${discoveredFile.path}: ${error}`;
     console.error(`[DEBUG] Rule Discovery: ${errorMsg}`);
@@ -887,8 +914,18 @@ export async function checkForNewRuleFiles(): Promise<boolean> {
     const existingPrograms = await db.benefit_programs.find().exec();
     const discoveredFiles = await discoverRuleFiles(FEDERAL_RULE_CONFIG);
 
-    // Check if we have more rule files than programs
-    return discoveredFiles.length > existingPrograms.length;
+    // Create a set of existing program IDs for efficient lookup
+    const existingProgramIds = new Set(existingPrograms.map(p => p.id));
+
+    // Check if any discovered file has a program ID that doesn't exist in the database
+    for (const discoveredFile of discoveredFiles) {
+      if (!existingProgramIds.has(discoveredFile.programInfo.id)) {
+        return true;
+      }
+    }
+
+    // All discovered files have corresponding programs
+    return false;
   } catch (error) {
     console.error('[DEBUG] Rule Discovery: Error checking for new rule files:', error);
     return false;

@@ -49,7 +49,7 @@ export const isTestEnvironment = (): boolean => {
   }
 
   // Check Vite/Vitest import.meta.env
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
+  if (import.meta.env) {
     debugInfo.importMetaEnv.VITEST = import.meta.env.VITEST;
     debugInfo.importMetaEnv.MODE = import.meta.env.MODE;
     if (import.meta.env.VITEST === true || import.meta.env.MODE === 'test') {

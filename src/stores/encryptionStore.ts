@@ -167,7 +167,7 @@ const getInitialState = (): EncryptionState => ({
 const encryptionStoreCreator = (
   set: (partial: Partial<EncryptionStore> | ((state: EncryptionStore) => Partial<EncryptionStore>)) => void,
   get: () => EncryptionStore
-) => ({
+): EncryptionStore => ({
   ...getInitialState(),
 
   // ======================================================================

@@ -301,10 +301,12 @@ function App(): React.ReactElement {
         if (results.length > 0) {
           setHasResults(true);
           // Load the most recent results for display
-          const mostRecent = results[0]; // loadAllResults should return sorted by date
-          const actualResults = await loadResultRef.current(mostRecent.id, abortController.signal);
-          // Check if aborted before proceeding
-          if (abortController.signal.aborted) return;
+          const [mostRecent] = results; // loadAllResults should return sorted by date
+          // Store signal reference before async operation (signal can be aborted during await)
+          const { signal } = abortController;
+          const actualResults = await loadResultRef.current(mostRecent.id, signal);
+          // Check if aborted before proceeding (signal may have been aborted during async operation)
+          if (signal.aborted) return;
 
           if (actualResults) {
             setCurrentResults(actualResults);

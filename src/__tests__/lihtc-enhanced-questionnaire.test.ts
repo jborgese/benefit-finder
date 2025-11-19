@@ -124,9 +124,9 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
     // Fetch AMI data
     const amiService = AMIDataService.getInstance();
     const amiData = await amiService.getAMIForHousehold(
-      enhancedProfile.state!,
-      enhancedProfile.county!,
-      enhancedProfile.householdSize!,
+      enhancedProfile.state,
+      enhancedProfile.county,
+      enhancedProfile.householdSize,
     );
     enhancedProfile.amiData = amiData;
 

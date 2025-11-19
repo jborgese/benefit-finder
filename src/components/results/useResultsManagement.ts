@@ -43,6 +43,10 @@ interface UseResultsManagementReturn {
   updateResult: (id: string, updates: { notes?: string; tags?: string[] }) => Promise<void>;
 }
 
+// Constants
+const OPERATION_CANCELLED_MESSAGE = 'Operation cancelled';
+const ELIGIBILITY_RESULTS_KEY = 'eligibility_results';
+
 /**
  * Hook for managing results persistence
  */
@@ -109,9 +113,9 @@ export function useResultsManagement(): UseResultsManagementReturn {
         // await db.eligibility_results.insert(document);
 
         // Mock: Save to localStorage for now
-        const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]');
+        const existing = JSON.parse(localStorage.getItem(ELIGIBILITY_RESULTS_KEY) ?? '[]');
         existing.push(document);
-        localStorage.setItem('eligibility_results', JSON.stringify(existing));
+        localStorage.setItem(ELIGIBILITY_RESULTS_KEY, JSON.stringify(existing));
 
         // Update local state
         setSavedResults(prev => [...prev, {
@@ -135,95 +139,7 @@ export function useResultsManagement(): UseResultsManagementReturn {
     });
   }, []);
 
-  /**
-   * Load a specific saved result
-   * Uses refs for setState functions to prevent memory leaks from Promise closures
-   */
-  const loadResult = useCallback((id: string, signal?: AbortSignal): Promise<EligibilityResults | null> => {
-    return new Promise((resolve, reject) => {
-      // Check if already aborted
-      if (signal?.aborted) {
-        reject(new Error('Operation cancelled'));
-        return;
-      }
-
-      // Use refs instead of direct setState to avoid closure capturing
-      setLoadingRef.current(true);
-      setErrorRef.current(null);
-      loadingRef.current = true;
-
-      // Use Promise.resolve().then() instead of queueMicrotask to allow proper cancellation
-      // This prevents closure memory leaks by ensuring the Promise can be properly rejected on abort
-      Promise.resolve().then(() => {
-        // Check if aborted before processing
-        if (signal?.aborted || !loadingRef.current) {
-          setLoadingRef.current(false);
-          loadingRef.current = false;
-          reject(new Error('Operation cancelled'));
-          return;
-        }
-
-        try {
-          // TODO: Replace with actual RxDB query
-          // const doc = await db.eligibility_results.findOne(id).exec();
-
-          // Mock: Load from localStorage (synchronous operation)
-          const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
-          const doc = existing.find((d) => d.id === id);
-
-          if (!doc?.results) {
-            if (!signal?.aborted && loadingRef.current) {
-              setLoadingRef.current(false);
-              loadingRef.current = false;
-              resolve(null);
-            } else {
-              setLoadingRef.current(false);
-              loadingRef.current = false;
-              reject(new Error('Operation cancelled'));
-            }
-            return;
-          }
-
-          const results: EligibilityResults = {
-            qualified: doc.results.qualified,
-            likely: doc.results.likely,
-            maybe: doc.results.maybe,
-            notQualified: doc.results.notQualified,
-            totalPrograms: doc.results.totalPrograms,
-            evaluatedAt: new Date(doc.results.evaluatedAt),
-          };
-
-          // Check again before setting state
-          if (!signal?.aborted && loadingRef.current) {
-            setLoadingRef.current(false);
-            loadingRef.current = false;
-            resolve(results);
-          } else {
-            setLoadingRef.current(false);
-            loadingRef.current = false;
-            reject(new Error('Operation cancelled'));
-          }
-        } catch (err) {
-          if (!signal?.aborted && loadingRef.current) {
-            const error = err instanceof Error ? err : new Error('Failed to load results');
-            setErrorRef.current(error);
-            setLoadingRef.current(false);
-            loadingRef.current = false;
-            reject(error);
-          } else {
-            setLoadingRef.current(false);
-            loadingRef.current = false;
-            reject(new Error('Operation cancelled'));
-          }
-        }
-      });
-    });
-  }, []);
-
-  /**
-   * Load all saved results (summary only)
-   * Uses refs for setState functions to prevent memory leaks from Promise closures
-   */
+  // Refs for setState functions to prevent memory leaks from Promise closures
   const loadingRef = useRef(false);
   const setLoadingRef = useRef(setIsLoading);
   const setErrorRef = useRef(setError);
@@ -237,11 +153,56 @@ export function useResultsManagement(): UseResultsManagementReturn {
     setSavedResultsRef.current = setSavedResults;
   }, [setIsLoading, setError, setSavedResults]);
 
-  const loadAllResults = useCallback((signal?: AbortSignal): Promise<SavedResult[]> => {
+  /**
+   * Helper function to reset loading state
+   */
+  const resetLoadingState = useCallback((): void => {
+    setLoadingRef.current(false);
+    loadingRef.current = false;
+  }, []);
+
+  /**
+   * Helper function to handle cancellation
+   */
+  const handleCancellation = useCallback((reject: (reason: Error) => void): void => {
+    resetLoadingState();
+    reject(new Error(OPERATION_CANCELLED_MESSAGE));
+  }, [resetLoadingState]);
+
+  /**
+   * Helper function to load document from localStorage
+   */
+  const loadDocumentFromStorage = useCallback((id: string): Partial<EligibilityResultsDocument> | undefined => {
+    const existing = JSON.parse(localStorage.getItem(ELIGIBILITY_RESULTS_KEY) ?? '[]') as Partial<EligibilityResultsDocument>[];
+    return existing.find((d) => d.id === id);
+  }, []);
+
+  /**
+   * Helper function to convert document to EligibilityResults
+   */
+  const convertDocumentToResults = useCallback((doc: Partial<EligibilityResultsDocument>): EligibilityResults => {
+    if (!doc.results) {
+      throw new Error('Document missing results');
+    }
+    return {
+      qualified: doc.results.qualified,
+      likely: doc.results.likely,
+      maybe: doc.results.maybe,
+      notQualified: doc.results.notQualified,
+      totalPrograms: doc.results.totalPrograms,
+      evaluatedAt: new Date(doc.results.evaluatedAt),
+    };
+  }, []);
+
+  /**
+   * Load a specific saved result
+   * Uses refs for setState functions to prevent memory leaks from Promise closures
+   */
+  const loadResult = useCallback((id: string, signal?: AbortSignal): Promise<EligibilityResults | null> => {
     return new Promise((resolve, reject) => {
       // Check if already aborted
       if (signal?.aborted) {
-        reject(new Error('Operation cancelled'));
+        reject(new Error(OPERATION_CANCELLED_MESSAGE));
         return;
       }
 
@@ -252,12 +213,103 @@ export function useResultsManagement(): UseResultsManagementReturn {
 
       // Use Promise.resolve().then() instead of queueMicrotask to allow proper cancellation
       // This prevents closure memory leaks by ensuring the Promise can be properly rejected on abort
-      Promise.resolve().then(() => {
+      void Promise.resolve().then(() => {
         // Check if aborted before processing
         if (signal?.aborted || !loadingRef.current) {
-          setLoadingRef.current(false);
-          loadingRef.current = false;
-          reject(new Error('Operation cancelled'));
+          handleCancellation(reject);
+          return;
+        }
+
+        try {
+          // TODO: Replace with actual RxDB query
+          // const doc = await db.eligibility_results.findOne(id).exec();
+
+          // Mock: Load from localStorage (synchronous operation)
+          const doc = loadDocumentFromStorage(id);
+
+          if (!doc?.results) {
+            if (!signal?.aborted) {
+              resetLoadingState();
+              resolve(null);
+            } else {
+              handleCancellation(reject);
+            }
+            return;
+          }
+
+          const results = convertDocumentToResults(doc);
+
+          // Check again before setting state
+          if (!signal?.aborted) {
+            resetLoadingState();
+            resolve(results);
+          } else {
+            handleCancellation(reject);
+          }
+        } catch (err) {
+          if (!signal?.aborted) {
+            const error = err instanceof Error ? err : new Error('Failed to load results');
+            setErrorRef.current(error);
+            resetLoadingState();
+            reject(error);
+          } else {
+            handleCancellation(reject);
+          }
+        }
+      }).catch((err) => {
+        // Handle any unexpected promise rejections
+        if (!signal?.aborted) {
+          const error = err instanceof Error ? err : new Error('Failed to load results');
+          setErrorRef.current(error);
+          resetLoadingState();
+          reject(error);
+        } else {
+          handleCancellation(reject);
+        }
+      });
+    });
+  }, [handleCancellation, resetLoadingState, loadDocumentFromStorage, convertDocumentToResults]);
+
+  /**
+   * Helper function to convert documents to SavedResult array
+   */
+  const convertDocumentsToSavedResults = useCallback((existing: Partial<EligibilityResultsDocument>[]): SavedResult[] => {
+    const results: SavedResult[] = existing
+      .filter((doc) => doc.id && doc.qualifiedCount !== undefined && doc.results && doc.evaluatedAt)
+      .map((doc) => ({
+        id: doc.id as string,
+        qualifiedCount: doc.qualifiedCount as number,
+        totalPrograms: doc.results?.totalPrograms ?? 0,
+        evaluatedAt: new Date(doc.evaluatedAt as number),
+        state: doc.state,
+        tags: doc.tags,
+        notes: doc.notes,
+      }));
+
+    // Sort by date descending
+    results.sort((a, b) => b.evaluatedAt.getTime() - a.evaluatedAt.getTime());
+    return results;
+  }, []);
+
+  const loadAllResults = useCallback((signal?: AbortSignal): Promise<SavedResult[]> => {
+    return new Promise((resolve, reject) => {
+      // Check if already aborted
+      if (signal?.aborted) {
+        reject(new Error(OPERATION_CANCELLED_MESSAGE));
+        return;
+      }
+
+      // Use refs instead of direct setState to avoid closure capturing
+      setLoadingRef.current(true);
+      setErrorRef.current(null);
+      loadingRef.current = true;
+
+      // Use Promise.resolve().then() instead of queueMicrotask to allow proper cancellation
+      // This prevents closure memory leaks by ensuring the Promise can be properly rejected on abort
+      void Promise.resolve().then(() => {
+        // Check if aborted before processing
+        if (signal?.aborted || !loadingRef.current) {
+          handleCancellation(reject);
           return;
         }
 
@@ -269,50 +321,40 @@ export function useResultsManagement(): UseResultsManagementReturn {
           //   .exec();
 
           // Mock: Load from localStorage (synchronous operation)
-          const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
-
-          const results: SavedResult[] = existing
-            .filter((doc) => doc.id && doc.qualifiedCount !== undefined && doc.results && doc.evaluatedAt)
-            .map((doc) => ({
-              id: doc.id as string,
-              qualifiedCount: doc.qualifiedCount as number,
-              totalPrograms: doc.results?.totalPrograms ?? 0,
-              evaluatedAt: new Date(doc.evaluatedAt as number),
-              state: doc.state,
-              tags: doc.tags,
-              notes: doc.notes,
-            }));
-
-          // Sort by date descending
-          results.sort((a, b) => b.evaluatedAt.getTime() - a.evaluatedAt.getTime());
+          const existing = JSON.parse(localStorage.getItem(ELIGIBILITY_RESULTS_KEY) ?? '[]') as Partial<EligibilityResultsDocument>[];
+          const results = convertDocumentsToSavedResults(existing);
 
           // Check again before setting state
-          if (!signal?.aborted && loadingRef.current) {
+          if (!signal?.aborted) {
             setSavedResultsRef.current(results);
-            setLoadingRef.current(false);
-            loadingRef.current = false;
+            resetLoadingState();
             resolve(results);
           } else {
-            setLoadingRef.current(false);
-            loadingRef.current = false;
-            reject(new Error('Operation cancelled'));
+            handleCancellation(reject);
           }
         } catch (err) {
-          if (!signal?.aborted && loadingRef.current) {
+          if (!signal?.aborted) {
             const error = err instanceof Error ? err : new Error('Failed to load results');
             setErrorRef.current(error);
-            setLoadingRef.current(false);
-            loadingRef.current = false;
+            resetLoadingState();
             reject(error);
           } else {
-            setLoadingRef.current(false);
-            loadingRef.current = false;
-            reject(new Error('Operation cancelled'));
+            handleCancellation(reject);
           }
+        }
+      }).catch((err) => {
+        // Handle any unexpected promise rejections
+        if (!signal?.aborted) {
+          const error = err instanceof Error ? err : new Error('Failed to load results');
+          setErrorRef.current(error);
+          resetLoadingState();
+          reject(error);
+        } else {
+          handleCancellation(reject);
         }
       });
     });
-  }, []);
+  }, [handleCancellation, resetLoadingState, convertDocumentsToSavedResults]);
 
   /**
    * Delete a saved result
@@ -327,9 +369,9 @@ export function useResultsManagement(): UseResultsManagementReturn {
         // await db.eligibility_results.findOne(id).remove();
 
         // Mock: Remove from localStorage
-        const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
+        const existing = JSON.parse(localStorage.getItem(ELIGIBILITY_RESULTS_KEY) ?? '[]') as Partial<EligibilityResultsDocument>[];
         const filtered = existing.filter((d) => d.id !== id);
-        localStorage.setItem('eligibility_results', JSON.stringify(filtered));
+        localStorage.setItem(ELIGIBILITY_RESULTS_KEY, JSON.stringify(filtered));
 
         // Update local state
         setSavedResults(prev => prev.filter(r => r.id !== id));
@@ -363,7 +405,7 @@ export function useResultsManagement(): UseResultsManagementReturn {
         // });
 
         // Mock: Update in localStorage
-        const existing = JSON.parse(localStorage.getItem('eligibility_results') ?? '[]') as Partial<EligibilityResultsDocument>[];
+        const existing = JSON.parse(localStorage.getItem(ELIGIBILITY_RESULTS_KEY) ?? '[]') as Partial<EligibilityResultsDocument>[];
         const index = existing.findIndex((d) => d.id === id);
 
         if (index !== -1) {
@@ -383,7 +425,7 @@ export function useResultsManagement(): UseResultsManagementReturn {
             ...existing.slice(index + 1),
           ];
 
-          localStorage.setItem('eligibility_results', JSON.stringify(updatedArray));
+          localStorage.setItem(ELIGIBILITY_RESULTS_KEY, JSON.stringify(updatedArray));
 
           // Update local state
           setSavedResults(prev => prev.map(r =>
@@ -426,7 +468,7 @@ export function useResultsManagement(): UseResultsManagementReturn {
       })
       .catch((error) => {
         // Only log error if it's not a cancellation
-        if (error.message !== 'Operation cancelled') {
+        if (error.message !== OPERATION_CANCELLED_MESSAGE) {
           console.error(error);
         }
       });
