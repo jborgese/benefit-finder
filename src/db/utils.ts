@@ -5,7 +5,7 @@
  */
 
 import { nanoid } from 'nanoid';
-import type { RxDocument } from 'rxdb';
+import type { RxDocument, RxCollection } from 'rxdb';
 import { getDatabase } from './database';
 import type {
   UserProfile,
@@ -24,15 +24,57 @@ export function generateId(): string {
 }
 
 /**
+ * Type-safe helper to check if an object has a callable method
+ *
+ * @param obj Object to check
+ * @param methodName Name of the method to check for
+ * @returns True if the method exists and is callable
+ */
+function hasCallableMethod(obj: unknown, methodName: string): boolean {
+  // Validate methodName is a safe property name (alphanumeric and underscore only)
+  if (!/^[a-zA-Z0-9_]+$/.test(methodName)) {
+    return false;
+  }
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    methodName in obj &&
+    // Safe: methodName is validated to contain only alphanumeric and underscore characters
+    // eslint-disable-next-line security/detect-object-injection
+    typeof (obj as Record<string, unknown>)[methodName] === 'function'
+  );
+}
+
+/**
+ * Type guard to check if a collection is ready (has required methods)
+ *
+ * @param collection Collection to check
+ * @returns True if collection has all required methods
+ */
+function isCollectionReady<T>(collection: RxCollection<T> | undefined): collection is RxCollection<T> {
+  if (!collection) {
+    return false;
+  }
+  return (
+    hasCallableMethod(collection, 'insert') &&
+    hasCallableMethod(collection, 'find') &&
+    hasCallableMethod(collection, 'findOne')
+  );
+}
+
+/**
  * Create a new user profile
  *
  * @param data Profile data
  * @returns Created profile document
  */
-export function createUserProfile(
+export async function createUserProfile(
   data: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<RxDocument<UserProfile>> {
   const db = getDatabase();
+
+  // Wait for collection to be fully initialized
+  const collection = await waitForCollectionReady(db.user_profiles, 'user_profiles');
 
   const profile: UserProfile = {
     id: generateId(),
@@ -55,7 +97,7 @@ export function createUserProfile(
     updatedAt: Date.now(),
   };
 
-  return db.user_profiles.insert(profile);
+  return collection.insert(profile);
 }
 
 /**
@@ -121,10 +163,13 @@ export async function deleteUserProfile(profileId: string): Promise<void> {
  * @param data Program data
  * @returns Created program document
  */
-export function createBenefitProgram(
+export async function createBenefitProgram(
   data: Omit<BenefitProgram, 'id' | 'lastUpdated' | 'createdAt'>
 ): Promise<RxDocument<BenefitProgram>> {
   const db = getDatabase();
+
+  // Wait for collection to be fully initialized
+  const collection = await waitForCollectionReady(db.benefit_programs, 'benefit_programs');
 
   const program: BenefitProgram = {
     id: generateId(),
@@ -133,19 +178,103 @@ export function createBenefitProgram(
     createdAt: Date.now(),
   };
 
-  return db.benefit_programs.insert(program);
+  return collection.insert(program);
 }
 
 /**
- * Create an eligibility rule
+ * Try to refresh collection reference from database
  *
- * @param data Rule data
- * @returns Created rule document
+ * @param collectionName Name of the collection to refresh
+ * @returns Refreshed collection if found and ready, null otherwise
  */
-export function createEligibilityRule(
+function tryRefreshCollection<T>(collectionName: string): RxCollection<T> | null {
+  // Validate collectionName is a safe property name (alphanumeric and underscore only)
+  if (!/^[a-zA-Z0-9_]+$/.test(collectionName)) {
+    return null;
+  }
+
+  const db = getDatabase();
+  const dbAny = db as unknown as Record<string, unknown>;
+  // Safe: collectionName is validated to contain only alphanumeric and underscore characters
+  // eslint-disable-next-line security/detect-object-injection
+  if (!dbAny[collectionName]) {
+    return null;
+  }
+
+  // Safe: collectionName is validated to contain only alphanumeric and underscore characters
+  // eslint-disable-next-line security/detect-object-injection
+  const refreshed = dbAny[collectionName] as RxCollection<T>;
+  return isCollectionReady(refreshed) ? refreshed : null;
+}
+
+/**
+ * Wait for collection to be fully initialized
+ */
+async function waitForCollectionReady<T>(
+  collection: RxCollection<T> | undefined,
+  collectionName: string,
+  maxRetries = 20,
+  delayMs = 100
+): Promise<RxCollection<T>> {
+  if (!collection) {
+    throw new Error(`${collectionName} collection is not initialized`);
+  }
+
+  // Check for multiple methods that should exist on a fully initialized collection
+  const requiredMethods = ['insert', 'find', 'findOne', 'count'];
+
+  for (let i = 0; i < maxRetries; i++) {
+    // Use type-safe helper to check if collection is ready
+    if (isCollectionReady(collection)) {
+      return collection;
+    }
+
+    // Wait a bit before retrying
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+
+    // Re-check the collection in case it was reassigned
+    // This handles cases where the collection reference might change
+    if (i === Math.floor(maxRetries / 2)) {
+      const refreshed = tryRefreshCollection<T>(collectionName);
+      if (refreshed) {
+        return refreshed;
+      }
+    }
+  }
+
+  // Final check with detailed error message
+  const collectionKeys = Object.keys(collection);
+  const availableMethods = collectionKeys.filter(key => hasCallableMethod(collection, key));
+  const missingMethods = requiredMethods.filter(method => !hasCallableMethod(collection, method));
+
+  throw new Error(
+    `${collectionName} collection does not have required methods after ${maxRetries} retries. ` +
+    `Missing methods: ${missingMethods.join(', ')}. ` +
+    `Available methods: ${availableMethods.join(', ')}. ` +
+    `Collection may not be fully initialized. Try increasing wait time or checking database initialization.`
+  );
+}
+
+export async function createEligibilityRule(
   data: Omit<EligibilityRule, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<RxDocument<EligibilityRule>> {
   const db = getDatabase();
+
+  // Try to get the collection - check multiple possible access patterns
+  let collection: RxCollection<EligibilityRule> | undefined = db.eligibility_rules;
+
+  // If direct access doesn't work, try accessing through collections property
+  const dbAny = db as unknown as Record<string, unknown>;
+  if (!isCollectionReady(collection) && dbAny.collections && typeof dbAny.collections === 'object') {
+    // Try accessing through collections property (RxDB internal structure)
+    const collections = dbAny.collections as Record<string, unknown>;
+    if (collections.eligibility_rules) {
+      collection = collections.eligibility_rules as RxCollection<EligibilityRule>;
+    }
+  }
+
+  // Wait for collection to be fully initialized
+  collection = await waitForCollectionReady(collection, 'eligibility_rules');
 
   const rule: EligibilityRule = {
     id: generateId(),
@@ -154,7 +283,83 @@ export function createEligibilityRule(
     updatedAt: Date.now(),
   };
 
-  return db.eligibility_rules.insert(rule);
+  // Try to insert - if it fails, provide better error message
+  try {
+    return await collection.insert(rule);
+  } catch (error) {
+    // If insert fails, check if collection is actually ready
+    if (!hasCallableMethod(collection, 'insert')) {
+      const availableMethods = Object.keys(collection).filter(
+        key => hasCallableMethod(collection, key)
+      );
+      throw new Error(
+        `Cannot insert into eligibility_rules collection. ` +
+        `Collection appears incomplete. Available methods: ${availableMethods.join(', ')}. ` +
+        `Original error: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+    throw error;
+  }
+}
+
+/**
+ * Insert an eligibility rule into the database
+ *
+ * @param rule Rule data to insert (must include id, createdAt, updatedAt)
+ * @returns Created rule document
+ */
+export async function insertEligibilityRule(
+  rule: EligibilityRule
+): Promise<RxDocument<EligibilityRule>> {
+  const db = getDatabase();
+
+  // Wait for collection to be fully initialized
+  const collection = await waitForCollectionReady(db.eligibility_rules, 'eligibility_rules');
+
+  return collection.insert(rule);
+}
+
+/**
+ * Find a single eligibility rule by selector
+ *
+ * @param selector Query selector (e.g., { id: 'rule-id' } or { programId: 'program-id' })
+ * @returns Found rule document or null if not found
+ */
+export async function findOneEligibilityRule(
+  selector: Record<string, unknown>
+): Promise<RxDocument<EligibilityRule> | null> {
+  const db = getDatabase();
+
+  // Wait for collection to be fully initialized
+  const collection = await waitForCollectionReady(db.eligibility_rules, 'eligibility_rules');
+
+  return collection.findOne({
+    selector,
+  }).exec();
+}
+
+/**
+ * Count eligibility rules matching a selector
+ *
+ * @param selector Optional query selector (defaults to all rules)
+ * @returns Number of matching rules
+ */
+export async function countEligibilityRules(
+  selector?: Record<string, unknown>
+): Promise<number> {
+  const db = getDatabase();
+
+  // Wait for collection to be fully initialized
+  const collection = await waitForCollectionReady(db.eligibility_rules, 'eligibility_rules');
+
+  if (selector) {
+    const results = await collection.find({
+      selector,
+    }).exec();
+    return results.length;
+  }
+
+  return collection.count().exec();
 }
 
 /**
@@ -218,6 +423,25 @@ export async function getDatabaseStats(): Promise<{
   total: number;
 }> {
   const db = getDatabase();
+
+  // Verify collections exist and are properly initialized
+  const collections = {
+    user_profiles: db.user_profiles,
+    benefit_programs: db.benefit_programs,
+    eligibility_rules: db.eligibility_rules,
+    eligibility_results: db.eligibility_results,
+  };
+
+  for (const [name, collection] of Object.entries(collections)) {
+    // Runtime check: TypeScript types guarantee these exist, but verify at runtime for safety
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime safety check
+    if (!collection) {
+      throw new Error(`${name} collection is not initialized`);
+    }
+    if (typeof collection.count !== 'function') {
+      throw new Error(`${name} collection does not have count method. Collection may not be fully initialized.`);
+    }
+  }
 
   const [
     userProfilesCount,
