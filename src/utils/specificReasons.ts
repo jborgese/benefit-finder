@@ -67,7 +67,7 @@ const genericReasons: SpecificReason[] = [
     key: 'incomeTooHigh',
     message: 'Your household income appears to be above the program income guidelines. Income limits vary by program and household size.',
     condition: (profile) => {
-      if (!profile.householdIncome || !profile.householdSize) return false;
+      if (!profile.householdIncome || !profile.householdSize) {return false;}
       const incomePerPerson = profile.householdIncome / profile.householdSize;
       return incomePerPerson > INCOME_THRESHOLDS.GENERIC;
     }
@@ -98,7 +98,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'incomeTooHigh',
       message: 'Your household income appears to be above the WIC income guidelines (185% of federal poverty level). WIC has strict income limits that vary by household size.',
       condition: (profile) => {
-        if (!profile.householdIncome || !profile.householdSize) return false;
+        if (!profile.householdIncome || !profile.householdSize) {return false;}
         const incomePerPerson = profile.householdIncome / profile.householdSize;
         return incomePerPerson > INCOME_THRESHOLDS.WIC;
       }
@@ -109,7 +109,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'incomeTooHigh',
       message: 'Your household income appears to be above the Medicaid income guidelines. Medicaid income limits vary significantly by state and household size.',
       condition: (profile) => {
-        if (!profile.householdIncome || !profile.householdSize) return false;
+        if (!profile.householdIncome || !profile.householdSize) {return false;}
         const incomePerPerson = profile.householdIncome / profile.householdSize;
         return incomePerPerson > INCOME_THRESHOLDS.MEDICAID;
       }
@@ -123,7 +123,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'ageRestriction',
       message: 'You may not meet the age requirements for Medicaid. Medicaid typically covers children under 19, pregnant women, adults 65+, and people with disabilities. Some states have expanded coverage for adults 19-64.',
       condition: (profile) => {
-        if (!profile.age) return false;
+        if (!profile.age) {return false;}
         return profile.age >= 19 && profile.age < 65 && !profile.isPregnant;
       }
     },
@@ -138,7 +138,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'incomeTooHigh',
       message: 'Your household income appears to be above the SNAP income guidelines (130% of federal poverty level). SNAP has strict income limits that vary by household size.',
       condition: (profile) => {
-        if (!profile.householdIncome || !profile.householdSize) return false;
+        if (!profile.householdIncome || !profile.householdSize) {return false;}
         const incomePerPerson = profile.householdIncome / profile.householdSize;
         return incomePerPerson > INCOME_THRESHOLDS.SNAP;
       }
@@ -157,7 +157,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'ageRestriction',
       message: 'You may not meet the age requirements for SNAP. SNAP serves households with children or adults 18 and older.',
       condition: (profile) => {
-        if (!profile.age) return false;
+        if (!profile.age) {return false;}
         return profile.age < 18 && !profile.hasChildren;
       }
     }
@@ -172,7 +172,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'incomeTooHigh',
       message: 'Your household income appears to be above the TANF income guidelines. TANF has very strict income limits that vary by state and household size.',
       condition: (profile) => {
-        if (!profile.householdIncome || !profile.householdSize) return false;
+        if (!profile.householdIncome || !profile.householdSize) {return false;}
         const incomePerPerson = profile.householdIncome / profile.householdSize;
         return incomePerPerson > INCOME_THRESHOLDS.TANF;
       }
@@ -203,7 +203,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'incomeTooHigh',
       message: 'Your household income appears to be above the SSI income guidelines. SSI has very strict income and asset limits.',
       condition: (profile) => {
-        if (!profile.householdIncome || !profile.householdSize) return false;
+        if (!profile.householdIncome || !profile.householdSize) {return false;}
         const incomePerPerson = profile.householdIncome / profile.householdSize;
         return incomePerPerson > INCOME_THRESHOLDS.SSI;
       }
@@ -219,7 +219,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'incomeTooHigh',
       message: 'Your household income appears to be above the Section 8 income guidelines (50% of area median income). Section 8 income limits vary significantly by location and household size.',
       condition: (profile) => {
-        if (!profile.householdIncome || !profile.householdSize) return false;
+        if (!profile.householdIncome || !profile.householdSize) {return false;}
         const incomePerPerson = profile.householdIncome / profile.householdSize;
         return incomePerPerson > INCOME_THRESHOLDS.SECTION8;
       }
@@ -233,7 +233,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'ageRestriction',
       message: 'You may not meet the age requirements for Section 8. Section 8 serves households with adults 18 and older or families with children.',
       condition: (profile) => {
-        if (!profile.age) return false;
+        if (!profile.age) {return false;}
         return profile.age < 18 && !profile.hasChildren;
       }
     }
@@ -243,7 +243,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'incomeTooHigh',
       message: 'Your household income appears to be above the LIHTC income guidelines. LIHTC income limits vary significantly by area and household size.',
       condition: (profile) => {
-        if (!profile.householdIncome || !profile.householdSize) return false;
+        if (!profile.householdIncome || !profile.householdSize) {return false;}
         const incomePerPerson = profile.householdIncome / profile.householdSize;
         return incomePerPerson > INCOME_THRESHOLDS.LIHTC;
       }
@@ -262,7 +262,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
       key: 'ageRestriction',
       message: 'You may not meet the age requirements for LIHTC housing. LIHTC serves households with adults 18 and older or families with children.',
       condition: (profile) => {
-        if (!profile.age) return false;
+        if (!profile.age) {return false;}
         return profile.age < 18 && !profile.hasChildren;
       }
     }

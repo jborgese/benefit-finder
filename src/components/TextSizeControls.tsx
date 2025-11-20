@@ -31,8 +31,8 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
 
   // Helper function to get size class without nested ternary
   const getSizeClass = (size: 'sm' | 'md' | 'lg', sizeClasses: typeof sizeClasses): string => {
-    if (size === 'sm') return sizeClasses.sm;
-    if (size === 'lg') return sizeClasses.lg;
+    if (size === 'sm') {return sizeClasses.sm;}
+    if (size === 'lg') {return sizeClasses.lg;}
     return sizeClasses.md;
   };
 

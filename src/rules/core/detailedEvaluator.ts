@@ -154,7 +154,7 @@ function isSNAPOperator(operator: string): boolean {
  * Handle standard comparison operators
  */
 function handleStandardComparison(operator: string, operands: unknown[], context: EvaluationContext): void {
-  if (operands.length < 2) return;
+  if (operands.length < 2) {return;}
 
   const leftOperand = operands[0];
   const rightOperand = operands[1];
@@ -232,7 +232,7 @@ function addComparisonResult(operator: string, comparisonData: { criterion: stri
  * Handle SNAP income eligibility comparison
  */
 function handleSNAPComparison(operands: unknown[], context: EvaluationContext): void {
-  if (operands.length < 2) return;
+  if (operands.length < 2) {return;}
 
   if (import.meta.env.DEV) {
     console.log('🔍 [DEBUG] SNAP operator detected! Processing snap_income_eligible...');

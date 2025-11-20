@@ -58,7 +58,7 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
   const lastSavedRef = useRef<string>('');
 
   const saveToStorage = useCallback(() => {
-    if (!enabled || !store.started) return;
+    if (!enabled || !store.started) {return;}
 
     try {
       // Ensure all required fields are non-null before saving
@@ -95,7 +95,7 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
 
   // Debounced save on any change
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     // Clear existing timeout
     if (timeoutRef.current) {

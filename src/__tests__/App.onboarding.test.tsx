@@ -11,8 +11,7 @@ import React from 'react';
 import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
 
-// Import mocks setup
-import './App.test.setup';
+// (App.test.setup exports the mocks we import above; no side-effect import needed)
 
 let App: (typeof import('../App'))['default'];
 
@@ -58,7 +57,7 @@ describe('App Component - Onboarding Modals', () => {
     render(<App />);
 
     const tourButtons = screen.getAllByText((_content, element) => {
-      if (!element) return false;
+      if (!element) { return false; }
       return element.textContent === '🎯 Tour' || element.textContent.includes('Tour');
     });
     const tourButton = tourButtons[0]?.closest('button');
@@ -76,7 +75,7 @@ describe('App Component - Onboarding Modals', () => {
     render(<App />);
 
     const privacyButtons = screen.getAllByText((_content, element) => {
-      if (!element) return false;
+      if (!element) { return false; }
       return element.textContent === '🔒 Privacy' || element.textContent.includes('Privacy');
     });
     const privacyButton = privacyButtons[0]?.closest('button');
@@ -94,7 +93,7 @@ describe('App Component - Onboarding Modals', () => {
     render(<App />);
 
     const guideButtons = screen.getAllByText((_content, element) => {
-      if (!element) return false;
+      if (!element) { return false; }
       return element.textContent === '📖 Guide' || element.textContent.includes('Guide');
     });
     const guideButton = guideButtons[0]?.closest('button');
@@ -112,7 +111,7 @@ describe('App Component - Onboarding Modals', () => {
     render(<App />);
 
     const shortcutsButtons = screen.getAllByText((_content, element) => {
-      if (!element) return false;
+      if (!element) { return false; }
       return element.textContent === '⌨️ navigation.shortcuts' || element.textContent.includes('navigation.shortcuts');
     });
     const shortcutsButton = shortcutsButtons[0]?.closest('button');
@@ -131,7 +130,7 @@ describe('App Component - Onboarding Modals', () => {
 
     // Open tour
     const tourButtons = screen.getAllByText((_content, element) => {
-      if (!element) return false;
+      if (!element) { return false; }
       return element.textContent === '🎯 Tour' || element.textContent.includes('Tour');
     });
     const tourButton = tourButtons[0]?.closest('button');
@@ -153,7 +152,7 @@ describe('App Component - Onboarding Modals', () => {
 
     // Open guide
     const guideButtons = screen.getAllByText((_content, element) => {
-      if (!element) return false;
+      if (!element) { return false; }
       return element.textContent === '📖 Guide' || element.textContent.includes('Guide');
     });
     const guideButton = guideButtons[0]?.closest('button');

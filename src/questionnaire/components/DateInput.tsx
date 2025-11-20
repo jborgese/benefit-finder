@@ -61,7 +61,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   };
 
   const formatDateForDisplay = (isoDate: string): string => {
-    if (!isoDate) return '';
+    if (!isoDate) {return '';}
 
     try {
       // Parse the ISO date string and create a date object in local timezone
@@ -86,7 +86,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   };
 
   const calculateAge = (birthDate: string): number | null => {
-    if (!birthDate) return null;
+    if (!birthDate) {return null;}
 
     try {
       const today = new Date();

@@ -91,7 +91,7 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 
   // Helper function to check if user is typing in an input
   const isTypingInInput = (target: EventTarget | null): boolean => {
-    if (!target) return false;
+    if (!target) {return false;}
     return (
       target instanceof HTMLInputElement ||
       target instanceof HTMLTextAreaElement ||
@@ -105,7 +105,7 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
     const { ctrlKey, metaKey, shiftKey } = event;
     const isCtrlOrCmd = ctrlKey || metaKey;
 
-    if (!isCtrlOrCmd) return false;
+    if (!isCtrlOrCmd) {return false;}
 
     switch (key) {
       case 'enter':

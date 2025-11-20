@@ -180,7 +180,7 @@ export function debugRule(
 
       // Handle operators
       const operator = Object.keys(rule)[0];
-      if (!operator) return null;
+      if (!operator) {return null;}
 
       operatorsUsed.add(operator);
 
@@ -366,7 +366,7 @@ export function inspectRule(
   };
 
   const countUsage = (node: JsonLogicRule): void => {
-    if (node === null || typeof node !== 'object') return;
+    if (node === null || typeof node !== 'object') {return;}
 
     if (Array.isArray(node)) {
       node.forEach(countUsage);

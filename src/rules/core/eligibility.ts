@@ -6,8 +6,7 @@
  */
 
 import { getDatabase } from '../../db/database';
-import type { DetailedEvaluationResult } from './detailedEvaluator';
-import { evaluateRuleWithDetails } from './detailedEvaluator';
+import { evaluateRuleWithDetails, type DetailedEvaluationResult } from './detailedEvaluator';
 import type { JsonLogicRule } from './types';
 import type { UserProfileDocument, EligibilityRuleDocument } from '../../db/schemas';
 

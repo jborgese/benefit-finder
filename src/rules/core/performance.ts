@@ -110,7 +110,7 @@ class PerformanceMonitor {
    * Record a performance metric
    */
   record(metric: PerformanceMetrics): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     this.metrics.push(metric);
 
@@ -283,8 +283,8 @@ export function getRulePerformanceProfile(ruleId: string): RulePerformanceProfil
   let trend: 'improving' | 'stable' | 'degrading' = 'stable';
   if (recent.length > 10 && older.length > 10) {
     const change = ((recentAvg - olderAvg) / olderAvg) * 100;
-    if (change < -10) trend = 'improving';
-    else if (change > 10) trend = 'degrading';
+    if (change < -10) {trend = 'improving';}
+    else if (change > 10) {trend = 'degrading';}
   }
 
   return {

@@ -40,7 +40,7 @@ export const userProfilesCollection: RxCollectionCreator<UserProfile> = {
      * Calculate age from date of birth
      */
     getAge(this: RxDocument<UserProfile>): number | null {
-      if (!this.dateOfBirth) return null;
+      if (!this.dateOfBirth) {return null;}
 
       const birthDate = new Date(this.dateOfBirth);
       const today = new Date();
@@ -130,12 +130,12 @@ export const eligibilityRulesCollection: RxCollectionCreator<EligibilityRule> = 
      * Check if rule is currently valid
      */
     isValid(this: RxDocument<EligibilityRule>): boolean {
-      if (!this.active) return false;
+      if (!this.active) {return false;}
 
       const now = Date.now();
 
-      if (this.effectiveDate && now < this.effectiveDate) return false;
-      if (this.expirationDate && now > this.expirationDate) return false;
+      if (this.effectiveDate && now < this.effectiveDate) {return false;}
+      if (this.expirationDate && now > this.expirationDate) {return false;}
 
       return true;
     },
@@ -213,7 +213,7 @@ export const eligibilityResultsCollection: RxCollectionCreator<EligibilityResult
      * Check if result is expired
      */
     isExpired(this: RxDocument<EligibilityResult>): boolean {
-      if (!this.expiresAt) return false;
+      if (!this.expiresAt) {return false;}
       return Date.now() > this.expiresAt;
     },
 
@@ -304,7 +304,7 @@ export const appSettingsCollection: RxCollectionCreator<AppSetting> = {
         selector: { key },
       }).exec();
 
-      if (!setting) return null;
+      if (!setting) {return null;}
 
       // Type assertion needed because RxDB doesn't automatically include method types
       return (setting as AppSettingDocument & { getValue: () => unknown }).getValue();
@@ -318,10 +318,10 @@ export const appSettingsCollection: RxCollectionCreator<AppSetting> = {
 
       let type: 'string' | 'number' | 'boolean' | 'object' | 'array' = 'string';
 
-      if (typeof value === 'number') type = 'number';
-      else if (typeof value === 'boolean') type = 'boolean';
-      else if (Array.isArray(value)) type = 'array';
-      else if (typeof value === 'object') type = 'object';
+      if (typeof value === 'number') {type = 'number';}
+      else if (typeof value === 'boolean') {type = 'boolean';}
+      else if (Array.isArray(value)) {type = 'array';}
+      else if (typeof value === 'object') {type = 'object';}
 
       await this.upsert({
         key,

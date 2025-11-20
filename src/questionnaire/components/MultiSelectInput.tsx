@@ -32,8 +32,8 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   // Convert error to array format (avoiding nested ternaries)
   const errors = (() => {
-    if (Array.isArray(error)) return error;
-    if (error) return [error];
+    if (Array.isArray(error)) {return error;}
+    if (error) {return [error];}
     return [];
   })();
 
@@ -95,7 +95,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   // Render selection constraints helper text
   const renderConstraintsText = (): React.ReactElement | null => {
-    if (!(minSelections ?? maxSelections)) return null;
+    if (!(minSelections ?? maxSelections)) {return null;}
     return (
       <p className="text-xs text-gray-500 dark:text-secondary-400 mt-1 mb-3">
         {getSelectionMessage()}
@@ -105,7 +105,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   // Render error messages
   const renderErrors = (): React.ReactElement | null => {
-    if (!showError) return null;
+    if (!showError) {return null;}
     return (
       <div
         id={errorId}

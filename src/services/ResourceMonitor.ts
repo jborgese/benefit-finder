@@ -246,7 +246,7 @@ export class ResourceMonitor {
    * Get import success rate
    */
   public getSuccessRate(): number {
-    if (this.performanceRecords.length === 0) return 0;
+    if (this.performanceRecords.length === 0) {return 0;}
 
     const successfulImports = this.performanceRecords.filter(r => r.success).length;
     return (successfulImports / this.performanceRecords.length) * 100;

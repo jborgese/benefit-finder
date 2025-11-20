@@ -5,9 +5,7 @@
  */
 
 import { useContext } from 'react';
-import { TextSizeContext } from './TextSizeContext';
-
-import type { TextSizeContextType } from './TextSizeContext';
+import { TextSizeContext, type TextSizeContextType } from './TextSizeContext';
 
 export const useTextSize = (): TextSizeContextType => {
   const context = useContext(TextSizeContext);

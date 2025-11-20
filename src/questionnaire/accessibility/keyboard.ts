@@ -4,8 +4,7 @@
  * Keyboard shortcuts and navigation helpers for questionnaires
  */
 
-import { useEffect, useCallback } from 'react';
-import type React from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 /**
  * Key codes for common keyboard actions
@@ -44,7 +43,7 @@ export interface KeyboardShortcut {
 export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = true): void {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!enabled) return;
+      if (!enabled) {return;}
 
       // Check if user is focused on an input field
       const { activeElement } = document;
@@ -78,7 +77,7 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = tr
   );
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     window.addEventListener('keydown', handleKeyDown);
 
@@ -152,7 +151,7 @@ export function useArrowNavigation(
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!enabled) return;
+      if (!enabled) {return;}
 
       const nextKey = horizontal ? Keys.ARROW_RIGHT : Keys.ARROW_DOWN;
       const prevKey = horizontal ? Keys.ARROW_LEFT : Keys.ARROW_UP;
@@ -185,7 +184,7 @@ export function useArrowNavigation(
   );
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     window.addEventListener('keydown', handleKeyDown);
 
@@ -203,7 +202,7 @@ export function useFocusTrap(
   enabled = true
 ): void {
   useEffect(() => {
-    if (!enabled || !containerRef.current) return;
+    if (!enabled || !containerRef.current) {return;}
 
     const container = containerRef.current;
 
@@ -223,10 +222,10 @@ export function useFocusTrap(
     };
 
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key !== Keys.TAB) return;
+      if (event.key !== Keys.TAB) {return;}
 
       const focusableElements = getFocusableElements();
-      if (focusableElements.length === 0) return;
+      if (focusableElements.length === 0) {return;}
 
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
@@ -235,12 +234,12 @@ export function useFocusTrap(
         // Shift + Tab
         if (document.activeElement === firstElement) {
           event.preventDefault();
-          lastElement.focus();
+          lastElement?.focus();
         }
       } else if (document.activeElement === lastElement) {
         // Tab
         event.preventDefault();
-        firstElement.focus();
+        firstElement?.focus();
       }
     };
 

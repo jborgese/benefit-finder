@@ -239,7 +239,7 @@ function validatePattern(
  * Validate email address
  */
 export function isValidEmail(email: string): boolean {
-  if (!email) return false;
+  if (!email) {return false;}
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
@@ -249,7 +249,7 @@ export function isValidEmail(email: string): boolean {
  * Validate phone number (US format)
  */
 export function isValidPhone(phone: string): boolean {
-  if (!phone) return false;
+  if (!phone) {return false;}
 
   // Remove all non-digits
   const digits = phone.replace(/\D/g, '');
@@ -262,7 +262,7 @@ export function isValidPhone(phone: string): boolean {
  * Validate date
  */
 export function isValidDate(date: string): boolean {
-  if (!date) return false;
+  if (!date) {return false;}
 
   const parsed = Date.parse(date);
   return !isNaN(parsed);
@@ -272,13 +272,13 @@ export function isValidDate(date: string): boolean {
  * Validate SSN format
  */
 export function isValidSSN(ssn: string): boolean {
-  if (!ssn) return false;
+  if (!ssn) {return false;}
 
   // Remove all non-digits
   const digits = ssn.replace(/\D/g, '');
 
   // SSN must be exactly 9 digits
-  if (digits.length !== 9) return false;
+  if (digits.length !== 9) {return false;}
 
   // Invalid SSN patterns
   const invalid = [
@@ -304,8 +304,8 @@ export function isValidSSN(ssn: string): boolean {
 export function formatSSN(ssn: string): string {
   const digits = ssn.replace(/\D/g, '');
 
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  if (digits.length <= 3) {return digits;}
+  if (digits.length <= 5) {return `${digits.slice(0, 3)}-${digits.slice(3)}`;}
   return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5, 9)}`;
 }
 
@@ -330,7 +330,7 @@ export function formatPhone(phone: string): string {
  * Validate ZIP code (US)
  */
 export function isValidZipCode(zip: string): boolean {
-  if (!zip) return false;
+  if (!zip) {return false;}
 
   // 5 digits or 5+4 format (safe regex - no ReDoS vulnerability)
   // Using specific length checks instead of quantifiers to avoid backtracking

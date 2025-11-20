@@ -7,8 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import type { RxDocument, RxQuery, MangoQuery } from 'rxdb';
-import { getDatabase, isDatabaseInitialized } from './database';
-import type { BenefitFinderDatabase } from './database';
+import { getDatabase, isDatabaseInitialized, type BenefitFinderDatabase } from './database';
 import type {
   UserProfile,
   BenefitProgram,
@@ -167,7 +166,7 @@ export function useBenefitPrograms(jurisdiction?: string): {
   const db = useDatabase();
 
   return useRxQuery<BenefitProgram>(() => {
-    if (!db) return null;
+    if (!db) {return null;}
 
     const query: MangoQuery<BenefitProgram> = {
       selector: {

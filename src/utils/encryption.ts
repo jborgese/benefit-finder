@@ -429,10 +429,10 @@ export function decryptFromString(
  */
 function getLengthScore(length: number): number {
   let score = 0;
-  if (length >= 8) score += 2;  // Increased from 1 to reward meeting minimum length
-  if (length >= 12) score += 1;
-  if (length >= 16) score += 1;
-  if (length >= 20) score += 1;
+  if (length >= 8) {score += 2;}  // Increased from 1 to reward meeting minimum length
+  if (length >= 12) {score += 1;}
+  if (length >= 16) {score += 1;}
+  if (length >= 20) {score += 1;}
   return score;
 }
 
@@ -441,10 +441,10 @@ function getLengthScore(length: number): number {
  */
 function getCharacterDiversityScore(passphrase: string): number {
   let score = 0;
-  if (/[a-z]/.test(passphrase)) score += 1; // Lowercase
-  if (/[A-Z]/.test(passphrase)) score += 1; // Uppercase
-  if (/[0-9]/.test(passphrase)) score += 1; // Numbers
-  if (/[^a-zA-Z0-9]/.test(passphrase)) score += 2; // Special characters (worth more)
+  if (/[a-z]/.test(passphrase)) {score += 1;} // Lowercase
+  if (/[A-Z]/.test(passphrase)) {score += 1;} // Uppercase
+  if (/[0-9]/.test(passphrase)) {score += 1;} // Numbers
+  if (/[^a-zA-Z0-9]/.test(passphrase)) {score += 2;} // Special characters (worth more)
   return score;
 }
 
@@ -472,10 +472,10 @@ function getCommonPatternPenalty(passphrase: string): number {
  * Convert score to strength rating
  */
 function scoreToStrength(score: number): EncryptionStrength {
-  if (score >= 9) return 'very-strong';  // Adjusted threshold
-  if (score >= 7) return 'strong';       // Adjusted threshold
-  if (score >= 4) return 'medium';
-  if (score >= 2) return 'weak';
+  if (score >= 9) {return 'very-strong';}  // Adjusted threshold
+  if (score >= 7) {return 'strong';}       // Adjusted threshold
+  if (score >= 4) {return 'medium';}
+  if (score >= 2) {return 'weak';}
   return 'none';
 }
 
@@ -694,10 +694,10 @@ export function estimateCrackTime(passphrase: string): string {
 
   // Determine character set size
   let charSetSize = 0;
-  if (/[a-z]/.test(passphrase)) charSetSize += charSets.lowercase;
-  if (/[A-Z]/.test(passphrase)) charSetSize += charSets.uppercase;
-  if (/[0-9]/.test(passphrase)) charSetSize += charSets.numbers;
-  if (/[^a-zA-Z0-9]/.test(passphrase)) charSetSize += charSets.symbols;
+  if (/[a-z]/.test(passphrase)) {charSetSize += charSets.lowercase;}
+  if (/[A-Z]/.test(passphrase)) {charSetSize += charSets.uppercase;}
+  if (/[0-9]/.test(passphrase)) {charSetSize += charSets.numbers;}
+  if (/[^a-zA-Z0-9]/.test(passphrase)) {charSetSize += charSets.symbols;}
 
   // Calculate entropy (bits)
   const entropy = passphrase.length * Math.log2(charSetSize);
@@ -716,12 +716,12 @@ export function estimateCrackTime(passphrase: string): string {
   const secondsToCrack = (combinations / 2) * secondsPerAttempt;
 
   // Convert to human-readable format
-  if (secondsToCrack < 1) return 'Less than 1 second';
-  if (secondsToCrack < 60) return `${Math.round(secondsToCrack)} seconds`;
-  if (secondsToCrack < 3600) return `${Math.round(secondsToCrack / 60)} minutes`;
-  if (secondsToCrack < 86400) return `${Math.round(secondsToCrack / 3600)} hours`;
-  if (secondsToCrack < 31536000) return `${Math.round(secondsToCrack / 86400)} days`;
-  if (secondsToCrack < 3153600000) return `${Math.round(secondsToCrack / 31536000)} years`;
+  if (secondsToCrack < 1) {return 'Less than 1 second';}
+  if (secondsToCrack < 60) {return `${Math.round(secondsToCrack)} seconds`;}
+  if (secondsToCrack < 3600) {return `${Math.round(secondsToCrack / 60)} minutes`;}
+  if (secondsToCrack < 86400) {return `${Math.round(secondsToCrack / 3600)} hours`;}
+  if (secondsToCrack < 31536000) {return `${Math.round(secondsToCrack / 86400)} days`;}
+  if (secondsToCrack < 3153600000) {return `${Math.round(secondsToCrack / 31536000)} years`;}
   return 'Centuries';
 }
 

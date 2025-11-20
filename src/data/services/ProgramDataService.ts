@@ -188,14 +188,14 @@ export class ProgramDataService {
     const warnings: string[] = [];
 
     // Required fields
-    if (!program.id) errors.push('Program ID is required');
-    if (!program.name) errors.push('Program name is required');
-    if (!program.jurisdiction) errors.push('Program jurisdiction is required');
+    if (!program.id) {errors.push('Program ID is required');}
+    if (!program.name) {errors.push('Program name is required');}
+    if (!program.jurisdiction) {errors.push('Program jurisdiction is required');}
 
     // Contact information warnings
-    if (!program.website) warnings.push('Program website is missing');
-    if (!program.phoneNumber) warnings.push('Program phone number is missing');
-    if (!program.applicationUrl) warnings.push('Program application URL is missing');
+    if (!program.website) {warnings.push('Program website is missing');}
+    if (!program.phoneNumber) {warnings.push('Program phone number is missing');}
+    if (!program.applicationUrl) {warnings.push('Program application URL is missing');}
 
     return {
       isValid: errors.length === 0,
@@ -278,9 +278,9 @@ export class ProgramDataService {
 
     if (filters.searchTerm) {
       const searchTerm = filters.searchTerm.toLowerCase();
-      if (program.name.toLowerCase().includes(searchTerm)) score += 3;
-      if (program.description.toLowerCase().includes(searchTerm)) score += 2;
-      if (program.shortName.toLowerCase().includes(searchTerm)) score += 1;
+      if (program.name.toLowerCase().includes(searchTerm)) {score += 3;}
+      if (program.description.toLowerCase().includes(searchTerm)) {score += 2;}
+      if (program.shortName.toLowerCase().includes(searchTerm)) {score += 1;}
     }
 
     if (filters.tags) {

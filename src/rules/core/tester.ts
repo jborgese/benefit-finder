@@ -413,17 +413,17 @@ export function generateCoverageReport(
  * Deep equality check
  */
 function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
+  if (a === b) {return true;}
 
-  if (a === null || b === null) return a === b;
-  if (typeof a !== 'object' || typeof b !== 'object') return a === b;
+  if (a === null || b === null) {return a === b;}
+  if (typeof a !== 'object' || typeof b !== 'object') {return a === b;}
 
   const aRecord = a as Record<string, unknown>;
   const bRecord = b as Record<string, unknown>;
   const aKeys = Object.keys(aRecord);
   const bKeys = Object.keys(bRecord);
 
-  if (aKeys.length !== bKeys.length) return false;
+  if (aKeys.length !== bKeys.length) {return false;}
 
   return aKeys.every((key) => {
     // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
@@ -438,8 +438,8 @@ function deepEqual(a: unknown, b: unknown): boolean {
  * Calculate cartesian product of arrays
  */
 function cartesianProduct<T>(arrays: T[][]): T[][] {
-  if (arrays.length === 0) return [[]];
-  if (arrays.length === 1) return arrays[0].map((x) => [x]);
+  if (arrays.length === 0) {return [[]];}
+  if (arrays.length === 1) {return arrays[0].map((x) => [x]);}
 
   const [first, ...rest] = arrays;
   const restProduct = cartesianProduct(rest);

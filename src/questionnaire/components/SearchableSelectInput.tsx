@@ -60,7 +60,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (disabled) return;
+    if (disabled) {return;}
 
     switch (e.key) {
       case 'Enter':
@@ -123,7 +123,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
   // Handle dropdown toggle
   const handleToggle = useCallback(() => {
-    if (disabled) return;
+    if (disabled) {return;}
     setIsOpen(prev => !prev);
     if (!isOpen) {
       inputRef.current?.focus();

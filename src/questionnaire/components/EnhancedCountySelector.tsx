@@ -50,7 +50,7 @@ interface CountyOption {
 // Helper function to get counties for a state
 const useCountiesForState = (selectedState: string | undefined): CountyOption[] => {
   return useMemo(() => {
-    if (!selectedState) return [];
+    if (!selectedState) {return [];}
     return getCountiesForState(selectedState);
   }, [selectedState]);
 };
@@ -58,7 +58,7 @@ const useCountiesForState = (selectedState: string | undefined): CountyOption[] 
 // Helper function to get popular counties
 const usePopularCounties = (selectedState: string | undefined, allCounties: CountyOption[], showPopularFirst: boolean): CountyOption[] => {
   return useMemo(() => {
-    if (!selectedState || !showPopularFirst) return [];
+    if (!selectedState || !showPopularFirst) {return [];}
     // eslint-disable-next-line security/detect-object-injection -- selectedState is validated and comes from questionnaire, not user input
     const popular = selectedState && selectedState in POPULAR_COUNTIES ? POPULAR_COUNTIES[selectedState] ?? [] : [];
     return allCounties.filter(county =>
@@ -82,7 +82,7 @@ const useProcessedCounties = (
     let counties = allCounties;
 
     if (searchQuery.trim()) {
-      if (!selectedState) return [];
+      if (!selectedState) {return [];}
       counties = searchCounties(selectedState, searchQuery);
     }
 
@@ -211,7 +211,7 @@ const renderLabelSection = (
 
 // Helper function to render state context banner
 const renderStateContext = (stateName: string | null, showStateContext: boolean): React.JSX.Element | null => {
-  if (!showStateContext || !stateName) return null;
+  if (!showStateContext || !stateName) {return null;}
 
   return (
     <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
@@ -224,7 +224,7 @@ const renderStateContext = (stateName: string | null, showStateContext: boolean)
 
 // Helper function to render desktop state context
 const renderDesktopStateContext = (stateName: string | null, showStateContext: boolean): React.JSX.Element | null => {
-  if (!showStateContext || !stateName) return null;
+  if (!showStateContext || !stateName) {return null;}
 
   return (
     <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -261,7 +261,7 @@ const renderErrors = (errorId: string, errors: string[]): React.JSX.Element => {
 
 // Helper function to render help text
 const renderHelpText = (question: QuestionDefinition, showError: boolean): React.JSX.Element | null => {
-  if (!question.helpText || showError) return null;
+  if (!question.helpText || showError) {return null;}
 
   return (
     <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">

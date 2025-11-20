@@ -1,7 +1,6 @@
-import i18n from 'i18next';
+import i18n, { type InitOptions } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import type { InitOptions } from 'i18next';
 import { hasOwnProperty } from '../utils/safePropertyAccess';
 
 // Import translation files
@@ -54,7 +53,7 @@ const normalizeLanguageCode = (language: string): string => {
   // Use safe property access to avoid security warnings
   if (hasOwnProperty(languageMap, language)) {
     // eslint-disable-next-line security/detect-object-injection
-    return languageMap[language];
+    return (languageMap[language] as string);
   }
   return language.split('-')[0];
 };
@@ -79,7 +78,7 @@ const initOptions: InitOptions = {
 
   interpolation: {
     escapeValue: false, // React already does escaping
-    format: (value: unknown, format: string, lng: string) => {
+    format: (value: unknown, format?: string, lng?: string) => {
       // Handle locale-specific formatting
       if (format === 'number' && typeof value === 'number') {
         return new Intl.NumberFormat(lng).format(value);
@@ -122,7 +121,7 @@ const initOptions: InitOptions = {
 let isInitialized = false;
 
 const initializeI18n = async (): Promise<void> => {
-  if (isInitialized) return;
+  if (isInitialized) {return;}
 
   try {
     await i18n

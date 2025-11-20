@@ -47,9 +47,10 @@ vi.mock('../db/database', () => {
   const mockDb = {
     name: 'benefitfinder',
     user_profiles: {
-      find: () => ({ exec: () => Promise.resolve([]) }),
+      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
       findOne: () => ({ exec: () => Promise.resolve(null) }),
       insert: () => Promise.resolve({}),
+      count: () => ({ exec: () => Promise.resolve(0) }),
     },
     benefit_programs: {
       find: () => ({
@@ -61,6 +62,16 @@ vi.mock('../db/database', () => {
               get: (key: string) => safeGet(p, key),
             })),
           ),
+        limit: () => ({
+          exec: () =>
+            Promise.resolve(
+              mockPrograms.map(p => ({
+                ...p,
+                toJSON: () => p,
+                get: (key: string) => safeGet(p, key),
+              })),
+            ),
+        }),
       }),
       findOne: (query?: { selector?: { id?: string } }) => ({
         exec: () => {
@@ -95,16 +106,24 @@ vi.mock('../db/database', () => {
           get: (key: string) => safeGet(data, key),
         });
       },
+      count: () => ({ exec: () => Promise.resolve(mockPrograms.length) }),
     },
     eligibility_rules: {
-      find: () => ({ exec: () => Promise.resolve([]) }),
+      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
+      findOne: () => ({ exec: () => Promise.resolve(null) }),
+      insert: () => Promise.resolve({}),
+      count: () => ({ exec: () => Promise.resolve(0) }),
     },
     eligibility_results: {
-      find: () => ({ exec: () => Promise.resolve([]) }),
+      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
+      findOne: () => ({ exec: () => Promise.resolve(null) }),
       insert: () => Promise.resolve({}),
+      count: () => ({ exec: () => Promise.resolve(0) }),
     },
     app_settings: {
-      find: () => ({ exec: () => Promise.resolve([]) }),
+      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
+      findOne: () => ({ exec: () => Promise.resolve(null) }),
+      count: () => ({ exec: () => Promise.resolve(0) }),
     },
   };
 

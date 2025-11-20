@@ -53,7 +53,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
   const [isNavigating, setIsNavigating] = React.useState(false);
 
   const handleBack = async (): Promise<void> => {
-    if (isNavigating) return;
+    if (isNavigating) {return;}
 
     setIsNavigating(true);
 
@@ -71,7 +71,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
   };
 
   const handleForward = async (): Promise<void> => {
-    if (isNavigating) return;
+    if (isNavigating) {return;}
 
     setIsNavigating(true);
 

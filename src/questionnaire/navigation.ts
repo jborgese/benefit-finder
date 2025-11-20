@@ -225,7 +225,7 @@ export class NavigationManager {
    */
   private navigateBackwardFromLastHistoryItem(currentNodeId: string): NavigationResult | null {
     const previousNodeId = this.history[this.history.length - 2];
-    if (!previousNodeId) return null;
+    if (!previousNodeId) {return null;}
 
     this.debugLog('Using history for backward navigation', {
       previousNodeId,
@@ -252,7 +252,7 @@ export class NavigationManager {
    */
   private navigateBackwardFromHistoryPosition(currentNodeId: string): NavigationResult | null {
     const currentIndex = this.history.lastIndexOf(currentNodeId);
-    if (currentIndex < 0 || currentIndex === 0) return null;
+    if (currentIndex < 0 || currentIndex === 0) {return null;}
 
     const previousNodeId = this.history[currentIndex - 1];
 
@@ -341,11 +341,11 @@ export class NavigationManager {
       // If current node is last in history, use the previous history item
       if (lastHistoryItem === currentNodeId) {
         const result = this.navigateBackwardFromLastHistoryItem(currentNodeId);
-        if (result) return result;
+        if (result) {return result;}
       } else {
         // Current node not at end of history - find it and trim history
         const result = this.navigateBackwardFromHistoryPosition(currentNodeId);
-        if (result) return result;
+        if (result) {return result;}
       }
     }
 

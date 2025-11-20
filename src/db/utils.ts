@@ -269,47 +269,169 @@ function collectMethodInfo<T>(collection: RxCollection<T>): {
 }
 
 /**
+ * Detect if we're in a test environment
+ */
+function isTestEnvironment(): boolean {
+  return typeof process !== 'undefined' &&
+    (process.env.NODE_ENV === 'test' ||
+     process.env.VITEST === 'true' ||
+     typeof import.meta.env.VITEST !== 'undefined');
+}
+
+/**
+ * Verify collection is ready in test environment by performing a lightweight operation
+ */
+async function verifyCollectionInTest<T>(
+  collection: RxCollection<T>,
+  delay: number
+): Promise<boolean> {
+  try {
+    // Try a lightweight operation to verify the collection is actually functional
+    await collection.find().limit(0).exec();
+    return true;
+  } catch {
+    // If the operation fails, wait and indicate not ready
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return false;
+  }
+}
+
+/**
+ * Check if collection is ready and return it, or null if not ready
+ */
+function checkCollectionReady<T>(
+  collection: RxCollection<T>
+): RxCollection<T> | null {
+  if (isCollectionReady(collection) && verifyInsertMethod(collection)) {
+    return collection;
+  }
+  return null;
+}
+
+/**
+ * Attempt to verify collection readiness in a single iteration
+ */
+async function attemptCollectionReady<T>(
+  collection: RxCollection<T>,
+  collectionName: string,
+  isTest: boolean,
+  delay: number
+): Promise<RxCollection<T> | null> {
+  const readyCollection = checkCollectionReady(collection);
+  if (!readyCollection) {
+    return null;
+  }
+
+  // In test environments, also try a simple operation to ensure it's truly ready
+  if (isTest) {
+    const verified = await verifyCollectionInTest(readyCollection, delay);
+    if (!verified) {
+      return null;
+    }
+  }
+
+  return readyCollection;
+}
+
+/**
+ * Refresh collection reference periodically during retry loop
+ */
+function refreshCollectionIfNeeded<T>(
+  collection: RxCollection<T>,
+  collectionName: string,
+  iteration: number
+): RxCollection<T> {
+  // Refresh collection reference from database periodically
+  if (iteration > 2 && iteration % 3 === 0) {
+    const refreshed = tryRefreshCollection<T>(collectionName);
+    if (refreshed) {
+      return refreshed;
+    }
+  }
+  return collection;
+}
+
+/**
+ * Calculate retry configuration based on environment
+ */
+function getRetryConfig(isTest: boolean, maxRetries?: number, delayMs?: number): {
+  retries: number;
+  delay: number;
+} {
+  return {
+    retries: maxRetries ?? (isTest ? 50 : 20),
+    delay: delayMs ?? (isTest ? 50 : 100),
+  };
+}
+
+/**
+ * Create error message for collection readiness failure
+ */
+function createCollectionNotReadyError<T>(
+  collectionName: string,
+  collection: RxCollection<T>,
+  retries: number,
+  delay: number
+): Error {
+  const { availableMethods, missingMethods } = collectMethodInfo(collection);
+  return new Error(
+    `${collectionName} collection does not have required methods after ${retries} retries (${retries * delay}ms total). ` +
+    `Missing methods: ${missingMethods.join(', ')}. ` +
+    `Available methods: ${availableMethods.join(', ')}. ` +
+    `Collection may not be fully initialized. Try increasing wait time or checking database initialization.`
+  );
+}
+
+/**
+ * Attempt to find a ready collection through retry loop
+ */
+async function retryUntilReady<T>(
+  collection: RxCollection<T>,
+  collectionName: string,
+  isTest: boolean,
+  retries: number,
+  delay: number
+): Promise<RxCollection<T> | null> {
+  let currentCollection = collection;
+
+  for (let i = 0; i < retries; i++) {
+    const readyCollection = await attemptCollectionReady(currentCollection, collectionName, isTest, delay);
+    if (readyCollection) {
+      return readyCollection;
+    }
+
+    // Wait a bit before retrying
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    // Refresh collection reference periodically
+    currentCollection = refreshCollectionIfNeeded(currentCollection, collectionName, i);
+  }
+
+  return null;
+}
+
+/**
  * Wait for collection to be fully initialized by testing actual usage
  */
 async function waitForCollectionReady<T>(
   collection: RxCollection<T> | undefined,
   collectionName: string,
-  maxRetries = 20,
-  delayMs = 100
+  maxRetries?: number,
+  delayMs?: number
 ): Promise<RxCollection<T>> {
   if (!collection) {
     throw new Error(`${collectionName} collection is not initialized`);
   }
 
-  let currentCollection = collection;
+  const isTest = isTestEnvironment();
+  const { retries, delay } = getRetryConfig(isTest, maxRetries, delayMs);
 
-  for (let i = 0; i < maxRetries; i++) {
-    // Check if core methods are available
-    if (isCollectionReady(currentCollection) && verifyInsertMethod(currentCollection)) {
-      return currentCollection;
-    }
-
-    // Wait a bit before retrying
-    await new Promise(resolve => setTimeout(resolve, delayMs));
-
-    // Refresh collection reference from database periodically
-    if (i > 2 && i % 3 === 0) {
-      const refreshed = tryRefreshCollection<T>(collectionName);
-      if (refreshed) {
-        currentCollection = refreshed;
-      }
-    }
+  const readyCollection = await retryUntilReady(collection, collectionName, isTest, retries, delay);
+  if (readyCollection) {
+    return readyCollection;
   }
 
-  // Final attempt with detailed error message
-  const { availableMethods, missingMethods } = collectMethodInfo(currentCollection);
-
-  throw new Error(
-    `${collectionName} collection does not have required methods after ${maxRetries} retries. ` +
-    `Missing methods: ${missingMethods.join(', ')}. ` +
-    `Available methods: ${availableMethods.join(', ')}. ` +
-    `Collection may not be fully initialized. Try increasing wait time or checking database initialization.`
-  );
+  throw createCollectionNotReadyError(collectionName, collection, retries, delay);
 }
 
 export async function createEligibilityRule(
@@ -537,15 +659,15 @@ export async function checkDatabaseHealth(): Promise<{
 
     // Check if collections exist (runtime check for database initialization)
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
-    if (!db.user_profiles) issues.push('user_profiles collection not found');
+    if (!db.user_profiles) {issues.push('user_profiles collection not found');}
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
-    if (!db.benefit_programs) issues.push('benefit_programs collection not found');
+    if (!db.benefit_programs) {issues.push('benefit_programs collection not found');}
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
-    if (!db.eligibility_rules) issues.push('eligibility_rules collection not found');
+    if (!db.eligibility_rules) {issues.push('eligibility_rules collection not found');}
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
-    if (!db.eligibility_results) issues.push('eligibility_results collection not found');
+    if (!db.eligibility_results) {issues.push('eligibility_results collection not found');}
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
-    if (!db.app_settings) issues.push('app_settings collection not found');
+    if (!db.app_settings) {issues.push('app_settings collection not found');}
 
     // Try a simple query on each collection
     await Promise.all([

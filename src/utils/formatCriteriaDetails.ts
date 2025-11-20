@@ -69,11 +69,11 @@ const criterionHandlers = {
 function getCriterionType(criterion: string): keyof typeof criterionHandlers {
   const lowerCriterion = criterion.toLowerCase();
 
-  if (lowerCriterion.includes('income')) return 'income';
-  if (lowerCriterion.includes('household') && lowerCriterion.includes('size')) return 'householdSize';
-  if (lowerCriterion.includes('citizenship') || lowerCriterion.includes('immigration')) return 'citizenship';
-  if (lowerCriterion.includes('asset') || lowerCriterion.includes('resource')) return 'asset';
-  if (lowerCriterion.includes('work') || lowerCriterion.includes('employment')) return 'work';
+  if (lowerCriterion.includes('income')) {return 'income';}
+  if (lowerCriterion.includes('household') && lowerCriterion.includes('size')) {return 'householdSize';}
+  if (lowerCriterion.includes('citizenship') || lowerCriterion.includes('immigration')) {return 'citizenship';}
+  if (lowerCriterion.includes('asset') || lowerCriterion.includes('resource')) {return 'asset';}
+  if (lowerCriterion.includes('work') || lowerCriterion.includes('employment')) {return 'work';}
 
   return 'default';
 }

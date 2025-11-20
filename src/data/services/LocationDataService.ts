@@ -61,7 +61,7 @@ export class LocationDataService {
   getStates(): StateOption[] {
     const cacheKey = 'states';
     const cached = this.getFromCache<StateOption[]>(cacheKey);
-    if (cached) return cached;
+    if (cached) {return cached;}
 
     const states = Object.entries(statesCountiesData.states).map(([code, data]) => ({
       value: code,
@@ -78,7 +78,7 @@ export class LocationDataService {
   getCountiesForState(stateCode: string): CountyOption[] {
     const cacheKey = `counties-${stateCode}`;
     const cached = this.getFromCache<CountyOption[]>(cacheKey);
-    if (cached) return cached;
+    if (cached) {return cached;}
 
     // Use type guard to prevent object injection
     const states = statesCountiesData.states as Record<string, { name: string; counties: string[] }>;
@@ -173,7 +173,7 @@ export class LocationDataService {
    * Search for locations by partial name
    */
   searchLocations(searchTerm: string): LocationSearchResult[] {
-    if (!searchTerm.trim()) return [];
+    if (!searchTerm.trim()) {return [];}
 
     const normalizedSearch = searchTerm.toLowerCase().trim();
     const results: LocationSearchResult[] = [];
@@ -227,7 +227,7 @@ export class LocationDataService {
 
   private getFromCache<T = unknown>(key: string): T | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (!entry) {return null;}
 
     const now = Date.now();
     if (now - entry.timestamp > entry.ttl) {

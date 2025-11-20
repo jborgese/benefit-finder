@@ -4,7 +4,7 @@
  * Focus management for accessible navigation and interactions
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 
 /**
  * Hook to auto-focus an element on mount
@@ -114,7 +114,7 @@ export function useModalFocus<T extends HTMLElement>(): React.RefObject<T> {
       );
 
       if (focusable.length > 0) {
-        focusable[0].focus();
+        focusable[0]?.focus();
       }
     }
 
@@ -135,7 +135,7 @@ export function useModalFocus<T extends HTMLElement>(): React.RefObject<T> {
 export function useFocusError(errors: Record<string, unknown>): void {
   useEffect(() => {
     const errorKeys = Object.keys(errors);
-    if (errorKeys.length === 0) return;
+    if (errorKeys.length === 0) {return;}
 
     // Find first error field
     const firstErrorField = document.querySelector<HTMLElement>(
@@ -153,7 +153,7 @@ export function useFocusError(errors: Record<string, unknown>): void {
  * Scroll element into view and focus
  */
 export function scrollIntoViewAndFocus(element: HTMLElement | null, options?: ScrollIntoViewOptions): void {
-  if (!element) return;
+  if (!element) {return;}
 
   element.scrollIntoView({
     behavior: 'smooth',
@@ -185,12 +185,12 @@ export function getNextFocusable(current: HTMLElement, reverse = false): HTMLEle
   );
 
   const currentIndex = focusableElements.indexOf(current);
-  if (currentIndex === -1) return null;
+  if (currentIndex === -1) {return null;}
 
   if (reverse) {
-    return focusableElements[currentIndex - 1] || null;
+    return focusableElements[currentIndex - 1] ?? null;
   } else {
-    return focusableElements[currentIndex + 1] || null;
+    return focusableElements[currentIndex + 1] ?? null;
   }
 }
 
@@ -255,6 +255,5 @@ export function useFocusHistory(): {
   };
 }
 
-// Import React
-import React from 'react';
+// (React imported at top)
 

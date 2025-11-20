@@ -202,7 +202,7 @@ export class ProgressiveLoader {
     // Load required stages first
     for (const stageId of requiredStages) {
       const stage = this.stages.get(stageId);
-      if (!stage) continue;
+      if (!stage) {continue;}
 
       try {
         stage.progress = 0;

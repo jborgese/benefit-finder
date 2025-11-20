@@ -70,7 +70,7 @@ export class AriaAnnouncer {
   announce(message: string, priority: 'polite' | 'assertive' = 'polite', clearAfter = 1000): void {
     const region = priority === 'assertive' ? this.assertiveRegion : this.politeRegion;
 
-    if (!region) return;
+    if (!region) {return;}
 
     // Clear and set new message
     region.textContent = '';
@@ -89,8 +89,8 @@ export class AriaAnnouncer {
   }
 
   clear(): void {
-    if (this.politeRegion) this.politeRegion.textContent = '';
-    if (this.assertiveRegion) this.assertiveRegion.textContent = '';
+    if (this.politeRegion) {this.politeRegion.textContent = '';}
+    if (this.assertiveRegion) {this.assertiveRegion.textContent = '';}
   }
 }
 
@@ -157,9 +157,9 @@ export function getFieldAriaProps(options: {
   const { labelId, descriptionId, errorId, helpId, hasError, isRequired } = options;
 
   const describedByIds = [];
-  if (descriptionId) describedByIds.push(descriptionId);
-  if (helpId) describedByIds.push(helpId);
-  if (hasError && errorId) describedByIds.push(errorId);
+  if (descriptionId) {describedByIds.push(descriptionId);}
+  if (helpId) {describedByIds.push(helpId);}
+  if (hasError && errorId) {describedByIds.push(errorId);}
 
   return {
     'aria-labelledby': labelId,

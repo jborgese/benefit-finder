@@ -406,7 +406,7 @@ function linkCountyNode(
   californiaQuestions: FlowNode[]
 ): void {
   const countyNode = flow.nodes.get('county');
-  if (!countyNode) return;
+  if (!countyNode) {return;}
 
   countyNode.nextId = californiaQuestions.length > 0
     ? californiaQuestions[0].id
@@ -421,7 +421,7 @@ function linkFirstCaliforniaQuestion(
   flow: QuestionFlow,
   californiaQuestions: FlowNode[]
 ): void {
-  if (californiaQuestions.length === 0) return;
+  if (californiaQuestions.length === 0) {return;}
 
   const firstCaliforniaQuestion = californiaQuestions[0];
   const firstCaliforniaNode = flow.nodes.get(firstCaliforniaQuestion.id);
@@ -438,7 +438,7 @@ function linkLastCaliforniaQuestion(
   flow: QuestionFlow,
   californiaQuestions: FlowNode[]
 ): void {
-  if (californiaQuestions.length === 0) return;
+  if (californiaQuestions.length === 0) {return;}
 
   const lastCaliforniaQuestion = californiaQuestions[californiaQuestions.length - 1];
   const lastCaliforniaNode = flow.nodes.get(lastCaliforniaQuestion.id);

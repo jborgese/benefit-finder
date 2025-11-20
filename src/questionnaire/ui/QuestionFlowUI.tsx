@@ -137,7 +137,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
 
   // Handle answer changes
   const handleAnswerChange = (value: unknown): void => {
-    if (!currentQuestion) return;
+    if (!currentQuestion) {return;}
 
     if (import.meta.env.DEV) {
       console.log('[QuestionFlowUI] Answer changed', {
@@ -175,7 +175,7 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
   // Handle Enter key press - navigate forward or complete questionnaire if valid
   const handleEnterKey = (): void => {
     // For date inputs, allow Enter key even if not fully valid (user might be typing)
-    if (!isCurrentQuestionValid && currentQuestion?.inputType !== 'date') return;
+    if (!isCurrentQuestionValid && currentQuestion?.inputType !== 'date') {return;}
 
     // Check if we can go forward (not on last question)
     if (store.canGoForward()) {

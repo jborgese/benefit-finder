@@ -33,7 +33,7 @@ try {
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
 
 // Import mocks setup AFTER ensuring window.location is safe
-import './App.test.setup';
+// (App.test.setup exports the mocks we import above; no side-effect import needed)
 
 // TEMPORARILY SKIPPED: This test file hangs when run in full suite due to Vitest runner issue
 // Works perfectly in isolation - all 4 tests pass

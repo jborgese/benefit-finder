@@ -33,8 +33,8 @@ export const TextInput: React.FC<TextInputProps> = ({
 
   // Convert error to array format
   const errors: string[] = (() => {
-    if (Array.isArray(error)) return error;
-    if (error) return [error];
+    if (Array.isArray(error)) {return error;}
+    if (error) {return [error];}
     return [];
   })();
 
@@ -61,8 +61,8 @@ export const TextInput: React.FC<TextInputProps> = ({
   // Format SSN as user types (if field is SSN)
   const formatSSN = (val: string): string => {
     const numbers = val.replace(/\D/g, '');
-    if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 5) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    if (numbers.length <= 3) {return numbers;}
+    if (numbers.length <= 5) {return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;}
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 5)}-${numbers.slice(5, 9)}`;
   };
 

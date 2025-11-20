@@ -1,64 +1,87 @@
 {
-    "compilerOptions": {
-        "target": "ES2020",
-        "useDefineForClassFields": true,
-        "lib": [
-            "DOM",
-            "DOM.Iterable",
-            "ES2020"
-        ],
-        "allowJs": false,
-        "skipLibCheck": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "declaration": false,
-        "jsx": "react-jsx",
-        "types": [
-            "vite/client",
-            "@testing-library/jest-dom",
-            "vitest/globals"
-        ],
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["src/*"],
-            "@/types": ["src/types"],
-            "@/db": ["src/db"],
-            "@/stores": ["src/stores"],
-            "@/components": ["src/components"],
-            "@/hooks": ["src/hooks"],
-            "@/utils": ["src/utils"],
-            "@/test": ["src/test"]
-        }
+  "compilerOptions": {
+    // ===== LANGUAGE & ENVIRONMENT =====
+    "target": "ES2020",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2020"
+    ],
+    "jsx": "react-jsx",
+
+    // ===== MODULES =====
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+
+    // ===== EMIT =====
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "incremental": false,
+    "sourceMap": false,
+
+    // ===== TYPE CHECKING (Strict Mode) =====
+    "strict": true,
+    // Additional strict flags not included in "strict: true"
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    // Enhanced type safety (TypeScript 4.1+)
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "exactOptionalPropertyTypes": false,
+
+    // ===== COMPILER OPTIONS =====
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+    "allowJs": false,
+
+    // ===== PATH MAPPING =====
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/types": ["src/types"],
+      "@/db": ["src/db"],
+      "@/stores": ["src/stores"],
+      "@/components": ["src/components"],
+      "@/hooks": ["src/hooks"],
+      "@/utils": ["src/utils"],
+      "@/test": ["src/test"]
     },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.tsx"
-    ],
-    "exclude": [
-        "**/*.d.ts",
-        "node_modules",
-        "dist",
-        "build"
-    ],
-    "references": [
-        {
-            "path": "./tsconfig.node.json"
-        },
-        {
-            "path": "./tsconfig.e2e.json"
-        }
+
+    // ===== TYPE DECLARATIONS =====
+    "types": [
+      "vite/client",
+      "@testing-library/jest-dom",
+      "vitest/globals"
     ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "**/*.d.ts",
+    "src/**/*.d.ts",
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "playwright-report",
+    "test-results"
+  ]
 }

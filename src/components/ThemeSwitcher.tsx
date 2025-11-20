@@ -36,14 +36,14 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   // Helper functions to avoid nested ternary expressions
   const getSizeClass = (size: 'sm' | 'md' | 'lg'): string => {
-    if (size === 'sm') return sizeClasses.sm;
-    if (size === 'lg') return sizeClasses.lg;
+    if (size === 'sm') {return sizeClasses.sm;}
+    if (size === 'lg') {return sizeClasses.lg;}
     return sizeClasses.md;
   };
 
   const getIconSizeClass = (size: 'sm' | 'md' | 'lg'): string => {
-    if (size === 'sm') return iconSizeClasses.sm;
-    if (size === 'lg') return iconSizeClasses.lg;
+    if (size === 'sm') {return iconSizeClasses.sm;}
+    if (size === 'lg') {return iconSizeClasses.lg;}
     return iconSizeClasses.md;
   };
 

@@ -9,7 +9,7 @@
  */
 
 import { importRules } from '../rules/core/import-export';
-import type { RuleImportResult } from '../rules/core/import-export';
+import type { RuleImportResult } from '../rules';
 import { resourceMonitor } from './ResourceMonitor';
 
 export interface ImportState {
@@ -54,7 +54,7 @@ export class ImportManager {
    */
   public wasRecentlyImported(importKey: string, maxAge: number = 60000): boolean {
     const state = this.importStates.get(importKey);
-    if (!state) return false;
+    if (!state) {return false;}
 
     const timeSinceLastImport = Date.now() - state.lastImportTime;
     return timeSinceLastImport < maxAge;

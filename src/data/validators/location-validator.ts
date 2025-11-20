@@ -29,9 +29,9 @@ export function validateLocationData(data: unknown): LocationValidationResult {
     errors.push('Location metadata is required');
   } else {
     const metadata = locationData.metadata as Record<string, unknown>;
-    if (!metadata.version) errors.push('Metadata version is required');
-    if (!metadata.lastUpdated) errors.push('Metadata lastUpdated is required');
-    if (!metadata.description) errors.push('Metadata description is required');
+    if (!metadata.version) {errors.push('Metadata version is required');}
+    if (!metadata.lastUpdated) {errors.push('Metadata lastUpdated is required');}
+    if (!metadata.description) {errors.push('Metadata description is required');}
   }
 
   if (!locationData.states || typeof locationData.states !== 'object') {

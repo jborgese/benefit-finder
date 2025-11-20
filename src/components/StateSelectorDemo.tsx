@@ -136,8 +136,8 @@ export const StateSelectorDemo: React.FC = () => {
         <div className="text-sm text-blue-800 dark:text-blue-200">
           <p>Screen: {deviceInfo.screenWidth}x{deviceInfo.screenHeight}</p>
           <p>Device: {(() => {
-            if (deviceInfo.isMobile) return 'Mobile';
-            if (deviceInfo.isTablet) return 'Tablet';
+            if (deviceInfo.isMobile) {return 'Mobile';}
+            if (deviceInfo.isTablet) {return 'Tablet';}
             return 'Desktop';
           })()}</p>
           <p>Touch: {deviceInfo.isTouchDevice ? 'Yes' : 'No'}</p>

@@ -22,7 +22,7 @@ export const QuickStartGuide: React.FC<QuickStartGuideProps> = ({
   const { t } = useI18n();
   const [currentStep, setCurrentStep] = useState(0);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const steps = [
     {

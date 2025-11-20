@@ -11,8 +11,8 @@ const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur', 'ku', 'dv'];
  */
 const getLanguageMetadata = (lng: string): typeof LANGUAGE_METADATA[keyof typeof LANGUAGE_METADATA] | undefined => {
   const normalizedLng = lng.split('-')[0];
-  if (normalizedLng === 'en') return LANGUAGE_METADATA.en;
-  if (normalizedLng === 'es') return LANGUAGE_METADATA.es;
+  if (normalizedLng === 'en') {return LANGUAGE_METADATA.en;}
+  if (normalizedLng === 'es') {return LANGUAGE_METADATA.es;}
   return undefined;
 };
 

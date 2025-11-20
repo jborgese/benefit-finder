@@ -48,15 +48,13 @@ export const isTestEnvironment = (): boolean => {
     }
   }
 
-  // Check Vite/Vitest import.meta.env
-  if (import.meta.env) {
-    debugInfo.importMetaEnv.VITEST = import.meta.env.VITEST;
-    debugInfo.importMetaEnv.MODE = import.meta.env.MODE;
-    if (import.meta.env.VITEST === true || import.meta.env.MODE === 'test') {
-      debugInfo.result = true;
-      console.log('[PERSIST DEBUG] isTestEnvironment() = true (import.meta.env check)', debugInfo);
-      return true;
-    }
+  // Check Vite/Vitest import.meta.env (always available in Vite environments)
+  debugInfo.importMetaEnv.VITEST = import.meta.env.VITEST;
+  debugInfo.importMetaEnv.MODE = import.meta.env.MODE;
+  if (import.meta.env.VITEST === true || import.meta.env.MODE === 'test') {
+    debugInfo.result = true;
+    console.log('[PERSIST DEBUG] isTestEnvironment() = true (import.meta.env check)', debugInfo);
+    return true;
   }
 
   // Check window.VITEST (set by Vitest in jsdom)

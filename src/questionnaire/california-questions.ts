@@ -224,7 +224,7 @@ export function getCaliforniaQuestions(): FlowNode[] {
 
 // Helper function to check if a question should be shown based on state
 export function shouldShowCaliforniaQuestion(questionId: string, state: string): boolean {
-  if (state !== 'CA') return false;
+  if (state !== 'CA') {return false;}
 
   // All California questions should only show for California residents
   return californiaQuestions.some(node => node.id === questionId);

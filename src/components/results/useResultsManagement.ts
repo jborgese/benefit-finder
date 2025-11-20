@@ -454,7 +454,7 @@ export function useResultsManagement(): UseResultsManagementReturn {
 
   useEffect(() => {
     // Only load once per component instance to prevent memory leaks
-    if (hasLoadedRef.current) return;
+    if (hasLoadedRef.current) {return;}
 
     hasLoadedRef.current = true;
 

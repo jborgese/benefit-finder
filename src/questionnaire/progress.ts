@@ -276,7 +276,7 @@ export class CheckpointManager {
    * Get latest checkpoint
    */
   getLatestCheckpoint(): ProgressCheckpoint | null {
-    return this.checkpoints[this.checkpoints.length - 1] || null;
+    return this.checkpoints[this.checkpoints.length - 1] ?? null;
   }
 
   /**

@@ -55,7 +55,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
 
   // Default age calculation function
   const defaultCalculateAge = (birthDate: string): number | null => {
-    if (!birthDate) return null;
+    if (!birthDate) {return null;}
 
     try {
       const today = new Date();
@@ -110,7 +110,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   };
 
   const formatDateForDisplay = (isoDate: string): string => {
-    if (!isoDate) return '';
+    if (!isoDate) {return '';}
 
     try {
       // Parse the ISO date string and create a date object in local timezone
@@ -129,9 +129,9 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   };
 
   const formatAgeInWords = (age: number): string => {
-    if (age < 1) return 'Less than 1 year old';
-    if (age === 1) return '1 year old';
-    if (age < 2) return '1 year old';
+    if (age < 1) {return 'Less than 1 year old';}
+    if (age === 1) {return '1 year old';}
+    if (age < 2) {return '1 year old';}
     return `${age} years old`;
   };
 

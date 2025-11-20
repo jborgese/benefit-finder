@@ -19,7 +19,7 @@ export const NextStepsList: React.FC<NextStepsListProps> = ({
 }) => {
   // Sort by priority: high > medium > low (undefined priorities go last)
   const getPriorityOrder = (priority: NextStep['priority']): number => {
-    if (!priority) return 3;
+    if (!priority) {return 3;}
     switch (priority) {
       case 'high': return 0;
       case 'medium': return 1;

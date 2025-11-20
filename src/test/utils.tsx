@@ -172,7 +172,7 @@ export function mockLocalStorage(): Storage {
 
   return {
     // eslint-disable-next-line security/detect-object-injection
-    getItem: vi.fn((key: string) => store[key] || null),
+    getItem: vi.fn((key: string) => store[key] ?? null),
     setItem: vi.fn((key: string, value: string) => {
       // eslint-disable-next-line security/detect-object-injection
       store[key] = value;
@@ -189,7 +189,7 @@ export function mockLocalStorage(): Storage {
       return Object.keys(store).length;
     },
     // eslint-disable-next-line security/detect-object-injection
-    key: vi.fn((index: number) => Object.keys(store)[index] || null),
+    key: vi.fn((index: number) => Object.keys(store)[index] ?? null),
   };
 }
 

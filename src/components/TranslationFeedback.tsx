@@ -44,7 +44,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
   }, [getStatistics]);
 
   const handleSubmitFeedback = (): void => {
-    if (!suggestedText.trim() || !reason.trim()) return;
+    if (!suggestedText.trim() || !reason.trim()) {return;}
 
     setIsSubmitting(true);
     try {
@@ -68,7 +68,7 @@ export const TranslationFeedback: React.FC<TranslationFeedbackProps> = ({
   };
 
   const handleReportIssue = (): void => {
-    if (!issueDescription.trim()) return;
+    if (!issueDescription.trim()) {return;}
 
     setIsSubmitting(true);
     try {

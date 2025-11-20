@@ -245,8 +245,8 @@ export function EditProfileButton({ profileId }: { profileId: string }): ReactEl
     }
   };
 
-  if (isFetching) return <div>Loading...</div>;
-  if (!profile) return <div>Profile not found</div>;
+  if (isFetching) {return <div>Loading...</div>;}
+  if (!profile) {return <div>Profile not found</div>;}
 
   if (!editing) {
     return (
@@ -479,8 +479,8 @@ export function EligibilityResultsList({ userProfileId }: { userProfileId: strin
                     <div className="text-right">
                       <span className="text-lg font-bold text-secondary-900">
                         {(() => {
-                          if (result.confidence >= 90) return result.eligible ? 'Strong Match' : 'Clear Mismatch';
-                          if (result.confidence >= 70) return result.eligible ? 'Good Match' : 'Likely Ineligible';
+                          if (result.confidence >= 90) {return result.eligible ? 'Strong Match' : 'Clear Mismatch';}
+                          if (result.confidence >= 70) {return result.eligible ? 'Good Match' : 'Likely Ineligible';}
                           return 'Uncertain';
                         })()}
                       </span>

@@ -85,7 +85,7 @@ export function useEligibilityEvaluation(options: EvaluationOptions): {
         const rulesByProgram = new Map<string, RuleDefinition[]>();
 
         for (const rule of rulePackage.rules) {
-          if (!rule.active || rule.draft) continue;
+          if (!rule.active || rule.draft) {continue;}
 
           const programRules = rulesByProgram.get(rule.programId) ?? [];
           programRules.push(rule);
@@ -219,8 +219,8 @@ function debugSnapIncomeRule(
   profile: UserProfile,
   evaluationResult: { result: boolean }
 ): void {
-  if (!import.meta.env.DEV) return;
-  if (!rule.id.includes('snap') || !rule.id.includes('income')) return;
+  if (!import.meta.env.DEV) {return;}
+  if (!rule.id.includes('snap') || !rule.id.includes('income')) {return;}
 
   const { householdIncome, householdSize, incomePeriod } = profile;
 
@@ -345,7 +345,7 @@ function formatFieldName(fieldName: string): string {
  * Helper to process required fields for rule result
  */
 function processRequiredFields(rule: RuleDefinition, profile: UserProfile, details: string[]): void {
-  if (!rule.requiredFields?.length) return;
+  if (!rule.requiredFields?.length) {return;}
 
   for (const field of rule.requiredFields) {
     // eslint-disable-next-line security/detect-object-injection -- field from rule definition, not user input
@@ -399,7 +399,7 @@ function processRuleResult(
  * Log rule evaluation start debug info
  */
 function logEvaluationStart(profile: UserProfile): void {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
   console.warn('🔍 [DEBUG] Starting rule evaluation with profile:', {
     householdIncome: profile.householdIncome,
     householdSize: profile.householdSize,
@@ -412,7 +412,7 @@ function logEvaluationStart(profile: UserProfile): void {
  * Log rule evaluation summary debug info
  */
 function logEvaluationSummary(passedRules: number, totalRules: number, rulesCited: string[]): void {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
   console.warn(`🔍 [DEBUG] Rule evaluation summary:`, {
     passedRules,
     totalRules,
@@ -425,7 +425,7 @@ function logEvaluationSummary(passedRules: number, totalRules: number, rulesCite
  * Log individual rule debug info
  */
 function logRuleDebug(rule: RuleDefinition, evaluationResult: { success: boolean; result: boolean; error?: string; executionTime?: number }): void {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
   console.warn(`🔍 [DEBUG] Evaluating rule: ${rule.id}`);
   console.warn(`🔍 [DEBUG] Rule logic:`, JSON.stringify(rule.ruleLogic, null, 2));
   console.warn(`🔍 [DEBUG] Rule ${rule.id} evaluation result:`, {
@@ -519,8 +519,8 @@ function evaluateIncomeRules(
   hasIncomeFailure: boolean;
 } {
   for (const rule of rules) {
-    if (rule.ruleType !== 'eligibility') continue;
-    if (!isIncomeRule(rule)) continue;
+    if (rule.ruleType !== 'eligibility') {continue;}
+    if (!isIncomeRule(rule)) {continue;}
 
     state.totalRules++;
     const ruleResult = processSingleRule(rule, profile, state);
@@ -568,8 +568,8 @@ function evaluateNonIncomeRules(
   hasIncomeFailure: boolean;
 } {
   for (const rule of rules) {
-    if (rule.ruleType !== 'eligibility') continue;
-    if (isIncomeRule(rule)) continue; // Skip income rules (already evaluated)
+    if (rule.ruleType !== 'eligibility') {continue;}
+    if (isIncomeRule(rule)) {continue;} // Skip income rules (already evaluated)
 
     state.totalRules++;
     const ruleResult = processSingleRule(rule, profile, state);
@@ -711,7 +711,7 @@ function getReasonText(status: EligibilityStatus, passed: number, total: number)
 function deduplicateDocuments(documents: RequiredDocument[]): RequiredDocument[] {
   const seen = new Set<string>();
   return documents.filter(doc => {
-    if (seen.has(doc.id)) return false;
+    if (seen.has(doc.id)) {return false;}
     seen.add(doc.id);
     return true;
   });
@@ -723,7 +723,7 @@ function deduplicateDocuments(documents: RequiredDocument[]): RequiredDocument[]
 function deduplicateSteps(steps: NextStep[]): NextStep[] {
   const seen = new Set<string>();
   return steps.filter(step => {
-    if (seen.has(step.step)) return false;
+    if (seen.has(step.step)) {return false;}
     seen.add(step.step);
     return true;
   });
@@ -749,7 +749,7 @@ function calculateSnapIncomeThreshold(householdSize: number): number {
  */
 function generateSnapIncomeCalculation(profile: UserProfile): { label: string; value: string; comparison: string } | null {
   const { householdIncome, householdSize } = profile;
-  if (householdIncome === undefined || householdSize === undefined) return null;
+  if (householdIncome === undefined || householdSize === undefined) {return null;}
 
   const threshold = calculateSnapIncomeThreshold(householdSize);
   const meetsThreshold = householdIncome <= threshold;
@@ -772,7 +772,7 @@ function generateSnapIncomeCalculation(profile: UserProfile): { label: string; v
  */
 function generateHouseholdCalculation(profile: UserProfile): { label: string; value: number; comparison: string } | null {
   const { householdSize } = profile;
-  if (householdSize === undefined) return null;
+  if (householdSize === undefined) {return null;}
 
   return {
     label: 'Household size',
@@ -786,7 +786,7 @@ function generateHouseholdCalculation(profile: UserProfile): { label: string; va
  */
 function generateCitizenshipCalculation(profile: UserProfile): { label: string; value: string; comparison: string } | null {
   const { citizenship } = profile;
-  if (!citizenship) return null;
+  if (!citizenship) {return null;}
 
   const citizenshipMap: Record<string, string> = {
     'us_citizen': 'U.S. Citizen',
@@ -808,7 +808,7 @@ function generateCitizenshipCalculation(profile: UserProfile): { label: string; 
  */
 function generateAgeCalculation(profile: UserProfile): { label: string; value: number; comparison: string } | null {
   const { age } = profile;
-  if (age === undefined) return null;
+  if (age === undefined) {return null;}
 
   return {
     label: 'Age',

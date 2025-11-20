@@ -62,7 +62,7 @@ export const ResultsHistory: React.FC<ResultsHistoryProps> = ({
   };
 
   const handleSaveEdit = async (): Promise<void> => {
-    if (!editingId) return;
+    if (!editingId) {return;}
 
     try {
       await updateResult(editingId, {

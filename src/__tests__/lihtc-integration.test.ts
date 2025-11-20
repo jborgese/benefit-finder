@@ -380,10 +380,10 @@ describe('LIHTC Integration Tests', () => {
 
     it('should determine unit size recommendations', () => {
       const getRecommendedUnitSize = (householdSize: number): string => {
-        if (householdSize === 1) return 'studio';
-        if (householdSize <= 2) return '1br';
-        if (householdSize <= 4) return '2br';
-        if (householdSize <= 6) return '3br';
+        if (householdSize === 1) {return 'studio';}
+        if (householdSize <= 2) {return '1br';}
+        if (householdSize <= 4) {return '2br';}
+        if (householdSize <= 6) {return '3br';}
         return '4br';
       };
 

@@ -60,8 +60,8 @@ export const SelectInput: React.FC<SelectProps> = ({
 
   // Convert error to array format
   const errors: string[] = (() => {
-    if (Array.isArray(error)) return error;
-    if (error) return [error];
+    if (Array.isArray(error)) {return error;}
+    if (error) {return [error];}
     return [];
   })();
 

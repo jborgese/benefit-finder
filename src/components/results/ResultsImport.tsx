@@ -38,7 +38,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
   const handleImport = async (): Promise<void> => {
     const password = passwordRef.current?.value ?? '';
 
-    if (!selectedFile || !password) return;
+    if (!selectedFile || !password) {return;}
 
     setIsImporting(true);
     setImportError(null);
@@ -51,7 +51,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
       // Reset and close
       setIsOpen(false);
       setSelectedFile(null);
-      if (passwordRef.current) passwordRef.current.value = '';
+      if (passwordRef.current) {passwordRef.current.value = '';}
       setIsImporting(false);
     } catch (err) {
       setImportError(err instanceof Error ? err.message : 'Failed to import file');
@@ -61,7 +61,7 @@ export const ResultsImport: React.FC<ResultsImportProps> = ({
 
   const handleReset = (): void => {
     setSelectedFile(null);
-    if (passwordRef.current) passwordRef.current.value = '';
+    if (passwordRef.current) {passwordRef.current.value = '';}
     setImportError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';

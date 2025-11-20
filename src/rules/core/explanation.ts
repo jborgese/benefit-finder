@@ -291,9 +291,9 @@ export function explainRule(
   const complexity = validation.complexity ?? 0;
   let complexityLevel: 'simple' | 'moderate' | 'complex' | 'very-complex' = 'simple';
 
-  if (complexity > 80) complexityLevel = 'very-complex';
-  else if (complexity > 50) complexityLevel = 'complex';
-  else if (complexity > 20) complexityLevel = 'moderate';
+  if (complexity > 80) {complexityLevel = 'very-complex';}
+  else if (complexity > 50) {complexityLevel = 'complex';}
+  else if (complexity > 20) {complexityLevel = 'moderate';}
 
   return {
     description,
@@ -370,10 +370,10 @@ function generateOperatorNodes(rule: JsonLogicRule, level: number): RuleExplanat
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
-    if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) continue;
+    if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) {continue;}
 
     const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
-    if (operandValue === undefined) continue;
+    if (operandValue === undefined) {continue;}
 
     const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
     const descriptionFn = Object.prototype.hasOwnProperty.call(OPERATOR_DESCRIPTIONS, operator)
@@ -712,10 +712,10 @@ function analyzeRuleForSuggestions(
 
   for (const operator of Object.keys(rule)) {
     const ruleAsRecord = rule as Record<string, unknown>;
-    if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) continue;
+    if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) {continue;}
 
     const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
-    if (operandValue === undefined) continue;
+    if (operandValue === undefined) {continue;}
 
     const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
 
@@ -847,9 +847,9 @@ function formatFieldName(fieldName: string): string {
  * Format value for display
  */
 function formatValue(value: unknown): string {
-  if (value === null) return 'empty';
-  if (value === undefined) return 'not provided';
-  if (typeof value === 'boolean') return value ? 'yes' : 'no';
+  if (value === null) {return 'empty';}
+  if (value === undefined) {return 'not provided';}
+  if (typeof value === 'boolean') {return value ? 'yes' : 'no';}
   if (typeof value === 'number') {
     // Format as currency if it looks like money
     if (value > 100) {
@@ -857,8 +857,8 @@ function formatValue(value: unknown): string {
     }
     return String(value);
   }
-  if (typeof value === 'string') return `"${value}"`;
-  if (Array.isArray(value)) return `[${value.length} items]`;
+  if (typeof value === 'string') {return `"${value}"`;}
+  if (Array.isArray(value)) {return `[${value.length} items]`;}
   if (typeof value === 'object' && 'var' in value) {
     return formatFieldName((value as Record<string, unknown>).var as string);
   }

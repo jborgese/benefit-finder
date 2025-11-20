@@ -260,7 +260,7 @@ function isIncomeRule(rule: EligibilityRuleDocument): boolean {
   // Check for word boundaries manually
   const hasWordBoundary = (text: string, keyword: string): boolean => {
     const index = text.indexOf(keyword);
-    if (index === -1) return false;
+    if (index === -1) {return false;}
 
     // Check if it's at the beginning or after a non-word character
     const beforeChar = index === 0 ? '' : text[index - 1];
@@ -699,8 +699,8 @@ function calculateConfidence(
   incomplete: boolean
 ): number {
   debugLog('Calculating confidence score', { evalResult, incomplete });
-  if (!evalResult.success) return 0;
-  if (incomplete) return 50;
+  if (!evalResult.success) {return 0;}
+  if (incomplete) {return 50;}
   return 95;
 }
 
@@ -713,9 +713,9 @@ function generateReason(
   incomplete: boolean
 ): string {
   debugLog('Generating human-readable reason', { evalResult, rule, incomplete });
-  if (!evalResult.success) return 'Unable to evaluate eligibility due to an error';
-  if (incomplete) return 'Cannot fully determine eligibility - missing required information';
-  if (evalResult.result) return rule.explanation ?? 'You meet the eligibility criteria for this program';
+  if (!evalResult.success) {return 'Unable to evaluate eligibility due to an error';}
+  if (incomplete) {return 'Cannot fully determine eligibility - missing required information';}
+  if (evalResult.result) {return rule.explanation ?? 'You meet the eligibility criteria for this program';}
   return 'You do not meet the eligibility criteria for this program';
 }
 

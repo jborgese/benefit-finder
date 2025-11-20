@@ -119,7 +119,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const tabs = [
     { id: 'overview', label: t('privacyExplainer.tabs.overview'), icon: '🔍' },

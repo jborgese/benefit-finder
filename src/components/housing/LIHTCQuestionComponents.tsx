@@ -114,10 +114,10 @@ export const UnitSizeQuestion: React.FC<QuestionProps> = ({
   const householdSize = (context?.householdSize as number) || 1;
 
   const getRecommendedUnitSize = (size: number): string => {
-    if (size === 1) return 'studio';
-    if (size <= 2) return '1br';
-    if (size <= 4) return '2br';
-    if (size <= 6) return '3br';
+    if (size === 1) {return 'studio';}
+    if (size <= 2) {return '1br';}
+    if (size <= 4) {return '2br';}
+    if (size <= 6) {return '3br';}
     return '4br';
   };
 

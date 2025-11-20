@@ -62,7 +62,7 @@ export function useValidationAnnouncements(): {
   }, [announce]);
 
   const announceValidationErrors = (errors: string[]): void => {
-    if (errors.length === 0) return;
+    if (errors.length === 0) {return;}
 
     const message = errors.length === 1
       ? errors[0]

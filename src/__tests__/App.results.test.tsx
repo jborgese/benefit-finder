@@ -10,7 +10,7 @@ import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation, flushPromises } from './App.test.setup';
 
 // Import mocks setup
-import './App.test.setup';
+// (App.test.setup exports the mocks we import above; no side-effect import needed)
 
 let App: (typeof import('../App'))['default'];
 

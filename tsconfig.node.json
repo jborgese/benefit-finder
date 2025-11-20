@@ -14,8 +14,7 @@
     "playwright.config.ts",
     "playwright.config.lowend.ts",
     "tailwind.config.ts",
-    "scripts/**/*.ts",
-    "src/**/*.ts"
+    "scripts/**/*.ts"
   ]
 }
 

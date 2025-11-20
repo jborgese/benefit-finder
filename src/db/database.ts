@@ -185,7 +185,7 @@ function convertToRxDBPassword(passphrase: string): string {
  * Debug utility to inspect current storage state
  */
 async function inspectStorageState(): Promise<void> {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
 
   console.warn('=== STORAGE STATE INSPECTION ===');
 
@@ -298,7 +298,7 @@ async function handleDuplicateDatabaseError(
  * Log encryption key mismatch debug info
  */
 async function logEncryptionMismatchDebug(): Promise<void> {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
 
   console.warn(`[DEBUG] handleEncryptionKeyMismatch: Starting encryption key mismatch recovery`);
   console.warn(`[DEBUG] handleEncryptionKeyMismatch: Current dbInstance exists: ${dbInstance !== null}`);
@@ -394,7 +394,7 @@ async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
  * Log database error debug info
  */
 function logDatabaseErrorDebug(error: unknown): void {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
 
   console.warn(`[DEBUG] handleDatabaseError: Handling database error`);
   console.warn(`[DEBUG] handleDatabaseError: Error object:`, error);
@@ -476,7 +476,7 @@ async function handleDatabaseError(
  * Log database initialization debug info
  */
 function logInitDebug(passphrase: string | undefined, forceReinit: boolean): void {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
 
   console.warn(`[DEBUG] initializeDatabase: Starting initialization`);
   console.warn(`[DEBUG] initializeDatabase: Parameters - passphrase: ${passphrase ? 'PROVIDED' : 'NOT PROVIDED'}, forceReinit: ${forceReinit}`);
@@ -596,7 +596,7 @@ export function isDatabaseInitialized(): boolean {
  * Log IndexedDB state for debugging
  */
 async function logIndexedDBState(when: 'before' | 'after'): Promise<void> {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV) {return;}
 
   try {
     const databases = await indexedDB.databases();

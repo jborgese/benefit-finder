@@ -10,8 +10,7 @@ import React from 'react';
 import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
 
-// Import mocks setup
-import './App.test.setup';
+// (App.test.setup exports the mocks we import above; no side-effect import needed)
 
 let App: (typeof import('../App'))['default'];
 
@@ -111,11 +110,11 @@ describe('App Component - Rendering', () => {
       // Buttons have emoji prefixes, so we need to use a text matcher function
       // Multiple responsive layouts render the same buttons, so use getAllByText
       expect(screen.getAllByText((_content, element) => {
-        if (!element) return false;
+        if (!element) { return false; }
         return element.textContent === '🎯 Tour' || element.textContent.includes('Tour');
       }).length).toBeGreaterThan(0);
       expect(screen.getAllByText((_content, element) => {
-        if (!element) return false;
+        if (!element) { return false; }
         return element.textContent === '🔒 Privacy' || element.textContent.includes('Privacy');
       }).length).toBeGreaterThan(0);
     });

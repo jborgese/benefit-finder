@@ -5,8 +5,7 @@
  */
 
 import React, { createContext, useEffect, useState, useCallback } from 'react';
-import type { Theme } from './themeContextConstants';
-import { THEME_STORAGE_KEY, DEFAULT_THEME } from './themeContextConstants';
+import { THEME_STORAGE_KEY, DEFAULT_THEME, type Theme } from './themeContextConstants';
 
 export interface ThemeContextType {
   theme: Theme;

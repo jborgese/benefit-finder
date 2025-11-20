@@ -23,7 +23,7 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
 
   // Memoize the expensive filtering operations
   const answeredQuestions = useMemo(() => {
-    if (!flow) return [];
+    if (!flow) {return [];}
 
     // Get all questions from the flow to display them in order
     const questions = Array.from(flow.nodes.values());
@@ -133,7 +133,7 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
         {answeredQuestions.map(({ question }: { question: QuestionDefinition }) => {
           const answer = answers.get(question.id);
 
-          if (!answer) return null;
+          if (!answer) {return null;}
 
           return (
             <div key={question.id} className="bg-gray-50 rounded-lg p-4 print:border print:bg-white">

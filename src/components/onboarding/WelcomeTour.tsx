@@ -84,7 +84,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
 
   // Highlight the current step's target element
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {return;}
 
     // eslint-disable-next-line security/detect-object-injection
     const step = tourSteps[currentStep] ?? tourSteps[0];
@@ -126,7 +126,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
 
   // Handle keyboard navigation
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {return;}
 
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
@@ -155,7 +155,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
     handleNext();
   }, [currentStep, tourSteps, handleNext]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   // eslint-disable-next-line security/detect-object-injection
   const currentStepData = tourSteps[currentStep] ?? tourSteps[0];

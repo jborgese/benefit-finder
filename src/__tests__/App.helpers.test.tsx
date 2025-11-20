@@ -9,7 +9,7 @@ import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
 
 // Import mocks setup
-import './App.test.setup';
+// (App.test.setup exports the mocks we import above; no side-effect import needed)
 
 describe('App Component - Helper Functions', () => {
   beforeEach(() => {

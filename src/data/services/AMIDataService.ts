@@ -159,7 +159,7 @@ export class AMIDataService {
 
   private getFromCache(key: string): ProcessedAMIData | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (!entry) {return null;}
 
     const now = Date.now();
     if (now - entry.timestamp > entry.ttl) {

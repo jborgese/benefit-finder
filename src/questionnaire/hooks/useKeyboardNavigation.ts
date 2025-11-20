@@ -5,8 +5,7 @@
  * Provides arrow key navigation, Enter key handling, and focus management
  */
 
-import { useCallback, useRef, useState, useEffect } from 'react';
-import type React from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 
 export interface KeyboardNavigationOptions {
   /** Total number of options */
@@ -106,7 +105,7 @@ export function useKeyboardNavigation({
   }, [focusedIndex, itemCount, wrap, navigateToIndex]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const { key } = e;
 

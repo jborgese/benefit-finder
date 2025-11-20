@@ -17,7 +17,7 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
   onClose,
 }) => {
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const shortcuts = [
     {

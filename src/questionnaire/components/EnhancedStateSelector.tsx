@@ -144,7 +144,7 @@ const processLocationResult = (
   setDetectedState: (state: string | null) => void,
   setLocationDetected: (detected: boolean) => void
 ): void => {
-  if (!coordinates || detectedState) return;
+  if (!coordinates || detectedState) {return;}
 
   const detectedStateCode = coordinatesToState(coordinates);
   debugLog('🌍 Location detected:', {
@@ -952,8 +952,8 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
 
   // Convert error to array format (must be declared before showError calculation)
   const errors: string[] = (() => {
-    if (Array.isArray(error)) return error;
-    if (error) return [error];
+    if (Array.isArray(error)) {return error;}
+    if (error) {return [error];}
     return [];
   })();
 
@@ -994,8 +994,8 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
     // Sort by priority if enabled
     if (showPopularFirst) {
       states.sort((a, b) => {
-        if (a.priority === 'high' && b.priority !== 'high') return -1;
-        if (b.priority === 'high' && a.priority !== 'high') return 1;
+        if (a.priority === 'high' && b.priority !== 'high') {return -1;}
+        if (b.priority === 'high' && a.priority !== 'high') {return 1;}
         return a.label.localeCompare(b.label);
       });
     }
@@ -1005,7 +1005,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
 
   // Group states by region if enabled
   const groupedStates = useMemo(() => {
-    if (!groupByRegion) return null;
+    if (!groupByRegion) {return null;}
     return createStateGroups(processedStates);
   }, [processedStates, groupByRegion]);
 
@@ -1123,7 +1123,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
   };
 
   const handleLocationRequest = (): void => {
-    if (isLocationLoading) return;
+    if (isLocationLoading) {return;}
 
     clearLocation();
     setLocationDetected(false);

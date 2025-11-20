@@ -335,9 +335,9 @@ export function formatVersion(version: RuleVersion): string {
  * Returns: -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2
  */
 export function compareVersions(v1: RuleVersion, v2: RuleVersion): number {
-  if (v1.major !== v2.major) return v1.major > v2.major ? 1 : -1;
-  if (v1.minor !== v2.minor) return v1.minor > v2.minor ? 1 : -1;
-  if (v1.patch !== v2.patch) return v1.patch > v2.patch ? 1 : -1;
+  if (v1.major !== v2.major) {return v1.major > v2.major ? 1 : -1;}
+  if (v1.minor !== v2.minor) {return v1.minor > v2.minor ? 1 : -1;}
+  if (v1.patch !== v2.patch) {return v1.patch > v2.patch ? 1 : -1;}
   return 0;
 }
 

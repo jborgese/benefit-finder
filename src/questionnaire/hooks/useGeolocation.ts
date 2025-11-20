@@ -142,7 +142,7 @@ export const useGeolocation = (options: GeolocationOptions = {}): GeolocationSta
    * Check permission status
    */
   const checkPermission = useCallback(async () => {
-    if (!state.isSupported) return;
+    if (!state.isSupported) {return;}
 
     try {
       // Check if we can query permission
