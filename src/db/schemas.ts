@@ -45,7 +45,7 @@ export const UserProfileZodSchema = z.object({
 
   // Location (will be encrypted)
   state: z.string().length(2).optional().describe('US state code (e.g., GA, CA)'),
-  // eslint-disable-next-line security/detect-unsafe-regex -- This regex is safe; it matches 5 or 9 digit ZIP codes with no backtracking risk
+   
   zipCode: z.string().regex(/^\d{5}(-\d{4})?$/).optional().describe('ZIP code (5 or 9 digits)'),
   county: z.string().max(100).optional().describe('County name'),
 

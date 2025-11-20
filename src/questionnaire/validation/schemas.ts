@@ -29,7 +29,7 @@ export const ssnSchema = z
 // Simple ZIP code pattern - no backtracking risk
 export const zipCodeSchema = z
   .string()
-  // eslint-disable-next-line security/detect-unsafe-regex
+   
   .regex(/^\d{5}(-\d{4})?$/, 'Please enter a valid ZIP code');
 
 /**
@@ -183,7 +183,7 @@ function applyValidation(schema: z.ZodTypeAny, validation: ValidationDefinition)
       return schema.regex(validation.value, validation.message);
     } else if (typeof validation.value === 'string') {
       // Validate pattern is safe before using
-      // eslint-disable-next-line security/detect-non-literal-regexp
+       
       return schema.regex(new RegExp(validation.value), validation.message);
     }
   }

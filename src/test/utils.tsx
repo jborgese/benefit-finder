@@ -171,24 +171,19 @@ export function mockLocalStorage(): Storage {
   const store: Record<string, string> = {};
 
   return {
-    // eslint-disable-next-line security/detect-object-injection
     getItem: vi.fn((key: string) => store[key] ?? null),
     setItem: vi.fn((key: string, value: string) => {
-      // eslint-disable-next-line security/detect-object-injection
       store[key] = value;
     }),
     removeItem: vi.fn((key: string) => {
-      // eslint-disable-next-line security/detect-object-injection
       delete store[key];
     }),
     clear: vi.fn(() => {
-      // eslint-disable-next-line security/detect-object-injection
       Object.keys(store).forEach((key) => delete store[key]);
     }),
     get length() {
       return Object.keys(store).length;
     },
-    // eslint-disable-next-line security/detect-object-injection
     key: vi.fn((index: number) => Object.keys(store)[index] ?? null),
   };
 }
@@ -207,17 +202,13 @@ export function suppressConsole(...methods: Array<keyof Console>): () => void {
   const original: Partial<Record<keyof Console, any>> = {};
 
   methods.forEach((method) => {
-    // eslint-disable-next-line security/detect-object-injection
     original[method] = console[method];
-    // eslint-disable-next-line security/detect-object-injection
     (console as any)[method] = vi.fn();
   });
 
   return () => {
     methods.forEach((method) => {
-      // eslint-disable-next-line security/detect-object-injection
       if (original[method]) {
-        // eslint-disable-next-line security/detect-object-injection
         (console as any)[method] = original[method];
       }
     });

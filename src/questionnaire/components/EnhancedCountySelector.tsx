@@ -59,7 +59,7 @@ const useCountiesForState = (selectedState: string | undefined): CountyOption[] 
 const usePopularCounties = (selectedState: string | undefined, allCounties: CountyOption[], showPopularFirst: boolean): CountyOption[] => {
   return useMemo(() => {
     if (!selectedState || !showPopularFirst) {return [];}
-    // eslint-disable-next-line security/detect-object-injection -- selectedState is validated and comes from questionnaire, not user input
+     
     const popular = selectedState && selectedState in POPULAR_COUNTIES ? POPULAR_COUNTIES[selectedState] ?? [] : [];
     return allCounties.filter(county =>
       popular.some(popularName =>

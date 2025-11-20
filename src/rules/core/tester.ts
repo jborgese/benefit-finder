@@ -301,7 +301,7 @@ export function generateCombinationTests(
   for (const combination of combinations) {
     const input: Record<string, unknown> = {};
     varNames.forEach((varName, i) => {
-      // eslint-disable-next-line security/detect-object-injection -- varName comes from Object.keys() and i is a controlled loop index, safe to use as property accessor
+       
       input[varName] = combination[i];
     });
 
@@ -426,9 +426,9 @@ function deepEqual(a: unknown, b: unknown): boolean {
   if (aKeys.length !== bKeys.length) {return false;}
 
   return aKeys.every((key) => {
-    // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+     
     const aValue = aRecord[key];
-    // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+     
     const bValue = bRecord[key];
     return deepEqual(aValue, bValue);
   });

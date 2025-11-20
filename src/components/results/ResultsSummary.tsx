@@ -186,14 +186,14 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
             print:p-2 print:border
           `}
           aria-label={`Show ${
-            // eslint-disable-next-line security/detect-object-injection
+             
             statusCounts[NOT_QUALIFIED_STATUS]
             } not qualified programs`}
         >
           <span className={`text-2xl mb-1 ${activeFilter === NOT_QUALIFIED_STATUS ? 'text-gray-800' : 'text-gray-600'}`}>{getStatusIcon(NOT_QUALIFIED_STATUS)}</span>
           <span className="text-sm font-medium">{t('results.summary.notQualified')}</span>
           <span className="text-xl font-bold text-gray-600">{
-            // eslint-disable-next-line security/detect-object-injection
+             
             statusCounts[NOT_QUALIFIED_STATUS]
           }</span>
         </button>

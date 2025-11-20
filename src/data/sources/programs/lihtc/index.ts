@@ -55,7 +55,7 @@ export function getLIHTCProgramsByState(stateCode: string): BenefitProgram[] {
   if (!Object.hasOwnProperty.call(LIHTC_PROGRAMS_BY_STATE, stateCode)) {
     return [];
   }
-  // eslint-disable-next-line security/detect-object-injection
+   
   return LIHTC_PROGRAMS_BY_STATE[stateCode];
 }
 
@@ -63,7 +63,7 @@ export function getLIHTCProgramsByState(stateCode: string): BenefitProgram[] {
  * Get LIHTC programs by jurisdiction level
  */
 export function getLIHTCProgramsByLevel(level: 'federal' | 'state' | 'city'): BenefitProgram[] {
-  // eslint-disable-next-line security/detect-object-injection
+   
   return LIHTC_PROGRAMS_BY_JURISDICTION_LEVEL[level];
 }
 

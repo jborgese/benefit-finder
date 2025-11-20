@@ -36,11 +36,6 @@ export class ImportManager {
 
   private constructor() {}
 
-  public static getInstance(): ImportManager {
-    ImportManager.instance ??= new ImportManager();
-    return ImportManager.instance;
-  }
-
   /**
    * Check if an import is currently in progress
    */
@@ -72,7 +67,12 @@ export class ImportManager {
    * Get import statistics for monitoring
    */
   public getImportStats(importKey: string): ImportState | null {
-    return this.importStates.get(importKey) ?? null;
+    const state = this.importStates.get(importKey);
+    if (!state) {
+      console.warn(`Import state for key ${importKey} is undefined.`);
+      return null;
+    }
+    return state;
   }
 
   /**
@@ -298,6 +298,14 @@ export class ImportManager {
       console.log(`⏳ [IMPORT MANAGER] Waiting for ${activePromises.length} active imports to complete...`);
       await Promise.allSettled(activePromises);
     }
+  }
+
+  public static getInstance(): ImportManager {
+    if (!this.instance) {
+      console.warn('ImportManager instance is undefined. Creating a new instance.');
+      this.instance = new ImportManager();
+    }
+    return this.instance;
   }
 }
 

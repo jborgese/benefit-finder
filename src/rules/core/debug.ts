@@ -162,7 +162,7 @@ export function debugRule(
         // Safe access using Object.prototype.hasOwnProperty
         const dataRecord = data as Record<string, unknown>;
         const value = Object.prototype.hasOwnProperty.call(dataRecord, varPath)
-          ? dataRecord[varPath] // eslint-disable-line security/detect-object-injection -- varPath from rule definition, not user input
+          ? dataRecord[varPath]  
           : undefined;
 
         trace.push({
@@ -193,7 +193,7 @@ export function debugRule(
         // Safe access to rule properties
         const ruleRecord = rule as Record<string, unknown>;
         const operatorValue = Object.prototype.hasOwnProperty.call(ruleRecord, operator)
-          ? ruleRecord[operator] // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
+          ? ruleRecord[operator]  
           : undefined;
 
         // Convert operatorValue to operands array
@@ -285,7 +285,7 @@ export function inspectVariable(
     if (value && typeof value === 'object') {
       const objValue = value as Record<string, unknown>;
       if (Object.prototype.hasOwnProperty.call(objValue, key)) {
-        value = objValue[key]; // eslint-disable-line security/detect-object-injection -- key from variable path, not user input
+        value = objValue[key];  
       } else {
         value = undefined;
       }
@@ -349,7 +349,7 @@ export function inspectRule(
   ): void => {
     if (key === 'var') {
       const nodeValue = Object.prototype.hasOwnProperty.call(nodeRecord, key)
-        ? nodeRecord[key] // eslint-disable-line security/detect-object-injection -- key from rule structure, not user input
+        ? nodeRecord[key]  
         : undefined;
       const varPath = typeof nodeValue === 'string' ? nodeValue : String(nodeValue);
       variableUsage.set(varPath, (variableUsage.get(varPath) ?? 0) + 1);
@@ -358,7 +358,7 @@ export function inspectRule(
     }
 
     const value = Object.prototype.hasOwnProperty.call(nodeRecord, key)
-      ? nodeRecord[key] // eslint-disable-line security/detect-object-injection -- key from rule structure, not user input
+      ? nodeRecord[key]  
       : undefined;
     if (value !== undefined) {
       countUsage(value as JsonLogicRule);
@@ -486,8 +486,8 @@ export async function compareEvaluations(
     const data2Record = data2 as Record<string, unknown>;
     const hasKey1 = Object.prototype.hasOwnProperty.call(data1Record, key);
     const hasKey2 = Object.prototype.hasOwnProperty.call(data2Record, key);
-    const value1 = hasKey1 ? data1Record[key] : undefined; // eslint-disable-line security/detect-object-injection -- key from data object keys, not user input
-    const value2 = hasKey2 ? data2Record[key] : undefined; // eslint-disable-line security/detect-object-injection -- key from data object keys, not user input
+    const value1 = hasKey1 ? data1Record[key] : undefined;  
+    const value2 = hasKey2 ? data2Record[key] : undefined;  
 
     if (value1 !== value2) {
       differences.push({

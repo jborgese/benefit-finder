@@ -202,11 +202,11 @@ function parseRulePattern(ruleCode: string): string {
   };
 
   const programName = Object.prototype.hasOwnProperty.call(programDescriptions, program)
-    // eslint-disable-next-line security/detect-object-injection -- program is validated via hasOwnProperty check
+     
     ? programDescriptions[program]
     : program;
   const categoryDesc = Object.prototype.hasOwnProperty.call(categoryDescriptions, category)
-    // eslint-disable-next-line security/detect-object-injection -- category is validated via hasOwnProperty check
+     
     ? categoryDescriptions[category]
     : category.toLowerCase();
 
@@ -238,7 +238,7 @@ function getUserFriendlyRuleDescription(
 
   // Direct match first
   if (Object.prototype.hasOwnProperty.call(programMappings, lowerRuleCode)) {
-    // eslint-disable-next-line security/detect-object-injection -- lowerRuleCode is validated via hasOwnProperty check
+     
     return programMappings[lowerRuleCode];
   }
 
@@ -254,7 +254,7 @@ function getUserFriendlyRuleDescription(
   // Check for exact match in rule descriptions
   const ruleDescriptions = getRuleDescriptions();
   if (Object.prototype.hasOwnProperty.call(ruleDescriptions, ruleCode)) {
-    // eslint-disable-next-line security/detect-object-injection -- ruleCode is validated via hasOwnProperty check
+     
     return ruleDescriptions[ruleCode];
   }
 

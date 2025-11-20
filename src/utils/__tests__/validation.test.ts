@@ -14,7 +14,7 @@ function isValidEmail(email: string): boolean {
 
 function isValidZipCode(zipCode: string): boolean {
   // Simple regex for ZIP code validation - no backtracking risk with fixed quantifiers
-  // eslint-disable-next-line security/detect-unsafe-regex
+   
   const zipRegex = /^\d{5}(-\d{4})?$/;
   return zipRegex.test(zipCode);
 }

@@ -198,7 +198,7 @@ export class AMIDataService {
     if (!Object.prototype.hasOwnProperty.call(counties, county)) {
       throw new Error(`AMI data not found for ${county}, ${state}`);
     }
-    // eslint-disable-next-line security/detect-object-injection -- county is validated above with hasOwnProperty
+     
     const countyData = counties[county];
 
     // Use whitelist validation to prevent object injection

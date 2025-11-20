@@ -220,7 +220,7 @@ function validatePattern(
     regex = pattern;
   } else {
     try {
-      // eslint-disable-next-line security/detect-non-literal-regexp
+       
       regex = new RegExp(pattern);
     } catch {
       // Invalid pattern - should be caught at schema validation
@@ -334,7 +334,7 @@ export function isValidZipCode(zip: string): boolean {
 
   // 5 digits or 5+4 format (safe regex - no ReDoS vulnerability)
   // Using specific length checks instead of quantifiers to avoid backtracking
-  // eslint-disable-next-line security/detect-unsafe-regex
+   
   const zipRegex = /^[0-9]{5}(?:-[0-9]{4})?$/;
   return zipRegex.test(zip);
 }

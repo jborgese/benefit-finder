@@ -55,7 +55,7 @@ export function useKeyboardNavigation({
 
   const focusItem = useCallback((index: number) => {
     if (index >= 0 && index < itemCount) {
-      // eslint-disable-next-line security/detect-object-injection
+       
       const element = itemRefs.current[index];
       if (element) {
         element.focus();
@@ -69,7 +69,7 @@ export function useKeyboardNavigation({
 
   const getItemRef = useCallback((index: number) => {
     return (el: HTMLElement | null) => {
-      // eslint-disable-next-line security/detect-object-injection
+       
       itemRefs.current[index] = el;
     };
   }, []);

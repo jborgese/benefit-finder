@@ -244,7 +244,7 @@ function debugSnapIncomeRule(
   };
 
   const correctThreshold = householdSize <= 8
-    // eslint-disable-next-line security/detect-object-injection -- householdSize is validated as a number in questionnaire
+     
     ? correctThresholds[householdSize]
     : correctThresholds[8] + (596 * (householdSize - 8));
 
@@ -330,7 +330,7 @@ const FIELD_NAME_MAPPINGS: Record<string, string> = {
 function formatFieldName(fieldName: string): string {
   // Check if we have a specific mapping for this field
   if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
-    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+    return FIELD_NAME_MAPPINGS[fieldName];  
   }
 
   // Fall back to converting camelCase or snake_case to Title Case
@@ -348,7 +348,7 @@ function processRequiredFields(rule: RuleDefinition, profile: UserProfile, detai
   if (!rule.requiredFields?.length) {return;}
 
   for (const field of rule.requiredFields) {
-    // eslint-disable-next-line security/detect-object-injection -- field from rule definition, not user input
+     
     const fieldValue = profile[field];
     const fieldDescription = formatFieldName(field);
     const hasValue = fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
@@ -739,7 +739,7 @@ function calculateSnapIncomeThreshold(householdSize: number): number {
   };
 
   return householdSize <= 8
-    // eslint-disable-next-line security/detect-object-injection -- householdSize is validated as a number in questionnaire
+     
     ? snapIncomeLimits[householdSize]
     : snapIncomeLimits[8] + (596 * (householdSize - 8));
 }
@@ -797,7 +797,7 @@ function generateCitizenshipCalculation(profile: UserProfile): { label: string; 
 
   return {
     label: 'Citizenship status',
-    // eslint-disable-next-line security/detect-object-injection -- citizenship is validated string from questionnaire
+     
     value: citizenshipMap[citizenship] || citizenship,
     comparison: 'Meets program requirements'
   };

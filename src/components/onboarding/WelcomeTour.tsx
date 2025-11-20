@@ -86,11 +86,11 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
   useEffect(() => {
     if (!isOpen) {return;}
 
-    // eslint-disable-next-line security/detect-object-injection
+     
     const step = tourSteps[currentStep] ?? tourSteps[0];
     const element = document.querySelector(step.target) as HTMLElement;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+     
     if (element && element.offsetParent !== null) {
       setHighlightedElement(element);
 
@@ -147,7 +147,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
   }, [onClose]);
 
   const handleActionClick = useCallback((): void => {
-    // eslint-disable-next-line security/detect-object-injection
+     
     const step = tourSteps[currentStep] ?? tourSteps[0];
     if (step.action) {
       step.action.onClick();
@@ -157,7 +157,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({
 
   if (!isOpen) {return null;}
 
-  // eslint-disable-next-line security/detect-object-injection
+   
   const currentStepData = tourSteps[currentStep] ?? tourSteps[0];
   const progress = ((currentStep + 1) / tourSteps.length) * 100;
 

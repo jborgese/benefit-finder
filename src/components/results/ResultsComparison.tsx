@@ -62,7 +62,7 @@ export const ResultsComparison: React.FC<ResultsComparisonProps> = ({
     };
 
     const defaultBadge = { color: 'bg-gray-50 text-gray-500', icon: '-', text: 'N/A' };
-    // eslint-disable-next-line security/detect-object-injection
+     
     const badge = (status in badges) ? badges[status] : defaultBadge;
 
     return (

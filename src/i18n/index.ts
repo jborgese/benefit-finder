@@ -52,7 +52,7 @@ const normalizeLanguageCode = (language: string): string => {
   // Return mapped language or just the first part (before hyphen)
   // Use safe property access to avoid security warnings
   if (hasOwnProperty(languageMap, language)) {
-    // eslint-disable-next-line security/detect-object-injection
+     
     return (languageMap[language] as string);
   }
   return language.split('-')[0];

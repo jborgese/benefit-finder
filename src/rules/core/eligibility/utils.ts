@@ -108,7 +108,7 @@ function processFieldForBreakdown(
   breakdown: CriteriaBreakdownItem[]
 ): void {
   const fieldValue = hasOwnProperty(data, field)
-    // eslint-disable-next-line security/detect-object-injection
+     
     ? data[field]
     : undefined;
   const fieldDescription = formatFieldName(field);

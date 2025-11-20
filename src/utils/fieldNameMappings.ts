@@ -61,7 +61,7 @@ export const FIELD_NAME_MAPPINGS: Record<string, string> = {
 export function formatFieldName(fieldName: string): string {
   // Check if we have a specific mapping for this field
   if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
-    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+    return FIELD_NAME_MAPPINGS[fieldName];  
   }
 
   // Fall back to converting camelCase or snake_case to Title Case

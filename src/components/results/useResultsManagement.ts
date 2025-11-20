@@ -410,7 +410,7 @@ export function useResultsManagement(): UseResultsManagementReturn {
 
         if (index !== -1) {
           // TypeScript knows index is valid here, so we can safely access the item
-          // eslint-disable-next-line security/detect-object-injection
+           
           const itemToUpdate = existing[index];
           const updatedItem = {
             ...itemToUpdate,
@@ -479,7 +479,7 @@ export function useResultsManagement(): UseResultsManagementReturn {
       abortControllerRef.current = null;
       hasLoadedRef.current = false; // Reset for potential remount
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Empty deps - only run on mount, not when loadAllResults changes
 
   return {

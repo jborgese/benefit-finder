@@ -190,7 +190,7 @@ export const useQuestionnaireStore = create<QuestionnaireState>()(
       // Answers
       setAnswer: (questionId, value) =>
         set((state) => {
-          // eslint-disable-next-line security/detect-object-injection -- questionId is from trusted application flow, not user input
+           
           state.answers[questionId] = {
             questionId,
             value,
@@ -220,7 +220,7 @@ export const useQuestionnaireStore = create<QuestionnaireState>()(
 
       updateAnswer: (questionId, value) =>
         set((state) => {
-          // eslint-disable-next-line security/detect-object-injection -- questionId is from trusted application flow, not user input
+           
           state.answers[questionId] = {
             questionId,
             value,
@@ -232,7 +232,7 @@ export const useQuestionnaireStore = create<QuestionnaireState>()(
 
       clearAnswer: (questionId) =>
         set((state) => {
-          // eslint-disable-next-line security/detect-object-injection -- questionId is from trusted application flow, not user input
+           
           delete state.answers[questionId];
 
           const answeredIndex = state.progress.answeredQuestions.indexOf(questionId);
@@ -268,13 +268,13 @@ export const useQuestionnaireStore = create<QuestionnaireState>()(
       // Validation
       setValidationError: (questionId, error) =>
         set((state) => {
-          // eslint-disable-next-line security/detect-object-injection -- questionId is from trusted application flow, not user input
+           
           state.validationErrors[questionId] = error;
         }),
 
       clearValidationError: (questionId) =>
         set((state) => {
-          // eslint-disable-next-line security/detect-object-injection -- questionId is from trusted application flow, not user input
+           
           delete state.validationErrors[questionId];
         }),
 

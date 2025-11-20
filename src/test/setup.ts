@@ -38,7 +38,6 @@ vi.mock('../db/database', () => {
     }
     // Use hasOwnProperty check to prevent prototype pollution
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      // eslint-disable-next-line security/detect-object-injection
       return obj[key];
     }
     return undefined;
@@ -427,13 +426,11 @@ function cleanupModuleCache(): void {
       ];
       let clearedCount = 0;
       storePaths.forEach(path => {
-        try {
+          try {
           const resolvedPath = require.resolve(path);
           // require.cache is always truthy when require is defined
-          // eslint-disable-next-line security/detect-object-injection
           const cacheEntry = require.cache[resolvedPath];
           if (cacheEntry) {
-            // eslint-disable-next-line security/detect-object-injection
             delete require.cache[resolvedPath];
             clearedCount++;
           }

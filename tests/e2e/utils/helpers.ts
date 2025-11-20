@@ -142,7 +142,6 @@ export function getLocalStorage(page: Page): Promise<Record<string, string>> {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key) {
-        // eslint-disable-next-line security/detect-object-injection
         items[key] = localStorage.getItem(key) ?? '';
       }
     }

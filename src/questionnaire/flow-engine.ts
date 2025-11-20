@@ -72,7 +72,7 @@ export class FlowEngine {
   updateContext(fieldName: string, value: unknown): void {
     // Using bracket notation for dynamic field access
     // This is intentional and safe as fieldName comes from trusted question definitions
-    // eslint-disable-next-line security/detect-object-injection
+     
     this.context[fieldName] = value;
   }
 
@@ -558,7 +558,7 @@ export function addNodeToFlow(
   node: FlowNode
 ): QuestionFlow {
   flow.nodes.set(node.id, node);
-  // eslint-disable-next-line no-param-reassign
+   
   flow.updatedAt = Date.now();
   return flow;
 }
@@ -581,7 +581,7 @@ export function linkNodes(
 
   fromNode.nextId = toId;
   toNode.previousId = fromId;
-  // eslint-disable-next-line no-param-reassign
+   
   flow.updatedAt = Date.now();
 
   return flow;
@@ -606,7 +606,7 @@ export function addBranch(
   node.branches ??= [];
 
   node.branches.push(branch);
-  // eslint-disable-next-line no-param-reassign
+   
   flow.updatedAt = Date.now();
 
   return flow;

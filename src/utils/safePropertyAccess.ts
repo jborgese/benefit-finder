@@ -11,11 +11,12 @@
  * @param key - The property key to check for
  * @returns True if the object has the property as its own property
  */
-export function hasOwnProperty<T extends Record<string, unknown>>(
-  obj: T,
-  key: string | number | symbol
-): key is keyof T {
-  return Object.prototype.hasOwnProperty.call(obj, key);
+export function hasOwnProperty<T extends object, K extends PropertyKey>(obj: T, key: K): boolean {
+  // Use Object.hasOwn for safer property access (ES2022+)
+  const { hasOwn } = Object as unknown as { hasOwn?: (obj: object, key: PropertyKey) => boolean };
+  return typeof hasOwn === 'function'
+    ? hasOwn(obj, key)
+    : Object.prototype.hasOwnProperty.call(obj, key);
 }
 
 /**
@@ -24,11 +25,16 @@ export function hasOwnProperty<T extends Record<string, unknown>>(
  * @param key - The property key
  * @returns The property value or undefined if it doesn't exist
  */
-export function safeGetProperty<T extends Record<string, unknown>>(
+export function safeGetProperty<T extends object, K extends keyof T>(
   obj: T,
-  key: string | number | symbol
-): unknown {
-  return hasOwnProperty(obj, key) ? obj[key as keyof T] : undefined;
+  key: K
+): T[K] | undefined {
+  // Avoid using 'any' and object injection sink
+  // Avoid object injection sink by checking key type and using safer access
+  if ((typeof key === 'string' || typeof key === 'number' || typeof key === 'symbol') && Object.prototype.hasOwnProperty.call(obj, key)) {
+    return Reflect.get(obj, key);
+  }
+  return undefined;
 }
 
 /**
@@ -37,9 +43,9 @@ export function safeGetProperty<T extends Record<string, unknown>>(
  * @param key - The property key to check for
  * @returns True if the property exists (own or inherited)
  */
-export function hasProperty<T extends Record<string, unknown>>(
+export function hasProperty<T extends object, K extends PropertyKey>(
   obj: T,
-  key: string | number | symbol
+  key: K
 ): boolean {
   return key in obj;
 }

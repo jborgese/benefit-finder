@@ -44,7 +44,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
       const nextIndex = event.key === 'ArrowLeft'
         ? (currentIndex - 1 + tabIds.length) % tabIds.length
         : (currentIndex + 1) % tabIds.length;
-      // eslint-disable-next-line security/detect-object-injection
+       
       setActiveTab(tabIds[nextIndex]);
     }
   }, [activeTab, onClose]);
@@ -111,7 +111,7 @@ export const PrivacyExplainer: React.FC<PrivacyExplainerProps> = ({
   // Focus management
   useEffect(() => {
     if (isOpen) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+       
       const modal = document.querySelector('[role="dialog"]') as HTMLElement | null;
       if (modal) {
         modal.focus();

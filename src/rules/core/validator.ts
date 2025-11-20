@@ -389,7 +389,7 @@ function calculateComplexity(rule: JsonLogicRule): number {
         complexity += 1; // Standard operator
       }
 
-      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+       
       const value = nodeAsRecord[key];
       if (value !== undefined) {
         visit(value as JsonLogicRule, depth + 1);
@@ -429,7 +429,7 @@ function extractOperators(rule: JsonLogicRule): string[] {
         operators.push(key);
       }
 
-      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+       
       const value = nodeAsRecord[key];
       if (value !== undefined) {
         visit(value as JsonLogicRule);
@@ -465,7 +465,7 @@ function extractVariables(rule: JsonLogicRule): string[] {
         continue;
       }
 
-      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+       
       const keyValue = nodeAsRecord[key];
 
       if (key === 'var') {
@@ -571,12 +571,12 @@ export function sanitizeRule(
         continue; // Skip disallowed operators
       }
 
-      // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+       
       const value = nodeAsRecord[key];
       const sanitizedValue = sanitize(value as JsonLogicRule);
 
       if (sanitizedValue !== null) {
-        // eslint-disable-next-line security/detect-object-injection -- key comes from Object.keys(), safe to use as property accessor
+         
         sanitized[key] = sanitizedValue;
       }
     }

@@ -659,7 +659,7 @@ async function clearAllIndexedDBs(): Promise<void> {
   const deletionResults: { [key: string]: 'success' | 'error' | 'blocked' } = {};
 
   for (const dbName of databasesToDelete) {
-    // eslint-disable-next-line security/detect-object-injection -- dbName is from existing database list or predefined array
+     
     deletionResults[dbName] = await deleteIndexedDB(dbName);
   }
 
@@ -751,12 +751,12 @@ export async function exportDatabase(): Promise<Record<string, unknown>> {
   const collectionEntries = Object.keys(collections) as Array<keyof BenefitFinderCollections>;
   for (const collectionName of collectionEntries) {
     // Safe: collectionName is type-checked as keyof BenefitFinderCollections
-    // eslint-disable-next-line security/detect-object-injection
+     
     const collection = db[collectionName];
     const docs = await collection.find().exec();
     const collectionKey = collectionName as string;
     // Safe: collectionKey is derived from typed collection name
-    // eslint-disable-next-line security/detect-object-injection
+     
     exportData.collections[collectionKey] = docs.map((doc) => doc.toJSON());
   }
 

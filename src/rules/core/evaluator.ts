@@ -555,7 +555,7 @@ export const BENEFIT_OPERATORS = {
     let threshold: number;
 
     if (householdSize <= 8) {
-      // eslint-disable-next-line security/detect-object-injection -- householdSize is validated as a number
+       
       threshold = thresholds[householdSize];
     } else {
       // For households larger than 8, add $596 per additional member

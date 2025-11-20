@@ -26,7 +26,7 @@ export async function initializeApp(): Promise<void> {
     // Wait for the current initialization to complete
     // Poll until the flag is cleared by the other initialization
     const maxAttempts = 100; // 10 seconds max wait (100ms * 100)
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isInitializing is modified asynchronously
+     
     for (let attempt = 0; attempt < maxAttempts && isInitializing; attempt++) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }

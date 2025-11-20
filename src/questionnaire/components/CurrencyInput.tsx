@@ -83,7 +83,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     };
     // Type-safe access using hasOwnProperty to prevent object injection
     if (Object.prototype.hasOwnProperty.call(symbols, code)) {
-      // eslint-disable-next-line security/detect-object-injection -- Safe: property existence validated above
+       
       return symbols[code];
     }
     return '$';

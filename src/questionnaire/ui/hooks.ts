@@ -23,7 +23,7 @@ export function useExitConfirmation(enabled = true): {
 
     const handleBeforeUnload = (e: BeforeUnloadEvent): string => {
       e.preventDefault();
-      // eslint-disable-next-line no-param-reassign
+       
       e.returnValue = 'Your progress has been saved. Are you sure you want to leave?';
       return e.returnValue;
     };

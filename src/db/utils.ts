@@ -46,7 +46,7 @@ function hasCallableMethod(obj: unknown, methodName: string): boolean {
   }
 
   // Safe: methodName is validated to contain only alphanumeric and underscore characters
-  // eslint-disable-next-line security/detect-object-injection
+   
   const method = (obj as Record<string, unknown>)[methodName];
 
   // Check if it's a function
@@ -210,13 +210,13 @@ function tryRefreshCollection<T>(collectionName: string): RxCollection<T> | null
   const db = getDatabase();
   const dbAny = db as unknown as Record<string, unknown>;
   // Safe: collectionName is validated to contain only alphanumeric and underscore characters
-  // eslint-disable-next-line security/detect-object-injection
+   
   if (!dbAny[collectionName]) {
     return null;
   }
 
   // Safe: collectionName is validated to contain only alphanumeric and underscore characters
-  // eslint-disable-next-line security/detect-object-injection
+   
   const refreshed = dbAny[collectionName] as RxCollection<T>;
   return isCollectionReady(refreshed) ? refreshed : null;
 }
@@ -613,7 +613,7 @@ export async function getDatabaseStats(): Promise<{
 
   for (const [name, collection] of Object.entries(collections)) {
     // Runtime check: TypeScript types guarantee these exist, but verify at runtime for safety
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime safety check
+     
     if (!collection) {
       throw new Error(`${name} collection is not initialized`);
     }
@@ -658,15 +658,15 @@ export async function checkDatabaseHealth(): Promise<{
     const db = getDatabase();
 
     // Check if collections exist (runtime check for database initialization)
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
+     
     if (!db.user_profiles) {issues.push('user_profiles collection not found');}
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
+     
     if (!db.benefit_programs) {issues.push('benefit_programs collection not found');}
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
+     
     if (!db.eligibility_rules) {issues.push('eligibility_rules collection not found');}
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
+     
     if (!db.eligibility_results) {issues.push('eligibility_results collection not found');}
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for proper database initialization
+     
     if (!db.app_settings) {issues.push('app_settings collection not found');}
 
     // Try a simple query on each collection

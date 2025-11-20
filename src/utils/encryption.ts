@@ -115,7 +115,6 @@ function arrayBufferToBase64(buffer: ArrayBufferLike): string {
   let binary = '';
   for (let i = 0; i < bytes.length; i++) {
     // Safe: i is a controlled loop counter within array bounds
-    // eslint-disable-next-line security/detect-object-injection
     binary += String.fromCharCode(bytes[i]);
   }
 
@@ -167,7 +166,6 @@ function base64ToUint8Array(base64: string): Uint8Array {
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
     // Safe: i is a controlled loop counter within array bounds
-    // eslint-disable-next-line security/detect-object-injection
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes;

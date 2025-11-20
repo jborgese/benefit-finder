@@ -225,9 +225,9 @@ export function calculateStats(metrics: PerformanceMetrics[]): PerformanceStats 
   // Calculate percentiles
   const p95Index = Math.floor(times.length * 0.95);
   const p99Index = Math.floor(times.length * 0.99);
-  // eslint-disable-next-line security/detect-object-injection -- Array access with computed index is safe here
+   
   const p95 = times[p95Index] ?? times[times.length - 1];
-  // eslint-disable-next-line security/detect-object-injection -- Array access with computed index is safe here
+   
   const p99 = times[p99Index] ?? times[times.length - 1];
 
   // Calculate standard deviation
@@ -612,7 +612,7 @@ export function analyzePerformance(rule: JsonLogicRule): {
       }
 
       const nodeAsRecord = node as Record<string, unknown>;
-      // eslint-disable-next-line security/detect-object-injection -- Dynamic property access is safe here, operator is from Object.keys()
+       
       const value = nodeAsRecord[operator];
       if (value !== undefined) {
         analyze(value as JsonLogicRule, depth + 1);
@@ -660,7 +660,7 @@ export async function benchmarkRule(
 
   for (let i = 0; i < testDataSets.length; i++) {
     const evalStart = performance.now();
-    // eslint-disable-next-line security/detect-object-injection -- Array access with loop index is safe here
+     
     const result = await evaluateRule(rule, testDataSets[i]);
     const evalEnd = performance.now();
 

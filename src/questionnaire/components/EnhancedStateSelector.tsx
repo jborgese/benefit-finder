@@ -887,7 +887,7 @@ export const EnhancedStateSelector: React.FC<EnhancedStateSelectorProps> = ({
       setHasRequestedLocation(true);
       getCurrentPosition();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [enableAutoDetection, hasRequestedLocation, isSupported, hasPermission, question.id, question.fieldName]);
 
   // Handle location detection result

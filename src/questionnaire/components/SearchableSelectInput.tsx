@@ -66,7 +66,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
       case 'Enter':
         e.preventDefault();
         if (isOpen && highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
-          // eslint-disable-next-line security/detect-object-injection
+           
           const selectedOption = filteredOptions[highlightedIndex];
           handleSelect(selectedOption);
         } else if (!isOpen) {
@@ -149,7 +149,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
   // Scroll highlighted option into view
   useEffect(() => {
     if (highlightedIndex >= 0 && listRef.current && highlightedIndex < listRef.current.children.length) {
-      // eslint-disable-next-line security/detect-object-injection
+       
       const highlightedElement = listRef.current.children[highlightedIndex] as HTMLElement;
       highlightedElement.scrollIntoView({
         block: 'nearest',

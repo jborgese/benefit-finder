@@ -301,7 +301,7 @@ export function QuestionComponent(): React.JSX.Element {
 
   // Safe: currentQuestionId is validated before use
   const currentAnswer = currentQuestionId
-    ? // eslint-disable-next-line security/detect-object-injection -- currentQuestionId comes from controlled questionnaire flow
+    ?  
       (answers[currentQuestionId].value ?? null)
     : null;
 
@@ -312,7 +312,7 @@ export function QuestionComponent(): React.JSX.Element {
   };
 
   // Safe: currentQuestionId is validated before use
-  // eslint-disable-next-line security/detect-object-injection
+   
   const currentValidationError = currentQuestionId ? validationErrors[currentQuestionId] : undefined;
   const hasValidationError = currentQuestionId ? currentQuestionId in validationErrors : false;
 

@@ -61,7 +61,7 @@ const genericReasons: SpecificReason[] = [
   {
     key: 'citizenship',
     message: `${CITIZENSHIP_MESSAGE}. Most benefit programs require U.S. citizenship or eligible immigration status.`,
-    condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
+    condition: (profile) => Boolean(profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship))
   },
   {
     key: 'incomeTooHigh',
@@ -130,7 +130,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: `${CITIZENSHIP_MESSAGE}. Medicaid requires U.S. citizenship or eligible immigration status.`,
-      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
+      condition: (profile) => Boolean(profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship))
     }
   ],
   'snap-federal': [
@@ -151,7 +151,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: `${CITIZENSHIP_MESSAGE}. SNAP requires U.S. citizenship or eligible immigration status.`,
-      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
+      condition: (profile) => Boolean(profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship))
     },
     {
       key: 'ageRestriction',
@@ -185,7 +185,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: `${CITIZENSHIP_MESSAGE}. TANF requires U.S. citizenship or eligible immigration status.`,
-      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
+      condition: (profile) => Boolean(profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship))
     }
   ],
   'ssi-federal': [
@@ -211,7 +211,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: `${CITIZENSHIP_MESSAGE}. SSI requires U.S. citizenship or eligible immigration status.`,
-      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
+      condition: (profile) => Boolean(profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship))
     }
   ],
   'section8-federal': [
@@ -227,7 +227,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: `${CITIZENSHIP_MESSAGE}. Section 8 requires U.S. citizenship or eligible immigration status.`,
-      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
+      condition: (profile) => Boolean(profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship))
     },
     {
       key: 'ageRestriction',
@@ -256,7 +256,7 @@ const programSpecificReasons: ProgramSpecificReasons = {
     {
       key: 'citizenship',
       message: `${CITIZENSHIP_MESSAGE}. LIHTC requires U.S. citizenship or eligible immigration status.`,
-      condition: (profile) => profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship)
+      condition: (profile) => Boolean(profile.citizenship && !ELIGIBLE_CITIZENSHIP_STATUSES.includes(profile.citizenship))
     },
     {
       key: 'ageRestriction',
@@ -290,7 +290,6 @@ function getProgramReasonsSafely(programId: string): SpecificReason[] {
   if (!VALID_PROGRAM_IDS.has(programId)) {
     return [];
   }
-  // eslint-disable-next-line security/detect-object-injection
   return programSpecificReasons[programId] ?? [];
 }
 
@@ -301,7 +300,6 @@ function getProgramMaybeReasonsSafely(programId: string): SpecificReason[] {
   if (!VALID_PROGRAM_IDS.has(programId)) {
     return [];
   }
-  // eslint-disable-next-line security/detect-object-injection
   return programMaybeReasons[programId] ?? [];
 }
 
@@ -328,7 +326,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'nutritionalRisk',
       message: 'Complete nutritional risk assessment - WIC requires documented nutritional need assessed by a health professional',
-      condition: (_profile) => true // Always show this as it requires professional assessment
+      condition: () => true // Always show this as it requires professional assessment
     }
   ],
   'medicaid-federal': [
@@ -367,7 +365,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'expenseDeductions',
       message: 'Document allowable expenses - SNAP considers housing, utilities, medical costs, and other deductions that can lower your countable income',
-      condition: (_profile) => true // Always relevant for SNAP
+      condition: () => true // Always relevant for SNAP
     },
     {
       key: 'citizenshipVerification',
@@ -394,7 +392,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'timeLimits',
       message: 'Check lifetime limits - TANF has 60-month lifetime limit in most states, with some exceptions for hardship cases',
-      condition: (_profile) => true // Always relevant for TANF
+      condition: () => true // Always relevant for TANF
     }
   ],
   'ssi-federal': [
@@ -433,12 +431,12 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'criminalBackground',
       message: 'Complete criminal background check - Section 8 requires clean criminal history',
-      condition: (_profile) => true // Always relevant for Section 8
+      condition: () => true // Always relevant for Section 8
     },
     {
       key: 'rentalHistory',
       message: 'Provide rental history and references - Section 8 requires good rental record',
-      condition: (_profile) => true // Always relevant for Section 8
+      condition: () => true // Always relevant for Section 8
     }
   ],
   'lihtc-federal': [
@@ -460,7 +458,7 @@ const programMaybeReasons: ProgramMaybeReasons = {
     {
       key: 'waitingList',
       message: 'Get on waiting lists immediately - LIHTC properties have long waiting lists',
-      condition: (_profile) => true // Always relevant for LIHTC
+      condition: () => true // Always relevant for LIHTC
     }
   ]
 };

@@ -372,12 +372,12 @@ function generateOperatorNodes(rule: JsonLogicRule, level: number): RuleExplanat
     const ruleAsRecord = rule as Record<string, unknown>;
     if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) {continue;}
 
-    const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
+    const operandValue = ruleAsRecord[operator];  
     if (operandValue === undefined) {continue;}
 
     const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
     const descriptionFn = Object.prototype.hasOwnProperty.call(OPERATOR_DESCRIPTIONS, operator)
-      ? OPERATOR_DESCRIPTIONS[operator] // eslint-disable-line security/detect-object-injection -- operator from known operator set, not user input
+      ? OPERATOR_DESCRIPTIONS[operator]  
       : undefined;
     const description = descriptionFn
       ? descriptionFn(operands as unknown[])
@@ -451,7 +451,7 @@ function generateRuleDescription(
     return 'Invalid rule structure';
   }
 
-  const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
+  const operandValue = ruleAsRecord[operator];  
   const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
 
   switch (languageLevel) {
@@ -462,7 +462,7 @@ function generateRuleDescription(
     case 'standard':
     default: {
       const descriptionFn = Object.prototype.hasOwnProperty.call(OPERATOR_DESCRIPTIONS, operator)
-        ? OPERATOR_DESCRIPTIONS[operator] // eslint-disable-line security/detect-object-injection -- operator from known operator set, not user input
+        ? OPERATOR_DESCRIPTIONS[operator]  
         : undefined;
       return descriptionFn
         ? descriptionFn(operands as unknown[])
@@ -488,7 +488,7 @@ function generateSimpleDescription(operator: string, _operands: JsonLogicRule[])
   };
 
   return Object.prototype.hasOwnProperty.call(simpleDescriptions, operator)
-    ? simpleDescriptions[operator] // eslint-disable-line security/detect-object-injection -- operator from known operator set, not user input
+    ? simpleDescriptions[operator]  
     : 'You must meet this requirement';
 }
 
@@ -643,8 +643,8 @@ export function explainDifference(
       continue;
     }
 
-    const value1 = Object.prototype.hasOwnProperty.call(data1, key) ? data1[key] : undefined; // eslint-disable-line security/detect-object-injection -- key from data object keys, not user input
-    const value2 = Object.prototype.hasOwnProperty.call(data2, key) ? data2[key] : undefined; // eslint-disable-line security/detect-object-injection -- key from data object keys, not user input
+    const value1 = Object.prototype.hasOwnProperty.call(data1, key) ? data1[key] : undefined;  
+    const value2 = Object.prototype.hasOwnProperty.call(data2, key) ? data2[key] : undefined;  
 
     if (value1 !== value2) {
       changedFields.push({
@@ -714,7 +714,7 @@ function analyzeRuleForSuggestions(
     const ruleAsRecord = rule as Record<string, unknown>;
     if (!Object.prototype.hasOwnProperty.call(ruleAsRecord, operator)) {continue;}
 
-    const operandValue = ruleAsRecord[operator]; // eslint-disable-line security/detect-object-injection -- operator from rule structure, not user input
+    const operandValue = ruleAsRecord[operator];  
     if (operandValue === undefined) {continue;}
 
     const operands = Array.isArray(operandValue) ? operandValue : [operandValue];
@@ -749,7 +749,7 @@ function getComparisonSuggestion(
   }
 
   const varName = (left as { var: string }).var;
-  const currentValue = Object.prototype.hasOwnProperty.call(data, varName) ? data[varName] : undefined; // eslint-disable-line security/detect-object-injection -- varName from rule structure, not user input
+  const currentValue = Object.prototype.hasOwnProperty.call(data, varName) ? data[varName] : undefined;  
 
   if (operator === '>' || operator === '>=') {
     return `Increase ${formatFieldName(varName)} from ${formatValue(currentValue)} to at least ${formatValue(right)}`;
@@ -832,7 +832,7 @@ const FIELD_NAME_MAPPINGS: Record<string, string> = {
 function formatFieldName(fieldName: string): string {
   // Check if we have a specific mapping for this field
   if (Object.prototype.hasOwnProperty.call(FIELD_NAME_MAPPINGS, fieldName)) {
-    return FIELD_NAME_MAPPINGS[fieldName]; // eslint-disable-line security/detect-object-injection -- fieldName from known field set, not user input
+    return FIELD_NAME_MAPPINGS[fieldName];  
   }
 
   // Fall back to converting camelCase or snake_case to Title Case

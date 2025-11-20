@@ -69,7 +69,6 @@ export function calculateFPL(householdSize: number): number {
   }
 
   if (householdSize <= 8) {
-    // eslint-disable-next-line security/detect-object-injection
     return FPL_2024_MONTHLY[householdSize];
   }
 
@@ -170,8 +169,7 @@ export function getSNAPGrossIncomeLimit(householdSize: number): number {
     8: 5867,
   };
 
-  if (householdSize <= 8) {
-    // eslint-disable-next-line security/detect-object-injection
+    if (householdSize <= 8) {
     return thresholds[householdSize];
   }
 
@@ -364,7 +362,7 @@ export function describeFPLPercentage(percentage: number): string {
     200: 'Medicaid Children/Pregnant Minimum',
   };
 
-  // eslint-disable-next-line security/detect-object-injection
+   
   return descriptions[percentage] || `${percentage}% of Federal Poverty Level`;
 }
 

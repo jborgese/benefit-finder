@@ -76,7 +76,7 @@ const colors = {
  */
 function loadRulePackage(filepath: string): RulePackage | null {
   try {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- filepath is validated CLI argument
+     
     const content = readFileSync(filepath, 'utf-8');
     return JSON.parse(content) as RulePackage;
   } catch (error) {
@@ -367,7 +367,7 @@ function main(): void {
             continue;
           }
 
-          // eslint-disable-next-line security/detect-non-literal-fs-filename
+           
           const files = readdirSync(dir, { recursive: true })
             .filter((f): f is string => typeof f === 'string' && f.endsWith('.json'));
           filesToValidate.push(...files.map((f) => join(dir, f)));
