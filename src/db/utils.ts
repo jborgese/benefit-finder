@@ -35,14 +35,22 @@ function hasCallableMethod(obj: unknown, methodName: string): boolean {
   if (!/^[a-zA-Z0-9_]+$/.test(methodName)) {
     return false;
   }
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    methodName in obj &&
-    // Safe: methodName is validated to contain only alphanumeric and underscore characters
-    // eslint-disable-next-line security/detect-object-injection
-    typeof (obj as Record<string, unknown>)[methodName] === 'function'
-  );
+
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+
+  // Check if method exists using 'in' operator (checks prototype chain)
+  if (!(methodName in obj)) {
+    return false;
+  }
+
+  // Safe: methodName is validated to contain only alphanumeric and underscore characters
+  // eslint-disable-next-line security/detect-object-injection
+  const method = (obj as Record<string, unknown>)[methodName];
+
+  // Check if it's a function
+  return typeof method === 'function';
 }
 
 /**
@@ -55,11 +63,17 @@ function isCollectionReady<T>(collection: RxCollection<T> | undefined): collecti
   if (!collection) {
     return false;
   }
-  return (
-    hasCallableMethod(collection, 'insert') &&
-    hasCallableMethod(collection, 'find') &&
-    hasCallableMethod(collection, 'findOne')
-  );
+
+  // Check for core required methods (count may not be immediately available but isn't critical)
+  const requiredMethods = ['insert', 'find', 'findOne'];
+
+  for (const method of requiredMethods) {
+    if (!hasCallableMethod(collection, method)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -208,7 +222,54 @@ function tryRefreshCollection<T>(collectionName: string): RxCollection<T> | null
 }
 
 /**
- * Wait for collection to be fully initialized
+ * Verify collection insert method is callable
+ */
+function verifyInsertMethod<T>(collection: RxCollection<T>): boolean {
+  try {
+    // Check if insert is actually callable (it should be a function)
+    // Safe: we've verified insert exists in isCollectionReady
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const insertMethod = (collection as any).insert;
+    return typeof insertMethod === 'function';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Collect method availability information for error reporting
+ */
+function collectMethodInfo<T>(collection: RxCollection<T>): {
+  availableMethods: string[];
+  missingMethods: string[];
+} {
+  const requiredMethods = ['insert', 'find', 'findOne'];
+  const optionalMethods = ['count'];
+  const otherMethods = ['remove', 'update', 'upsert', 'bulkInsert', 'bulkUpsert'];
+  const availableMethods: string[] = [];
+  const missingMethods: string[] = [];
+
+  // Check all required methods
+  for (const method of requiredMethods) {
+    if (hasCallableMethod(collection, method)) {
+      availableMethods.push(method);
+    } else {
+      missingMethods.push(method);
+    }
+  }
+
+  // Check optional and other methods (for debugging)
+  for (const method of [...optionalMethods, ...otherMethods]) {
+    if (hasCallableMethod(collection, method)) {
+      availableMethods.push(method);
+    }
+  }
+
+  return { availableMethods, missingMethods };
+}
+
+/**
+ * Wait for collection to be fully initialized by testing actual usage
  */
 async function waitForCollectionReady<T>(
   collection: RxCollection<T> | undefined,
@@ -220,32 +281,28 @@ async function waitForCollectionReady<T>(
     throw new Error(`${collectionName} collection is not initialized`);
   }
 
-  // Check for multiple methods that should exist on a fully initialized collection
-  const requiredMethods = ['insert', 'find', 'findOne', 'count'];
+  let currentCollection = collection;
 
   for (let i = 0; i < maxRetries; i++) {
-    // Use type-safe helper to check if collection is ready
-    if (isCollectionReady(collection)) {
-      return collection;
+    // Check if core methods are available
+    if (isCollectionReady(currentCollection) && verifyInsertMethod(currentCollection)) {
+      return currentCollection;
     }
 
     // Wait a bit before retrying
     await new Promise(resolve => setTimeout(resolve, delayMs));
 
-    // Re-check the collection in case it was reassigned
-    // This handles cases where the collection reference might change
-    if (i === Math.floor(maxRetries / 2)) {
+    // Refresh collection reference from database periodically
+    if (i > 2 && i % 3 === 0) {
       const refreshed = tryRefreshCollection<T>(collectionName);
       if (refreshed) {
-        return refreshed;
+        currentCollection = refreshed;
       }
     }
   }
 
-  // Final check with detailed error message
-  const collectionKeys = Object.keys(collection);
-  const availableMethods = collectionKeys.filter(key => hasCallableMethod(collection, key));
-  const missingMethods = requiredMethods.filter(method => !hasCallableMethod(collection, method));
+  // Final attempt with detailed error message
+  const { availableMethods, missingMethods } = collectMethodInfo(currentCollection);
 
   throw new Error(
     `${collectionName} collection does not have required methods after ${maxRetries} retries. ` +
