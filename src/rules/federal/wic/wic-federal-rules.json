@@ -352,7 +352,7 @@
           "id": "test-wic-income-boundary",
           "description": "Income at exact limit",
           "input": {
-            "householdIncome": 8229,
+            "householdIncome": 4671,
             "householdSize": 3
           },
           "expected": true,

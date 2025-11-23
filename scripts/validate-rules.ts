@@ -24,7 +24,7 @@ try {
   // use the word 'not' (e.g. {"not": {"var": "x"}}). Add a small
   // alias so tests that use 'not' evaluate correctly in the validator.
   // This is safe to call repeatedly; json-logic-js will override if needed.
-   
+
   (jsonLogic as any).add_operation('not', (v: unknown) => !v);
 } catch {
   // If operator registration fails for any reason, continue; the
@@ -400,10 +400,9 @@ function resolveHouseholdMultiplication(node: any, data: Record<string, unknown>
     if (packagePath && packagePath.includes(join('src', 'rules', 'core', 'examples'))) {
       return node;
     }
-    // Preserve original example behavior for the federal WIC package
-    if (packagePath && packagePath.includes(join('src', 'rules', 'federal', 'wic'))) {
-      return node;
-    }
+    // Preserve original example behavior for core examples directory only
+    // (previously we treated federal WIC as an exception; that special-case
+    // has been removed to ensure consistent FPL substitution across packages)
   } catch {
     // ignore path check failures and continue
   }
@@ -448,11 +447,8 @@ function computeFplThresholdFromBase(base: number, householdSize: number, rule?:
 
   // Mapping of known FPL base constants is loaded from `scripts/fpl-mapping.json` into `FPL_BASE_MAPPING`.
   const inc = FPL_BASE_MAPPING[base];
-  // Preserve legacy multiplication behavior for WIC rules because many
-  // example tests (and historical package files) expect `base * householdSize`.
-  if (rule && typeof rule.id === 'string' && rule.id.toLowerCase().includes('wic')) {
-    return base * householdSize;
-  }
+  // No special-case fallbacks: prefer authoritative mapping or explanation
+  // inference. This keeps validation consistent across packages.
 
   if (inc !== undefined) {
     return base + (householdSize - 1) * inc;
@@ -704,8 +700,16 @@ function main(): void {
   process.exit(hasBlockingErrors ? 1 : 0);
 }
 
-export { validatePackageStructure, testRulePackage, ValidationReport, TestSuiteReport };
+export { validatePackageStructure, testRulePackage, ValidationReport, TestSuiteReport, computeFplThresholdFromBase, resolveHouseholdMultiplication, normalizeTestInput, FPL_BASE_MAPPING };
 
-// Run main function
-main();
+// Run main function when executed as a script (not when imported by tests)
+try {
+  const argv1 = process.argv && process.argv[1] ? String(process.argv[1]) : '';
+  if (argv1.includes('validate-rules')) {
+    // Called directly via `node scripts/validate-rules.ts` or via the npm script
+    main();
+  }
+} catch {
+  // If detection fails, do not run main automatically (prevents test runner exits)
+}
 
