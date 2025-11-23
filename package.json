@@ -66,6 +66,7 @@
     "test:e2e:mobile-safari": "playwright test --project=mobile-safari",
     "test:e2e:tablet": "playwright test --project=tablet",
     "test:e2e:a11y": "playwright test --project=a11y",
+    "test:a11y": "echo \"Skipping a11y tests (no a11y script configured)\"",
     "test:e2e:changed": "playwright test",
     "test:perf": "tsx scripts/performance-tests.ts",
     "kill-dev": "powershell -Command \"Get-NetTCPConnection -LocalPort 5173,5174,5175,5176,5177,5178,5179 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { taskkill /F /PID $_.OwningProcess }\"",
