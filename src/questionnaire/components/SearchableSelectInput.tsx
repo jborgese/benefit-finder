@@ -8,11 +8,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDownIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import type { QuestionDefinition, QuestionOption } from '../types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 export interface SearchableSelectInputProps {
   question: QuestionDefinition;
-  value: string | null;
-  onChange: (value: string | null) => void;
+  value: string | number | null;
+  onChange: (value: string | number | null) => void;
   error?: string[];
   disabled?: boolean;
   onEnterKey?: () => void;
@@ -52,7 +53,8 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
   // Handle option selection
   const handleSelect = useCallback((option: QuestionOption) => {
-    onChange(option.value);
+    // Preserve numeric/string values; allow null as clear
+    onChange(option.value as string | number);
     setIsOpen(false);
     setSearchTerm('');
     setHighlightedIndex(-1);
@@ -60,13 +62,13 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (disabled) {return;}
+    if (disabled) { return; }
 
     switch (e.key) {
       case 'Enter':
         e.preventDefault();
         if (isOpen && highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
-           
+
           const selectedOption = filteredOptions[highlightedIndex];
           handleSelect(selectedOption);
         } else if (!isOpen) {
@@ -123,7 +125,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
   // Handle dropdown toggle
   const handleToggle = useCallback(() => {
-    if (disabled) {return;}
+    if (disabled) { return; }
     setIsOpen(prev => !prev);
     if (!isOpen) {
       inputRef.current?.focus();
@@ -149,7 +151,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
   // Scroll highlighted option into view
   useEffect(() => {
     if (highlightedIndex >= 0 && listRef.current && highlightedIndex < listRef.current.children.length) {
-       
+
       const highlightedElement = listRef.current.children[highlightedIndex] as HTMLElement;
       highlightedElement.scrollIntoView({
         block: 'nearest',
@@ -199,7 +201,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={question.ariaLabel ?? question.text}
+        aria-label={resolveQuestionString(question.ariaLabel) || resolveQuestionString(question.text)}
         aria-describedby={hasError ? `${question.id}-error` : undefined}
       >
         <div className="flex-1 min-w-0">

@@ -7,7 +7,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { KeyboardShortcuts } from '../KeyboardShortcuts';
 import * as useThemeModule from '../../contexts/useTheme';
 import * as useTextSizeModule from '../../contexts/useTextSize';

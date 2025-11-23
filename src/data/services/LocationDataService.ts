@@ -134,7 +134,7 @@ export class LocationDataService {
    * Get the complete location data structure
    */
   getLocationData(): LocationData {
-    return statesCountiesData as LocationData;
+    return statesCountiesData as unknown as LocationData;
   }
 
   /**

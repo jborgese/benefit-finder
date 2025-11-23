@@ -4,7 +4,7 @@
  * Specialized questions for LIHTC housing eligibility determination.
  */
 
-import type { QuestionDefinition } from '../types/question';
+import type { QuestionDefinition } from './types';
 
 /**
  * LIHTC-specific questionnaire questions
@@ -13,11 +13,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Student Status Question
   {
     id: 'lihtc-student-status',
-    key: 'studentStatus',
-    question: 'Are you or any household members full-time students?',
-    subtitle: 'This affects LIHTC eligibility - full-time students are generally ineligible unless exceptions apply',
+    fieldName: 'studentStatus',
+    text: 'Are you or any household members full-time students?',
+    description: 'This affects LIHTC eligibility - full-time students are generally ineligible unless exceptions apply',
     helpText: 'Single parents and married students may still be eligible even if they are students',
-    type: 'radio',
+    inputType: 'radio',
     required: true,
     options: [
       {
@@ -61,11 +61,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Unit Size Preference Question
   {
     id: 'lihtc-unit-size-preference',
-    key: 'preferredUnitSize',
-    question: 'What size unit are you looking for?',
-    subtitle: 'Choose the unit size that best fits your household needs',
+    fieldName: 'preferredUnitSize',
+    text: 'What size unit are you looking for?',
+    description: 'Choose the unit size that best fits your household needs',
     helpText: 'LIHTC units are available in various sizes. Your household size will help determine the appropriate unit size.',
-    type: 'select',
+    inputType: 'select',
     required: true,
     options: [
       {
@@ -109,11 +109,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Housing History Question
   {
     id: 'lihtc-housing-history',
-    key: 'hasLivedInSubsidizedHousing',
-    question: 'Have you or any household members lived in subsidized housing before?',
-    subtitle: 'This includes public housing, Section 8, LIHTC, or other subsidized housing',
+    fieldName: 'hasLivedInSubsidizedHousing',
+    text: 'Have you or any household members lived in subsidized housing before?',
+    description: 'This includes public housing, Section 8, LIHTC, or other subsidized housing',
     helpText: 'Previous subsidized housing experience may affect eligibility for certain programs',
-    type: 'radio',
+    inputType: 'radio',
     required: true,
     options: [
       {
@@ -142,11 +142,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Income Sources Breakdown
   {
     id: 'lihtc-income-sources',
-    key: 'incomeSources',
-    question: 'What are your main sources of household income?',
-    subtitle: 'Select all that apply to help determine LIHTC eligibility',
+    fieldName: 'incomeSources',
+    text: 'What are your main sources of household income?',
+    description: 'Select all that apply to help determine LIHTC eligibility',
     helpText: 'Different income sources may be treated differently for LIHTC calculations',
-    type: 'checkbox',
+    inputType: 'checkbox',
     required: true,
     options: [
       {
@@ -195,11 +195,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Rent Affordability Question
   {
     id: 'lihtc-rent-affordability',
-    key: 'maxRentAffordable',
-    question: 'What is the maximum monthly rent you can afford?',
-    subtitle: 'LIHTC units typically have rent caps at 30% of the applicable income limit',
+    fieldName: 'maxRentAffordable',
+    text: 'What is the maximum monthly rent you can afford?',
+    description: 'LIHTC units typically have rent caps at 30% of the applicable income limit',
     helpText: 'This helps determine if LIHTC housing is financially appropriate for your household',
-    type: 'currency',
+    inputType: 'currency',
     required: true,
     min: 0,
     max: 10000,
@@ -224,11 +224,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Housing Preferences
   {
     id: 'lihtc-preferences',
-    key: 'housingPreferences',
-    question: 'Do you have any specific housing preferences or needs?',
-    subtitle: 'Select any that apply to help match you with appropriate LIHTC properties',
+    fieldName: 'housingPreferences',
+    text: 'Do you have any specific housing preferences or needs?',
+    description: 'Select any that apply to help match you with appropriate LIHTC properties',
     helpText: 'These preferences help identify suitable LIHTC properties in your area',
-    type: 'checkbox',
+    inputType: 'checkbox',
     required: false,
     options: [
       {
@@ -271,11 +271,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Contact Preferences
   {
     id: 'lihtc-contact-preferences',
-    key: 'contactPreferences',
-    question: 'How would you like to be contacted about LIHTC housing opportunities?',
-    subtitle: 'Select your preferred method for receiving housing information',
+    fieldName: 'contactPreferences',
+    text: 'How would you like to be contacted about LIHTC housing opportunities?',
+    description: 'Select your preferred method for receiving housing information',
     helpText: 'This helps housing authorities contact you about available LIHTC units',
-    type: 'checkbox',
+    inputType: 'checkbox',
     required: true,
     options: [
       {
@@ -314,11 +314,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Completion Question
   {
     id: 'lihtc-complete',
-    key: 'lihtcComplete',
-    question: 'LIHTC Housing Assessment Complete',
-    subtitle: 'Thank you for completing the LIHTC housing assessment',
+    fieldName: 'lihtcComplete',
+    text: 'LIHTC Housing Assessment Complete',
+    description: 'Thank you for completing the LIHTC housing assessment',
     helpText: 'Your responses will be used to determine LIHTC eligibility and match you with appropriate housing options',
-    type: 'info',
+    inputType: 'text',
     required: false,
     category: 'housing',
     priority: 10,
@@ -329,11 +329,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Student Ineligible Question
   {
     id: 'lihtc-student-ineligible',
-    key: 'studentIneligible',
-    question: 'Student Status May Affect Eligibility',
-    subtitle: 'Full-time students are generally ineligible for LIHTC housing',
+    fieldName: 'studentIneligible',
+    text: 'Student Status May Affect Eligibility',
+    description: 'Full-time students are generally ineligible for LIHTC housing',
     helpText: 'However, you may still be eligible for other housing programs. We will check your eligibility for alternative housing assistance.',
-    type: 'info',
+    inputType: 'text',
     required: false,
     category: 'housing',
     priority: 3.5,
@@ -344,11 +344,11 @@ export const LIHTC_QUESTIONS: QuestionDefinition[] = [
   // Alternative Housing Programs
   {
     id: 'lihtc-alternatives',
-    key: 'alternativeHousing',
-    question: 'Alternative Housing Programs',
-    subtitle: 'While LIHTC may not be available, other housing programs may be suitable',
+    fieldName: 'alternativeHousing',
+    text: 'Alternative Housing Programs',
+    description: 'While LIHTC may not be available, other housing programs may be suitable',
     helpText: 'We will check your eligibility for Section 8, public housing, and other affordable housing programs',
-    type: 'info',
+    inputType: 'text',
     required: false,
     category: 'housing',
     priority: 3.6,

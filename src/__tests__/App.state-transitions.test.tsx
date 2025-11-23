@@ -7,7 +7,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import type { RxDocument } from 'rxdb';
 import type { UserProfile } from '../db/schemas';
 import { destroyDatabase } from '../db';

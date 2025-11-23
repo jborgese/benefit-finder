@@ -18,7 +18,7 @@ import {
   validateCaliforniaAnswers,
   getCaliforniaFieldMappings
 } from './california-integration';
-import type { QuestionContext } from './types';
+// NOTE: QuestionContext type import removed - this file uses concrete Maps for examples
 
 /**
  * Example: Using California questions in the questionnaire
@@ -34,8 +34,8 @@ export function demonstrateCaliforniaIntegration(): {
   const flow = createEnhancedFlow();
 
   // Example context with California selected
-  const context: QuestionContext = {
-    answers: new Map([
+  const context: { answers: Map<string, unknown>; currentQuestionId: string; progress: number } = {
+    answers: new Map<string, unknown>([
       ['state', 'CA'],
       ['householdSize', 2],
       ['householdIncome', 3000],
@@ -82,7 +82,7 @@ export function demonstrateCaliforniaValidation(): {
   fieldMappings: Record<string, string>;
 } {
   // Example answers for a California resident
-  const answers = new Map([
+  const answers = new Map<string, unknown>([
     ['state', 'CA'],
     ['immigration_status', 'daca'],
     ['hasValidDACA', true],
@@ -122,7 +122,7 @@ export function demonstrateStateChanges(): ReturnType<typeof updateFlowForState>
 
   // User initially selects Georgia
   let currentFlow = updateFlowForState(flow, 'GA', {
-    answers: new Map([['state', 'GA']]),
+    answers: new Map<string, unknown>([['state', 'GA']]),
     currentQuestionId: 'state',
     progress: 0.1
   });
@@ -131,7 +131,7 @@ export function demonstrateStateChanges(): ReturnType<typeof updateFlowForState>
 
   // User changes to California
   currentFlow = updateFlowForState(flow, 'CA', {
-    answers: new Map([['state', 'CA']]),
+    answers: new Map<string, unknown>([['state', 'CA']]),
     currentQuestionId: 'state',
     progress: 0.1
   });
@@ -140,7 +140,7 @@ export function demonstrateStateChanges(): ReturnType<typeof updateFlowForState>
 
   // User changes back to Georgia
   currentFlow = updateFlowForState(flow, 'GA', {
-    answers: new Map([['state', 'GA']]),
+    answers: new Map<string, unknown>([['state', 'GA']]),
     currentQuestionId: 'state',
     progress: 0.1
   });
@@ -154,8 +154,7 @@ export function demonstrateStateChanges(): ReturnType<typeof updateFlowForState>
  * Example: California-specific question flow
  */
 export function demonstrateCaliforniaFlow(): string[] {
-  const _flow = createEnhancedFlow();
-  const answers = new Map([
+  const answers = new Map<string, unknown>([
     ['state', 'CA'],
     ['householdSize', 1],
     ['householdIncome', 2000]

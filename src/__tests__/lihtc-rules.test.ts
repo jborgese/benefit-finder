@@ -18,7 +18,7 @@ describe('LIHTC Rules Unit Tests', () => {
         amiData: { incomeLimit50: 40000, incomeLimit60: 48000 }
       };
 
-      const result = await evaluateRule(rule.ruleLogic, data);
+      const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
@@ -29,7 +29,7 @@ describe('LIHTC Rules Unit Tests', () => {
         amiData: { incomeLimit50: 40000, incomeLimit60: 48000 }
       };
 
-      const result = await evaluateRule(rule.ruleLogic, data);
+      const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
@@ -40,7 +40,7 @@ describe('LIHTC Rules Unit Tests', () => {
         amiData: { incomeLimit50: 40000, incomeLimit60: 48000 }
       };
 
-      const result = await evaluateRule(rule.ruleLogic, data);
+      const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
@@ -51,7 +51,7 @@ describe('LIHTC Rules Unit Tests', () => {
         amiData: { incomeLimit50: 40000, incomeLimit60: 48000 }
       };
 
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -62,7 +62,7 @@ describe('LIHTC Rules Unit Tests', () => {
         amiData: { incomeLimit50: 40000, incomeLimit60: 48000 }
       };
 
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
@@ -73,28 +73,28 @@ describe('LIHTC Rules Unit Tests', () => {
 
     it('should pass for non-student', async () => {
       const data = { studentStatus: 'none' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for single parent student', async () => {
       const data = { studentStatus: 'single_parent' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for married student', async () => {
       const data = { studentStatus: 'married_student' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should fail for full-time student', async () => {
       const data = { studentStatus: 'full_time_student' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -105,28 +105,28 @@ describe('LIHTC Rules Unit Tests', () => {
 
     it('should pass for appropriate household size', async () => {
       const data = { householdSize: 3, maxUnitOccupancy: 4 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for exact match', async () => {
       const data = { householdSize: 4, maxUnitOccupancy: 4 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should fail for oversized household', async () => {
       const data = { householdSize: 5, maxUnitOccupancy: 4 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
 
     it('should pass for single person in studio', async () => {
       const data = { householdSize: 1, maxUnitOccupancy: 1 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
@@ -140,7 +140,7 @@ describe('LIHTC Rules Unit Tests', () => {
         maxRentAffordable: 1000,
         amiData: { incomeLimit50: 40000 }
       };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
@@ -150,7 +150,7 @@ describe('LIHTC Rules Unit Tests', () => {
         maxRentAffordable: 15000, // This should be > 30% of 40000 (12000)
         amiData: { incomeLimit50: 40000 }
       };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -160,7 +160,7 @@ describe('LIHTC Rules Unit Tests', () => {
         maxRentAffordable: 1000, // 30% of 40000/12 = 1000
         amiData: { incomeLimit50: 40000 }
       };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
@@ -171,35 +171,35 @@ describe('LIHTC Rules Unit Tests', () => {
 
     it('should pass for US citizen', async () => {
       const data = { citizenship: 'us_citizen' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for permanent resident', async () => {
       const data = { citizenship: 'permanent_resident' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for refugee', async () => {
       const data = { citizenship: 'refugee' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for asylee', async () => {
       const data = { citizenship: 'asylee' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should fail for other status', async () => {
       const data = { citizenship: 'other' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+      const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -210,35 +210,35 @@ describe('LIHTC Rules Unit Tests', () => {
 
     it('should pass for 18 year old', async () => {
       const data = { age: 18 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for adult', async () => {
       const data = { age: 25 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for senior', async () => {
       const data = { age: 65 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should fail for minor', async () => {
       const data = { age: 17 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
 
     it('should fail for very young', async () => {
       const data = { age: 16 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -249,35 +249,35 @@ describe('LIHTC Rules Unit Tests', () => {
 
     it('should pass for single person', async () => {
       const data = { householdSize: 1 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for small family', async () => {
       const data = { householdSize: 3 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should pass for large family', async () => {
       const data = { householdSize: 8 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should fail for zero household size', async () => {
       const data = { householdSize: 0 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
 
     it('should fail for oversized household', async () => {
       const data = { householdSize: 9 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -288,14 +288,14 @@ describe('LIHTC Rules Unit Tests', () => {
 
     it('should pass for clean background', async () => {
       const data = { hasCriminalHistory: false };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should fail for criminal history', async () => {
       const data = { hasCriminalHistory: true };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -306,21 +306,21 @@ describe('LIHTC Rules Unit Tests', () => {
 
     it('should pass for positive income', async () => {
       const data = { householdIncome: 30000 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(true);
     });
 
     it('should fail for zero income', async () => {
       const data = { householdIncome: 0 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
 
     it('should fail for negative income', async () => {
       const data = { householdIncome: -1000 };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
       expect(result.success).toBe(true);
       expect(result.result).toBe(false);
     });
@@ -331,7 +331,7 @@ describe('LIHTC Rules Unit Tests', () => {
       const rule = LIHTC_RULES.find(r => r.id === 'lihtc-income-eligibility-2024')!;
 
       const data = {}; // Missing required fields
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
 
       expect(result.success).toBe(true);
       expect(result.result).toBe(null); // Should return null when data is missing
@@ -341,7 +341,7 @@ describe('LIHTC Rules Unit Tests', () => {
       const rule = LIHTC_RULES.find(r => r.id === 'lihtc-age-eligibility')!;
 
       const data = { age: 'not-a-number' };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
 
       expect(result.success).toBe(true);
       expect(result.result).toBe(false); // JSON Logic returns false for invalid data types
@@ -351,7 +351,7 @@ describe('LIHTC Rules Unit Tests', () => {
       const rule = LIHTC_RULES.find(r => r.id === 'lihtc-student-eligibility')!;
 
       const data = { studentStatus: null };
-      const result = await evaluateRule(rule.ruleLogic, data);
+        const result = await evaluateRule(rule.logic, data);
 
       expect(result.success).toBe(true);
       expect(result.result).toBe(false); // JSON Logic returns false for null values
@@ -367,7 +367,7 @@ describe('LIHTC Rules Unit Tests', () => {
       };
 
       const start = Date.now();
-      await evaluateRule(rule.ruleLogic, data);
+        await evaluateRule(rule.logic, data);
       const duration = Date.now() - start;
 
       expect(duration).toBeLessThan(50); // Should complete in under 50ms
@@ -381,7 +381,7 @@ describe('LIHTC Rules Unit Tests', () => {
       };
 
       const start = Date.now();
-      const promises = Array(100).fill(null).map(() => evaluateRule(rule.ruleLogic, data));
+        const promises = Array(100).fill(null).map(() => evaluateRule(rule.logic, data));
       await Promise.all(promises);
       const duration = Date.now() - start;
 

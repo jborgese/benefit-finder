@@ -220,9 +220,9 @@ const createResultFromEvaluation = (result: EligibilityEvaluationResult, program
         amount: result.estimatedBenefit.amount ?? 0,
         frequency: ((): 'monthly' | 'annual' | 'one-time' => {
           const freq = result.estimatedBenefit.frequency;
-          if (freq === 'one_time') {return 'one-time';}
-          if (freq === 'quarterly') {return 'monthly';}
-          if (freq === 'annual') {return 'annual';}
+          if (freq === 'one_time') { return 'one-time'; }
+          if (freq === 'quarterly') { return 'monthly'; }
+          if (freq === 'annual') { return 'annual'; }
           return 'monthly';
         })(),
         description: result.estimatedBenefit.description
@@ -296,7 +296,7 @@ function App(): React.ReactElement {
       try {
         const results = await loadAllResultsRef.current(abortController.signal);
         // Check if aborted before proceeding
-        if (abortController.signal.aborted) {return;}
+        if (abortController.signal.aborted) { return; }
 
         if (results.length > 0) {
           setHasResults(true);
@@ -306,7 +306,7 @@ function App(): React.ReactElement {
           const { signal } = abortController;
           const actualResults = await loadResultRef.current(mostRecent.id, signal);
           // Check if aborted before proceeding (signal may have been aborted during async operation)
-          if (signal.aborted) {return;}
+          if (signal.aborted) { return; }
 
           if (actualResults) {
             setCurrentResults(actualResults);
@@ -610,7 +610,7 @@ function App(): React.ReactElement {
               result.ruleId === 'medicaid-federal-expansion-income' ||
               result.ruleId === 'wic-federal-income-limit' ||
               (result.confidence >= 90 && result.ruleId.includes('income'));
-            if (isIncomeHardStop) {return false;}
+            if (isIncomeHardStop) { return false; }
 
             // Other ineligible results go to maybe if incomplete or low confidence
             return (result.incomplete ?? false) || result.confidence < 70;
@@ -641,7 +641,7 @@ function App(): React.ReactElement {
               result.ruleId === 'medicaid-federal-expansion-income' ||
               result.ruleId === 'wic-federal-income-limit' ||
               (result.confidence >= 90 && result.ruleId.includes('income'));
-            if (isIncomeHardStop) {return false;}
+            if (isIncomeHardStop) { return false; }
 
             // Other ineligible results go to not-qualified if complete and high confidence
             return !result.incomplete && result.confidence >= 70;
@@ -1085,8 +1085,8 @@ function App(): React.ReactElement {
                   currentUserProfile={currentUserProfile}
                   isProcessingResults={isProcessingResults}
                   onNewAssessment={handleNewAssessment}
-                  onImportResults={(results): void => {
-                    void handleImportResults(results);
+                  onImportResults={async (results) => {
+                    await handleImportResults(results);
                   }}
                 />
               )}

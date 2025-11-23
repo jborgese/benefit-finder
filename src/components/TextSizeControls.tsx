@@ -30,10 +30,10 @@ export const TextSizeControls: React.FC<TextSizeControlsProps> = ({
   } as const;
 
   // Helper function to get size class without nested ternary
-  const getSizeClass = (size: 'sm' | 'md' | 'lg', sizeClasses: typeof sizeClasses): string => {
-    if (size === 'sm') {return sizeClasses.sm;}
-    if (size === 'lg') {return sizeClasses.lg;}
-    return sizeClasses.md;
+  const getSizeClass = (size: 'sm' | 'md' | 'lg', sc: Record<'sm' | 'md' | 'lg', string>): string => {
+    if (size === 'sm') { return sc.sm; }
+    if (size === 'lg') { return sc.lg; }
+    return sc.md;
   };
 
   const variantClasses = {

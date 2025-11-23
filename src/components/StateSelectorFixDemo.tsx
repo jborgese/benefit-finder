@@ -28,8 +28,8 @@ const demoQuestion: DemoQuestion = {
 export const StateSelectorFixDemo: React.FC = () => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
 
-  const handleStateChange = (value: string | null): void => {
-    setSelectedState(value);
+  const handleStateChange = (value: string | number | null): void => {
+    setSelectedState(value == null ? null : String(value));
   };
 
   return (

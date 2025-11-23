@@ -7,6 +7,7 @@
 
 import React, { useState, useId, useEffect, useRef } from 'react';
 import type { NumberInputProps } from './types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 export const NumberInput: React.FC<NumberInputProps> = ({
   question,
@@ -28,7 +29,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   const descId = `${id}-desc`;
   const [isFocused, setIsFocused] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
-  const [inputValue, setInputValue] = useState(value?.toString() ?? '');
+  const [inputValue, setInputValue] = useState(value != null ? (value as number).toString() : '');
   const [isIncrementing, setIsIncrementing] = useState(false);
   const [isDecrementing, setIsDecrementing] = useState(false);
   const incrementTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -36,8 +37,8 @@ export const NumberInput: React.FC<NumberInputProps> = ({
 
   // Sync inputValue with value prop to prevent glitches
   useEffect(() => {
-    if (value !== undefined) {
-      setInputValue(value.toFixed(decimals));
+    if (value != null) {
+      setInputValue((value as number).toFixed(decimals));
     } else {
       setInputValue('');
     }
@@ -60,8 +61,8 @@ export const NumberInput: React.FC<NumberInputProps> = ({
 
   // Convert error to array format
   const errors: string[] = (() => {
-    if (Array.isArray(error)) {return error;}
-    if (error) {return [error];}
+    if (Array.isArray(error)) { return error; }
+    if (error) { return [error]; }
     return [];
   })();
 
@@ -75,8 +76,8 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     setInputValue(rawValue);
 
     if (rawValue === '' || rawValue === '-') {
-      // Type assertion needed: component allows clearing optional number fields
-      onChange(undefined as unknown as number);
+      // When clearing, propagate null to indicate empty value
+      onChange(null);
       return;
     }
 
@@ -91,8 +92,8 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     setIsTouched(true);
 
     // Format value on blur
-    if (value !== undefined) {
-      setInputValue(value.toFixed(decimals));
+    if (value != null) {
+      setInputValue((value as number).toFixed(decimals));
     }
   };
 
@@ -163,7 +164,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
         htmlFor={id}
         className="question-label block"
       >
-        {question.text}
+        {resolveQuestionString(question.text)}
         {question.required && (
           <span className="required-indicator" aria-label="required">
             *
@@ -171,12 +172,12 @@ export const NumberInput: React.FC<NumberInputProps> = ({
         )}
       </label>
 
-      {question.description && (
+      {question.description && resolveQuestionString(question.description) && (
         <p
           id={descId}
           className="question-description"
         >
-          {question.description}
+          {resolveQuestionString(question.description)}
         </p>
       )}
 
@@ -198,7 +199,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel ?? question.text}
+          aria-label={resolveQuestionString(question.ariaLabel) || resolveQuestionString(question.text)}
           className={`
             question-input flex-1 px-3 py-2 border rounded-md shadow-sm
             bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100

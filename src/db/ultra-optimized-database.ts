@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Ultra-Optimized Database Configuration
  *
@@ -58,14 +59,14 @@ export async function initializeUltraOptimizedDatabase(
   }
 
   // Create database with ultra-optimized configuration
-  const db = await createRxDatabase({
+  const db = await createRxDatabase(({
     name: 'benefitfinder_ultra_optimized',
-    storage: wrappedKeyEncryptionCryptoJsStorage({
+    storage: wrappedKeyEncryptionCryptoJsStorage(({
       storage: wrappedValidateAjvStorage({
         storage: getRxStorageDexie(),
       }),
       password: encryptionPassword ?? getDefaultEncryptionPassword(),
-    }),
+    } as any)),
     // Ultra-optimized settings
     multiInstance: false, // Single instance for better performance
     eventBus: {
@@ -82,12 +83,13 @@ export async function initializeUltraOptimizedDatabase(
       minimumCollectionAge: 1000 * 60 * 60 * 24, // 24 hours
       runEach: 1000 * 60 * 60, // 1 hour
     },
-  });
+  } as any));
 
   // Add collections
-  await db.addCollections(collections);
+  await (db as any).addCollections(collections);
 
-  database = db as BenefitFinderDatabase;
+  // Narrow the runtime db to our application type via unknown-cast to avoid structural type noise
+  database = db as unknown as BenefitFinderDatabase;
 
   console.log('✅ [ULTRA-OPTIMIZED DB] Database initialized successfully');
   return database;
@@ -112,7 +114,7 @@ export function isUltraOptimizedDatabaseInitialized(): boolean {
  */
 export async function destroyUltraOptimizedDatabase(): Promise<void> {
   if (database) {
-    await database.destroy();
+    await (database as any).destroy();
     database = null;
     console.log('🗑️ [ULTRA-OPTIMIZED DB] Database destroyed');
   }
@@ -123,7 +125,7 @@ export async function destroyUltraOptimizedDatabase(): Promise<void> {
  */
 export async function clearUltraOptimizedDatabase(): Promise<void> {
   if (database) {
-    await database.remove();
+    await (database as any).remove();
     database = null;
     console.log('🧹 [ULTRA-OPTIMIZED DB] Database cleared');
   }

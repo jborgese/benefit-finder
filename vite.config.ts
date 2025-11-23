@@ -64,11 +64,7 @@ export default defineConfig({
     target: 'es2020', // Modern target for better optimization
     minify: 'esbuild', // Fast minification
     sourcemap: false, // Disable sourcemaps in production for smaller bundles
-    // Add build timestamp for cache busting
-    define: {
-      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
-      __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.1.0'),
-    },
+    // Add build timestamp for cache busting (moved to top-level `define` below)
   },
   optimizeDeps: {
     include: [
@@ -97,5 +93,11 @@ export default defineConfig({
       'zod',
       'ajv'
     ]
+  }
+  ,
+  // Top-level defines are applied by Vite globally
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.1.0'),
   }
 });

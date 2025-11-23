@@ -296,7 +296,7 @@ export default {
           }
         }
       }
-      addUtilities(newUtilities)
+      addUtilities(newUtilities as unknown as Record<string, Record<string, string>>)
     }
   ],
 } satisfies Config;

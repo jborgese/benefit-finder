@@ -65,7 +65,7 @@ function debugLog(...args: unknown[]): void {
  * Process benefit amount rules for eligible programs
  */
 function processBenefitAmountRules(
-  rules: Array<{ id: string; ruleType: string; ruleLogic: JsonLogicRule }>,
+  rules: EligibilityRuleDocument[],
   data: Record<string, unknown>,
   overallEligible: boolean
 ): { amount: number; frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual'; description?: string } | undefined {
@@ -79,7 +79,7 @@ function processBenefitAmountRules(
   for (const benefitRule of benefitAmountRules) {
     try {
       const benefitResult = evaluateRuleWithDetails(
-        benefitRule.ruleLogic,
+        benefitRule.ruleLogic as JsonLogicRule,
         data
       );
 
@@ -105,7 +105,7 @@ function logDebugInfo(
   resultRule: { id: string },
   resultRuleDetails: unknown,
   result: EligibilityEvaluationResult,
-  ruleResults: Array<{ rule: { id: string; priority: number }; evalResult: { success: boolean; result: unknown } }>,
+  ruleResults: Array<{ rule: { id: string; priority?: number | undefined }; evalResult: { success: boolean; result: unknown } }>,
   overallEligible: boolean,
   programId: string
 ): void {
@@ -120,7 +120,7 @@ function logDebugInfo(
 
   if (resultRuleDetails && typeof resultRuleDetails === 'object' && 'criteriaResults' in resultRuleDetails) {
     const details = resultRuleDetails as DetailedEvaluationResult;
-    console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results count:', details.criteriaResults.length);
+    console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results count:', details.criteriaResults?.length ?? 0);
     console.log('eligibility.ts - evaluateEligibility - 🔍 [DEBUG] Criteria results:', details.criteriaResults);
   }
 
@@ -267,7 +267,7 @@ async function performEligibilityEvaluation(
   // Cache result if enabled
   if (opts.cacheResult && combinedEvalResult.success) {
     debugLog('Caching eligibility result...');
-    await cacheResult(result, opts.expiresIn);
+    await cacheResult(result, opts.expiresIn ?? 1000 * 60 * 60 * 24 * 30);
   }
 
   debugLog('Returning eligibility result', result);

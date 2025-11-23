@@ -55,3 +55,6 @@ export function useAMIData(
 
   return { amiData, loading, error };
 }
+
+// Re-export for backward compatibility (tests and legacy imports)
+export { AMIDataService } from '../data/services/AMIDataService';

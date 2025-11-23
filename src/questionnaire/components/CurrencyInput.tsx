@@ -7,6 +7,7 @@
 
 import React, { useState, useId } from 'react';
 import type { CurrencyInputProps } from './types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   question,
@@ -28,7 +29,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
   const [displayValue, setDisplayValue] = useState(
-    value !== undefined ? formatCurrency(value, false) : ''
+    value != null ? formatCurrency(value as number, false) : ''
   );
 
   const hasError = Boolean(error);
@@ -83,7 +84,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     };
     // Type-safe access using hasOwnProperty to prevent object injection
     if (Object.prototype.hasOwnProperty.call(symbols, code)) {
-       
+
       return symbols[code];
     }
     return '$';
@@ -124,9 +125,8 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     if (!isNaN(numValue)) {
       onChange(numValue);
     } else if (inputVal === '' || inputVal === '-') {
-      // When input is cleared, pass undefined
-      // Type assertion needed: component allows clearing optional number fields
-      onChange(undefined as unknown as number);
+      // When input is cleared, pass null to indicate empty value
+      onChange(null);
     }
   };
 
@@ -135,16 +135,16 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     setIsTouched(true);
 
     // Format with commas on blur
-    if (value !== undefined) {
-      setDisplayValue(formatCurrency(value, false));
+    if (value != null) {
+      setDisplayValue(formatCurrency(value as number, false));
     }
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>): void => {
     setIsFocused(true);
     // Remove formatting on focus for easier editing
-    if (value !== undefined) {
-      setDisplayValue(value.toString());
+    if (value != null) {
+      setDisplayValue((value as number).toString());
     }
     // Select all text on focus
     e.target.select();
@@ -163,7 +163,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         htmlFor={id}
         className="question-label block"
       >
-        {question.text}
+        {resolveQuestionString(question.text)}
         {question.required && (
           <span className="required-indicator" aria-label="required">
             *
@@ -171,12 +171,12 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         )}
       </label>
 
-      {question.description && (
+      {question.description && resolveQuestionString(question.description) && (
         <p
           id={descId}
           className="question-description"
         >
-          {question.description}
+          {resolveQuestionString(question.description)}
         </p>
       )}
 
@@ -200,7 +200,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel ?? question.text}
+          aria-label={resolveQuestionString(question.ariaLabel) || resolveQuestionString(question.text)}
           className={`
             question-input w-full pl-8 pr-3 py-2 border rounded-md shadow-sm
             bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
@@ -215,11 +215,11 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
 
       {question.helpText && !showError && (
         <p className="question-help-text">
-          {question.helpText}
+          {resolveQuestionString(question.helpText)}
         </p>
       )}
 
-      {!showError && value !== undefined && value >= 1000 && (
+      {!showError && value != null && value >= 1000 && (
         <p className="question-help-text">
           {formatCurrency(value, false)} {currency}
         </p>

@@ -8,6 +8,7 @@
 import React, { useState, useId } from 'react';
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 import type { MultiSelectProps } from './types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   question,
@@ -22,6 +23,8 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   variant = 'checkbox',
   onEnterKey,
 }) => {
+  // Ensure value is always an array for internal operations
+  const safeValue = value ?? [];
   const id = useId();
   const errorId = `${id}-error`;
   const descId = `${id}-desc`;
@@ -32,8 +35,8 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   // Convert error to array format (avoiding nested ternaries)
   const errors = (() => {
-    if (Array.isArray(error)) {return error;}
-    if (error) {return [error];}
+    if (Array.isArray(error)) { return error; }
+    if (error) { return [error]; }
     return [];
   })();
 
@@ -56,9 +59,9 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   });
 
   const handleToggle = (optionValue: string | number): void => {
-    const newValue = value.includes(optionValue)
-      ? value.filter((v) => v !== optionValue)
-      : [...value, optionValue];
+    const newValue = safeValue.includes(optionValue)
+      ? safeValue.filter((v) => v !== optionValue)
+      : [...safeValue, optionValue];
 
     // Check constraints
     if (maxSelections && newValue.length > maxSelections) {
@@ -74,10 +77,10 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
   };
 
   const isOptionSelected = (optionValue: string | number): boolean => {
-    return value.includes(optionValue);
+    return safeValue.includes(optionValue);
   };
 
-  const canSelectMore = !maxSelections || value.length < maxSelections;
+  const canSelectMore = !maxSelections || safeValue.length < maxSelections;
 
   // Helper to generate selection constraint message
   const getSelectionMessage = (): string => {
@@ -95,7 +98,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   // Render selection constraints helper text
   const renderConstraintsText = (): React.ReactElement | null => {
-    if (!(minSelections ?? maxSelections)) {return null;}
+    if (!(minSelections ?? maxSelections)) { return null; }
     return (
       <p className="text-xs text-gray-500 dark:text-secondary-400 mt-1 mb-3">
         {getSelectionMessage()}
@@ -105,7 +108,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
   // Render error messages
   const renderErrors = (): React.ReactElement | null => {
-    if (!showError) {return null;}
+    if (!showError) { return null; }
     return (
       <div
         id={errorId}
@@ -127,7 +130,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
       <div className={`question-multiselect-pills ${className}`} onKeyDown={handleKeyDown}>
         <div className="mb-2">
           <label className="question-label block">
-            {question.text}
+            {resolveQuestionString(question.text)}
             {question.required && (
               <span className="required-indicator" aria-label="required">
                 *
@@ -135,12 +138,12 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
             )}
           </label>
 
-          {question.description && (
+          {question.description && resolveQuestionString(question.description) && (
             <p
               id={descId}
               className="question-description"
             >
-              {question.description}
+              {resolveQuestionString(question.description)}
             </p>
           )}
 
@@ -202,7 +205,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
 
         {question.helpText && !showError && (
           <p className="question-help-text">
-            {question.helpText}
+            {resolveQuestionString(question.helpText)}
           </p>
         )}
 
@@ -216,7 +219,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
     <div className={`question-multiselect-checkbox ${className}`}>
       <fieldset onKeyDown={handleKeyDown}>
         <legend className="question-label block">
-          {question.text}
+          {resolveQuestionString(question.text)}
           {question.required && (
             <span className="required-indicator" aria-label="required">
               *
@@ -224,12 +227,12 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
           )}
         </legend>
 
-        {question.description && (
+        {question.description && resolveQuestionString(question.description) && (
           <p
             id={descId}
             className="question-description"
           >
-            {question.description}
+            {resolveQuestionString(question.description)}
           </p>
         )}
 

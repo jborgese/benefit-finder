@@ -31,16 +31,24 @@ export const QuestionnaireCore = {
   createAccessibility: () => import('../questionnaire/accessibility'),
 
   // Question types
-  createQuestionTypes: () => import('../questionnaire/question-types'),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createQuestionTypes: () => import('../questionnaire/question-types').then(m => m as any),
 
   // Validation
-  createValidation: () => import('../questionnaire/validation'),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createValidation: () => import('../questionnaire/validation').then(m => m as any),
 };
 
 // Lazy load questionnaire components
 export const LazyQuestionnaireComponents = {
   EnhancedQuestionnaire: () => import('../questionnaire/ui').then(m => ({ default: m.EnhancedQuestionnaire })),
   FlowEngine: () => import('../questionnaire/flow-engine').then(m => ({ default: m.FlowEngine })),
-  QuestionTypes: () => import('../questionnaire/question-types').then(m => ({ default: m.QuestionTypes })),
-  Validation: () => import('../questionnaire/validation').then(m => ({ default: m.Validation })),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  QuestionTypes: () => import('../questionnaire/question-types').then(m => ({ default: (m as any).QuestionTypes })),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Validation: () => import('../questionnaire/validation').then(m => ({ default: (m as any).Validation })),
 };

@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+// React import removed (not needed in tests)
 import { EncryptionIndicator, EncryptionBadge, EncryptionBanner } from '../EncryptionIndicator';
 import * as encryptionStoreModule from '../../stores/encryptionStore';
 
@@ -24,7 +24,7 @@ describe('EncryptionIndicator Component', () => {
     vi.clearAllMocks();
 
     // Default mock: encryption disabled
-    (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
+    (encryptionStoreModule.useEncryptionStore as unknown as ReturnType<typeof vi.fn>)
       .mockImplementation((selector: unknown) => {
         if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
           return false;
@@ -79,7 +79,7 @@ describe('EncryptionIndicator Component', () => {
 
   describe('Rendering - Encryption Enabled', () => {
     beforeEach(() => {
-      (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
+      (encryptionStoreModule.useEncryptionStore as unknown as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
           if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
             return true;
@@ -113,7 +113,7 @@ describe('EncryptionIndicator Component', () => {
 
   describe('Rendering - Passphrase Mode', () => {
     beforeEach(() => {
-      (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
+      (encryptionStoreModule.useEncryptionStore as unknown as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
           if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
             return true;
@@ -145,7 +145,7 @@ describe('EncryptionIndicator Component', () => {
     });
 
     it('should show very strong passphrase', () => {
-      (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
+      (encryptionStoreModule.useEncryptionStore as unknown as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
           if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
             return true;
@@ -168,7 +168,7 @@ describe('EncryptionIndicator Component', () => {
     });
 
     it('should show medium passphrase', () => {
-      (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
+      (encryptionStoreModule.useEncryptionStore as unknown as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
           if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
             return true;
@@ -191,7 +191,7 @@ describe('EncryptionIndicator Component', () => {
     });
 
     it('should show weak passphrase', () => {
-      (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
+      (encryptionStoreModule.useEncryptionStore as unknown as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
           if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
             return true;
@@ -216,7 +216,7 @@ describe('EncryptionIndicator Component', () => {
 
   describe('Rendering - Locked State', () => {
     beforeEach(() => {
-      (encryptionStoreModule.useEncryptionStore as ReturnType<typeof vi.fn>)
+      (encryptionStoreModule.useEncryptionStore as unknown as ReturnType<typeof vi.fn>)
         .mockImplementation((selector: unknown) => {
           if (selector === encryptionStoreModule.selectIsEncryptionEnabled) {
             return true;

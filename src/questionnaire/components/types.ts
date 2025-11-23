@@ -13,9 +13,9 @@ export interface BaseQuestionProps<T = unknown> {
   /** Question definition */
   question: QuestionDefinition;
   /** Current value */
-  value?: T;
+  value?: T | null;
   /** Change handler */
-  onChange: (value: T) => void;
+  onChange: (value: T | null) => void;
   /** Error message(s) */
   error?: string | string[];
   /** Is the field disabled */

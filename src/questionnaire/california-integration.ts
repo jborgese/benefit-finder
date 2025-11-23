@@ -146,7 +146,7 @@ export function getCaliforniaFieldMappings(): Record<string, string> {
   const mappings: Record<string, string> = {};
 
   californiaQuestions.forEach(node => {
-    mappings[node.id] = node.question.fieldName;
+    mappings[node.id] = node.question.fieldName ?? '';
   });
 
   return mappings;

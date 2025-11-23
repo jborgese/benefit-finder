@@ -103,7 +103,7 @@ describe('LIHTC Integration Tests', () => {
           }
         };
 
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
       });
@@ -120,7 +120,7 @@ describe('LIHTC Integration Tests', () => {
           }
         };
 
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
         expect(result.success).toBe(true);
         expect(result.result).toBe(false);
       });
@@ -137,7 +137,7 @@ describe('LIHTC Integration Tests', () => {
           }
         };
 
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
       });
@@ -149,7 +149,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { studentStatus: 'none' };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -160,7 +160,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { studentStatus: 'single_parent' };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -171,7 +171,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { studentStatus: 'married_student' };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -182,7 +182,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { studentStatus: 'full_time_student' };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(false);
@@ -198,7 +198,7 @@ describe('LIHTC Integration Tests', () => {
           householdSize: 3,
           maxUnitOccupancy: 4
         };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -212,7 +212,7 @@ describe('LIHTC Integration Tests', () => {
           householdSize: 5,
           maxUnitOccupancy: 4
         };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(false);
@@ -230,7 +230,7 @@ describe('LIHTC Integration Tests', () => {
             incomeLimit50: 40000
           }
         };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -246,7 +246,7 @@ describe('LIHTC Integration Tests', () => {
             incomeLimit50: 40000
           }
         };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(false);
@@ -259,7 +259,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { citizenship: 'us_citizen' };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -270,7 +270,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { citizenship: 'permanent_resident' };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -281,7 +281,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { citizenship: 'other' };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(false);
@@ -294,7 +294,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { age: 25 };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(true);
@@ -305,7 +305,7 @@ describe('LIHTC Integration Tests', () => {
         expect(rule).toBeDefined();
 
         const data = { age: 17 };
-        const result = await evaluateRule(rule!.ruleLogic, data);
+        const result = await evaluateRule(rule!.logic, data);
 
         expect(result.success).toBe(true);
         expect(result.result).toBe(false);
@@ -408,7 +408,7 @@ describe('LIHTC Integration Tests', () => {
       expect(rule).toBeDefined();
 
       const data = { householdSize: 0 };
-      const result = await evaluateRule(rule!.ruleLogic, data);
+      const result = await evaluateRule(rule!.logic, data);
 
       expect(result.success).toBe(true);
       expect(result.result).toBe(false); // JSON Logic returns false for invalid data
@@ -419,7 +419,7 @@ describe('LIHTC Integration Tests', () => {
       expect(rule).toBeDefined();
 
       const data = { amiData: { incomeLimit50: 40000 } };
-      const result = await evaluateRule(rule!.ruleLogic, data);
+      const result = await evaluateRule(rule!.logic, data);
 
       expect(result.success).toBe(true);
       expect(result.result).toBe(null); // JSON Logic returns null for missing data
@@ -436,7 +436,7 @@ describe('LIHTC Integration Tests', () => {
         amiData: { incomeLimit50: 40000, incomeLimit60: 48000 }
       };
 
-      await evaluateRule(rule!.ruleLogic, data);
+      await evaluateRule(rule!.logic, data);
 
       const duration = Date.now() - start;
       expect(duration).toBeLessThan(100); // Should complete in under 100ms
@@ -454,7 +454,7 @@ describe('LIHTC Integration Tests', () => {
         householdSize: 3
       };
 
-      const promises = LIHTC_RULES.map(rule => evaluateRule(rule.ruleLogic, data));
+      const promises = LIHTC_RULES.map(rule => evaluateRule(rule.logic, data));
       await Promise.all(promises);
 
       const duration = Date.now() - start;

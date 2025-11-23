@@ -256,9 +256,9 @@ export function getVisibleQuestions(
   const visibleQuestions: string[] = [];
 
   // Add all non-California questions
-  flow.nodes.forEach((node, nodeId) => {
+  flow.nodes.forEach((_, nodeId) => {
     const californiaQuestions = getCaliforniaQuestions();
-    const californiaQuestionIds = californiaQuestions.map(node => node.id);
+    const californiaQuestionIds = californiaQuestions.map(n => n.id);
 
     if (!californiaQuestionIds.includes(nodeId)) {
       visibleQuestions.push(nodeId);

@@ -40,14 +40,18 @@ export interface NextStep {
  * Explanation for eligibility determination
  */
 export interface EligibilityExplanation {
-  reason: string;
-  details: string[];
-  rulesCited: string[];
+  // Primary, canonical fields
+  reason?: string;
+  details?: string[];
+  rulesCited?: string[];
   calculations?: {
     label: string;
     value: string | number;
     comparison?: string;
   }[];
+
+  // Allow legacy/custom shapes during migration (e.g. `reasoning`, `confidence`, `factors`, `criteria`)
+  [key: string]: unknown;
 }
 
 /**

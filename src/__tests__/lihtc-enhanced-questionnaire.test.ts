@@ -14,14 +14,15 @@ import type { LIHTCProfile } from '@/types/housing';
 
 // Mock AMI Data Service
 vi.mock('@/services/ami-data', () => ({
-  AMIDataService: {
+      AMIDataService: {
     getInstance: () => ({
       getAMIForHousehold: vi.fn((state, county, householdSize) => {
         if (state === 'GA' && county === 'Fulton') {
+          // Use String(householdSize) to safely index the AMI mapping whether it's a number or string
           const ami = {
             '1': 65400, '2': 74700, '3': 84000, '4': 93300,
             '5': 100800, '6': 108300, '7': 115800, '8': 123300
-          }[householdSize.toString()] ?? 123300;
+          }[String(householdSize)] ?? 123300;
           return Promise.resolve({
             state, county, householdSize, year: 2024, amiAmount: ami,
             incomeLimit50: Math.floor(ami * 0.5),
@@ -124,19 +125,19 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
     // Fetch AMI data
     const amiService = AMIDataService.getInstance();
     const amiData = await amiService.getAMIForHousehold(
-      enhancedProfile.state,
-      enhancedProfile.county,
-      enhancedProfile.householdSize,
+      enhancedProfile.state as string,
+      enhancedProfile.county as string,
+      enhancedProfile.householdSize as number,
     );
     enhancedProfile.amiData = amiData;
 
     // Test individual LIHTC rules
-    const incomeEligibility = await evaluateRule(LIHTC_RULES[0].ruleLogic, enhancedProfile);
-    const studentEligibility = await evaluateRule(LIHTC_RULES[1].ruleLogic, enhancedProfile);
-    const citizenshipEligibility = await evaluateRule(LIHTC_RULES[4].ruleLogic, enhancedProfile);
-    const backgroundCheck = await evaluateRule(LIHTC_RULES[8].ruleLogic, enhancedProfile);
-    const rentalHistory = await evaluateRule(LIHTC_RULES[9].ruleLogic, enhancedProfile);
-    const rentalReferences = await evaluateRule(LIHTC_RULES[10].ruleLogic, enhancedProfile);
+    const incomeEligibility = await evaluateRule(LIHTC_RULES[0].logic, enhancedProfile);
+    const studentEligibility = await evaluateRule(LIHTC_RULES[1].logic, enhancedProfile);
+    const citizenshipEligibility = await evaluateRule(LIHTC_RULES[4].logic, enhancedProfile);
+    const backgroundCheck = await evaluateRule(LIHTC_RULES[8].logic, enhancedProfile);
+    const rentalHistory = await evaluateRule(LIHTC_RULES[9].logic, enhancedProfile);
+    const rentalReferences = await evaluateRule(LIHTC_RULES[10].logic, enhancedProfile);
 
     // Verify all rules pass for eligible profile
     expect(incomeEligibility.success).toBe(true);
@@ -167,7 +168,7 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
       incomeVerificationMethods: ['pay_stubs']
     };
 
-    const backgroundCheck = await evaluateRule(LIHTC_RULES[8].ruleLogic, ineligibleProfile);
+    const backgroundCheck = await evaluateRule(LIHTC_RULES[8].logic, ineligibleProfile);
 
     expect(backgroundCheck.success).toBe(true);
     expect(backgroundCheck.result).toBe(false); // Criminal history disqualifies
@@ -182,7 +183,7 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
       incomeVerificationMethods: ['pay_stubs']
     };
 
-    const rentalHistory = await evaluateRule(LIHTC_RULES[9].ruleLogic, ineligibleProfile);
+    const rentalHistory = await evaluateRule(LIHTC_RULES[9].logic, ineligibleProfile);
 
     expect(rentalHistory.success).toBe(true);
     expect(rentalHistory.result).toBe(false); // Eviction history disqualifies
@@ -197,21 +198,13 @@ describe('Enhanced LIHTC Questionnaire Integration', () => {
       incomeVerificationMethods: ['pay_stubs']
     };
 
-    const rentalReferences = await evaluateRule(LIHTC_RULES[10].ruleLogic, ineligibleProfile);
+    const rentalReferences = await evaluateRule(LIHTC_RULES[10].logic, ineligibleProfile);
 
     expect(rentalReferences.success).toBe(true);
     expect(rentalReferences.result).toBe(false); // No rental references disqualifies
   });
 
   it('should handle missing county data gracefully', async () => {
-    const _profileWithoutCounty: LIHTCProfile = {
-      ...householdProfile,
-      county: undefined, // Missing county
-      hasCriminalHistory: false,
-      hasEvictionHistory: false,
-      hasRentalReferences: true
-    };
-
     // AMI data should fail without county
     const amiService = AMIDataService.getInstance();
     await expect(amiService.getAMIForHousehold('GA', '', 2)).rejects.toThrow();

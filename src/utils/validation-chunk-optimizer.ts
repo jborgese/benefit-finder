@@ -21,22 +21,34 @@ export interface ValidationResult {
 // Split validation into focused modules
 export const ValidationCore = {
   // Zod schemas
-  schemas: () => import('../db/schemas'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  schemas: () => import('../db/schemas').then(m => m as any),
 
   // Form validation
-  forms: () => import('../utils/formValidation'),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  forms: () => import('../utils/formValidation').then(m => m as any),
 
   // Data validation
-  data: () => import('../utils/dataValidation'),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: () => import('../utils/dataValidation').then(m => m as any),
 
   // Rule validation
-  rules: () => import('../rules/core/validator'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rules: () => import('../rules/core/validator').then(m => m as any),
 };
 
 // Lazy load validation components
 export const LazyValidationComponents = {
-  ZodSchemas: () => import('../db/schemas').then(m => ({ default: m.schemas })),
-  FormValidation: () => import('../utils/formValidation').then(m => ({ default: m.FormValidation })),
-  DataValidation: () => import('../utils/dataValidation').then(m => ({ default: m.DataValidation })),
-  RuleValidation: () => import('../rules/core/validator').then(m => ({ default: m.RuleValidator })),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ZodSchemas: () => import('../db/schemas').then(m => ({ default: (m as any).schemas })),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  FormValidation: () => import('../utils/formValidation').then(m => ({ default: (m as any).FormValidation })),
+  // @ts-expect-error - dynamic import without static types (shim in src/types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  DataValidation: () => import('../utils/dataValidation').then(m => ({ default: (m as any).DataValidation })),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  RuleValidation: () => import('../rules/core/validator').then(m => ({ default: (m as any).RuleValidator })),
 };

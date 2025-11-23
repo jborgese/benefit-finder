@@ -96,3 +96,12 @@ export const TextSizeProvider: React.FC<TextSizeProviderProps> = ({ children }) 
 
 // Export the context for use in the hook file
 export { TextSizeContext };
+
+// Convenience hook for consuming text size context
+export function useTextSize(): TextSizeContextType {
+  const ctx = React.useContext(TextSizeContext);
+  if (!ctx) {
+    throw new Error('useTextSize must be used within a TextSizeProvider');
+  }
+  return ctx;
+}

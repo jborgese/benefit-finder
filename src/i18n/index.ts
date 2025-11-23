@@ -52,7 +52,7 @@ const normalizeLanguageCode = (language: string): string => {
   // Return mapped language or just the first part (before hyphen)
   // Use safe property access to avoid security warnings
   if (hasOwnProperty(languageMap, language)) {
-     
+
     return (languageMap[language] as string);
   }
   return language.split('-')[0];
@@ -78,7 +78,7 @@ const initOptions: InitOptions = {
 
   interpolation: {
     escapeValue: false, // React already does escaping
-    format: (value: unknown, format?: string, lng?: string) => {
+    format: (value: unknown, format?: string, lng?: string): string => {
       // Handle locale-specific formatting
       if (format === 'number' && typeof value === 'number') {
         return new Intl.NumberFormat(lng).format(value);
@@ -99,7 +99,7 @@ const initOptions: InitOptions = {
           timeStyle: 'short',
         }).format(value);
       }
-      return value;
+      return String(value);
     },
   },
 

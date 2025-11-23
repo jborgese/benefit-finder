@@ -29,21 +29,22 @@ interface TanfExplanationProps {
 /**
  * Get TANF-specific status messaging
  */
-function getTanfStatusMessage(status: EligibilityStatus, userProfile?: { hasChildren?: boolean; isEmployed?: boolean }, t: (key: string) => string): string {
+function getTanfStatusMessage(status: EligibilityStatus, userProfile?: { hasChildren?: boolean; isEmployed?: boolean }, t?: (key: string) => string): string {
+  const tr = t ?? ((k: string) => k);
   switch (status) {
     case 'qualified':
-      return t('results.tanf.statusMessages.qualified');
+      return tr('results.tanf.statusMessages.qualified');
     case 'likely':
-      return t('results.tanf.statusMessages.likely');
+      return tr('results.tanf.statusMessages.likely');
     case 'maybe':
-      return t('results.tanf.statusMessages.maybe');
+      return tr('results.tanf.statusMessages.maybe');
     case 'unlikely':
-      return t('results.tanf.statusMessages.unlikely');
+      return tr('results.tanf.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.hasChildren) {
-        return `${t('results.tanf.statusMessages.notQualified')} Contact your local TANF office to discuss your family situation and work requirements.`;
+        return `${tr('results.tanf.statusMessages.notQualified')} Contact your local TANF office to discuss your family situation and work requirements.`;
       }
-      return t('results.tanf.statusMessages.notQualified');
+      return tr('results.tanf.statusMessages.notQualified');
     default:
       return 'Contact your local TANF office to discuss your eligibility.';
   }
@@ -52,32 +53,33 @@ function getTanfStatusMessage(status: EligibilityStatus, userProfile?: { hasChil
 /**
  * Get TANF-specific next steps based on status and user profile
  */
-function getTanfNextSteps(status: EligibilityStatus, userProfile?: { hasChildren?: boolean; isEmployed?: boolean }, t: (key: string) => string): string[] {
+function getTanfNextSteps(status: EligibilityStatus, userProfile?: { hasChildren?: boolean; isEmployed?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const steps: string[] = [];
 
   switch (status) {
     case 'qualified':
     case 'likely':
-      steps.push(t('results.tanf.nextSteps.contact'));
-      steps.push(t('results.tanf.nextSteps.schedule'));
-      steps.push(t('results.tanf.nextSteps.documents'));
+      steps.push(tr('results.tanf.nextSteps.contact'));
+      steps.push(tr('results.tanf.nextSteps.schedule'));
+      steps.push(tr('results.tanf.nextSteps.documents'));
       if (userProfile?.hasChildren) {
-        steps.push(t('results.tanf.nextSteps.familyServices'));
+        steps.push(tr('results.tanf.nextSteps.familyServices'));
       }
       if (!userProfile?.isEmployed) {
-        steps.push(t('results.tanf.nextSteps.workRequirements'));
+        steps.push(tr('results.tanf.nextSteps.workRequirements'));
       }
       break;
     case 'maybe':
     case 'unlikely':
-      steps.push(t('results.tanf.nextSteps.discuss'));
-      steps.push(t('results.tanf.nextSteps.alternatives'));
-      steps.push(t('results.tanf.nextSteps.checkBack'));
+      steps.push(tr('results.tanf.nextSteps.discuss'));
+      steps.push(tr('results.tanf.nextSteps.alternatives'));
+      steps.push(tr('results.tanf.nextSteps.checkBack'));
       break;
     case 'not-qualified':
-      steps.push(t('results.tanf.nextSteps.discuss'));
-      steps.push(t('results.tanf.nextSteps.alternatives'));
-      steps.push(t('results.tanf.nextSteps.reapply'));
+      steps.push(tr('results.tanf.nextSteps.discuss'));
+      steps.push(tr('results.tanf.nextSteps.alternatives'));
+      steps.push(tr('results.tanf.nextSteps.reapply'));
       break;
   }
 
@@ -87,21 +89,22 @@ function getTanfNextSteps(status: EligibilityStatus, userProfile?: { hasChildren
 /**
  * Get TANF-specific benefit information
  */
-function getTanfBenefitInfo(userProfile?: { hasChildren?: boolean; householdSize?: number }, t: (key: string) => string): string[] {
+function getTanfBenefitInfo(userProfile?: { hasChildren?: boolean; householdSize?: number }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const benefits: string[] = [];
 
   if (userProfile?.hasChildren) {
-    benefits.push(t('results.tanf.benefits.cashAssistance'));
-    benefits.push(t('results.tanf.benefits.familySupport'));
-    benefits.push(t('results.tanf.benefits.childcare'));
+    benefits.push(tr('results.tanf.benefits.cashAssistance'));
+    benefits.push(tr('results.tanf.benefits.familySupport'));
+    benefits.push(tr('results.tanf.benefits.childcare'));
   } else {
-    benefits.push(t('results.tanf.benefits.generalCash'));
-    benefits.push(t('results.tanf.benefits.workSupport'));
-    benefits.push(t('results.tanf.benefits.services'));
+    benefits.push(tr('results.tanf.benefits.generalCash'));
+    benefits.push(tr('results.tanf.benefits.workSupport'));
+    benefits.push(tr('results.tanf.benefits.services'));
   }
 
-  benefits.push(t('results.tanf.benefits.timeLimit'));
-  benefits.push(t('results.tanf.benefits.workRequirements'));
+  benefits.push(tr('results.tanf.benefits.timeLimit'));
+  benefits.push(tr('results.tanf.benefits.workRequirements'));
 
   return benefits;
 }
@@ -109,21 +112,22 @@ function getTanfBenefitInfo(userProfile?: { hasChildren?: boolean; householdSize
 /**
  * Get TANF-specific requirements explanation
  */
-function getTanfRequirementsExplanation(userProfile?: { hasChildren?: boolean; householdSize?: number }, t: (key: string) => string): string[] {
+function getTanfRequirementsExplanation(userProfile?: { hasChildren?: boolean; householdSize?: number }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const requirements: string[] = [];
 
-  requirements.push(t('results.tanf.requirements.citizenship'));
-  requirements.push(t('results.tanf.requirements.residence'));
-  requirements.push(t('results.tanf.requirements.income'));
+  requirements.push(tr('results.tanf.requirements.citizenship'));
+  requirements.push(tr('results.tanf.requirements.residence'));
+  requirements.push(tr('results.tanf.requirements.income'));
 
   if (userProfile?.hasChildren) {
-    requirements.push(t('results.tanf.requirements.children'));
+    requirements.push(tr('results.tanf.requirements.children'));
   } else {
-    requirements.push(t('results.tanf.requirements.family'));
+    requirements.push(tr('results.tanf.requirements.family'));
   }
 
-  requirements.push(t('results.tanf.requirements.work'));
-  requirements.push(t('results.tanf.requirements.timeLimit'));
+  requirements.push(tr('results.tanf.requirements.work'));
+  requirements.push(tr('results.tanf.requirements.timeLimit'));
 
   return requirements;
 }

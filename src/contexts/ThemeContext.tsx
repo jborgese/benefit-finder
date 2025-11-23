@@ -106,3 +106,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
 // Export the context for use in the hook file
 export { ThemeContext };
+
+// Convenience hook for consuming theme context
+export function useTheme(): ThemeContextType {
+  const ctx = React.useContext(ThemeContext);
+  if (!ctx) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return ctx;
+}

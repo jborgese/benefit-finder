@@ -15,7 +15,7 @@ interface SpecificReasonsSectionProps {
   programId: string;
   status: EligibilityStatus;
   userProfile?: UserProfile;
-  evaluationResult?: EvaluationResult;
+  evaluationResult?: EvaluationResult | undefined; // Accept evaluation shapes during migration
 }
 
 export const SpecificReasonsSection: React.FC<SpecificReasonsSectionProps> = ({

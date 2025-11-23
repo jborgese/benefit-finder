@@ -9,7 +9,7 @@
 // This ensures persist middleware correctly detects test environment
 // when stores are created at module load time
 if (typeof window !== 'undefined') {
-  (window as Record<string, unknown>).VITEST = true;
+  (window as unknown as Record<string, unknown>).VITEST = true;
 }
 
 // Also set on process.env for Node.js side detection
@@ -74,8 +74,9 @@ vi.mock('../db/database', () => {
       }),
       findOne: (query?: { selector?: { id?: string } }) => ({
         exec: () => {
-          if (query?.selector?.id) {
-            const program = mockPrograms.find(p => p.id === query.selector.id);
+          const id = query && query.selector ? query.selector.id : undefined;
+          if (id) {
+            const program = mockPrograms.find(p => p.id === id);
             return Promise.resolve(
               program
                 ? { ...program, toJSON: () => program, get: (key: string) => safeGet(program, key) }
@@ -160,63 +161,9 @@ let uiStore: ReturnType<typeof import('../stores/uiStore').useUIStore.getState> 
 let appSettingsStore: ReturnType<typeof import('../stores/appSettingsStore').useAppSettingsStore.getState> | null = null;
 
 // Store module references for cache clearing
-let storeModules: {
-  questionFlow?: typeof import('../questionnaire/store');
-  questionnaire?: typeof import('../stores/questionnaireStore');
-  encryption?: typeof import('../stores/encryptionStore');
-  ui?: typeof import('../stores/uiStore');
-  appSettings?: typeof import('../stores/appSettingsStore');
-} = {};
+// storeModules removed - no longer needed in test setup
 
-// Lazy load stores on first afterEach call
-// Currently unused but kept for potential future use
-async function _ensureStoresLoaded(): Promise<void> {
-  if (questionFlowStore === null) {
-    try {
-      const mod = await import('../questionnaire/store');
-      storeModules.questionFlow = mod;
-      questionFlowStore = mod.useQuestionFlowStore.getState();
-    } catch {
-      // Store not available
-    }
-  }
-  if (questionnaireStore === null) {
-    try {
-      const mod = await import('../stores/questionnaireStore');
-      storeModules.questionnaire = mod;
-      questionnaireStore = mod.useQuestionnaireStore.getState();
-    } catch {
-      // Store not available
-    }
-  }
-  if (encryptionStore === null) {
-    try {
-      const mod = await import('../stores/encryptionStore');
-      storeModules.encryption = mod;
-      encryptionStore = mod.useEncryptionStore.getState();
-    } catch {
-      // Store not available
-    }
-  }
-  if (uiStore === null) {
-    try {
-      const mod = await import('../stores/uiStore');
-      storeModules.ui = mod;
-      uiStore = mod.useUIStore.getState();
-    } catch {
-      // Store not available
-    }
-  }
-  if (appSettingsStore === null) {
-    try {
-      const mod = await import('../stores/appSettingsStore');
-      storeModules.appSettings = mod;
-      appSettingsStore = mod.useAppSettingsStore.getState();
-    } catch {
-      // Store not available
-    }
-  }
-}
+// Lazy store loader removed - not used in current test setup
 
 // Reset store references to force fresh state
 function resetStoreReferences(): void {
@@ -225,7 +172,6 @@ function resetStoreReferences(): void {
   encryptionStore = null;
   uiStore = null;
   appSettingsStore = null;
-  storeModules = {};
 }
 
 // Helper functions to reduce cognitive complexity
@@ -272,7 +218,7 @@ function forceGarbageCollection(): void {
 }
 
 // Helper function to reset a single store if it has a reset method
-function resetStoreIfAvailable<T extends { reset?: () => void }>(
+function resetStoreIfAvailable<T>(
   store: T | null,
   resetMethod: (store: T) => void,
 ): void {
@@ -359,8 +305,8 @@ function resetZustandStores(): void {
     });
 
     // Clear Zustand devtools state if present
-    if (typeof window !== 'undefined' && (window as Record<string, unknown>).__ZUSTAND_STORES__) {
-      delete (window as Record<string, unknown>).__ZUSTAND_STORES__;
+    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).__ZUSTAND_STORES__) {
+      delete (window as unknown as Record<string, unknown>).__ZUSTAND_STORES__;
     }
 
     // CRITICAL: Clear Zustand persist storage keys to prevent middleware from processing stale data
@@ -480,7 +426,7 @@ afterEach(() => {
 
 // Setup Web Crypto API BEFORE all tests
 // This needs to happen at module load time, not in beforeAll
-if (!('crypto' in global) || !(global as Record<string, unknown>).crypto?.subtle) {
+if (!('crypto' in global) || !(global as any).crypto?.subtle) {
   Object.defineProperty(global, 'crypto', {
     value: webcrypto as unknown as Crypto,
     writable: false,
@@ -489,7 +435,7 @@ if (!('crypto' in global) || !(global as Record<string, unknown>).crypto?.subtle
 }
 
 // Also set on window for jsdom
-if (typeof window !== 'undefined' && (!('crypto' in window) || !(window as Record<string, unknown>).crypto?.subtle)) {
+if (typeof window !== 'undefined' && (!('crypto' in window) || !(window as any).crypto?.subtle)) {
   Object.defineProperty(window, 'crypto', {
     value: webcrypto as unknown as Crypto,
     writable: false,

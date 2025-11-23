@@ -7,6 +7,7 @@
 
 import React, { useState, useId } from 'react';
 import type { TextInputProps } from './types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 export const TextInput: React.FC<TextInputProps> = ({
   question,
@@ -33,8 +34,8 @@ export const TextInput: React.FC<TextInputProps> = ({
 
   // Convert error to array format
   const errors: string[] = (() => {
-    if (Array.isArray(error)) {return error;}
-    if (error) {return [error];}
+    if (Array.isArray(error)) { return error; }
+    if (error) { return [error]; }
     return [];
   })();
 
@@ -61,14 +62,16 @@ export const TextInput: React.FC<TextInputProps> = ({
   // Format SSN as user types (if field is SSN)
   const formatSSN = (val: string): string => {
     const numbers = val.replace(/\D/g, '');
-    if (numbers.length <= 3) {return numbers;}
-    if (numbers.length <= 5) {return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;}
+    if (numbers.length <= 3) { return numbers; }
+    if (numbers.length <= 5) { return `${numbers.slice(0, 3)}-${numbers.slice(3)}`; }
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 5)}-${numbers.slice(5, 9)}`;
   };
 
-  const displayValue = question.fieldName.toLowerCase().includes('ssn')
-    ? formatSSN(value)
-    : value;
+  const fieldName = question.fieldName ?? '';
+
+  const displayValue = fieldName.toLowerCase().includes('ssn')
+    ? formatSSN(value ?? '')
+    : (value ?? '');
 
   return (
     <div className={`question-text-input ${className}`}>
@@ -76,7 +79,7 @@ export const TextInput: React.FC<TextInputProps> = ({
         htmlFor={id}
         className="question-label block"
       >
-        {question.text}
+        {resolveQuestionString(question.text)}
         {question.required && (
           <span className="required-indicator" aria-label="required">
             *
@@ -89,7 +92,7 @@ export const TextInput: React.FC<TextInputProps> = ({
           id={descId}
           className="question-description"
         >
-          {question.description}
+          {resolveQuestionString(question.description)}
         </p>
       )}
 
@@ -111,7 +114,7 @@ export const TextInput: React.FC<TextInputProps> = ({
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel ?? question.text}
+          aria-label={resolveQuestionString(question.ariaLabel) || resolveQuestionString(question.text)}
           className={`
             question-input w-full px-4 py-3 border rounded-lg shadow-sm
             bg-white dark:bg-secondary-700 text-secondary-900 dark:text-secondary-100
@@ -125,7 +128,7 @@ export const TextInput: React.FC<TextInputProps> = ({
 
         {maxLength && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-secondary-400 dark:text-secondary-400">
-            {value.length}/{maxLength}
+            {(value ?? '').toString().length}/{maxLength}
           </div>
         )}
       </div>

@@ -84,14 +84,30 @@ export interface QuestionTrigger {
 export interface QuestionDefinition {
   /** Unique question ID */
   id: string;
+  /** Legacy key (optional) - maps to profile field in older definitions */
+  key?: string;
   /** Question text - can be a string or a function that takes context and returns string */
   text: string | ((context: QuestionContext) => string);
+  /** Legacy question text property (optional) for older definitions */
+  question?: string;
   /** Optional description/help text - can be a string or a function that takes context and returns string */
   description?: string | ((context: QuestionContext) => string);
+  /** Legacy subtitle/help fields from older definitions */
+  subtitle?: string;
   /** Input type */
-  inputType: QuestionInputType;
+  inputType?: QuestionInputType;
+  /** Legacy 'type' property (optional) to accept older question definitions */
+  type?: string;
   /** Field name to store answer */
-  fieldName: string;
+  fieldName?: string;
+  /** Legacy priority value used by older flows */
+  priority?: number;
+  /** Category for question grouping (legacy/optional) */
+  category?: string;
+  /** Legacy explanation of why asking this question */
+  whyAsking?: string;
+  /** Legacy 'key' alias for field name (if present) */
+  // `key` above can be used by older code; this keeps the shape compatible.
   /** Default value */
   defaultValue?: unknown;
   /** Placeholder text */
@@ -122,6 +138,28 @@ export interface QuestionDefinition {
   step?: number;
   /** Maximum length (for text inputs) */
   maxLength?: number;
+  /** Legacy navigation properties */
+  nextQuestionId?: string | ((answer: unknown) => string);
+  previousQuestionId?: string;
+  allowSkip?: boolean;
+  /** Marker for terminal questions (legacy placement on question objects) */
+  isTerminal?: boolean;
+  /** Legacy/compatibility fields for migration */
+  legacyId?: string;
+  legacyType?: string;
+  legacyOptions?: unknown;
+  legacyHelp?: string;
+  legacyRequired?: boolean;
+  legacyCategory?: string;
+  legacyFlow?: string;
+  legacyOrder?: number;
+  legacyShowIf?: JsonLogicRule;
+  legacyNext?: string;
+  legacyPrevious?: string;
+  legacyTags?: string[];
+  legacyPlaceholder?: string;
+  legacyDefault?: unknown;
+  legacyExtra?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -419,7 +457,7 @@ export type QuestionContext = Record<string, unknown>;
  */
 export interface FlowEvent {
   /** Event type */
-  type: 'start' | 'question_answered' | 'navigation' | 'skip' | 'branch' | 'complete' | 'error';
+  type: 'start' | 'question_answered' | 'navigation' | 'skip' | 'branch' | 'complete' | 'error' | 'question_updated';
   /** Event timestamp */
   timestamp: number;
   /** Node ID */

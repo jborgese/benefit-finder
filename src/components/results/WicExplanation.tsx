@@ -30,23 +30,24 @@ interface WicExplanationProps {
 /**
  * Get WIC-specific status messaging
  */
-function getWicStatusMessage(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string {
+function getWicStatusMessage(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string {
+  const tr = t ?? ((k: string) => k);
   switch (status) {
     case 'qualified':
-      return t('results.wic.statusMessages.qualified');
+      return tr('results.wic.statusMessages.qualified');
     case 'likely':
-      return t('results.wic.statusMessages.likely');
+      return tr('results.wic.statusMessages.likely');
     case 'maybe':
-      return t('results.wic.statusMessages.maybe');
+      return tr('results.wic.statusMessages.maybe');
     case 'unlikely':
-      return t('results.wic.statusMessages.unlikely');
+      return tr('results.wic.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.isPregnant) {
-        return `${t('results.wic.statusMessages.notQualified')} Contact your local WIC office to discuss your pregnancy and nutritional needs.`;
+        return `${tr('results.wic.statusMessages.notQualified')} Contact your local WIC office to discuss your pregnancy and nutritional needs.`;
       } else if (userProfile?.hasChildren) {
-        return `${t('results.wic.statusMessages.notQualified')} Contact your local WIC office to discuss your children and nutritional needs.`;
+        return `${tr('results.wic.statusMessages.notQualified')} Contact your local WIC office to discuss your children and nutritional needs.`;
       }
-      return t('results.wic.statusMessages.notQualified');
+      return tr('results.wic.statusMessages.notQualified');
     default:
       return 'Contact your local WIC office to discuss your eligibility.';
   }
@@ -55,32 +56,33 @@ function getWicStatusMessage(status: EligibilityStatus, userProfile?: { isPregna
 /**
  * Get WIC-specific next steps based on status and user profile
  */
-function getWicNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getWicNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const steps: string[] = [];
 
   switch (status) {
     case 'qualified':
     case 'likely':
-      steps.push(t('results.wic.nextSteps.contact'));
-      steps.push(t('results.wic.nextSteps.schedule'));
-      steps.push(t('results.wic.nextSteps.documents'));
+      steps.push(tr('results.wic.nextSteps.contact'));
+      steps.push(tr('results.wic.nextSteps.schedule'));
+      steps.push(tr('results.wic.nextSteps.documents'));
       if (userProfile?.isPregnant) {
-        steps.push(t('results.wic.nextSteps.prenatalCounseling'));
+        steps.push(tr('results.wic.nextSteps.prenatalCounseling'));
       }
       if (userProfile?.hasChildren) {
-        steps.push(t('results.wic.nextSteps.childGuidance'));
+        steps.push(tr('results.wic.nextSteps.childGuidance'));
       }
       break;
     case 'maybe':
     case 'unlikely':
-      steps.push(t('results.wic.nextSteps.discuss'));
-      steps.push(t('results.wic.nextSteps.alternatives'));
-      steps.push(t('results.wic.nextSteps.checkBack'));
+      steps.push(tr('results.wic.nextSteps.discuss'));
+      steps.push(tr('results.wic.nextSteps.alternatives'));
+      steps.push(tr('results.wic.nextSteps.checkBack'));
       break;
     case 'not-qualified':
-      steps.push(t('results.wic.nextSteps.discuss'));
-      steps.push(t('results.wic.nextSteps.alternatives'));
-      steps.push(t('results.wic.nextSteps.reapply'));
+      steps.push(tr('results.wic.nextSteps.discuss'));
+      steps.push(tr('results.wic.nextSteps.alternatives'));
+      steps.push(tr('results.wic.nextSteps.reapply'));
       break;
   }
 
@@ -90,21 +92,22 @@ function getWicNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?:
 /**
  * Get WIC-specific benefit information
  */
-function getWicBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getWicBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const benefits: string[] = [];
 
   if (userProfile?.isPregnant) {
-    benefits.push(t('results.wic.benefits.prenatal'));
-    benefits.push(t('results.wic.benefits.monthlyFood'));
-    benefits.push(t('results.wic.benefits.foods'));
+    benefits.push(tr('results.wic.benefits.prenatal'));
+    benefits.push(tr('results.wic.benefits.monthlyFood'));
+    benefits.push(tr('results.wic.benefits.foods'));
   } else if (userProfile?.hasChildren) {
-    benefits.push(t('results.wic.benefits.childNutrition'));
-    benefits.push(t('results.wic.benefits.childFood'));
-    benefits.push(t('results.wic.benefits.foods'));
+    benefits.push(tr('results.wic.benefits.childNutrition'));
+    benefits.push(tr('results.wic.benefits.childFood'));
+    benefits.push(tr('results.wic.benefits.foods'));
   } else {
-    benefits.push(t('results.wic.benefits.generalNutrition'));
-    benefits.push(t('results.wic.benefits.generalFood'));
-    benefits.push(t('results.wic.benefits.referrals'));
+    benefits.push(tr('results.wic.benefits.generalNutrition'));
+    benefits.push(tr('results.wic.benefits.generalFood'));
+    benefits.push(tr('results.wic.benefits.referrals'));
   }
 
   return benefits;
@@ -113,22 +116,23 @@ function getWicBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: b
 /**
  * Get WIC-specific requirements explanation
  */
-function getWicRequirementsExplanation(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getWicRequirementsExplanation(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const requirements: string[] = [];
 
-  requirements.push(t('results.wic.requirements.citizenship'));
-  requirements.push(t('results.wic.requirements.residence'));
-  requirements.push(t('results.wic.requirements.nutritionalRisk'));
+  requirements.push(tr('results.wic.requirements.citizenship'));
+  requirements.push(tr('results.wic.requirements.residence'));
+  requirements.push(tr('results.wic.requirements.nutritionalRisk'));
 
   if (userProfile?.isPregnant) {
-    requirements.push(t('results.wic.requirements.pregnant'));
+    requirements.push(tr('results.wic.requirements.pregnant'));
   } else if (userProfile?.hasChildren) {
-    requirements.push(t('results.wic.requirements.children'));
+    requirements.push(tr('results.wic.requirements.children'));
   } else {
-    requirements.push(t('results.wic.requirements.category'));
+    requirements.push(tr('results.wic.requirements.category'));
   }
 
-  requirements.push(t('results.wic.requirements.income'));
+  requirements.push(tr('results.wic.requirements.income'));
 
   return requirements;
 }

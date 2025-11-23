@@ -5,7 +5,6 @@
  */
 
 import { vi } from 'vitest';
-import React from 'react';
 import type { RxDocument } from 'rxdb';
 import type { UserProfile } from '../db/schemas';
 

@@ -32,8 +32,6 @@ export class ProgramDataService {
   private static instance: ProgramDataService | undefined;
   private cache = new Map<string, unknown>();
   private programs: BenefitProgram[] = [];
-  private readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour
-  private readonly MAX_CACHE_SIZE = 1000;
 
   private constructor() {
     this.initializePrograms();
@@ -115,7 +113,7 @@ export class ProgramDataService {
 
     if (filters.tags && filters.tags.length > 0) {
       results = results.filter(program =>
-        filters.tags?.some(tag => program.tags.includes(tag)) ?? false
+        filters.tags?.some(tag => (program.tags ?? []).includes(tag)) ?? false
       );
     }
 
@@ -161,8 +159,9 @@ export class ProgramDataService {
     }, {} as Record<string, number>);
 
     const programsByLevel = this.programs.reduce((acc, program) => {
-      const currentCount = acc[program.jurisdictionLevel] ?? 0;
-      return { ...acc, [program.jurisdictionLevel]: currentCount + 1 };
+      const level = program.jurisdictionLevel ?? 'unknown';
+      const currentCount = acc[level] ?? 0;
+      return { ...acc, [level]: currentCount + 1 };
     }, {} as Record<string, number>);
 
     const programsWithApplicationUrl = this.programs.filter(p => p.applicationUrl).length;
@@ -284,7 +283,7 @@ export class ProgramDataService {
     }
 
     if (filters.tags) {
-      const matchingTags = filters.tags.filter(tag => program.tags.includes(tag));
+      const matchingTags = filters.tags.filter(tag => (program.tags ?? []).includes(tag));
       score += matchingTags.length;
     }
 
@@ -305,7 +304,7 @@ export class ProgramDataService {
     }
 
     if (filters.tags) {
-      const matchingTags = filters.tags.filter(tag => program.tags.includes(tag));
+      const matchingTags = filters.tags.filter(tag => (program.tags ?? []).includes(tag));
       if (matchingTags.length > 0) {
         reasons.push(`Matches tags: ${matchingTags.join(', ')}`);
       }

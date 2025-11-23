@@ -30,25 +30,26 @@ interface MedicaidExplanationProps {
 /**
  * Get Medicaid-specific status messaging
  */
-function getMedicaidStatusMessage(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean; age?: number }, t: (key: string) => string): string {
+function getMedicaidStatusMessage(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean; age?: number }, t?: (key: string) => string): string {
+  const tr = t ?? ((k: string) => k);
   switch (status) {
     case 'qualified':
-      return t('results.medicaid.statusMessages.qualified');
+      return tr('results.medicaid.statusMessages.qualified');
     case 'likely':
-      return t('results.medicaid.statusMessages.likely');
+      return tr('results.medicaid.statusMessages.likely');
     case 'maybe':
-      return t('results.medicaid.statusMessages.maybe');
+      return tr('results.medicaid.statusMessages.maybe');
     case 'unlikely':
-      return t('results.medicaid.statusMessages.unlikely');
+      return tr('results.medicaid.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.isPregnant) {
-        return `${t('results.medicaid.statusMessages.notQualified')} Contact your state Medicaid office to discuss your pregnancy and health coverage needs.`;
+        return `${tr('results.medicaid.statusMessages.notQualified')} Contact your state Medicaid office to discuss your pregnancy and health coverage needs.`;
       } else if (userProfile?.hasChildren) {
-        return `${t('results.medicaid.statusMessages.notQualified')} Contact your state Medicaid office to discuss your children and health coverage needs.`;
+        return `${tr('results.medicaid.statusMessages.notQualified')} Contact your state Medicaid office to discuss your children and health coverage needs.`;
       } else if (userProfile?.age && userProfile.age >= 65) {
-        return `${t('results.medicaid.statusMessages.notQualified')} You may be eligible for Medicare instead. Contact your state Medicaid office to discuss.`;
+        return `${tr('results.medicaid.statusMessages.notQualified')} You may be eligible for Medicare instead. Contact your state Medicaid office to discuss.`;
       }
-      return t('results.medicaid.statusMessages.notQualified');
+      return tr('results.medicaid.statusMessages.notQualified');
     default:
       return 'Contact your state Medicaid office to discuss your eligibility.';
   }
@@ -57,32 +58,33 @@ function getMedicaidStatusMessage(status: EligibilityStatus, userProfile?: { isP
 /**
  * Get Medicaid-specific next steps based on status and user profile
  */
-function getMedicaidNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getMedicaidNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const steps: string[] = [];
 
   switch (status) {
     case 'qualified':
     case 'likely':
-      steps.push(t('results.medicaid.nextSteps.contact'));
-      steps.push(t('results.medicaid.nextSteps.online'));
-      steps.push(t('results.medicaid.nextSteps.documents'));
+      steps.push(tr('results.medicaid.nextSteps.contact'));
+      steps.push(tr('results.medicaid.nextSteps.schedule'));
+      steps.push(tr('results.medicaid.nextSteps.documents'));
       if (userProfile?.isPregnant) {
-        steps.push(t('results.medicaid.additionalSteps.prenatalCare'));
+        steps.push(tr('results.medicaid.additionalSteps.prenatalCare'));
       }
       if (userProfile?.hasChildren) {
-        steps.push(t('results.medicaid.additionalSteps.childrenHealth'));
+        steps.push(tr('results.medicaid.additionalSteps.childrenHealth'));
       }
-      steps.push(t('results.medicaid.nextSteps.enrollment'));
+      steps.push(tr('results.medicaid.nextSteps.enrollment'));
       break;
     case 'maybe':
     case 'unlikely':
-      steps.push(t('results.medicaid.nextSteps.contact'));
-      steps.push(t('results.medicaid.additionalSteps.alternativeHealth'));
+      steps.push(tr('results.medicaid.nextSteps.contact'));
+      steps.push(tr('results.medicaid.additionalSteps.alternativeHealth'));
       steps.push('Check back if your situation changes');
       break;
     case 'not-qualified':
-      steps.push(t('results.medicaid.nextSteps.contact'));
-      steps.push(t('results.medicaid.additionalSteps.otherHealth'));
+      steps.push(tr('results.medicaid.nextSteps.contact'));
+      steps.push(tr('results.medicaid.additionalSteps.otherHealth'));
       steps.push('Consider reapplying if your situation changes');
       break;
   }
@@ -93,15 +95,16 @@ function getMedicaidNextSteps(status: EligibilityStatus, userProfile?: { isPregn
 /**
  * Get Medicaid-specific benefit information
  */
-function getMedicaidBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getMedicaidBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const benefits: string[] = [];
 
-  benefits.push(t('results.medicaid.benefits.healthCoverage'));
-  benefits.push(t('results.medicaid.benefits.doctorVisits'));
-  benefits.push(t('results.medicaid.benefits.hospitalCare'));
-  benefits.push(t('results.medicaid.benefits.prescriptions'));
-  benefits.push(t('results.medicaid.benefits.preventiveCare'));
-  benefits.push(t('results.medicaid.benefits.mentalHealth'));
+  benefits.push(tr('results.medicaid.benefits.healthCoverage'));
+  benefits.push(tr('results.medicaid.benefits.doctorVisits'));
+  benefits.push(tr('results.medicaid.benefits.hospitalCare'));
+  benefits.push(tr('results.medicaid.benefits.prescriptions'));
+  benefits.push(tr('results.medicaid.benefits.preventiveCare'));
+  benefits.push(tr('results.medicaid.benefits.mentalHealth'));
 
   if (userProfile?.isPregnant) {
     benefits.push('Prenatal care and delivery services');
@@ -113,8 +116,8 @@ function getMedicaidBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildre
     benefits.push('Pediatric care and specialist services');
   }
 
-  benefits.push(t('results.medicaid.benefits.dentalVision'));
-  benefits.push(t('results.medicaid.benefits.transportation'));
+  benefits.push(tr('results.medicaid.benefits.dentalVision'));
+  benefits.push(tr('results.medicaid.benefits.transportation'));
 
   return benefits;
 }
@@ -122,22 +125,23 @@ function getMedicaidBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildre
 /**
  * Get Medicaid-specific requirements explanation
  */
-function getMedicaidRequirementsExplanation(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getMedicaidRequirementsExplanation(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const requirements: string[] = [];
 
-  requirements.push(t('results.medicaid.requirements.citizenship'));
-  requirements.push(t('results.medicaid.requirements.residence'));
-  requirements.push(t('results.medicaid.requirements.income'));
+  requirements.push(tr('results.medicaid.requirements.citizenship'));
+  requirements.push(tr('results.medicaid.requirements.residence'));
+  requirements.push(tr('results.medicaid.requirements.income'));
 
   if (userProfile?.isPregnant) {
-    requirements.push(t('results.medicaid.requirements.pregnancy'));
+    requirements.push(tr('results.medicaid.requirements.pregnancy'));
   } else if (userProfile?.hasChildren) {
-    requirements.push(t('results.medicaid.requirements.children'));
+    requirements.push(tr('results.medicaid.requirements.children'));
   } else {
-    requirements.push(t('results.medicaid.requirements.age'));
+    requirements.push(tr('results.medicaid.requirements.age'));
   }
 
-  requirements.push(t('results.medicaid.requirements.disability'));
+  requirements.push(tr('results.medicaid.requirements.disability'));
 
   return requirements;
 }

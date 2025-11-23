@@ -36,9 +36,14 @@ export const useDeviceDetection = (): DeviceInfo => {
       const height = window.innerHeight;
 
       // Touch device detection
-      const isTouchDevice = 'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0 ||
-        (navigator as NavigatorWithTouchPoints).msMaxTouchPoints > 0;
+      const navLike = navigator as unknown as { maxTouchPoints?: number };
+      const msTouch = (navigator as NavigatorWithTouchPoints).msMaxTouchPoints ?? 0;
+      const maxTouch = (typeof navLike?.maxTouchPoints === 'number') ? navLike.maxTouchPoints : 0;
+      const isTouchDevice = typeof window !== 'undefined' && (
+        'ontouchstart' in window ||
+        maxTouch > 0 ||
+        msTouch > 0
+      );
 
       // Breakpoint definitions
       const isMobile = width < 768;

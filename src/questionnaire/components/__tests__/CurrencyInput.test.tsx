@@ -7,7 +7,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { CurrencyInput } from '../CurrencyInput';
 import type { QuestionDefinition } from '../../types';
 
@@ -79,7 +78,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={1000} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.click(input);
       await user.tab();
 
@@ -93,7 +92,7 @@ describe('CurrencyInput Component', () => {
       render(<CurrencyInput question={mockQuestion} value={50000} onChange={mockOnChange} />);
 
       // Trigger blur to format
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       input.blur();
 
       expect(screen.getByText(/50,000.00 USD/i)).toBeInTheDocument();
@@ -106,7 +105,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={undefined} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.type(input, '1234.56');
 
       expect(mockOnChange).toHaveBeenCalled();
@@ -117,7 +116,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={undefined} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.type(input, 'abc123def');
 
       // Should only contain numbers
@@ -129,7 +128,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={undefined} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.type(input, '123.456789');
 
       // Should limit to 2 decimal places
@@ -141,7 +140,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={undefined} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.type(input, '12.34.56');
 
       // Should only have one decimal point
@@ -153,7 +152,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={1000} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.clear(input);
 
       // onChange should be called with undefined for clearing
@@ -167,7 +166,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={undefined} onChange={mockOnChange} allowNegative />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.type(input, '-123.45');
 
       expect(input).toHaveValue('-123.45');
@@ -178,7 +177,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={undefined} onChange={mockOnChange} allowNegative={false} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.type(input, '-123');
 
       // Negative sign should be removed
@@ -190,7 +189,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={undefined} onChange={mockOnChange} allowNegative />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.type(input, '123-45');
 
       // Should move negative to beginning
@@ -204,7 +203,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={1000} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
       await user.click(input);
       await user.tab();
 
@@ -218,7 +217,7 @@ describe('CurrencyInput Component', () => {
 
       render(<CurrencyInput question={mockQuestion} value={1000} onChange={mockOnChange} />);
 
-      const input = screen.getByLabelText(/What is your annual income/i);
+      const input = screen.getByLabelText(/What is your annual income/i) as HTMLInputElement;
 
       // First blur to format
       await user.click(input);

@@ -30,23 +30,24 @@ interface SnapExplanationProps {
 /**
  * Get SNAP-specific status messaging
  */
-function getSnapStatusMessage(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string {
+function getSnapStatusMessage(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string {
+  const tr = t ?? ((k: string) => k);
   switch (status) {
     case 'qualified':
-      return t('results.snap.statusMessages.qualified');
+      return tr('results.snap.statusMessages.qualified');
     case 'likely':
-      return t('results.snap.statusMessages.likely');
+      return tr('results.snap.statusMessages.likely');
     case 'maybe':
-      return t('results.snap.statusMessages.maybe');
+      return tr('results.snap.statusMessages.maybe');
     case 'unlikely':
-      return t('results.snap.statusMessages.unlikely');
+      return tr('results.snap.statusMessages.unlikely');
     case 'not-qualified':
       if (userProfile?.isPregnant) {
-        return `${t('results.snap.statusMessages.notQualified')} Contact your local SNAP office to discuss your pregnancy and food assistance needs.`;
+        return `${tr('results.snap.statusMessages.notQualified')} Contact your local SNAP office to discuss your pregnancy and food assistance needs.`;
       } else if (userProfile?.hasChildren) {
-        return `${t('results.snap.statusMessages.notQualified')} Contact your local SNAP office to discuss your children and food assistance needs.`;
+        return `${tr('results.snap.statusMessages.notQualified')} Contact your local SNAP office to discuss your children and food assistance needs.`;
       }
-      return t('results.snap.statusMessages.notQualified');
+      return tr('results.snap.statusMessages.notQualified');
     default:
       return 'Contact your local SNAP office to discuss your eligibility.';
   }
@@ -55,32 +56,33 @@ function getSnapStatusMessage(status: EligibilityStatus, userProfile?: { isPregn
 /**
  * Get SNAP-specific next steps based on status and user profile
  */
-function getSnapNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getSnapNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const steps: string[] = [];
 
   switch (status) {
     case 'qualified':
     case 'likely':
-      steps.push(t('results.snap.nextSteps.contact'));
-      steps.push(t('results.snap.nextSteps.online'));
-      steps.push(t('results.snap.nextSteps.documents'));
+      steps.push(tr('results.snap.nextSteps.contact'));
+      steps.push(tr('results.snap.nextSteps.online'));
+      steps.push(tr('results.snap.nextSteps.documents'));
       if (userProfile?.isPregnant) {
-        steps.push(t('results.snap.additionalSteps.prenatalNutrition'));
+        steps.push(tr('results.snap.additionalSteps.prenatalNutrition'));
       }
       if (userProfile?.hasChildren) {
-        steps.push(t('results.snap.additionalSteps.familyNutrition'));
+        steps.push(tr('results.snap.additionalSteps.familyNutrition'));
       }
-      steps.push(t('results.snap.nextSteps.ebtCard'));
+      steps.push(tr('results.snap.nextSteps.ebtCard'));
       break;
     case 'maybe':
     case 'unlikely':
-      steps.push(t('results.snap.nextSteps.contact'));
-      steps.push(t('results.snap.additionalSteps.alternativeFood'));
+      steps.push(tr('results.snap.nextSteps.contact'));
+      steps.push(tr('results.snap.additionalSteps.alternativeFood'));
       steps.push('Check back if your situation changes');
       break;
     case 'not-qualified':
-      steps.push(t('results.snap.nextSteps.contact'));
-      steps.push(t('results.snap.additionalSteps.otherFood'));
+      steps.push(tr('results.snap.nextSteps.contact'));
+      steps.push(tr('results.snap.additionalSteps.otherFood'));
       steps.push('Consider reapplying if your situation changes');
       break;
   }
@@ -91,14 +93,15 @@ function getSnapNextSteps(status: EligibilityStatus, userProfile?: { isPregnant?
 /**
  * Get SNAP-specific benefit information
  */
-function getSnapBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getSnapBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
   const benefits: string[] = [];
 
-  benefits.push(t('results.snap.benefits.monthlyBenefits'));
-  benefits.push(t('results.snap.benefits.ebtCard'));
-  benefits.push(t('results.snap.benefits.foodItems'));
-  benefits.push(t('results.snap.benefits.farmerMarkets'));
-  benefits.push(t('results.snap.benefits.onlineShopping'));
+  benefits.push(tr('results.snap.benefits.monthlyBenefits'));
+  benefits.push(tr('results.snap.benefits.ebtCard'));
+  benefits.push(tr('results.snap.benefits.foodItems'));
+  benefits.push(tr('results.snap.benefits.farmerMarkets'));
+  benefits.push(tr('results.snap.benefits.onlineShopping'));
 
   if (userProfile?.isPregnant) {
     benefits.push('Nutrition education for pregnant women');
@@ -110,8 +113,8 @@ function getSnapBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: 
     benefits.push('Children\'s nutrition programs');
   }
 
-  benefits.push(t('results.snap.benefits.nutritionEducation'));
-  benefits.push(t('results.snap.benefits.workSupport'));
+  benefits.push(tr('results.snap.benefits.nutritionEducation'));
+  benefits.push(tr('results.snap.benefits.workSupport'));
 
   return benefits;
 }
@@ -119,15 +122,18 @@ function getSnapBenefitInfo(userProfile?: { isPregnant?: boolean; hasChildren?: 
 /**
  * Get SNAP-specific requirements explanation
  */
-function getSnapRequirementsExplanation(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t: (key: string) => string): string[] {
+function getSnapRequirementsExplanation(userProfile?: { isPregnant?: boolean; hasChildren?: boolean }, t?: (key: string) => string): string[] {
+  const tr = t ?? ((k: string) => k);
+  // Reference userProfile to avoid unused parameter compiler warnings
+  void userProfile;
   const requirements: string[] = [];
 
-  requirements.push(t('results.snap.requirements.citizenship'));
-  requirements.push(t('results.snap.requirements.residence'));
-  requirements.push(t('results.snap.requirements.income'));
-  requirements.push(t('results.snap.requirements.assets'));
-  requirements.push(t('results.snap.requirements.work'));
-  requirements.push(t('results.snap.requirements.socialSecurity'));
+  requirements.push(tr('results.snap.requirements.citizenship'));
+  requirements.push(tr('results.snap.requirements.residence'));
+  requirements.push(tr('results.snap.requirements.income'));
+  requirements.push(tr('results.snap.requirements.assets'));
+  requirements.push(tr('results.snap.requirements.work'));
+  requirements.push(tr('results.snap.requirements.socialSecurity'));
 
   return requirements;
 }

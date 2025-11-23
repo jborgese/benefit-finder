@@ -14,7 +14,7 @@ import type { QuestionDefinition } from '../types';
 interface StateSelectorWithLocationProps {
   question: QuestionDefinition;
   value: string | number | null;
-  onChange: (value: string | number) => void;
+  onChange: (value: string | number | null) => void;
   error?: string[];
   disabled?: boolean;
   className?: string;
@@ -86,7 +86,7 @@ export const StateSelectorWithLocation: React.FC<StateSelectorWithLocationProps>
   }, [hasPermission, locationDetected]);
 
   const handleLocationRequest = (): void => {
-    if (isLoading) {return;}
+    if (isLoading) { return; }
 
     clearLocation();
     setLocationDetected(false);
@@ -107,6 +107,7 @@ export const StateSelectorWithLocation: React.FC<StateSelectorWithLocationProps>
         disabled={disabled}
         autoFocus={autoFocus}
         onEnterKey={onEnterKey}
+        options={question.options ?? []}
       />
 
       {showLocationButton && (

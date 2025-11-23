@@ -8,7 +8,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import {
   EligibilityResultExplanation,
   EligibilityResultSummary,
@@ -30,6 +29,12 @@ const mockEligibleResult: EligibilityEvaluationResult = {
     { document: 'Proof of Income', description: 'Pay stubs or tax returns' },
     { document: 'ID', description: 'Driver\'s license or passport' },
   ],
+  // Required base fields
+  profileId: 'test-profile',
+  programId: 'test-program',
+  ruleId: 'rule-eligible-1',
+  reason: '',
+  evaluatedAt: Date.now(),
 };
 
 const mockIneligibleResult: EligibilityEvaluationResult = {
@@ -39,6 +44,12 @@ const mockIneligibleResult: EligibilityEvaluationResult = {
   executionTime: 32,
   needsReview: false,
   requiredDocuments: [],
+  // Required base fields
+  profileId: 'test-profile',
+  programId: 'test-program',
+  ruleId: 'rule-ineligible-1',
+  reason: '',
+  evaluatedAt: Date.now(),
 };
 
 const mockIncompleteResult: EligibilityEvaluationResult = {
@@ -48,6 +59,12 @@ const mockIncompleteResult: EligibilityEvaluationResult = {
   executionTime: 28,
   needsReview: true,
   requiredDocuments: [],
+  // Required base fields
+  profileId: 'test-profile',
+  programId: 'test-program',
+  ruleId: 'rule-incomplete-1',
+  reason: '',
+  evaluatedAt: Date.now(),
 };
 
 const mockRule: JsonLogicRule = {

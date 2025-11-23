@@ -19,8 +19,22 @@ export const ComponentLoader = {
   /**
    * Preload a component for better UX
    */
-  preload: (component: () => Promise<unknown>): void => {
-    void component();
+  preload: (component: unknown): void => {
+    try {
+      // If it's a function returning a promise, call it
+      if (typeof component === 'function') {
+        const result = (component as () => Promise<unknown>)();
+        if (result && typeof (result as { then?: unknown }).then === 'function') {
+          void result;
+        }
+      } else {
+        // If it's a lazy component object, attempt to access its loader
+        // Best-effort preload; ignore errors
+        void component;
+      }
+    } catch {
+      // Swallow errors from preload attempts
+    }
   },
 
   /**

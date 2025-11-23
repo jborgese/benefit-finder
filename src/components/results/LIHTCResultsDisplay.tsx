@@ -35,7 +35,7 @@ export const LIHTCResultsDisplay: React.FC<LIHTCResultsDisplayProps> = ({
       {/* Eligibility Status */}
       <EligibilityStatusCard
         eligible={eligibility.eligible}
-        explanation={eligibility.explanation}
+        explanation={String(eligibility.reason ?? eligibility.detailedExplanation ?? eligibility.summary ?? '')}
         reasons={lihtcEligibility.reasons}
       />
 
@@ -276,7 +276,7 @@ const EligibilityBreakdownCard: React.FC<{
 const NextStepsCard: React.FC<{
   eligible: boolean;
   lihtcEligibility: LIHTCEligibilityResult;
-}> = ({ eligible, _lihtcEligibility }) => (
+}> = ({ eligible }) => (
   <div className={`p-6 rounded-lg border-2 ${eligible
     ? 'bg-green-50 border-green-200'
     : 'bg-amber-50 border-amber-200'

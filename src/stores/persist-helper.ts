@@ -59,8 +59,8 @@ export const isTestEnvironment = (): boolean => {
 
   // Check window.VITEST (set by Vitest in jsdom)
   if (typeof window !== 'undefined') {
-    debugInfo.windowVITEST = (window as Record<string, unknown>).VITEST;
-    if ((window as Record<string, unknown>).VITEST === true) {
+    debugInfo.windowVITEST = (window as unknown as Record<string, unknown>).VITEST;
+    if ((window as unknown as Record<string, unknown>).VITEST === true) {
       debugInfo.result = true;
       console.log('[PERSIST DEBUG] isTestEnvironment() = true (window.VITEST check)', debugInfo);
       return true;

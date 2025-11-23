@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import type { QuestionDefinition } from '../../types/question';
+import type { QuestionDefinition } from '../../questionnaire/types';
 
 // Constants for repeated CSS classes
 const SELECTED_STYLES = 'border-blue-500 bg-blue-50';
@@ -19,11 +19,11 @@ interface AMIData {
 // Helper function to get unit size className
 const getUnitSizeClassName = (
   value: unknown,
-  optionValue: string,
+  optionValue: unknown,
   isRecommended: boolean,
   isTooSmall: boolean
 ): string => {
-  if (value === optionValue) {
+  if (String(value) === String(optionValue)) {
     return SELECTED_STYLES;
   }
   if (isRecommended) {
@@ -73,7 +73,7 @@ export const StudentStatusQuestion: React.FC<QuestionProps> = ({
               name={question.key}
               value={option.value}
               checked={value === option.value}
-              onChange={(e) => onChange(question.key, e.target.value)}
+              onChange={(e) => onChange(question.key as string, e.target.value)}
               className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
             />
             <div className="flex-1">
@@ -114,10 +114,10 @@ export const UnitSizeQuestion: React.FC<QuestionProps> = ({
   const householdSize = (context?.householdSize as number) || 1;
 
   const getRecommendedUnitSize = (size: number): string => {
-    if (size === 1) {return 'studio';}
-    if (size <= 2) {return '1br';}
-    if (size <= 4) {return '2br';}
-    if (size <= 6) {return '3br';}
+    if (size === 1) { return 'studio'; }
+    if (size <= 2) { return '1br'; }
+    if (size <= 4) { return '2br'; }
+    if (size <= 6) { return '3br'; }
     return '4br';
   };
 
@@ -161,7 +161,7 @@ export const UnitSizeQuestion: React.FC<QuestionProps> = ({
                 name={question.key}
                 value={option.value}
                 checked={value === option.value}
-                onChange={(e) => onChange(question.key, e.target.value)}
+                onChange={(e) => onChange(question.key as string, e.target.value)}
                 className="sr-only"
               />
               <div className="flex items-center justify-between">
@@ -225,7 +225,7 @@ export const HousingHistoryQuestion: React.FC<QuestionProps> = ({
               name={question.key}
               value={option.value}
               checked={value === option.value}
-              onChange={(e) => onChange(question.key, e.target.value)}
+              onChange={(e) => onChange(question.key as string, e.target.value)}
               className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
             />
             <div className="flex-1">
@@ -259,9 +259,9 @@ export const IncomeSourcesQuestion: React.FC<QuestionProps> = ({
 
   const handleSourceChange = (sourceValue: string, checked: boolean): void => {
     if (checked) {
-      onChange(question.key, [...selectedSources, sourceValue]);
+      onChange(question.key as string, [...selectedSources, sourceValue]);
     } else {
-      onChange(question.key, selectedSources.filter(s => s !== sourceValue));
+      onChange(question.key as string, selectedSources.filter(s => s !== sourceValue));
     }
   };
 
@@ -352,7 +352,7 @@ export const RentAffordabilityQuestion: React.FC<QuestionProps> = ({
           id={question.key}
           name={question.key}
           value={value as number || ''}
-          onChange={(e) => onChange(question.key, parseFloat(e.target.value) || 0)}
+          onChange={(e) => onChange(question.key as string, parseFloat(e.target.value) || 0)}
           min={question.min}
           max={question.max}
           step={question.step}
@@ -392,9 +392,9 @@ export const HousingPreferencesQuestion: React.FC<QuestionProps> = ({
 
   const handlePreferenceChange = (preferenceValue: string, checked: boolean): void => {
     if (checked) {
-      onChange(question.key, [...selectedPreferences, preferenceValue]);
+      onChange(question.key as string, [...selectedPreferences, preferenceValue]);
     } else {
-      onChange(question.key, selectedPreferences.filter(p => p !== preferenceValue));
+      onChange(question.key as string, selectedPreferences.filter(p => p !== preferenceValue));
     }
   };
 
@@ -455,9 +455,9 @@ export const ContactPreferencesQuestion: React.FC<QuestionProps> = ({
 
   const handleMethodChange = (methodValue: string, checked: boolean): void => {
     if (checked) {
-      onChange(question.key, [...selectedMethods, methodValue]);
+      onChange(question.key as string, [...selectedMethods, methodValue]);
     } else {
-      onChange(question.key, selectedMethods.filter(m => m !== methodValue));
+      onChange(question.key as string, selectedMethods.filter(m => m !== methodValue));
     }
   };
 

@@ -8,6 +8,7 @@
 import React, { useState, useId } from 'react';
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 import type { SelectProps } from './types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 export const SelectInput: React.FC<SelectProps> = ({
   question,
@@ -60,8 +61,8 @@ export const SelectInput: React.FC<SelectProps> = ({
 
   // Convert error to array format
   const errors: string[] = (() => {
-    if (Array.isArray(error)) {return error;}
-    if (error) {return [error];}
+    if (Array.isArray(error)) { return error; }
+    if (error) { return [error]; }
     return [];
   })();
 
@@ -119,7 +120,7 @@ export const SelectInput: React.FC<SelectProps> = ({
       <div className={`question-select-radio ${className}`}>
         <fieldset onKeyDown={handleKeyDown}>
           <legend className="question-label block">
-            {question.text}
+            {resolveQuestionString(question.text)}
             {question.required && (
               <span className="required-indicator" aria-label="required">
                 *
@@ -132,7 +133,7 @@ export const SelectInput: React.FC<SelectProps> = ({
               id={descId}
               className="question-description"
             >
-              {question.description}
+              {resolveQuestionString(question.description)}
             </p>
           )}
 
@@ -205,7 +206,7 @@ export const SelectInput: React.FC<SelectProps> = ({
 
         {question.helpText && !showError && (
           <p className="question-help-text">
-            {question.helpText}
+            {resolveQuestionString(question.helpText)}
           </p>
         )}
 
@@ -234,7 +235,7 @@ export const SelectInput: React.FC<SelectProps> = ({
         htmlFor={id}
         className="question-label block"
       >
-        {question.text}
+        {resolveQuestionString(question.text)}
         {question.required && (
           <span className="required-indicator" aria-label="required">
             *
@@ -247,7 +248,7 @@ export const SelectInput: React.FC<SelectProps> = ({
           id={descId}
           className="question-description"
         >
-          {question.description}
+          {resolveQuestionString(question.description)}
         </p>
       )}
 
@@ -276,7 +277,7 @@ export const SelectInput: React.FC<SelectProps> = ({
         required={question.required}
         aria-invalid={showError}
         aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-        aria-label={question.ariaLabel ?? question.text}
+        aria-label={resolveQuestionString(question.ariaLabel) || resolveQuestionString(question.text)}
         size={filteredOptions.length > 10 ? 8 : 1}
         className={`
           question-input w-full px-4 py-3 border rounded-lg shadow-sm

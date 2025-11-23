@@ -7,7 +7,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
 

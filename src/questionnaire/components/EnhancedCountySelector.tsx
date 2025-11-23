@@ -9,6 +9,7 @@ import React, { useState, useId, useMemo, useRef, useEffect } from 'react';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
 import { getCountiesForState, getStateName, searchCounties } from '../../services/location-data';
 import type { QuestionDefinition } from '../types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 // Popular counties by state (major metropolitan areas)
 const POPULAR_COUNTIES: Record<string, string[]> = {
@@ -50,7 +51,7 @@ interface CountyOption {
 // Helper function to get counties for a state
 const useCountiesForState = (selectedState: string | undefined): CountyOption[] => {
   return useMemo(() => {
-    if (!selectedState) {return [];}
+    if (!selectedState) { return []; }
     return getCountiesForState(selectedState);
   }, [selectedState]);
 };
@@ -58,8 +59,8 @@ const useCountiesForState = (selectedState: string | undefined): CountyOption[] 
 // Helper function to get popular counties
 const usePopularCounties = (selectedState: string | undefined, allCounties: CountyOption[], showPopularFirst: boolean): CountyOption[] => {
   return useMemo(() => {
-    if (!selectedState || !showPopularFirst) {return [];}
-     
+    if (!selectedState || !showPopularFirst) { return []; }
+
     const popular = selectedState && selectedState in POPULAR_COUNTIES ? POPULAR_COUNTIES[selectedState] ?? [] : [];
     return allCounties.filter(county =>
       popular.some(popularName =>
@@ -82,7 +83,7 @@ const useProcessedCounties = (
     let counties = allCounties;
 
     if (searchQuery.trim()) {
-      if (!selectedState) {return [];}
+      if (!selectedState) { return []; }
       counties = searchCounties(selectedState, searchQuery);
     }
 
@@ -192,7 +193,7 @@ const renderLabelSection = (
         htmlFor={id}
         className="question-label block"
       >
-        {question.text}
+        {resolveQuestionString(question.text)}
         {question.required && (
           <span className="required-indicator" aria-label="required">
             *
@@ -200,9 +201,9 @@ const renderLabelSection = (
         )}
       </label>
 
-      {question.description && (
+      {question.description && resolveQuestionString(question.description) && (
         <p id={descId} className="question-description">
-          {question.description}
+          {resolveQuestionString(question.description)}
         </p>
       )}
     </>
@@ -211,7 +212,7 @@ const renderLabelSection = (
 
 // Helper function to render state context banner
 const renderStateContext = (stateName: string | null, showStateContext: boolean): React.JSX.Element | null => {
-  if (!showStateContext || !stateName) {return null;}
+  if (!showStateContext || !stateName) { return null; }
 
   return (
     <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
@@ -224,7 +225,7 @@ const renderStateContext = (stateName: string | null, showStateContext: boolean)
 
 // Helper function to render desktop state context
 const renderDesktopStateContext = (stateName: string | null, showStateContext: boolean): React.JSX.Element | null => {
-  if (!showStateContext || !stateName) {return null;}
+  if (!showStateContext || !stateName) { return null; }
 
   return (
     <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -261,7 +262,7 @@ const renderErrors = (errorId: string, errors: string[]): React.JSX.Element => {
 
 // Helper function to render help text
 const renderHelpText = (question: QuestionDefinition, showError: boolean): React.JSX.Element | null => {
-  if (!question.helpText || showError) {return null;}
+  if (!question.helpText || showError) { return null; }
 
   return (
     <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
@@ -689,7 +690,7 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
           htmlFor={id}
           className="block text-sm font-medium text-gray-700 dark:text-secondary-200 mb-2"
         >
-          {question.text}
+          {resolveQuestionString(question.text)}
           {question.required && (
             <span className="text-red-500 dark:text-red-400 ml-1" aria-label="required">
               *
@@ -699,7 +700,7 @@ export const EnhancedCountySelector: React.FC<EnhancedCountySelectorProps> = ({
 
         {question.description && (
           <p id={descId} className="text-sm text-gray-600 dark:text-secondary-300 mb-3">
-            {question.description}
+            {resolveQuestionString(question.description)}
           </p>
         )}
 

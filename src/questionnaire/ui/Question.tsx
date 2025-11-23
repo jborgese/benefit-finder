@@ -76,6 +76,8 @@ export const Question: React.FC<QuestionProps> = ({
   // Resolve dynamic question text and description
   const questionContext = context ?? store.getAnswerContext();
 
+  const fieldName = question.fieldName ?? '';
+
   // Debug logging for dynamic question text
   React.useEffect(() => {
     if (import.meta.env.DEV) {
@@ -142,7 +144,14 @@ export const Question: React.FC<QuestionProps> = ({
       return;
     }
 
-    const schema = createSchemaFromQuestion(question);
+    const schema = createSchemaFromQuestion({
+      inputType: question.inputType ?? 'text',
+      fieldName: question.fieldName,
+      required: question.required,
+      min: question.min,
+      max: question.max,
+      validations: question.validations,
+    });
     const result = validateWithSchema(schema, val);
 
     if (!result.success) {
@@ -231,7 +240,7 @@ export const Question: React.FC<QuestionProps> = ({
       <EnhancedStateSelector
         {...commonProps}
         question={resolvedQuestion}
-        value={commonProps.value as string}
+        value={commonProps.value as string | null}
         placeholder="Search for your state..."
         showPopularFirst
         groupByRegion={!deviceInfo.isMobile}
@@ -313,8 +322,8 @@ export const Question: React.FC<QuestionProps> = ({
       <EnhancedCountySelector
         {...commonProps}
         value={value as string | null}
-        selectedState={selectedState}
-        placeholder={question.placeholder ?? 'Search for your county...'}
+        selectedState={selectedState ?? undefined}
+        searchPlaceholder={question.placeholder ?? 'Search for your county...'}
         showPopularFirst
         showStateContext
         enableSearch
@@ -326,18 +335,18 @@ export const Question: React.FC<QuestionProps> = ({
 
   // Helper to check if question is about state
   const isStateQuestion = (): boolean => {
-    return question.fieldName === 'state' || questionText.toLowerCase().includes('state');
+    return fieldName === 'state' || questionText.toLowerCase().includes('state');
   };
 
   // Helper to check if question is about county
   const isCountyQuestion = (): boolean => {
-    return question.fieldName === 'county' || questionText.toLowerCase().includes('county');
+    return fieldName === 'county' || questionText.toLowerCase().includes('county');
   };
 
   // Helper to check if question is about birth date
   const isBirthDateQuestion = (): boolean => {
-    return question.fieldName.toLowerCase().includes('birth') ||
-      question.fieldName.toLowerCase().includes('dob') ||
+    return fieldName.toLowerCase().includes('birth') ||
+      fieldName.toLowerCase().includes('dob') ||
       questionText.toLowerCase().includes('birth');
   };
 

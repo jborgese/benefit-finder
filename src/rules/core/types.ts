@@ -408,12 +408,22 @@ export interface RuleBuilder {
  * Rule metadata
  */
 export interface RuleMetadata {
+    /** Source or reference for rule */
+    source?: string;
   /** Rule ID */
   id?: string;
   /** Rule name */
   name?: string;
   /** Rule description */
   description?: string;
+  /** Rule type (eligibility, benefit_amount, etc.) */
+  ruleType?: string;
+  /** Explanation for the rule */
+  explanation?: string;
+  /** Required fields for evaluation */
+  requiredFields?: string[];
+  /** Required documents for verification */
+  requiredDocuments?: string[];
   /** Rule version */
   version?: string;
   /** Author */
@@ -422,6 +432,10 @@ export interface RuleMetadata {
   createdAt?: number;
   /** Last modified date */
   updatedAt?: number;
+  /** Effective date for rule */
+  effectiveDate?: number;
+  /** Whether rule is active */
+  active?: boolean;
   /** Tags */
   tags?: string[];
   /** Custom metadata */
@@ -432,6 +446,12 @@ export interface RuleMetadata {
  * Complete rule definition with metadata
  */
 export interface RuleDefinition {
+  /** Legacy identifier (optional) retained for imports and older rule files */
+  id?: string;
+  /** Program identifier (legacy placement on rule objects) */
+  programId?: string;
+  /** Priority for rule ordering (optional, legacy) */
+  priority?: number;
   /** Rule logic */
   logic: JsonLogicRule;
   /** Metadata */

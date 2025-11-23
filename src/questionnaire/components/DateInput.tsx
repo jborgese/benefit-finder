@@ -7,6 +7,7 @@
 
 import React, { useState, useId } from 'react';
 import type { DateInputProps } from './types';
+import { resolveQuestionString } from '../resolveQuestionText';
 
 export const DateInput: React.FC<DateInputProps> = ({
   question,
@@ -61,7 +62,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   };
 
   const formatDateForDisplay = (isoDate: string): string => {
-    if (!isoDate) {return '';}
+    if (!isoDate) { return ''; }
 
     try {
       // Parse the ISO date string and create a date object in local timezone
@@ -86,7 +87,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   };
 
   const calculateAge = (birthDate: string): number | null => {
-    if (!birthDate) {return null;}
+    if (!birthDate) { return null; }
 
     try {
       const today = new Date();
@@ -108,8 +109,9 @@ export const DateInput: React.FC<DateInputProps> = ({
     }
   };
 
-  const age = question.fieldName.toLowerCase().includes('birth') && value
-    ? calculateAge(value)
+  const fieldName = question.fieldName ?? '';
+  const age = fieldName.toLowerCase().includes('birth') && value
+    ? calculateAge(value as string)
     : null;
 
   return (
@@ -118,7 +120,7 @@ export const DateInput: React.FC<DateInputProps> = ({
         htmlFor={id}
         className="block text-sm font-medium text-gray-700 mb-1"
       >
-        {question.text}
+        {resolveQuestionString(question.text)}
         {question.required && (
           <span className="text-red-500 ml-1" aria-label="required">
             *
@@ -126,12 +128,12 @@ export const DateInput: React.FC<DateInputProps> = ({
         )}
       </label>
 
-      {question.description && (
+      {question.description && resolveQuestionString(question.description) && (
         <p
           id={descId}
           className="text-sm text-gray-600 mb-2"
         >
-          {question.description}
+          {resolveQuestionString(question.description)}
         </p>
       )}
 
@@ -151,7 +153,7 @@ export const DateInput: React.FC<DateInputProps> = ({
           required={question.required}
           aria-invalid={showError}
           aria-describedby={`${question.description ? descId : ''} ${showError ? errorId : ''}`.trim()}
-          aria-label={question.ariaLabel ?? question.text}
+          aria-label={resolveQuestionString(question.ariaLabel) || resolveQuestionString(question.text)}
           className={`
             w-full px-3 py-2 border rounded-md shadow-sm
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
@@ -189,7 +191,7 @@ export const DateInput: React.FC<DateInputProps> = ({
 
       {question.helpText && !showError && (
         <p className="mt-1 text-xs text-gray-500">
-          {question.helpText}
+          {resolveQuestionString(question.helpText)}
         </p>
       )}
 

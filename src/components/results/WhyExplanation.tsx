@@ -202,11 +202,11 @@ function parseRulePattern(ruleCode: string): string {
   };
 
   const programName = Object.prototype.hasOwnProperty.call(programDescriptions, program)
-     
+
     ? programDescriptions[program]
     : program;
   const categoryDesc = Object.prototype.hasOwnProperty.call(categoryDescriptions, category)
-     
+
     ? categoryDescriptions[category]
     : category.toLowerCase();
 
@@ -238,7 +238,7 @@ function getUserFriendlyRuleDescription(
 
   // Direct match first
   if (Object.prototype.hasOwnProperty.call(programMappings, lowerRuleCode)) {
-     
+
     return programMappings[lowerRuleCode];
   }
 
@@ -254,7 +254,7 @@ function getUserFriendlyRuleDescription(
   // Check for exact match in rule descriptions
   const ruleDescriptions = getRuleDescriptions();
   if (Object.prototype.hasOwnProperty.call(ruleDescriptions, ruleCode)) {
-     
+
     return ruleDescriptions[ruleCode];
   }
 
@@ -352,11 +352,11 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
       </div>
 
       {/* Details */}
-      {explanation.details.length > 0 && (
+      {(explanation.details?.length ?? 0) > 0 && (
         <div className="mb-6">
           <h4 className="font-semibold text-gray-900 mb-3">How we determined this:</h4>
           <ul className="space-y-2">
-            {explanation.details.map((detail, index) => (
+            {(explanation.details ?? []).map((detail, index) => (
               <li key={index} className="flex items-start">
                 <span className="text-blue-600 mr-2 mt-0.5">•</span>
                 <span className="text-gray-700">{detail}</span>
@@ -391,11 +391,11 @@ export const WhyExplanation: React.FC<WhyExplanationProps> = ({
       )}
 
       {/* Program Requirements */}
-      {explanation.rulesCited.length > 0 && (
+      {(explanation.rulesCited?.length ?? 0) > 0 && (
         <div className="mb-6">
           <h4 className="font-semibold text-gray-900 mb-3">Program requirements:</h4>
           <div className="space-y-2">
-            {explanation.rulesCited.map((rule, index) => (
+            {(explanation.rulesCited ?? []).map((rule, index) => (
               <div
                 key={index}
                 className="text-sm text-gray-700 bg-blue-50 px-3 py-2 rounded border border-blue-200"

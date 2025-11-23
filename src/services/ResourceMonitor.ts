@@ -107,8 +107,9 @@ export class ResourceMonitor {
    * Get current memory usage
    */
   private getMemoryUsage(): number {
-    if (typeof performance !== 'undefined' && performance.memory) {
-      return performance.memory.usedJSHeapSize;
+    const perf = performance as unknown as { memory?: { usedJSHeapSize?: number } };
+    if (typeof perf !== 'undefined' && perf?.memory && typeof perf.memory.usedJSHeapSize === 'number') {
+      return perf.memory.usedJSHeapSize;
     }
     return 0;
   }
@@ -154,9 +155,10 @@ export class ResourceMonitor {
    * Get memory usage information
    */
   private getMemoryUsageInfo(): ResourceMetrics['memoryUsage'] {
-    if (typeof performance !== 'undefined' && performance.memory) {
-      const used = performance.memory.usedJSHeapSize;
-      const total = performance.memory.totalJSHeapSize;
+    const perf = performance as unknown as { memory?: { usedJSHeapSize?: number; totalJSHeapSize?: number } };
+    if (typeof perf !== 'undefined' && perf?.memory && typeof perf.memory.usedJSHeapSize === 'number' && typeof perf.memory.totalJSHeapSize === 'number') {
+      const used = perf.memory.usedJSHeapSize;
+      const total = perf.memory.totalJSHeapSize;
       const percentage = (used / total) * 100;
 
       return { used, total, percentage };

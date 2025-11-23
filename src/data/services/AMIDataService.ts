@@ -173,8 +173,10 @@ export class AMIDataService {
   private setCache(key: string, data: ProcessedAMIData): void {
     // Implement LRU eviction if cache is full
     if (this.cache.size >= this.config.maxCacheSize) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      const oldestKey = this.cache.keys().next().value as string | undefined;
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
     }
 
     this.cache.set(key, {
@@ -198,7 +200,7 @@ export class AMIDataService {
     if (!Object.prototype.hasOwnProperty.call(counties, county)) {
       throw new Error(`AMI data not found for ${county}, ${state}`);
     }
-     
+
     const countyData = counties[county];
 
     // Use whitelist validation to prevent object injection

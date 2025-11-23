@@ -46,7 +46,7 @@ function hasCallableMethod(obj: unknown, methodName: string): boolean {
   }
 
   // Safe: methodName is validated to contain only alphanumeric and underscore characters
-   
+
   const method = (obj as Record<string, unknown>)[methodName];
 
   // Check if it's a function
@@ -210,13 +210,13 @@ function tryRefreshCollection<T>(collectionName: string): RxCollection<T> | null
   const db = getDatabase();
   const dbAny = db as unknown as Record<string, unknown>;
   // Safe: collectionName is validated to contain only alphanumeric and underscore characters
-   
+
   if (!dbAny[collectionName]) {
     return null;
   }
 
   // Safe: collectionName is validated to contain only alphanumeric and underscore characters
-   
+
   const refreshed = dbAny[collectionName] as RxCollection<T>;
   return isCollectionReady(refreshed) ? refreshed : null;
 }
@@ -313,7 +313,7 @@ function checkCollectionReady<T>(
  */
 async function attemptCollectionReady<T>(
   collection: RxCollection<T>,
-  collectionName: string,
+  _collectionName: string,
   isTest: boolean,
   delay: number
 ): Promise<RxCollection<T> | null> {
@@ -613,7 +613,7 @@ export async function getDatabaseStats(): Promise<{
 
   for (const [name, collection] of Object.entries(collections)) {
     // Runtime check: TypeScript types guarantee these exist, but verify at runtime for safety
-     
+
     if (!collection) {
       throw new Error(`${name} collection is not initialized`);
     }
@@ -658,15 +658,15 @@ export async function checkDatabaseHealth(): Promise<{
     const db = getDatabase();
 
     // Check if collections exist (runtime check for database initialization)
-     
+
     if (!db.user_profiles) {issues.push('user_profiles collection not found');}
-     
+
     if (!db.benefit_programs) {issues.push('benefit_programs collection not found');}
-     
+
     if (!db.eligibility_rules) {issues.push('eligibility_rules collection not found');}
-     
+
     if (!db.eligibility_results) {issues.push('eligibility_results collection not found');}
-     
+
     if (!db.app_settings) {issues.push('app_settings collection not found');}
 
     // Try a simple query on each collection

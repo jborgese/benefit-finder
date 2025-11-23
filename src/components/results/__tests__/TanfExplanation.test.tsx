@@ -2,15 +2,15 @@
  * TANF Explanation Component Tests
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
 import * as Dialog from '@radix-ui/react-dialog';
+import { vi } from 'vitest';
 import { TanfExplanation } from '../TanfExplanation';
 import { EligibilityStatus, EligibilityExplanation } from '../types';
 
 // Mock the i18n hook
 vi.mock('../../../i18n/hooks', () => ({
+  // Removed unused import React
   useI18n: () => ({
     t: (key: string) => {
       const translations = new Map<string, string>([
@@ -156,7 +156,8 @@ describe('TanfExplanation', () => {
       userProfile: {
         hasChildren: true,
         householdSize: 4,
-        isEmployed: false
+        isEmployed: false,
+        householdIncome: 2500
       }
     };
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Detailed Rule Evaluator
  *
@@ -65,7 +67,8 @@ export function evaluateRuleWithDetails(
     analyzeRule(rule, context);
 
     // Perform standard evaluation
-    const result = jsonLogic.apply(rule, data) as boolean;
+    // Defensive cast to avoid json-logic typings mismatch with our JsonLogicRule type
+    const result = jsonLogic.apply(rule as unknown as any, data) as boolean;
     const endTime = performance.now();
 
     if (import.meta.env.DEV) {
@@ -317,7 +320,7 @@ function isVariableReference(operand: unknown): boolean {
 function getVariableValue(varName: string, data: JsonLogicData): unknown {
   // Safely check for property existence and return value
   if (hasOwnProperty(data, varName)) {
-     
+
     return data[varName];
   }
   return undefined;
@@ -334,7 +337,9 @@ function evaluateOperand(operand: unknown, data: JsonLogicData): unknown {
 
   if (typeof operand === 'object' && operand !== null) {
     // Nested JSON Logic expression
-    return jsonLogic.apply(operand, data);
+    // Defensive cast: json-logic typings are loose compared to our JsonLogic types,
+    // cast through unknown to avoid TypeScript incompatibility while preserving runtime behavior.
+    return jsonLogic.apply(operand as unknown as any, data);
   }
 
   return operand;

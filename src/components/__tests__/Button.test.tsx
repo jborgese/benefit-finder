@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+// Removed unused import React
 import { Button } from '../Button';
 
 describe('Button Component', () => {
@@ -279,7 +279,7 @@ describe('Button Component', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty children', () => {
-      render(<Button aria-label="Empty button" />);
+      render(<Button aria-label="Empty button"> </Button>);
 
       const button = screen.getByRole('button', { name: 'Empty button' });
       expect(button).toBeInTheDocument();

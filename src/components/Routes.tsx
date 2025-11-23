@@ -4,7 +4,7 @@
  * Provides lazy-loaded route components with optimized loading
  */
 
-import React, { lazy } from 'react';
+import { lazy } from 'react';
 import { RouteComponent } from './RouteComponent';
 import type { EligibilityResults } from './results';
 

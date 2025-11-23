@@ -73,6 +73,13 @@ export interface LIHTCProfile extends HouseholdProfile {
 
   // AMI calculations (computed)
   amiData?: AMIData;
+
+  // Optional legacy/auxiliary fields used in tests and other flows
+  hasCriminalHistory?: boolean;
+  incomeVerificationMethods?: string[];
+
+  // Allow profile objects to be passed as JsonLogicData (index signature)
+  [key: string]: unknown;
 }
 
 /**
