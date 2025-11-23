@@ -45,7 +45,12 @@
                 "var": "householdIncome"
               },
               {
-                "var": "areaMedianIncome"
+                "*": [
+                  {
+                    "var": "areaMedianIncome"
+                  },
+                  0.6
+                ]
               }
             ]
           }
@@ -318,14 +323,23 @@
       "name": "LIHTC Background Check",
       "description": "Must pass criminal background check",
       "ruleLogic": {
-        "and": [
-          {
-            "var": "hasCriminalHistory"
-          },
+        "or": [
           {
             "not": {
-              "var": "hasDisqualifyingCrimes"
+              "var": "hasCriminalHistory"
             }
+          },
+          {
+            "and": [
+              {
+                "var": "hasCriminalHistory"
+              },
+              {
+                "not": {
+                  "var": "hasDisqualifyingCrimes"
+                }
+              }
+            ]
           }
         ]
       },

@@ -616,8 +616,8 @@
       "name": "WIC Nutritional Risk Requirement",
       "description": "Must be determined to be at nutritional risk by a health professional",
       "ruleLogic": {
-        "==": [
-          true,
+        "var": [
+          "hasNutritionalRisk",
           true
         ]
       },
@@ -781,13 +781,25 @@
       "ruleLogic": {
         "if": [
           {
-            "var": "hasChildren"
+            "and": [
+              {
+                "var": "isPostpartum"
+              },
+              {
+                "<=": [
+                  {
+                    "var": "monthsSinceBirth"
+                  },
+                  6
+                ]
+              }
+            ]
           },
           {
             "wic_benefit_amount": {
-              "amount": 35,
+              "amount": 45,
               "frequency": "monthly",
-              "description": "Child nutritional package includes milk, cheese, eggs, cereal, juice, fruits/vegetables, and whole grains"
+              "description": "Nutritional package includes milk, cheese, eggs, cereal, juice, fruits/vegetables, whole grains, and legumes"
             }
           },
           null
@@ -852,13 +864,25 @@
       "ruleLogic": {
         "if": [
           {
-            "var": "hasChildren"
+            "and": [
+              {
+                "var": "isBreastfeeding"
+              },
+              {
+                "<=": [
+                  {
+                    "var": "monthsSinceBirth"
+                  },
+                  12
+                ]
+              }
+            ]
           },
           {
             "wic_benefit_amount": {
               "amount": 55,
               "frequency": "monthly",
-              "description": "Enhanced nutritional package for families with children includes extra milk, cheese, eggs, cereal, juice, fruits/vegetables, whole grains, legumes, and canned fish"
+              "description": "Enhanced nutritional package includes extra milk, cheese, eggs, cereal, juice, fruits/vegetables, whole grains, legumes, and canned fish"
             }
           },
           null

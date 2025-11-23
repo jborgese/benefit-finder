@@ -390,6 +390,9 @@
             ]
           },
           {
+            "var": "receivesSNAP"
+          },
+          {
             "var": "receivesMedicaid"
           },
           {
@@ -626,10 +629,7 @@
       "name": "WIC Nutritional Risk Requirement",
       "description": "Must be determined to be at nutritional risk by a health professional",
       "ruleLogic": {
-        "==": [
-          true,
-          true
-        ]
+        "var": "hasNutritionalRisk"
       },
       "ruleType": "eligibility",
       "explanation": "To receive WIC, you must be determined by a health professional (doctor, nurse, or nutritionist) to be at 'nutritional risk.' This means having a medical or dietary condition that could affect your nutrition, such as anemia, underweight, overweight, poor diet, or certain medical conditions. This assessment is done for free at the WIC clinic during your appointment. Most applicants meet this requirement.",
@@ -791,13 +791,13 @@
       "ruleLogic": {
         "if": [
           {
-            "var": "hasChildren"
+            "var": "isPostpartum"
           },
           {
             "wic_benefit_amount": {
-              "amount": 35,
+              "amount": 45,
               "frequency": "monthly",
-              "description": "Child nutritional package includes milk, cheese, eggs, cereal, juice, fruits/vegetables, and whole grains"
+              "description": "Nutritional package includes milk, cheese, eggs, cereal, juice, fruits/vegetables, whole grains, and legumes"
             }
           },
           null
@@ -862,13 +862,13 @@
       "ruleLogic": {
         "if": [
           {
-            "var": "hasChildren"
+            "var": "isBreastfeeding"
           },
           {
             "wic_benefit_amount": {
               "amount": 55,
               "frequency": "monthly",
-              "description": "Enhanced nutritional package for families with children includes extra milk, cheese, eggs, cereal, juice, fruits/vegetables, whole grains, legumes, and canned fish"
+              "description": "Enhanced nutritional package includes extra milk, cheese, eggs, cereal, juice, fruits/vegetables, whole grains, legumes, and canned fish"
             }
           },
           null

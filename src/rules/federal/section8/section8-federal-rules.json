@@ -45,7 +45,12 @@
                 "var": "householdIncome"
               },
               {
-                "var": "areaMedianIncome"
+                "*": [
+                  {
+                    "var": "areaMedianIncome"
+                  },
+                  0.5
+                ]
               }
             ]
           }
@@ -463,14 +468,23 @@
       "name": "Section 8 Background Check",
       "description": "Must pass criminal background check",
       "ruleLogic": {
-        "and": [
-          {
-            "var": "hasCriminalHistory"
-          },
+        "or": [
           {
             "not": {
-              "var": "hasDisqualifyingCrimes"
+              "var": "hasCriminalHistory"
             }
+          },
+          {
+            "and": [
+              {
+                "var": "hasCriminalHistory"
+              },
+              {
+                "not": {
+                  "var": "hasDisqualifyingCrimes"
+                }
+              }
+            ]
           }
         ]
       },
