@@ -37,7 +37,9 @@ function determineTestScope(changedFiles) {
     runUnitTests: hasSourceChanges || hasTestChanges || hasConfigChanges,
     runE2ETests: hasSourceChanges || hasTestChanges || hasConfigChanges,
     runA11yTests: hasSourceChanges || hasTestChanges || hasConfigChanges,
-    runRuleValidation: hasRuleChanges || hasConfigChanges,
+    // Only run rule validation when rule files changed, or when explicitly forced.
+    // Avoid running the expensive rule suite for unrelated config tweaks (e.g. package.json).
+    runRuleValidation: hasRuleChanges || process.env.FORCE_RULE_VALIDATION === '1',
     changedFiles
   };
 }
