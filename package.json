@@ -80,7 +80,7 @@
       "eslint --fix --max-warnings=0 --no-warn-ignored"
     ],
     "src/rules/**/*.json": [
-      "npm run validate-rules"
+      "cross-env VALIDATOR_STRICT=1 npm run validate-rules"
     ],
     "tests/e2e/**/*.e2e.{ts,tsx}": [
       "echo 'E2E tests will run in CI/CD pipeline'"

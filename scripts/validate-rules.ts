@@ -687,14 +687,24 @@ function main(): void {
     printSummary(reports);
   }
 
-  // Decide exit code: structural validation failures should block commits,
-  // but failing test cases (which are used for triage) should not always
-  // block pre-commit hooks. Treat test failures as non-blocking here and
-  // only exit non-zero for invalid package structure or parsing errors.
+  // Decide exit code.
+  // Structural validation failures should always block commits.
+  // Test-case failures may be treated as blocking when `VALIDATOR_STRICT` is set.
   const hasBlockingErrors = reports.some((r) => !r.valid || r.errors.length > 0);
   const totalFailedTests = reports.reduce((sum, r) => sum + (r.testResults?.failedTests ?? 0), 0);
+
+  const validatorStrict = (() => {
+    const v = process.env.VALIDATOR_STRICT ?? process.env.VALIDATOR_STRICT?.toString();
+    return v === '1' || String(v).toLowerCase() === 'true';
+  })();
+
   if (totalFailedTests > 0) {
-    console.warn(`${colors.yellow}Warning: ${totalFailedTests} test(s) failed across validated packages; tests are non-blocking in this validator run.${colors.reset}`);
+    if (validatorStrict) {
+      console.error(`${colors.red}Error: ${totalFailedTests} test(s) failed across validated packages; VALIDATOR_STRICT=1 enforces test failures as blocking.${colors.reset}`);
+      process.exit(1);
+    } else {
+      console.warn(`${colors.yellow}Warning: ${totalFailedTests} test(s) failed across validated packages; tests are non-blocking in this validator run.${colors.reset}`);
+    }
   }
 
   process.exit(hasBlockingErrors ? 1 : 0);
