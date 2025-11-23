@@ -8,6 +8,7 @@
 import React from 'react';
 import { getSpecificReasons, getMaybeReasons, type UserProfile } from '../../utils/specificReasons';
 import { generateEvaluationBasedReasons, type EvaluationResult } from '../../utils/evaluationBasedReasons';
+import type { EligibilityExplanation } from './types';
 import { EligibilityStatus } from './types';
 import { useI18n } from '../../i18n/hooks';
 
@@ -15,7 +16,7 @@ interface SpecificReasonsSectionProps {
   programId: string;
   status: EligibilityStatus;
   userProfile?: UserProfile;
-  evaluationResult?: EvaluationResult | undefined; // Accept evaluation shapes during migration
+  evaluationResult?: EvaluationResult | EligibilityExplanation | undefined; // Accept evaluation shapes or legacy explanation
 }
 
 export const SpecificReasonsSection: React.FC<SpecificReasonsSectionProps> = ({
@@ -27,8 +28,11 @@ export const SpecificReasonsSection: React.FC<SpecificReasonsSectionProps> = ({
   const { t } = useI18n();
 
   // Use evaluation-based reasons if available, otherwise fall back to generic reasons
-  const evaluationBasedReasons = evaluationResult
-    ? generateEvaluationBasedReasons(programId, status, evaluationResult, userProfile)
+  const evaluationBasedReasons = (
+    evaluationResult &&
+    typeof (('result' in (evaluationResult as object) ? (evaluationResult as EvaluationResult).result : undefined)) === 'boolean'
+  )
+    ? generateEvaluationBasedReasons(programId, status, evaluationResult as EvaluationResult, userProfile)
     : [];
 
   const specificReasons = evaluationBasedReasons.length > 0
