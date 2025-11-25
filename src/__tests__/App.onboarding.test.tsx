@@ -68,11 +68,11 @@ describe('App Component - Onboarding Modals', () => {
       expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
     }, { timeout: 2000 });
 
-    const tourButtons = screen.getAllByText((_content, element) => {
-      if (!element) { return false; }
-      return element.textContent === '🎯 Tour' || element.textContent.includes('Tour');
-    });
-    const tourButton = tourButtons[0]?.closest('button');
+    // Query by role button with text containing 'Tour'
+    const tourButtons = screen.getAllByRole('button').filter(btn =>
+      btn.textContent?.includes('Tour')
+    );
+    const tourButton = tourButtons[0];
     if (tourButton) {
       await user.click(tourButton);
       await waitFor(() => {
@@ -90,11 +90,10 @@ describe('App Component - Onboarding Modals', () => {
       expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
     }, { timeout: 2000 });
 
-    const privacyButtons = screen.getAllByText((_content, element) => {
-      if (!element) { return false; }
-      return element.textContent === '🔒 Privacy' || element.textContent.includes('Privacy');
-    });
-    const privacyButton = privacyButtons[0]?.closest('button');
+    const privacyButtons = screen.getAllByRole('button').filter(btn =>
+      btn.textContent?.includes('Privacy')
+    );
+    const privacyButton = privacyButtons[0];
     if (privacyButton) {
       await user.click(privacyButton);
       await waitFor(() => {
@@ -112,11 +111,10 @@ describe('App Component - Onboarding Modals', () => {
       expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
     }, { timeout: 2000 });
 
-    const guideButtons = screen.getAllByText((_content, element) => {
-      if (!element) { return false; }
-      return element.textContent === '📖 Guide' || element.textContent.includes('Guide');
-    });
-    const guideButton = guideButtons[0]?.closest('button');
+    const guideButtons = screen.getAllByRole('button').filter(btn =>
+      btn.textContent?.includes('Guide')
+    );
+    const guideButton = guideButtons[0];
     if (guideButton) {
       await user.click(guideButton);
       await waitFor(() => {
@@ -134,11 +132,10 @@ describe('App Component - Onboarding Modals', () => {
       expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
     }, { timeout: 2000 });
 
-    const shortcutsButtons = screen.getAllByText((_content, element) => {
-      if (!element) { return false; }
-      return element.textContent === '⌨️ navigation.shortcuts' || element.textContent.includes('navigation.shortcuts');
-    });
-    const shortcutsButton = shortcutsButtons[0]?.closest('button');
+    const shortcutsButtons = screen.getAllByRole('button').filter(btn =>
+      btn.textContent?.includes('Shortcuts') || btn.getAttribute('aria-label')?.includes('Shortcuts')
+    );
+    const shortcutsButton = shortcutsButtons[0];
     if (shortcutsButton) {
       await user.click(shortcutsButton);
       await waitFor(() => {
@@ -157,11 +154,10 @@ describe('App Component - Onboarding Modals', () => {
     }, { timeout: 2000 });
 
     // Open tour
-    const tourButtons = screen.getAllByText((_content, element) => {
-      if (!element) { return false; }
-      return element.textContent === '🎯 Tour' || element.textContent.includes('Tour');
-    });
-    const tourButton = tourButtons[0]?.closest('button');
+    const tourButtons = screen.getAllByRole('button').filter(btn =>
+      btn.textContent?.includes('Tour')
+    );
+    const tourButton = tourButtons[0];
     if (tourButton) {
       await user.click(tourButton);
       await waitFor(() => {
@@ -183,11 +179,10 @@ describe('App Component - Onboarding Modals', () => {
     }, { timeout: 2000 });
 
     // Open guide
-    const guideButtons = screen.getAllByText((_content, element) => {
-      if (!element) { return false; }
-      return element.textContent === '📖 Guide' || element.textContent.includes('Guide');
-    });
-    const guideButton = guideButtons[0]?.closest('button');
+    const guideButtons = screen.getAllByRole('button').filter(btn =>
+      btn.textContent?.includes('Guide')
+    );
+    const guideButton = guideButtons[0];
     if (guideButton) {
       await user.click(guideButton);
       await waitFor(() => {
