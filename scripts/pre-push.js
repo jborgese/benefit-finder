@@ -48,7 +48,7 @@ function determineTestScope(changedFiles) {
 function runSmartTests(scope) {
   const commands = [
     { name: '📝 Linting...', cmd: 'npm run lint', always: true },
-    { name: '✅ Type checking...', cmd: 'npx tsc --noEmit', always: true }
+    { name: '✅ Type checking...', cmd: 'npx tsc --noEmit --noCache', always: true }
   ];
 
   if (scope.runRuleValidation) {
