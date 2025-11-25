@@ -694,7 +694,7 @@ function main(): void {
   const totalFailedTests = reports.reduce((sum, r) => sum + (r.testResults?.failedTests ?? 0), 0);
 
   const validatorStrict = (() => {
-    const v = process.env.VALIDATOR_STRICT ?? process.env.VALIDATOR_STRICT?.toString();
+    const v = process.env.VALIDATOR_STRICT ?? '';
     return v === '1' || String(v).toLowerCase() === 'true';
   })();
 
@@ -710,7 +710,8 @@ function main(): void {
   process.exit(hasBlockingErrors ? 1 : 0);
 }
 
-export { validatePackageStructure, testRulePackage, ValidationReport, TestSuiteReport, computeFplThresholdFromBase, resolveHouseholdMultiplication, normalizeTestInput, FPL_BASE_MAPPING };
+export { validatePackageStructure, testRulePackage, computeFplThresholdFromBase, resolveHouseholdMultiplication, normalizeTestInput, FPL_BASE_MAPPING };
+export type { ValidationReport, TestSuiteReport };
 
 // Run main function when executed as a script (not when imported by tests)
 try {

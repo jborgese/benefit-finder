@@ -73,10 +73,10 @@ vi.mock('../db/database', () => {
         if (prop === 'update') return async (patch: any) => {
           const set = patch && patch.$set ? patch.$set : patch;
           // Debug: log updates to profiles during tests
-           
+
           console.debug('[MOCK DB] update profile', p.id, set);
           if (set && typeof set === 'object') Object.assign(p, set);
-           
+
           console.debug('[MOCK DB] profile after update', p.id, p);
           return makeProfileWrapper(p);
         };
@@ -100,7 +100,7 @@ vi.mock('../db/database', () => {
       const id = typeof query === 'string' ? query : query && query.selector ? query.selector.id : undefined;
       const p = id ? mockProfiles.find(x => x.id === id) ?? null : null;
       if (!p) return Promise.resolve(null);
-       
+
       console.debug('[MOCK DB] findOne returning profile', p.id, p);
       return Promise.resolve(makeProfileWrapper(p));
     },
@@ -142,7 +142,7 @@ vi.mock('../db/database', () => {
         const id = typeof query === 'string' ? query : (query && query.selector ? query.selector.id : undefined);
         const program = id ? mockPrograms.find(p => p.id === id) ?? null : null;
         // Debug: log benefit_programs.findOne lookups and result
-         
+
         console.debug('[MOCK DB] benefit_programs.findOne lookup id=', id, 'found=', program ? program.id : null);
         return Promise.resolve(program ? { ...program, toJSON: () => program, get: (k: string) => safeGet(program, k) } : null);
       },
@@ -178,11 +178,11 @@ vi.mock('../db/database', () => {
     find: (query?: { selector?: { programId?: string } }) => ({
       exec: () => {
         // Debug: log what's in mockRules and what we're searching for
-         
+
         console.debug('[MOCK DB] eligibility_rules.find query=', query, 'mockRules.length=', mockRules.length, 'programIds=', mockRules.map(r => r.programId));
-        if (query && query.selector && query.selector.programId) {
+        if (query?.selector?.programId) {
           const filtered = mockRules.filter(r => r.programId === query.selector.programId);
-           
+
           console.debug('[MOCK DB] eligibility_rules.find filtered count=', filtered.length, 'for programId=', query.selector.programId);
           return Promise.resolve(filtered.map(r => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) })));
         }
@@ -212,12 +212,12 @@ vi.mock('../db/database', () => {
       if (idx >= 0) {
         Object.assign(mockRules[idx], entry);
         const updated = mockRules[idx];
-         
+
         console.debug('[MOCK DB] upsert updated rule', updated.id);
         return Promise.resolve({ ...updated, toJSON: () => updated, get: (k: string) => safeGet(updated, k) });
       }
       mockRules.push(entry);
-       
+
       console.debug('[MOCK DB] upsert inserted rule', entry.id);
       return Promise.resolve({ ...entry, toJSON: () => entry, get: (k: string) => safeGet(entry, k) });
     },
@@ -314,9 +314,9 @@ vi.mock('../db/database', () => {
       mockPrograms.push({ ...seededWicProgram });
       mockRules.push({ ...seededWicRule });
       // Debug: show seeded state so tests can confirm initialization
-       
+
       console.debug('[MOCK DB] initializeDatabase seeded programs:', mockPrograms.map(p => p.id));
-       
+
       console.debug('[MOCK DB] initializeDatabase seeded rules:', mockRules.map(r => r.id));
       return Promise.resolve(mockDb);
     },
