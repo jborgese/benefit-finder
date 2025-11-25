@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-vars, no-prototype-builtins */
-const fs = require('fs');
-const path = require('path');
+// Removed unused eslint-disable directives
+import fs from 'fs';
+import path from 'path';
 
 function readJson(file) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch (e) {
+  } catch {
     return null;
   }
 }
