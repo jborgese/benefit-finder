@@ -275,6 +275,11 @@ export class ImportManager {
     }
   }
 
+  // Test-only reset convenience (alias of clearing all state)
+  public resetForTests(): void {
+    this.clearImportState();
+  }
+
   /**
    * Get all import states for monitoring
    */

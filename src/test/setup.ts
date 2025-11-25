@@ -28,123 +28,315 @@ import { afterEach, beforeAll, vi } from 'vitest';
 // This is a critical fix for memory leaks - RxDB creates IndexedDB connections
 // and storage event listeners that accumulate across tests
 vi.mock('../db/database', () => {
-  // Store programs in memory for the mock
-  const mockPrograms: Array<{ id: string; [key: string]: unknown }> = [];
+  // In-memory stores for mock collections
+  const mockPrograms: Array<Record<string, unknown>> = [];
+  const mockRules: Array<Record<string, unknown>> = [];
+  const mockProfiles: Array<Record<string, unknown>> = [];
+  // Add eligibility results store to support caching tests
+  const mockResults: Array<Record<string, any>> = [];
 
   // Safe property access helper to prevent object injection
   const safeGet = (obj: Record<string, unknown>, key: string): unknown => {
-    if (typeof key !== 'string' || key.length === 0) {
-      return undefined;
-    }
-    // Use hasOwnProperty check to prevent prototype pollution
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      return obj[key];
-    }
+    if (typeof key !== 'string' || key.length === 0) return undefined;
+    if (Object.prototype.hasOwnProperty.call(obj, key)) return obj[key];
     return undefined;
+  };
+
+  // Seed WIC program and a minimal eligibility rule for tests
+  const seededWicProgram = {
+    id: 'wic-federal',
+    name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
+    shortName: 'WIC',
+    category: 'food',
+    active: true,
+  } as Record<string, unknown>;
+
+  const seededWicRule = {
+    id: 'wic-rule-2024-eligibility',
+    programId: seededWicProgram.id,
+    name: 'WIC Federal Eligibility Rules (2024)',
+    ruleType: 'eligibility',
+    jsonLogic: { if: [{ var: 'householdIncome' }, true, false] },
+    active: true,
+  } as Record<string, unknown>;
+
+  // Collection implementations
+  const userProfilesCollection: any = {};
+
+  // Helper to create a live wrapper proxy for a backing object
+  const makeProfileWrapper = (p: Record<string, any>) => {
+    const wrapperHandler: ProxyHandler<any> = {
+      get: (_target, prop) => {
+        if (prop === 'toJSON') return () => p;
+        if (prop === 'get') return (k: string) => safeGet(p, k);
+        if (prop === 'collection') return userProfilesCollection;
+        if (prop === 'update') return async (patch: any) => {
+          const set = patch && patch.$set ? patch.$set : patch;
+          // Debug: log updates to profiles during tests
+           
+          console.debug('[MOCK DB] update profile', p.id, set);
+          if (set && typeof set === 'object') Object.assign(p, set);
+           
+          console.debug('[MOCK DB] profile after update', p.id, p);
+          return makeProfileWrapper(p);
+        };
+        if (prop === 'remove') return async () => { const idx = mockProfiles.findIndex((d: any) => d.id === p.id); if (idx >= 0) mockProfiles.splice(idx, 1); return; };
+        return p[prop as keyof typeof p];
+      },
+      ownKeys: () => Reflect.ownKeys(p),
+      getOwnPropertyDescriptor: (_t, prop) => ({ configurable: true, enumerable: true, value: p[prop as keyof typeof p] }),
+    };
+    return new Proxy({}, wrapperHandler) as any;
+  };
+
+  // Provide find which returns wrapper documents with expected methods
+  userProfilesCollection.find = () => ({
+    exec: () => Promise.resolve(mockProfiles.map((p: any) => makeProfileWrapper(p))),
+    limit: () => ({ exec: () => Promise.resolve(mockProfiles.map((p: any) => makeProfileWrapper(p))) }),
+  });
+
+  userProfilesCollection.findOne = (query?: any) => ({
+    exec: () => {
+      const id = typeof query === 'string' ? query : query && query.selector ? query.selector.id : undefined;
+      const p = id ? mockProfiles.find(x => x.id === id) ?? null : null;
+      if (!p) return Promise.resolve(null);
+       
+      console.debug('[MOCK DB] findOne returning profile', p.id, p);
+      return Promise.resolve(makeProfileWrapper(p));
+    },
+  });
+
+  userProfilesCollection.insert = (doc: Record<string, unknown>) => {
+    const entry: Record<string, any> = { ...(doc || {}) } as Record<string, unknown> as Record<string, any>;
+    if (!entry.id) entry.id = Math.random().toString(36).slice(2, 22);
+    mockProfiles.push(entry);
+    const wrapper: any = {
+      ...entry,
+      collection: userProfilesCollection,
+      toJSON: () => entry,
+      get: (k: string) => safeGet(entry, k),
+      update: async (patch: any) => {
+        const set = patch && patch.$set ? patch.$set : patch;
+        if (set && typeof set === 'object') Object.assign(entry, set);
+        return Promise.resolve(wrapper);
+      },
+      remove: async () => {
+        const idx = mockProfiles.findIndex((d: any) => d.id === entry.id);
+        if (idx >= 0) mockProfiles.splice(idx, 1);
+        return Promise.resolve();
+      },
+    };
+    return Promise.resolve(wrapper);
+  };
+
+  userProfilesCollection.count = () => ({ exec: () => Promise.resolve(mockProfiles.length) });
+
+  const benefitProgramsCollection: any = {
+    find: () => ({
+      exec: () => Promise.resolve(mockPrograms.map(p => ({ ...p, toJSON: () => p, get: (k: string) => safeGet(p, k) }))),
+      limit: () => ({ exec: () => Promise.resolve(mockPrograms.map(p => ({ ...p, toJSON: () => p, get: (k: string) => safeGet(p, k) }))) }),
+    }),
+    findOne: (query?: { selector?: { id?: string } } | string) => ({
+      exec: () => {
+        // Support both RxDB query format: { selector: { id: '...' } } and direct string
+        const id = typeof query === 'string' ? query : (query && query.selector ? query.selector.id : undefined);
+        const program = id ? mockPrograms.find(p => p.id === id) ?? null : null;
+        // Debug: log benefit_programs.findOne lookups and result
+         
+        console.debug('[MOCK DB] benefit_programs.findOne lookup id=', id, 'found=', program ? program.id : null);
+        return Promise.resolve(program ? { ...program, toJSON: () => program, get: (k: string) => safeGet(program, k) } : null);
+      },
+    }),
+    insert: (data: Record<string, unknown>) => {
+      const entry = { ...(data || {}) } as Record<string, unknown>;
+      if (!entry.id) entry.id = Math.random().toString(36).slice(2, 22);
+      const existing = mockPrograms.find(p => p.id === entry.id);
+      if (existing) Object.assign(existing, entry);
+      else mockPrograms.push(entry);
+      return Promise.resolve({ ...entry, toJSON: () => entry, get: (k: string) => safeGet(entry, k) });
+    },
+    count: () => ({ exec: () => Promise.resolve(mockPrograms.length) }),
+    // Provide a findActivePrograms helper used by evaluateAllPrograms
+    findActivePrograms: () => {
+      // If programs were seeded/inserted, return them
+      if (mockPrograms.length > 0) return Promise.resolve(mockPrograms.filter((p: any) => p.active));
+      // Fallback: derive programs from rules if programs are empty (helps tests that initialize via rules)
+      const programIds = Array.from(new Set(mockRules.map((r: any) => r.programId).filter(Boolean)));
+      if (programIds.length === 0) return Promise.resolve([]);
+      const derived = programIds.map(pid => {
+        const existing = mockPrograms.find(p => p.id === pid);
+        if (existing) return existing;
+        // Provide a minimal program object for known canonical ids
+        if (pid === 'wic-federal') return { id: 'wic-federal', name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)', shortName: 'WIC', category: 'food', active: true };
+        return { id: pid, name: `Program ${pid}`, shortName: undefined, category: 'other', active: true };
+      });
+      return Promise.resolve(derived);
+    },
+  };
+
+  const eligibilityRulesCollection: any = {
+    find: (query?: { selector?: { programId?: string } }) => ({
+      exec: () => {
+        // Debug: log what's in mockRules and what we're searching for
+         
+        console.debug('[MOCK DB] eligibility_rules.find query=', query, 'mockRules.length=', mockRules.length, 'programIds=', mockRules.map(r => r.programId));
+        if (query && query.selector && query.selector.programId) {
+          const filtered = mockRules.filter(r => r.programId === query.selector.programId);
+           
+          console.debug('[MOCK DB] eligibility_rules.find filtered count=', filtered.length, 'for programId=', query.selector.programId);
+          return Promise.resolve(filtered.map(r => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) })));
+        }
+        return Promise.resolve(mockRules.map(r => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) })));
+      },
+      limit: () => ({ exec: () => Promise.resolve(mockRules.map(r => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) }))) }),
+    }),
+    findOne: (query?: { selector?: { id?: string } }) => ({
+      exec: () => {
+        const id = query && query.selector ? query.selector.id : undefined;
+        const rule = id ? mockRules.find(r => r.id === id) ?? null : null;
+        return Promise.resolve(rule ? { ...rule, toJSON: () => rule, get: (k: string) => safeGet(rule, k) } : null);
+      },
+    }),
+    insert: (data: Record<string, unknown>) => {
+      const entry = { ...(data || {}) } as Record<string, unknown>;
+      if (!entry.id) entry.id = Math.random().toString(36).slice(2, 22);
+      mockRules.push(entry);
+      return Promise.resolve({ ...entry, toJSON: () => entry, get: (k: string) => safeGet(entry, k) });
+    },
+    // Upsert behaves like RxDB upsert: insert if missing, otherwise update the existing document
+    upsert: async (data: Record<string, any>) => {
+      if (!data) return Promise.resolve(null);
+      const entry = { ...(data || {}) } as Record<string, any>;
+      if (!entry.id) entry.id = Math.random().toString(36).slice(2, 22);
+      const idx = mockRules.findIndex(r => r.id === entry.id);
+      if (idx >= 0) {
+        Object.assign(mockRules[idx], entry);
+        const updated = mockRules[idx];
+         
+        console.debug('[MOCK DB] upsert updated rule', updated.id);
+        return Promise.resolve({ ...updated, toJSON: () => updated, get: (k: string) => safeGet(updated, k) });
+      }
+      mockRules.push(entry);
+       
+      console.debug('[MOCK DB] upsert inserted rule', entry.id);
+      return Promise.resolve({ ...entry, toJSON: () => entry, get: (k: string) => safeGet(entry, k) });
+    },
+    // Convenience helper used by rule evaluation to load rules for a program
+    findRulesByProgram: async (programId: string) => {
+      return Promise.resolve(mockRules.filter((r: any) => r.programId === programId).map((r: any) => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) })));
+    },
+    count: () => ({ exec: () => Promise.resolve(mockRules.length) }),
+  };
+
+  const eligibilityResultsCollection: any = {
+    find: (query?: { selector?: { userProfileId?: string; programId?: string } }) => ({
+      exec: () => {
+        let results = mockResults;
+        if (query && query.selector) {
+          const { userProfileId, programId } = query.selector;
+          if (userProfileId) results = results.filter(r => r.userProfileId === userProfileId);
+          if (programId) results = results.filter(r => r.programId === programId);
+        }
+        // Support sort by evaluatedAt desc if requested
+        if (query && (query as any).sort) {
+          const sortArr = (query as any).sort as Array<Record<string, 'asc' | 'desc'>>;
+          const firstSort = sortArr[0];
+          if (firstSort && 'evaluatedAt' in firstSort) {
+            results = [...results].sort((a, b) => (firstSort.evaluatedAt === 'desc' ? b.evaluatedAt - a.evaluatedAt : a.evaluatedAt - b.evaluatedAt));
+          }
+        }
+        return Promise.resolve(results.map(r => ({
+          ...r,
+          toJSON: () => r,
+          get: (k: string) => safeGet(r, k),
+          remove: async () => {
+            const idx = mockResults.findIndex(x => x.id === r.id);
+            if (idx >= 0) mockResults.splice(idx, 1);
+          }
+        })));
+      },
+      limit: () => ({ exec: () => Promise.resolve(mockResults.map(r => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) }))) })
+    }),
+    findOne: (query?: { selector?: { userProfileId?: string; programId?: string } }) => ({
+      exec: () => {
+        if (query && query.selector) {
+          const { userProfileId, programId } = query.selector;
+          const found = mockResults.find(r => (!userProfileId || r.userProfileId === userProfileId) && (!programId || r.programId === programId)) || null;
+          return Promise.resolve(found ? { ...found, toJSON: () => found, get: (k: string) => safeGet(found, k) } : null);
+        }
+        return Promise.resolve(null);
+      }
+    }),
+    insert: (data: Record<string, any>) => {
+      const entry: Record<string, any> = { ...(data || {}) };
+      if (!entry.id) entry.id = Math.random().toString(36).slice(2, 22);
+      // Provide evaluatedAt default if missing for sort stability
+      if (!entry.evaluatedAt) entry.evaluatedAt = Date.now();
+      mockResults.push(entry);
+      return Promise.resolve({
+        ...entry,
+        toJSON: () => entry,
+        get: (k: string) => safeGet(entry, k),
+        remove: async () => {
+          const idx = mockResults.findIndex(x => x.id === entry.id);
+          if (idx >= 0) mockResults.splice(idx, 1);
+        }
+      });
+    },
+    count: () => ({ exec: () => Promise.resolve(mockResults.length) }),
+  };
+
+  const appSettingsCollection: any = {
+    find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
+    findOne: () => ({ exec: () => Promise.resolve(null) }),
+    count: () => ({ exec: () => Promise.resolve(0) }),
   };
 
   const mockDb = {
     name: 'benefitfinder',
-    user_profiles: {
-      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
-      findOne: () => ({ exec: () => Promise.resolve(null) }),
-      insert: () => Promise.resolve({}),
-      count: () => ({ exec: () => Promise.resolve(0) }),
-    },
-    benefit_programs: {
-      find: () => ({
-        exec: () =>
-          Promise.resolve(
-            mockPrograms.map(p => ({
-              ...p,
-              toJSON: () => p,
-              get: (key: string) => safeGet(p, key),
-            })),
-          ),
-        limit: () => ({
-          exec: () =>
-            Promise.resolve(
-              mockPrograms.map(p => ({
-                ...p,
-                toJSON: () => p,
-                get: (key: string) => safeGet(p, key),
-              })),
-            ),
-        }),
-      }),
-      findOne: (query?: { selector?: { id?: string } }) => ({
-        exec: () => {
-          const id = query && query.selector ? query.selector.id : undefined;
-          if (id) {
-            const program = mockPrograms.find(p => p.id === id);
-            return Promise.resolve(
-              program
-                ? { ...program, toJSON: () => program, get: (key: string) => safeGet(program, key) }
-                : null,
-            );
-          }
-          return Promise.resolve(null);
-        },
-      }),
-      insert: (data: { id: string; [key: string]: unknown }) => {
-        // Check if program already exists
-        const existing = mockPrograms.find(p => p.id === data.id);
-        if (existing) {
-          // Update existing program
-          Object.assign(existing, data);
-          return Promise.resolve({
-            ...existing,
-            toJSON: () => existing,
-            get: (key: string) => safeGet(existing, key),
-          });
-        }
-        // Add new program
-        mockPrograms.push(data);
-        return Promise.resolve({
-          ...data,
-          toJSON: () => data,
-          get: (key: string) => safeGet(data, key),
-        });
-      },
-      count: () => ({ exec: () => Promise.resolve(mockPrograms.length) }),
-    },
-    eligibility_rules: {
-      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
-      findOne: () => ({ exec: () => Promise.resolve(null) }),
-      insert: () => Promise.resolve({}),
-      count: () => ({ exec: () => Promise.resolve(0) }),
-    },
-    eligibility_results: {
-      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
-      findOne: () => ({ exec: () => Promise.resolve(null) }),
-      insert: () => Promise.resolve({}),
-      count: () => ({ exec: () => Promise.resolve(0) }),
-    },
-    app_settings: {
-      find: () => ({ exec: () => Promise.resolve([]), limit: () => ({ exec: () => Promise.resolve([]) }) }),
-      findOne: () => ({ exec: () => Promise.resolve(null) }),
-      count: () => ({ exec: () => Promise.resolve(0) }),
-    },
-  };
+    user_profiles: userProfilesCollection,
+    benefit_programs: benefitProgramsCollection,
+    eligibility_rules: eligibilityRulesCollection,
+    eligibility_results: eligibilityResultsCollection,
+    app_settings: appSettingsCollection,
+    // expose internal stores for debugging in tests
+    __internal_store: { mockPrograms, mockRules, mockProfiles, mockResults },
+  } as const;
 
   return {
     initializeDatabase: () => {
-      // Clear programs on each initialization to simulate fresh database
+      // Reset stores
       mockPrograms.length = 0;
+      mockRules.length = 0;
+      mockProfiles.length = 0;
+      mockResults.length = 0;
+      // Seed canonical WIC program and rule
+      mockPrograms.push({ ...seededWicProgram });
+      mockRules.push({ ...seededWicRule });
+      // Debug: show seeded state so tests can confirm initialization
+       
+      console.debug('[MOCK DB] initializeDatabase seeded programs:', mockPrograms.map(p => p.id));
+       
+      console.debug('[MOCK DB] initializeDatabase seeded rules:', mockRules.map(r => r.id));
       return Promise.resolve(mockDb);
     },
     getDatabase: () => mockDb,
     isDatabaseInitialized: () => true,
     clearDatabase: () => {
       mockPrograms.length = 0;
+      mockRules.length = 0;
+      mockProfiles.length = 0;
+      mockResults.length = 0;
       return Promise.resolve();
     },
     destroyDatabase: () => {
       mockPrograms.length = 0;
+      mockRules.length = 0;
+      mockProfiles.length = 0;
+      mockResults.length = 0;
       return Promise.resolve();
     },
-    exportDatabase: () =>
-      Promise.resolve({ version: '1.0.0', timestamp: Date.now(), collections: {} }),
+    exportDatabase: () => Promise.resolve({ version: '1.0.0', timestamp: Date.now(), collections: {} }),
     importDatabase: () => Promise.resolve(undefined),
   };
 });

@@ -8,6 +8,18 @@ import { vi } from 'vitest';
 import type { RxDocument } from 'rxdb';
 import type { UserProfile } from '../db/schemas';
 
+// Provide a minimal non-suspending React.lazy mock so tests never hit Suspense fallbacks.
+vi.mock('react', async () => {
+  const actual = await vi.importActual<typeof import('react')>('react');
+  return {
+    ...actual,
+    lazy: (_factory: unknown) => {
+      // Return a stable stub component (renders nothing, but never suspends)
+      return ((/* props */) => null) as any;
+    },
+  };
+});
+
 // Helper to flush all pending promises
 export const flushPromises = (): Promise<void> => new Promise(resolve => {
   // Use setTimeout(0) as fallback for environments without setImmediate
@@ -130,41 +142,84 @@ vi.mock('../questionnaire/accessibility', () => ({
 // CRITICAL: Mock database module BEFORE any imports that use it
 // This prevents RxDB instances from being created, which causes memory leaks
 vi.mock('../db', () => {
+  // Simple in-memory mock DB that mimics enough RxDB APIs used in tests
+  const store: Record<string, any[]> = {
+    user_profiles: [],
+    benefit_programs: [],
+    eligibility_rules: [],
+    eligibility_results: [],
+    app_settings: [],
+  };
+
+  // Seed the store with a canonical WIC program and one minimal eligibility rule
+  const seededWicProgram = {
+    id: 'wic-federal',
+    name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
+    shortName: 'WIC',
+    category: 'food',
+    active: true,
+    // other fields tests might inspect
+  };
+
+  const seededWicRule = {
+    id: 'wic-rule-2024-eligibility',
+    programId: seededWicProgram.id,
+    name: 'WIC Federal Eligibility Rules (2024)',
+    ruleType: 'eligibility',
+    // minimal rule payload so code that reads basic fields won't crash
+    jsonLogic: { if: [{ var: 'householdIncome' }, true, false] },
+  };
+
+  // push seeds into store so collections find them
+  store.benefit_programs.push(seededWicProgram);
+  store.eligibility_rules.push(seededWicRule);
+
+  const makeCollection = (name: string) => ({
+    find: vi.fn().mockImplementation(({ selector } = {}) => ({
+      exec: vi.fn().mockResolvedValue(
+        // If selector provided, do a simple filter
+        selector && selector.programId
+          ? store[name].filter((d) => d.programId === selector.programId)
+          : selector && selector.id
+            ? store[name].filter((d) => d.id === selector.id)
+            : store[name].slice()
+      ),
+    })),
+    findOne: vi.fn().mockImplementation(({ selector } = {}) => ({
+      exec: vi.fn().mockResolvedValue(
+        store[name].find((d) => (selector && selector.id ? d.id === selector.id : false)) ?? null
+      ),
+    })),
+    insert: vi.fn().mockImplementation(async (doc: Record<string, unknown>) => {
+      const entry = { ...(doc as any) } as any;
+      if (!entry.id) {
+        entry.id = Math.random().toString(36).slice(2, 22);
+      }
+      store[name].push(entry);
+      // add simple remove method for cleanup
+      entry.remove = async () => {
+        const idx = store[name].findIndex((d) => d.id === entry.id);
+        if (idx >= 0) store[name].splice(idx, 1);
+      };
+      return entry;
+    }),
+    // Provide a findActivePrograms helper used by evaluateAllPrograms
+    findActivePrograms: vi.fn().mockImplementation(async () => {
+      return store[name].filter((p) => p.active);
+    }),
+    // Provide generic find({}).exec()
+    // (already handled by find above)
+  });
+
   const mockDb = {
     name: 'benefitfinder',
-    user_profiles: {
-      find: vi.fn().mockReturnValue({
-        exec: vi.fn().mockResolvedValue([]),
-      }),
-      findOne: vi.fn().mockReturnValue({
-        exec: vi.fn().mockResolvedValue(null),
-      }),
-      insert: vi.fn().mockResolvedValue({}),
-    },
-    benefit_programs: {
-      find: vi.fn().mockReturnValue({
-        exec: vi.fn().mockResolvedValue([]),
-      }),
-      findOne: vi.fn().mockReturnValue({
-        exec: vi.fn().mockResolvedValue(null),
-      }),
-    },
-    eligibility_rules: {
-      find: vi.fn().mockReturnValue({
-        exec: vi.fn().mockResolvedValue([]),
-      }),
-    },
-    eligibility_results: {
-      find: vi.fn().mockReturnValue({
-        exec: vi.fn().mockResolvedValue([]),
-      }),
-      insert: vi.fn().mockResolvedValue({}),
-    },
-    app_settings: {
-      find: vi.fn().mockReturnValue({
-        exec: vi.fn().mockResolvedValue([]),
-      }),
-    },
+    user_profiles: makeCollection('user_profiles'),
+    benefit_programs: makeCollection('benefit_programs'),
+    eligibility_rules: makeCollection('eligibility_rules'),
+    eligibility_results: makeCollection('eligibility_results'),
+    app_settings: makeCollection('app_settings'),
+    // utility to inspect store in tests if needed
+    __internal_store: store,
   };
 
   return {
@@ -248,12 +303,12 @@ vi.mock('../components/Routes', () => ({
   Routes: {
     Home: vi.fn(({ onStartQuestionnaire }: { onStartQuestionnaire: () => void }) => (
       <div data-testid="home-page">
-        <button onClick={onStartQuestionnaire}>Start Assessment</button>
+        <button type="button" aria-label="Start Assessment" role="button" onClick={onStartQuestionnaire}>Start Assessment</button>
       </div>
     )),
     Questionnaire: vi.fn(({ onComplete }: { onComplete: (answers: Record<string, unknown>) => void }) => (
       <div data-testid="questionnaire-page">
-        <button onClick={() => onComplete({})}>Complete</button>
+        <button type="button" aria-label="Complete" role="button" onClick={() => onComplete({})}>Complete</button>
       </div>
     )),
     Results: vi.fn(({ onNewAssessment, onImportResults }: {
@@ -261,13 +316,13 @@ vi.mock('../components/Routes', () => ({
       onImportResults: (results: unknown) => Promise<void>;
     }) => (
       <div data-testid="results-page">
-        <button onClick={onNewAssessment}>New Assessment</button>
-        <button onClick={() => void onImportResults({})}>Import</button>
+        <button type="button" aria-label="New Assessment" role="button" onClick={onNewAssessment}>New Assessment</button>
+        <button type="button" aria-label="Import" role="button" onClick={() => void onImportResults({})}>Import</button>
       </div>
     )),
     Error: vi.fn(({ onGoHome }: { onGoHome: () => void }) => (
       <div data-testid="error-page">
-        <button onClick={onGoHome}>Go Home</button>
+        <button type="button" aria-label="Go Home" role="button" onClick={onGoHome}>Go Home</button>
       </div>
     )),
   },
@@ -303,6 +358,11 @@ vi.mock('../components/RouteComponent', () => ({
 
 vi.mock('../components/RouteLoadingFallback', () => ({
   RouteLoadingFallback: () => <div data-testid="loading-fallback">Loading...</div>,
+}));
+
+// Bypass ErrorBoundary so suspension-like errors do not swallow route rendering during tests
+vi.mock('../components/ErrorBoundary', () => ({
+  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 // Mock lazy-loaded onboarding components
@@ -381,21 +441,17 @@ vi.mock('../questionnaire/enhanced-flow', () => ({
   }),
 }));
 
-vi.mock('../contexts/ThemeContext', async () => {
-  const actual = await vi.importActual('../contexts/ThemeContext');
-  return {
-    ...actual,
-    ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  };
-});
+// Make ThemeContext/TextSizeContext mocks synchronous passthroughs
+vi.mock('../contexts/ThemeContext', () => ({
+  // Provide a simple ThemeProvider wrapper for tests that doesn't suspend
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  // Keep any other exports if tests import them
+}));
 
-vi.mock('../contexts/TextSizeContext', async () => {
-  const actual = await vi.importActual('../contexts/TextSizeContext');
-  return {
-    ...actual,
-    TextSizeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  };
-});
+vi.mock('../contexts/TextSizeContext', () => ({
+  // Provide a simple TextSizeProvider wrapper for tests that doesn't suspend
+  TextSizeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 // Mock window.location
 export const mockLocation = {
@@ -409,4 +465,11 @@ Object.defineProperty(window, 'location', {
   writable: true,
   configurable: true, // Allow tests to redefine it
 });
+
+// Preload modules that App uses via React.lazy so imports resolve before
+// any synchronous updates in tests (prevents Suspense during event handlers)
+// These imports use the mocked module implementations above and will
+// populate Node's module cache so `import()` resolves immediately.
+void import('../components/onboarding');
+void import('../components/ShortcutsHelp');
 

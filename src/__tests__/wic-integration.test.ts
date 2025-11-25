@@ -4,19 +4,22 @@
  * Tests that WIC program is properly integrated with benefit calculations
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { initializeApp } from '../utils/initializeApp';
+import { discoverAndSeedAllRules } from '../utils/ruleDiscovery';
+import { ImportManager } from '../services/ImportManager';
 import { getDatabase, clearDatabase } from '../db';
 import { evaluateAllPrograms } from '../rules';
 
 describe('WIC Integration', () => {
-  beforeAll(async () => {
-    // Clear database and re-initialize to ensure fresh import
-    console.log('🔍 [DEBUG] beforeAll: Starting database clear and re-initialization');
+  beforeEach(async () => {
+    // Clear database and force a full rule discovery import for isolation
     await clearDatabase();
-    console.log('🔍 [DEBUG] beforeAll: Database cleared, now initializing app');
-    await initializeApp();
-    console.log('🔍 [DEBUG] beforeAll: App initialization complete');
+    await initializeApp({ force: true });
+    // Reset import manager cached state to allow re-import of rules each test
+    ImportManager.getInstance().resetForTests();
+    // Explicitly run discovery to ensure programs and rules are loaded in test environment
+    await discoverAndSeedAllRules();
   });
 
   it('should have WIC program in database', async () => {

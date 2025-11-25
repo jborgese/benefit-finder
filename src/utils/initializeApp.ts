@@ -7,19 +7,21 @@ let isInitializing = false;
 /**
  * Initialize database and load sample data
  */
- 
-export async function initializeApp(): Promise<void> {
+
+export async function initializeApp(options?: { force?: boolean }): Promise<void> {
+  const forceReinit = options?.force ?? false;
+
   if (import.meta.env.DEV) {
-    console.warn('[DEBUG] initializeApp: Starting app initialization');
+    console.warn('[DEBUG] initializeApp: Starting app initialization', { force: forceReinit });
   }
 
   // Prevent multiple simultaneous initializations
-  if (isInitializing) {
+  if (isInitializing && !forceReinit) {
     console.warn('[DEBUG] initializeApp: App initialization already in progress, waiting...');
     // Wait for the current initialization to complete
     // Poll until the flag is cleared by the other initialization
     const maxAttempts = 100; // 10 seconds max wait (100ms * 100)
-     
+
     for (let attempt = 0; attempt < maxAttempts && isInitializing; attempt++) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -71,8 +73,8 @@ export async function initializeApp(): Promise<void> {
       if (import.meta.env.DEV) {
         console.warn('[DEBUG] initializeApp: SNAP program exists but has no rules, forcing rule discovery...');
       }
-    } else {
-      // Check if we need to discover and seed new rule files
+    } else if (!forceReinit) {
+      // Check if we need to discover and seed new rule files (skip this check if forcing reinit)
       const hasNewRuleFiles = await checkForNewRuleFiles();
       if (existingPrograms.length > 0 && !hasNewRuleFiles) {
         if (import.meta.env.DEV) {

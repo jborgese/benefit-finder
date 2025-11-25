@@ -1,6 +1,7 @@
 // Database Helper for Rule Discovery
 import { getDatabase, isDatabaseInitialized } from '../db';
 import type { DiscoveredRuleFile } from './ruleDiscoveryConfig';
+import { extractProgramName, extractProgramDescription, extractShortName } from './ruleDiscoveryExtractors';
 
 export async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise<boolean> {
   // Create a new benefit program in the database from discoveredFile
@@ -12,9 +13,9 @@ export async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): 
   try {
     const program = {
       id: discoveredFile.programInfo.id,
-      name: discoveredFile.programInfo.name,
-      shortName: discoveredFile.programInfo.shortName,
-      description: discoveredFile.programInfo.description,
+      name: extractProgramName(discoveredFile.programInfo.name, discoveredFile.programInfo.id),
+      shortName: extractShortName(discoveredFile.programInfo.shortName, discoveredFile.programInfo.id),
+      description: extractProgramDescription(discoveredFile.programInfo.id, discoveredFile.programInfo.description),
       category: discoveredFile.programInfo.category as
         | 'food'
         | 'healthcare'
