@@ -169,7 +169,7 @@ describe('App Component - State Management and Navigation', () => {
     }
   });
 
-  it.skip('should handle error state navigation', async () => {
+  it('should handle error state navigation', async () => {
     const user = userEvent.setup();
     const { initializeApp } = await import('../utils/initializeApp');
 
@@ -205,11 +205,11 @@ describe('App Component - State Management and Navigation', () => {
     await user.click(returnHomeButton);
 
     await waitFor(() => {
-      expect(screen.getByText('app.subtitle')).toBeInTheDocument();
+      expect(screen.getByTestId('home-page')).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 
-  it.skip('should handle refresh page button in error state', async () => {
+  it('should handle refresh page button in error state', async () => {
     const user = userEvent.setup();
     const { initializeApp } = await import('../utils/initializeApp');
 
