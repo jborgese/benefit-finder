@@ -36,7 +36,7 @@ export async function initializeApp(options?: { force?: boolean }): Promise<void
     // Initialize database
     await initializeDatabase();
 
-    const db = getDatabase();
+    const db = getDatabase()!;
 
     // Check if we already have programs loaded
     const existingPrograms = await db.benefit_programs.find().exec();
@@ -116,7 +116,7 @@ export async function initializeApp(options?: { force?: boolean }): Promise<void
         }
         await initializeDatabase();
 
-        const db = getDatabase();
+        const db = getDatabase()!;
         const existingPrograms = await db.benefit_programs.find().exec();
         if (existingPrograms.length > 0) {
           return; // Already initialized

@@ -47,7 +47,7 @@ export async function getEvaluationEntities(
   programId: string
 ): Promise<EvaluationEntities> {
   debugLog('Retrieving evaluation entities for', { profileId, programId });
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   // Get user profile
   const profile = await db.user_profiles.findOne(profileId).exec();
@@ -135,7 +135,7 @@ export async function getEvaluationEntities(
 export async function getAllProgramRuleIds(programId: string): Promise<string[]> {
   debugLog('Retrieving all rule IDs for program', programId);
   try {
-    const db = getDatabase();
+    const db = getDatabase()!;
     const rules: EligibilityRuleDocument[] = await db.eligibility_rules.findRulesByProgram(programId);
 
     // Sort by priority (highest first) for consistent order

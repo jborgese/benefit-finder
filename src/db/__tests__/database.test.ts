@@ -33,16 +33,16 @@ describe('RxDB Database', () => {
     it('should return database instance', () => {
       const db = getDatabase();
       expect(db).toBeDefined();
-      expect(db.name).toBe('benefitfinder');
+      expect(db?.name).toBe('benefitfinder');
     });
 
     it('should have all required collections', () => {
       const db = getDatabase();
-      expect(db.user_profiles).toBeDefined();
-      expect(db.benefit_programs).toBeDefined();
-      expect(db.eligibility_rules).toBeDefined();
-      expect(db.eligibility_results).toBeDefined();
-      expect(db.app_settings).toBeDefined();
+      expect(db?.user_profiles).toBeDefined();
+      expect(db?.benefit_programs).toBeDefined();
+      expect(db?.eligibility_rules).toBeDefined();
+      expect(db?.eligibility_results).toBeDefined();
+      expect(db?.app_settings).toBeDefined();
     });
   });
 

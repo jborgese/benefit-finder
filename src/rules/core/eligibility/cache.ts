@@ -62,7 +62,7 @@ export async function getCachedResult(
   programId: string
 ): Promise<EligibilityResultDocument | null> {
   debugLog('Fetching cached result', { profileId, programId });
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   const results = await db.eligibility_results
     .find({
@@ -87,7 +87,7 @@ export async function cacheResult(
   expiresIn: number
 ): Promise<void> {
   debugLog('Caching evaluation result to database', { result, expiresIn });
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   const dbResult: Partial<EligibilityResult> = {
     id: nanoid(),
@@ -138,7 +138,7 @@ export async function clearCachedResults(
   programId?: string
 ): Promise<number> {
   debugLog('Clearing cached results', { profileId, programId });
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   const selector: { userProfileId: string; programId?: string } = {
     userProfileId: profileId
@@ -170,7 +170,7 @@ export async function getCachedResults(
   profileId: string
 ): Promise<EligibilityEvaluationResult[]> {
   debugLog('Fetching all cached results for profile', profileId);
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   const results = await db.eligibility_results
     .find({

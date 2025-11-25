@@ -5,7 +5,7 @@ import { extractProgramName, extractProgramDescription, extractShortName } from 
 
 export async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): Promise<boolean> {
   // Create a new benefit program in the database from discoveredFile
-  const db = getDatabase();
+  const db = getDatabase()!;
   if (!isDatabaseInitialized()) {
     console.error('[RuleDiscoveryDb] Database is not initialized');
     return false;

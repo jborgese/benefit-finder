@@ -23,7 +23,7 @@ describe('WIC Integration', () => {
   });
 
   it('should have WIC program in database', async () => {
-    const db = getDatabase();
+    const db = getDatabase()!;
     const wicProgram = await db.benefit_programs.findOne({
       selector: { id: 'wic-federal' }
     }).exec();
@@ -35,7 +35,7 @@ describe('WIC Integration', () => {
   });
 
   it('should have WIC rules loaded', async () => {
-    const db = getDatabase();
+    const db = getDatabase()!;
     const wicRules = await db.eligibility_rules.find({
       selector: { programId: 'wic-federal' }
     }).exec();
@@ -53,7 +53,7 @@ describe('WIC Integration', () => {
   });
 
   it('should debug WIC rules in database', async () => {
-    const db = getDatabase();
+    const db = getDatabase()!;
     const wicRules = await db.eligibility_rules.find({
       selector: { programId: 'wic-federal' }
     }).exec();
@@ -82,7 +82,7 @@ describe('WIC Integration', () => {
 
   it('should evaluate WIC eligibility for pregnant woman', async () => {
     // Create a test profile for a pregnant woman using existing schema fields
-    const db = getDatabase();
+    const db = getDatabase()!;
     const profile = await db.user_profiles.insert({
       id: 'test-pregnant-woman',
       firstName: 'Jane',
@@ -119,7 +119,7 @@ describe('WIC Integration', () => {
   });
 
   it('should evaluate WIC eligibility for breastfeeding woman', async () => {
-    const db = getDatabase();
+    const db = getDatabase()!;
     const profile = await db.user_profiles.insert({
       id: 'test-breastfeeding-woman',
       firstName: 'Jane',
@@ -149,7 +149,7 @@ describe('WIC Integration', () => {
   });
 
   it('should evaluate WIC eligibility for child', async () => {
-    const db = getDatabase();
+    const db = getDatabase()!;
     const profile = await db.user_profiles.insert({
       id: 'test-child',
       firstName: 'John',

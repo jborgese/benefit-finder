@@ -4,7 +4,7 @@ import { DB_VERSION } from './config';
 import { getDbInstance } from './state';
 import { collections } from '../collections';
 
-interface ExportedDatabaseData {
+export interface ExportedDatabaseData extends Record<string, unknown> {
   version: number;
   timestamp: number;
   collections: Partial<Record<keyof BenefitFinderCollections, unknown[]>>;
@@ -35,7 +35,8 @@ export async function importDatabase(data: Record<string, unknown>): Promise<voi
   for (const [name, docs] of Object.entries(collectionsData)) {
     if (!(name in db)) { console.warn(`Collection ${name} missing, skipping`); continue; }
     const coll = db[name as keyof BenefitFinderCollections];
-    await coll.bulkInsert(docs as unknown[]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await coll.bulkInsert(docs as any);
   }
   if (import.meta.env.DEV) console.warn('Import completed');
 }

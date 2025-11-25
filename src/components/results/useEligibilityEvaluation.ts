@@ -5,4 +5,5 @@
  * @see useEligibilityEvaluation/ for modular implementation
  */
 
-export * from './useEligibilityEvaluation';
+export * from './useEligibilityEvaluation/index';
+export { default } from './useEligibilityEvaluation/index';

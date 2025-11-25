@@ -100,7 +100,7 @@ export async function discoverAndSeedAllRules(): Promise<{
 export async function checkForNewRuleFiles(): Promise<boolean> {
   try {
     const db = (await import('../db')).getDatabase();
-    const existingPrograms = await db.benefit_programs.find().exec();
+    const existingPrograms = await db!.benefit_programs.find().exec();
     const discoveredFiles = await discoverRuleFiles(FEDERAL_RULE_CONFIG);
     const existingProgramIds = new Set(existingPrograms.map((p: { id: string }) => p.id));
     for (const discoveredFile of discoveredFiles) {

@@ -26,7 +26,7 @@ export async function initializeApp(): Promise<void> {
     // Wait for the current initialization to complete
     // Poll until the flag is cleared by the other initialization
     const maxAttempts = 100; // 10 seconds max wait (100ms * 100)
-     
+
     for (let attempt = 0; attempt < maxAttempts && isInitializing; attempt++) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -41,7 +41,7 @@ export async function initializeApp(): Promise<void> {
     // Initialize database
     await initializeDatabase();
 
-    const db = getDatabase();
+    const db = getDatabase()!;
 
     // Check if we already have programs loaded
     const existingPrograms = await db.benefit_programs.find().exec();
@@ -84,9 +84,9 @@ export async function initializeApp(): Promise<void> {
 /**
  * Load sample benefit programs into the database
  */
-async function loadSamplePrograms(db: ReturnType<typeof getDatabase>): Promise<void> {
+async function loadSamplePrograms(db: NonNullable<ReturnType<typeof getDatabase>>): Promise<void> {
   // Create SNAP program with explicit ID to match rules
-  await db.benefit_programs.insert({
+  await db!.benefit_programs.insert({
     id: 'snap-federal',
     name: 'Supplemental Nutrition Assistance Program (SNAP)',
     shortName: 'SNAP',
@@ -104,7 +104,7 @@ async function loadSamplePrograms(db: ReturnType<typeof getDatabase>): Promise<v
   });
 
   // Create Medicaid program with explicit ID to match rules
-  await db.benefit_programs.insert({
+  await db!.benefit_programs.insert({
     id: 'medicaid-federal',
     name: 'Medicaid',
     shortName: 'Medicaid',
@@ -122,7 +122,7 @@ async function loadSamplePrograms(db: ReturnType<typeof getDatabase>): Promise<v
   });
 
   // Create WIC program with explicit ID to match rules
-  await db.benefit_programs.insert({
+  await db!.benefit_programs.insert({
     id: 'wic-federal',
     name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
     shortName: 'WIC',
@@ -158,7 +158,7 @@ async function loadSamplePrograms(db: ReturnType<typeof getDatabase>): Promise<v
   });
 
   // Create SSI program with explicit ID to match rules
-  await db.benefit_programs.insert({
+  await db!.benefit_programs.insert({
     id: 'ssi-federal',
     name: 'Supplemental Security Income (SSI)',
     shortName: 'SSI',
@@ -215,14 +215,14 @@ async function retryInitialization(): Promise<void> {
   }
   await initializeDatabase();
 
-  const db = getDatabase();
+  const db = getDatabase()!;
   const existingPrograms = await db.benefit_programs.find().exec();
   if (existingPrograms.length > 0) {
     return; // Already initialized
   }
 
   // Load sample data after successful initialization
-  const retryDb = getDatabase();
+  const retryDb = getDatabase()!;
   await loadSamplePrograms(retryDb);
   await loadSampleRules();
 }

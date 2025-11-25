@@ -12,7 +12,7 @@ export async function checkExistingRuleConflicts(
   opts: { mode: string; overwriteExisting: boolean },
   result: RuleImportResult
 ): Promise<boolean> {
-  const db = getDatabase();
+  const db = getDatabase()!;
   const existing = await db.eligibility_rules.findOne(rule.id).exec();
 
   if (!existing) {
@@ -51,7 +51,7 @@ export async function saveRuleToDatabase(
   rule: RuleDefinition,
   mode: string
 ): Promise<void> {
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   const dbRule: Partial<EligibilityRule> = {
     id: rule.id,

@@ -27,7 +27,7 @@ describe('Rule Discovery', () => {
       expect(results.errors).toHaveLength(0);
 
       // Verify programs were created in database
-      const db = getDatabase();
+      const db = getDatabase()!;
       const programs = await db.benefit_programs.find().exec();
       expect(programs.length).toBeGreaterThan(0);
 

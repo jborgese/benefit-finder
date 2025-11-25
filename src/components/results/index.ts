@@ -22,7 +22,8 @@ export { ResultsImport } from './ResultsImport';
 export { ResultsComparison } from './ResultsComparison';
 
 // Hooks
-export { useEligibilityEvaluation } from './useEligibilityEvaluation';
+import useEligibilityEvaluation from './useEligibilityEvaluation';
+export { useEligibilityEvaluation };
 export { useResultsManagement } from './useResultsManagement';
 
 // Utilities

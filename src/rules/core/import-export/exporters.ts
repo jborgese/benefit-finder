@@ -10,7 +10,7 @@ export async function exportRule(
   ruleId: string,
   options: RuleExportOptions = {}
 ): Promise<RuleDefinition | null> {
-  const db = getDatabase();
+  const db = getDatabase()!;
   const rule = await db.eligibility_rules.findOne(ruleId).exec();
 
   if (!rule) {
@@ -69,7 +69,7 @@ export async function exportProgramRules(
   programId: string,
   options: RuleExportOptions = {}
 ): Promise<RuleDefinition[]> {
-  const db = getDatabase();
+  const db = getDatabase()!;
   const rules = await db.eligibility_rules
     .find({
       selector: { programId },

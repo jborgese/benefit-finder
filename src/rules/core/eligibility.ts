@@ -466,7 +466,7 @@ export async function evaluateAllPrograms(
     await ensureSNAPRulesAreCorrect();
   }
 
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   // Get all active programs
   console.log('🔍 [PROGRAM RETRIEVAL DEBUG] Retrieving all active programs');

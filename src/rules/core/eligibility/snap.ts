@@ -22,7 +22,7 @@ export async function ensureSNAPRulesAreCorrect(): Promise<void> {
     console.warn('🔍 [DEBUG] ensureSNAPRulesAreCorrect: Checking SNAP rules...');
   }
 
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   try {
     // Get SNAP rules from database

@@ -7,12 +7,25 @@
 import { nanoid } from 'nanoid';
 import type { RxDocument, RxCollection } from 'rxdb';
 import { getDatabase } from './database';
+import type { BenefitFinderDatabase } from './database-engine/types';
 import type {
   UserProfile,
   BenefitProgram,
   EligibilityRule,
   EligibilityResult,
 } from './schemas';
+
+/**
+ * Get database instance and assert it's initialized
+ * @throws Error if database is not initialized
+ */
+function getDb(): BenefitFinderDatabase {
+  const db = getDatabase();
+  if (!db) {
+    throw new Error('Database not initialized');
+  }
+  return db;
+}
 
 /**
  * Generate a unique ID for database documents
@@ -85,7 +98,7 @@ function isCollectionReady<T>(collection: RxCollection<T> | undefined): collecti
 export async function createUserProfile(
   data: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<RxDocument<UserProfile>> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Wait for collection to be fully initialized
   const collection = await waitForCollectionReady(db.user_profiles, 'user_profiles');
@@ -125,7 +138,7 @@ export async function updateUserProfile(
   profileId: string,
   data: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<RxDocument<UserProfile>> {
-  const db = getDatabase();
+  const db = getDb();
 
   const profile = await db.user_profiles.findOne({
     selector: { id: profileId },
@@ -149,7 +162,7 @@ export async function updateUserProfile(
  * @param profileId Profile ID
  */
 export async function deleteUserProfile(profileId: string): Promise<void> {
-  const db = getDatabase();
+  const db = getDb();
 
   const profile = await db.user_profiles.findOne({
     selector: { id: profileId },
@@ -180,7 +193,7 @@ export async function deleteUserProfile(profileId: string): Promise<void> {
 export async function createBenefitProgram(
   data: Omit<BenefitProgram, 'id' | 'lastUpdated' | 'createdAt'>
 ): Promise<RxDocument<BenefitProgram>> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Wait for collection to be fully initialized
   const collection = await waitForCollectionReady(db.benefit_programs, 'benefit_programs');
@@ -207,7 +220,7 @@ function tryRefreshCollection<T>(collectionName: string): RxCollection<T> | null
     return null;
   }
 
-  const db = getDatabase();
+  const db = getDb();
   const dbAny = db as unknown as Record<string, unknown>;
   // Safe: collectionName is validated to contain only alphanumeric and underscore characters
 
@@ -437,7 +450,7 @@ async function waitForCollectionReady<T>(
 export async function createEligibilityRule(
   data: Omit<EligibilityRule, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<RxDocument<EligibilityRule>> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Try to get the collection - check multiple possible access patterns
   let collection: RxCollection<EligibilityRule> | undefined = db.eligibility_rules;
@@ -490,7 +503,7 @@ export async function createEligibilityRule(
 export async function insertEligibilityRule(
   rule: EligibilityRule
 ): Promise<RxDocument<EligibilityRule>> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Wait for collection to be fully initialized
   const collection = await waitForCollectionReady(db.eligibility_rules, 'eligibility_rules');
@@ -507,7 +520,7 @@ export async function insertEligibilityRule(
 export async function findOneEligibilityRule(
   selector: Record<string, unknown>
 ): Promise<RxDocument<EligibilityRule> | null> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Wait for collection to be fully initialized
   const collection = await waitForCollectionReady(db.eligibility_rules, 'eligibility_rules');
@@ -526,7 +539,7 @@ export async function findOneEligibilityRule(
 export async function countEligibilityRules(
   selector?: Record<string, unknown>
 ): Promise<number> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Wait for collection to be fully initialized
   const collection = await waitForCollectionReady(db.eligibility_rules, 'eligibility_rules');
@@ -552,7 +565,7 @@ export function saveEligibilityResult(
   data: Omit<EligibilityResult, 'id' | 'evaluatedAt' | 'expiresAt'>,
   expirationDays = 30
 ): Promise<RxDocument<EligibilityResult>> {
-  const db = getDatabase();
+  const db = getDb();
 
   const now = Date.now();
   const expiresAt = now + (expirationDays * 24 * 60 * 60 * 1000);
@@ -574,7 +587,7 @@ export function saveEligibilityResult(
  * Benefit programs and rules are preserved.
  */
 export async function clearUserData(): Promise<void> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Remove all user profiles
   const profiles = await db.user_profiles.find().exec();
@@ -601,7 +614,7 @@ export async function getDatabaseStats(): Promise<{
   eligibilityResults: number;
   total: number;
 }> {
-  const db = getDatabase();
+  const db = getDb();
 
   // Verify collections exist and are properly initialized
   const collections = {
@@ -655,7 +668,7 @@ export async function checkDatabaseHealth(): Promise<{
   const issues: string[] = [];
 
   try {
-    const db = getDatabase();
+    const db = getDb();
 
     // Check if collections exist (runtime check for database initialization)
 

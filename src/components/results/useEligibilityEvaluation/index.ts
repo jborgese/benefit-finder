@@ -4,7 +4,9 @@
  * Re-exports all functionality for backward compatibility
  */
 
-export { useEligibilityEvaluation } from './main';
+import { useEligibilityEvaluation } from './main';
+
+export { useEligibilityEvaluation };
 export type {
   UserProfile,
   EvaluationOptions,

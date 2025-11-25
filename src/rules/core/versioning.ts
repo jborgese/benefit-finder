@@ -30,7 +30,7 @@ import type { JsonLogicRule } from './types';
 export async function getLatestRuleVersion(
   ruleId: string
 ): Promise<{ rule: RuleDefinition; version: RuleVersion } | null> {
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   // Find all rules with this ID (may have version suffixes)
   const rules = await db.eligibility_rules
@@ -78,7 +78,7 @@ export async function getLatestRuleVersion(
 export async function getAllRuleVersions(
   ruleId: string
 ): Promise<Array<{ rule: RuleDefinition; version: RuleVersion }>> {
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   const rules = await db.eligibility_rules
     .find({
@@ -273,7 +273,7 @@ export async function migrateAllProgramRules(
   skipped: number;
   errors: Array<{ ruleId: string; error: string }>;
 }> {
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   const rules = await db.eligibility_rules
     .find({
@@ -442,7 +442,7 @@ export async function archiveOldVersions(
   ruleId: string,
   keepVersions = 5
 ): Promise<number> {
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   // Find all rules with this ID
   const rules = await db.eligibility_rules
@@ -493,7 +493,7 @@ export async function deleteOldVersions(
   ruleId: string,
   keepVersions = 3
 ): Promise<number> {
-  const db = getDatabase();
+  const db = getDatabase()!;
 
   // Find all rules with this ID
   const rules = await db.eligibility_rules
