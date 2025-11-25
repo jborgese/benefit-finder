@@ -22,6 +22,8 @@ export default defineConfig({
     include: [
       'src/__tests__/**/*.test.{ts,tsx}',
       'src/**/__tests__/**/*.test.{ts,tsx}',
+      // Allow targeted utility tests placed directly alongside source (e.g., initializeApp.test.ts)
+      'src/utils/*.test.{ts,tsx}',
     ],
     exclude: [
       '**/node_modules/**',
