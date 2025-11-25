@@ -35,7 +35,6 @@ export async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): 
       tags: discoveredFile.programInfo.tags,
       active: true,
       createdAt: Date.now(),
-      updatedAt: Date.now(),
       lastUpdated: Date.now(),
     };
     await db.benefit_programs.insert(program);

@@ -119,39 +119,43 @@ describe('forceFixProgramNames', () => {
 
   it('should handle clearDatabase errors and throw', async () => {
     // Arrange
-    const dbError = new Error('Database clear failed');
-    vi.mocked(db.clearDatabase).mockRejectedValue(dbError);
+    vi.mocked(db.clearDatabase).mockImplementation(() => Promise.reject(new Error('Database clear failed')));
 
     // Act & Assert
+    let thrownError: Error | null = null;
     try {
       const promise = forceFixProgramNames();
       await vi.runAllTimersAsync();
       await promise;
-      expect.fail('Should have thrown an error');
     } catch (error) {
-      expect(error).toEqual(dbError);
-      expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', dbError);
-      expect(ruleDiscovery.discoverAndSeedAllRules).not.toHaveBeenCalled();
+      thrownError = error as Error;
     }
+
+    expect(thrownError).toBeInstanceOf(Error);
+    expect(thrownError?.message).toBe('Database clear failed');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', expect.any(Error));
+    expect(ruleDiscovery.discoverAndSeedAllRules).not.toHaveBeenCalled();
   });
 
   it('should handle discoverAndSeedAllRules errors and throw', async () => {
     // Arrange
-    const discoveryError = new Error('Discovery failed');
     vi.mocked(db.clearDatabase).mockResolvedValue();
-    vi.mocked(ruleDiscovery.discoverAndSeedAllRules).mockRejectedValue(discoveryError);
+    vi.mocked(ruleDiscovery.discoverAndSeedAllRules).mockImplementation(() => Promise.reject(new Error('Discovery failed')));
 
     // Act & Assert
+    let thrownError: Error | null = null;
     try {
       const promise = forceFixProgramNames();
       await vi.runAllTimersAsync();
       await promise;
-      expect.fail('Should have thrown an error');
     } catch (error) {
-      expect(error).toEqual(discoveryError);
-      expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', discoveryError);
-      expect(db.clearDatabase).toHaveBeenCalledTimes(1);
+      thrownError = error as Error;
     }
+
+    expect(thrownError).toBeInstanceOf(Error);
+    expect(thrownError?.message).toBe('Discovery failed');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', expect.any(Error));
+    expect(db.clearDatabase).toHaveBeenCalledTimes(1);
   });
 
   it('should wait 1000ms between clearing and reinitializing', async () => {
