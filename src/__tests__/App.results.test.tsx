@@ -37,7 +37,11 @@ describe('App Component - Results Display', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Reset initializeApp mock to its default implementation
+    const { initializeApp } = await import('../utils/initializeApp');
+    vi.mocked(initializeApp).mockResolvedValue(undefined);
+
     vi.restoreAllMocks();
     vi.clearAllTimers();
   });
