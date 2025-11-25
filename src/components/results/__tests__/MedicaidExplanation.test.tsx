@@ -32,46 +32,46 @@ describe('MedicaidExplanation Component', () => {
   describe('Status messaging variations', () => {
     it('shows qualified status message', () => {
       renderExplanation('qualified');
-      expect(screen.getByText('You are eligible for Medicaid! You can receive comprehensive health coverage.')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.statusMessages.qualified')).toBeInTheDocument();
     });
 
     it('shows likely status message', () => {
       renderExplanation('likely');
-      expect(screen.getByText(/You appear to be eligible for Medicaid/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.statusMessages.likely')).toBeInTheDocument();
     });
 
     it('shows maybe status message', () => {
       renderExplanation('maybe');
-      expect(screen.getByText(/You may be eligible for Medicaid/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.statusMessages.maybe')).toBeInTheDocument();
     });
 
     it('shows unlikely status message', () => {
       renderExplanation('unlikely');
-      expect(screen.getByText(/You may not currently qualify for Medicaid, but eligibility can change/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.statusMessages.unlikely')).toBeInTheDocument();
     });
 
     it('shows not-qualified with pregnancy extra guidance', () => {
       renderExplanation('not-qualified', { isPregnant: true });
-      // Combined string includes base message plus guidance
-      expect(screen.getByText(/You may not currently qualify for Medicaid/)).toBeInTheDocument();
+      // Combined string includes base key plus guidance
+      expect(screen.getByText(/results\.medicaid\.statusMessages\.notQualified/)).toBeInTheDocument();
       expect(screen.getByText(/pregnancy and health coverage needs/)).toBeInTheDocument();
     });
 
     it('shows not-qualified with children extra guidance', () => {
       renderExplanation('not-qualified', { hasChildren: true });
-      expect(screen.getByText(/You may not currently qualify for Medicaid/)).toBeInTheDocument();
+      expect(screen.getByText(/results\.medicaid\.statusMessages\.notQualified/)).toBeInTheDocument();
       expect(screen.getByText(/children and health coverage needs/)).toBeInTheDocument();
     });
 
     it('shows not-qualified with age >= 65 Medicare guidance', () => {
       renderExplanation('not-qualified', { age: 70 });
-      expect(screen.getByText(/You may not currently qualify for Medicaid/)).toBeInTheDocument();
+      expect(screen.getByText(/results\.medicaid\.statusMessages\.notQualified/)).toBeInTheDocument();
       expect(screen.getByText(/eligible for Medicare instead/)).toBeInTheDocument();
     });
 
     it('shows not-qualified without special profile additions', () => {
       renderExplanation('not-qualified', {});
-      const items = screen.getAllByText(/You may not currently qualify for Medicaid/);
+      const items = screen.getAllByText('results.medicaid.statusMessages.notQualified');
       // One inside base message and maybe in other sections, assert at least 1
       expect(items.length).toBeGreaterThanOrEqual(1);
       // Should not include pregnancy/children/medicare phrases
@@ -108,21 +108,21 @@ describe('MedicaidExplanation Component', () => {
   describe('Next steps list', () => {
     it('includes pregnancy and children additional steps when qualified', () => {
       renderExplanation('qualified', { isPregnant: true, hasChildren: true });
-      expect(screen.getByText(/Contact your state Medicaid office to apply/)).toBeInTheDocument();
-      expect(screen.getByText(/Schedule an appointment with your healthcare provider/)).toBeInTheDocument();
-      expect(screen.getByText(/Make sure your children are up to date/)).toBeInTheDocument();
-      expect(screen.getByText(/Choose a health plan and enroll/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.nextSteps.contact')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.additionalSteps.prenatalCare')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.additionalSteps.childrenHealth')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.nextSteps.enrollment')).toBeInTheDocument();
     });
 
     it('contains alternative health and check-back message when maybe', () => {
       renderExplanation('maybe');
-      expect(screen.getByText(/Consider alternative health coverage options/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.additionalSteps.alternativeHealth')).toBeInTheDocument();
       expect(screen.getByText(/Check back if your situation changes/)).toBeInTheDocument();
     });
 
     it('contains other health and reapply when not-qualified', () => {
       renderExplanation('not-qualified');
-      expect(screen.getByText(/Consider other health coverage options available to you/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.additionalSteps.otherHealth')).toBeInTheDocument();
       expect(screen.getByText(/Consider reapplying if your situation changes/)).toBeInTheDocument();
     });
   });
@@ -130,14 +130,14 @@ describe('MedicaidExplanation Component', () => {
   describe('Benefit information', () => {
     it('includes base benefit items', () => {
       renderExplanation('qualified');
-      expect(screen.getByText(/Comprehensive health insurance coverage/)).toBeInTheDocument();
-      expect(screen.getByText(/Doctor visits and specialist care/)).toBeInTheDocument();
-      expect(screen.getByText(/Hospital stays and emergency care/)).toBeInTheDocument();
-      expect(screen.getByText(/Prescription medications/)).toBeInTheDocument();
-      expect(screen.getByText(/Preventive care and screenings/)).toBeInTheDocument();
-      expect(screen.getByText(/Mental health and substance abuse treatment/)).toBeInTheDocument();
-      expect(screen.getByText(/Dental and vision care/)).toBeInTheDocument();
-      expect(screen.getByText(/Transportation to medical appointments/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.healthCoverage')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.doctorVisits')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.hospitalCare')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.prescriptions')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.preventiveCare')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.mentalHealth')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.dentalVision')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.transportation')).toBeInTheDocument();
     });
 
     it('adds pregnancy-specific benefits', () => {
@@ -156,27 +156,27 @@ describe('MedicaidExplanation Component', () => {
   describe('Requirements explanation', () => {
     it('uses pregnancy requirement when pregnant', () => {
       renderExplanation('qualified', { isPregnant: true });
-      expect(screen.getByText(/Pregnancy status/)).toBeInTheDocument();
-      expect(screen.queryByText(/Children in household/)).toBeNull();
+      expect(screen.getByText('results.medicaid.requirements.pregnancy')).toBeInTheDocument();
+      expect(screen.queryByText('results.medicaid.requirements.children')).toBeNull();
     });
 
     it('uses children requirement when has children and not pregnant', () => {
       renderExplanation('qualified', { hasChildren: true });
-      expect(screen.getByText(/Children in household/)).toBeInTheDocument();
-      expect(screen.queryByText(/Pregnancy status/)).toBeNull();
+      expect(screen.getByText('results.medicaid.requirements.children')).toBeInTheDocument();
+      expect(screen.queryByText('results.medicaid.requirements.pregnancy')).toBeNull();
     });
 
     it('uses age requirement when neither pregnant nor has children', () => {
       renderExplanation('qualified');
-      expect(screen.getByText(/Age requirements vary by state/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.requirements.age')).toBeInTheDocument();
     });
 
     it('always includes citizenship, residence, income, disability requirements', () => {
       renderExplanation('qualified');
-      expect(screen.getByText(/U\.S\. citizen or qualified immigrant/)).toBeInTheDocument();
-      expect(screen.getByText(/Must live in the state where you apply/)).toBeInTheDocument();
-      expect(screen.getByText(/Must meet income guidelines/)).toBeInTheDocument();
-      expect(screen.getByText(/Disability status/)).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.requirements.citizenship')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.requirements.residence')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.requirements.income')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.requirements.disability')).toBeInTheDocument();
     });
   });
 
@@ -213,11 +213,11 @@ describe('MedicaidExplanation Component', () => {
       renderExplanation('qualified');
       expect(screen.getByText('Why this result?')).toBeInTheDocument();
       expect(screen.getByTestId('specific-reasons-section')).toBeInTheDocument();
-      expect(screen.getByText('What Medicaid provides:')).toBeInTheDocument();
-      expect(screen.getByText('Medicaid requirements:')).toBeInTheDocument();
-      expect(screen.getByText('Next steps:')).toBeInTheDocument();
-      expect(screen.getByText('How to apply for Medicaid:')).toBeInTheDocument();
-      expect(screen.getByText('Additional resources:')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.benefits.title')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.requirements.title')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.nextSteps.title')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.howToApply.title')).toBeInTheDocument();
+      expect(screen.getByText('results.medicaid.resources.title')).toBeInTheDocument();
     });
 
     it('includes privacy note text', () => {
