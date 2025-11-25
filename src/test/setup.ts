@@ -180,10 +180,10 @@ vi.mock('../db/database', () => {
         // Debug: log what's in mockRules and what we're searching for
 
         console.debug('[MOCK DB] eligibility_rules.find query=', query, 'mockRules.length=', mockRules.length, 'programIds=', mockRules.map(r => r.programId));
-        if (query?.selector?.programId) {
-          const filtered = mockRules.filter(r => r.programId === query.selector.programId);
-
-          console.debug('[MOCK DB] eligibility_rules.find filtered count=', filtered.length, 'for programId=', query.selector.programId);
+        const programId = query?.selector?.programId;
+        if (programId) {
+          const filtered = mockRules.filter(r => r.programId === programId);
+          console.debug('[MOCK DB] eligibility_rules.find filtered count=', filtered.length, 'for programId=', programId);
           return Promise.resolve(filtered.map(r => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) })));
         }
         return Promise.resolve(mockRules.map(r => ({ ...r, toJSON: () => r, get: (k: string) => safeGet(r, k) })));
