@@ -186,175 +186,185 @@ export const WicExplanation: React.FC<WicExplanationProps> = ({
   const requirements = getWicRequirementsExplanation(userProfile, t);
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
-            Why this result?
-          </Dialog.Title>
-          <p className="text-gray-600">{t('benefits.wic')}</p>
-        </div>
-        <Dialog.Close asChild>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close explanation"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+    <Dialog.Root open onOpenChange={onClose}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+        <Dialog.Content
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto z-50"
+          aria-describedby="wic-explanation-description"
+        >
+          <div className="p-6">
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <Dialog.Title className="text-2xl font-bold text-gray-900 mb-2">
+                  Why this result?
+                </Dialog.Title>
+                <p className="text-gray-600" id="wic-explanation-description">{t('benefits.wic')}</p>
+              </div>
+              <Dialog.Close asChild>
+                <button
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Close explanation"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </Dialog.Close>
+            </div>
+
+            {/* Status Badge */}
+            <div className={`p-4 rounded-lg border mb-6 ${getStatusColor()}`}>
+              <div className="flex items-center">
+                <span className="text-3xl mr-3">{getStatusIcon()}</span>
+                <div>
+                  <h3 className="font-semibold text-lg capitalize">{status.replace('-', ' ')}</h3>
+                  <p className="text-sm">{statusMessage}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* WIC-Specific Information */}
+            <div className="space-y-6">
+              {/* Specific Reasons for Not Qualifying */}
+              <SpecificReasonsSection
+                programId="wic-federal"
+                status={status}
+                userProfile={userProfile}
               />
-            </svg>
-          </button>
-        </Dialog.Close>
-      </div>
 
-      {/* Status Badge */}
-      <div className={`p-4 rounded-lg border mb-6 ${getStatusColor()}`}>
-        <div className="flex items-center">
-          <span className="text-3xl mr-3">{getStatusIcon()}</span>
-          <div>
-            <h3 className="font-semibold text-lg capitalize">{status.replace('-', ' ')}</h3>
-            <p className="text-sm">{statusMessage}</p>
+              {/* What WIC Provides */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                  <span className="text-lg mr-2">🍎</span>
+                  {t('results.wic.benefits.title')}
+                </h4>
+                <ul className="space-y-2">
+                  {benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-green-600 mr-2 mt-0.5">•</span>
+                      <span className="text-gray-700">{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* WIC Requirements */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                  <span className="text-lg mr-2">📋</span>
+                  {t('results.wic.requirements.title')}
+                </h4>
+                <ul className="space-y-2">
+                  {requirements.map((requirement, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                      <span className="text-gray-700">{requirement}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Next Steps */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                  <span className="text-lg mr-2">📞</span>
+                  {t('results.wic.nextSteps.title')}
+                </h4>
+                <ul className="space-y-2">
+                  {nextSteps.map((step, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                      <span className="text-gray-700">{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* How to Apply */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
+                  <span className="text-lg mr-2">🏥</span>
+                  {t('results.wic.howToApply.title')}
+                </h4>
+                <ol className="space-y-2 text-sm text-blue-800">
+                  <li className="flex items-start">
+                    <span className="font-semibold mr-2">1.</span>
+                    <span>{t('results.wic.howToApply.findOffice')}</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="font-semibold mr-2">2.</span>
+                    <span>{t('results.wic.howToApply.schedule')}</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="font-semibold mr-2">3.</span>
+                    <span>{t('results.wic.howToApply.bringDocuments')}</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="font-semibold mr-2">4.</span>
+                    <span>{t('results.wic.howToApply.assessment')}</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="font-semibold mr-2">5.</span>
+                    <span>{t('results.wic.howToApply.receiveBenefits')}</span>
+                  </li>
+                </ol>
+              </div>
+
+              {/* Additional Resources */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                  <span className="text-lg mr-2">ℹ️</span>
+                  {t('results.wic.resources.title')}
+                </h4>
+                <ul className="space-y-1 text-sm text-gray-700">
+                  <li>• {t('results.wic.resources.website')}: <a href="https://www.fns.usda.gov/wic" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Visit USDA WIC program website">fns.usda.gov/wic</a></li>
+                  <li>• {t('results.wic.resources.hotline')}</li>
+                  <li>• {t('results.wic.resources.education')}</li>
+                  <li>• {t('results.wic.resources.locations')}</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Privacy Note */}
+            <div className="border-t border-gray-200 pt-4 mt-6">
+              <div className="flex items-start gap-2 text-sm text-gray-600">
+                <span className="text-lg">🔒</span>
+                <p>
+                  <strong>Privacy Note:</strong> All eligibility calculations happen locally on your device.
+                  No information is sent to external servers. This determination is based on official program
+                  rules and the information you provided.
+                </p>
+              </div>
+            </div>
+
+            {/* Close Button */}
+            <div className="mt-6 flex justify-end">
+              <Dialog.Close asChild>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Close
+                </button>
+              </Dialog.Close>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* WIC-Specific Information */}
-      <div className="space-y-6">
-        {/* Specific Reasons for Not Qualifying */}
-        <SpecificReasonsSection
-          programId="wic-federal"
-          status={status}
-          userProfile={userProfile}
-        />
-
-        {/* What WIC Provides */}
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="text-lg mr-2">🍎</span>
-            {t('results.wic.benefits.title')}
-          </h4>
-          <ul className="space-y-2">
-            {benefits.map((benefit, index) => (
-              <li key={index} className="flex items-start">
-                <span className="text-green-600 mr-2 mt-0.5">•</span>
-                <span className="text-gray-700">{benefit}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* WIC Requirements */}
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="text-lg mr-2">📋</span>
-            {t('results.wic.requirements.title')}
-          </h4>
-          <ul className="space-y-2">
-            {requirements.map((requirement, index) => (
-              <li key={index} className="flex items-start">
-                <span className="text-blue-600 mr-2 mt-0.5">•</span>
-                <span className="text-gray-700">{requirement}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Next Steps */}
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="text-lg mr-2">📞</span>
-            {t('results.wic.nextSteps.title')}
-          </h4>
-          <ul className="space-y-2">
-            {nextSteps.map((step, index) => (
-              <li key={index} className="flex items-start">
-                <span className="text-blue-600 mr-2 mt-0.5">•</span>
-                <span className="text-gray-700">{step}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* How to Apply */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
-            <span className="text-lg mr-2">🏥</span>
-            {t('results.wic.howToApply.title')}
-          </h4>
-          <ol className="space-y-2 text-sm text-blue-800">
-            <li className="flex items-start">
-              <span className="font-semibold mr-2">1.</span>
-              <span>{t('results.wic.howToApply.findOffice')}</span>
-            </li>
-            <li className="flex items-start">
-              <span className="font-semibold mr-2">2.</span>
-              <span>{t('results.wic.howToApply.schedule')}</span>
-            </li>
-            <li className="flex items-start">
-              <span className="font-semibold mr-2">3.</span>
-              <span>{t('results.wic.howToApply.bringDocuments')}</span>
-            </li>
-            <li className="flex items-start">
-              <span className="font-semibold mr-2">4.</span>
-              <span>{t('results.wic.howToApply.assessment')}</span>
-            </li>
-            <li className="flex items-start">
-              <span className="font-semibold mr-2">5.</span>
-              <span>{t('results.wic.howToApply.receiveBenefits')}</span>
-            </li>
-          </ol>
-        </div>
-
-        {/* Additional Resources */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-            <span className="text-lg mr-2">ℹ️</span>
-            {t('results.wic.resources.title')}
-          </h4>
-          <ul className="space-y-1 text-sm text-gray-700">
-            <li>• {t('results.wic.resources.website')}: <a href="https://www.fns.usda.gov/wic" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Visit USDA WIC program website">fns.usda.gov/wic</a></li>
-            <li>• {t('results.wic.resources.hotline')}</li>
-            <li>• {t('results.wic.resources.education')}</li>
-            <li>• {t('results.wic.resources.locations')}</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Privacy Note */}
-      <div className="border-t border-gray-200 pt-4 mt-6">
-        <div className="flex items-start gap-2 text-sm text-gray-600">
-          <span className="text-lg">🔒</span>
-          <p>
-            <strong>Privacy Note:</strong> All eligibility calculations happen locally on your device.
-            No information is sent to external servers. This determination is based on official program
-            rules and the information you provided.
-          </p>
-        </div>
-      </div>
-
-      {/* Close Button */}
-      <div className="mt-6 flex justify-end">
-        <Dialog.Close asChild>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            Close
-          </button>
-        </Dialog.Close>
-      </div>
-    </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
 
