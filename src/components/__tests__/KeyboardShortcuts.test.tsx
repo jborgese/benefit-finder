@@ -261,5 +261,252 @@ describe('KeyboardShortcuts Component', () => {
       removeSpy.mockRestore();
     });
   });
+
+  describe('Edge Cases', () => {
+    it('should not trigger shortcuts when typing in contentEditable element', async () => {
+      const onStartQuestionnaire = vi.fn();
+
+      render(
+        <div>
+          <KeyboardShortcuts onStartQuestionnaire={onStartQuestionnaire} />
+        </div>
+      );
+
+      // Create a mock contentEditable element
+      const editable = document.createElement('div');
+      editable.contentEditable = 'true';
+      document.body.appendChild(editable);
+
+      // Dispatch event with contentEditable element as target
+      const event = new KeyboardEvent('keydown', {
+        key: 'enter',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      // Override target to be the contentEditable element
+      Object.defineProperty(event, 'target', {
+        value: editable,
+        writable: false,
+        configurable: true
+      });
+
+      document.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(onStartQuestionnaire).not.toHaveBeenCalled();
+
+      // Cleanup
+      document.body.removeChild(editable);
+    });
+
+    it('should handle null event target gracefully', () => {
+      render(<KeyboardShortcuts />);
+
+      // Dispatch event with null target
+      const event = new KeyboardEvent('keydown', {
+        key: 't',
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+
+      // Mock target as null
+      Object.defineProperty(event, 'target', { value: null, writable: false });
+
+      // Should not throw error
+      expect(() => {
+        document.dispatchEvent(event);
+      }).not.toThrow();
+    });
+
+    it('should not trigger when Ctrl without Shift for theme toggle', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}t{/Control}');
+
+      // Should not trigger without Shift
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger when Ctrl without Shift for text size increase', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}={/Control}');
+
+      // Should not trigger without Shift
+      expect(mockIncreaseTextSize).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger when Ctrl without Shift for text size decrease', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}-{/Control}');
+
+      // Should not trigger without Shift
+      expect(mockDecreaseTextSize).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger when Ctrl without Shift for text size reset', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}0{/Control}');
+
+      // Should not trigger without Shift
+      expect(mockResetTextSize).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger when Ctrl without Shift for home navigation', async () => {
+      const onGoHome = vi.fn();
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts onGoHome={onGoHome} />);
+
+      await user.keyboard('{Control>}h{/Control}');
+
+      // Should not trigger without Shift
+      expect(onGoHome).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger when Ctrl without Shift for results view', async () => {
+      const onViewResults = vi.fn();
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts onViewResults={onViewResults} />);
+
+      await user.keyboard('{Control>}r{/Control}');
+
+      // Should not trigger without Shift
+      expect(onViewResults).not.toHaveBeenCalled();
+    });
+
+    it('should ignore unrecognized Ctrl key combinations', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}{Shift>}z{/Shift}{/Control}');
+
+      // Should not crash or trigger any callbacks
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+      expect(mockIncreaseTextSize).not.toHaveBeenCalled();
+    });
+
+    it('should ignore unrecognized function keys', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{F4}');
+
+      // Should not crash
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+
+    it('should work with Meta key for Ctrl+Enter', async () => {
+      const onStartQuestionnaire = vi.fn();
+
+      render(<KeyboardShortcuts onStartQuestionnaire={onStartQuestionnaire} />);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'enter',
+        metaKey: true,
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(onStartQuestionnaire).toHaveBeenCalled();
+    });
+
+    it('should handle keys without Ctrl or Meta', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('t');
+
+      // Should not trigger anything without Ctrl/Meta
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Optional callbacks', () => {
+    it('should handle missing onStartQuestionnaire gracefully', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}{Enter}{/Control}');
+
+      // Should not crash when callback is undefined
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+
+    it('should handle missing onGoHome gracefully', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}{Shift>}h{/Shift}{/Control}');
+
+      // Should not crash when callback is undefined
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+
+    it('should handle missing onViewResults gracefully', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{Control>}{Shift>}r{/Shift}{/Control}');
+
+      // Should not crash when callback is undefined
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+
+    it('should handle missing onToggleTour gracefully', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{F1}');
+
+      // Should not crash when callback is undefined
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+
+    it('should handle missing onTogglePrivacy gracefully', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{F2}');
+
+      // Should not crash when callback is undefined
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+
+    it('should handle missing onToggleGuide gracefully', async () => {
+      const user = userEvent.setup();
+
+      render(<KeyboardShortcuts />);
+
+      await user.keyboard('{F3}');
+
+      // Should not crash when callback is undefined
+      expect(mockToggleTheme).not.toHaveBeenCalled();
+    });
+  });
 });
 
