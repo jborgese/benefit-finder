@@ -55,6 +55,10 @@ describe('App Component - Onboarding Modals', () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
     const tourButtons = screen.getAllByText((_content, element) => {
       if (!element) { return false; }
       return element.textContent === '🎯 Tour' || element.textContent.includes('Tour');
@@ -72,6 +76,10 @@ describe('App Component - Onboarding Modals', () => {
   it('should open privacy explainer when privacy button is clicked', async () => {
     const user = userEvent.setup();
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
 
     const privacyButtons = screen.getAllByText((_content, element) => {
       if (!element) { return false; }
@@ -91,6 +99,10 @@ describe('App Component - Onboarding Modals', () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
     const guideButtons = screen.getAllByText((_content, element) => {
       if (!element) { return false; }
       return element.textContent === '📖 Guide' || element.textContent.includes('Guide');
@@ -109,6 +121,10 @@ describe('App Component - Onboarding Modals', () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
     const shortcutsButtons = screen.getAllByText((_content, element) => {
       if (!element) { return false; }
       return element.textContent === '⌨️ navigation.shortcuts' || element.textContent.includes('navigation.shortcuts');
@@ -122,10 +138,14 @@ describe('App Component - Onboarding Modals', () => {
     }
   });
 
-  // TESTING MEMORY LEAK FIX: Re-enabled batch 4 - onboarding tests
+  // TESTING MEMORY LEAK FIX: Re-enabled batch 1 - onboarding modals
   it('should handle welcome tour completion', async () => {
     const user = userEvent.setup();
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
 
     // Open tour
     const tourButtons = screen.getAllByText((_content, element) => {
@@ -144,10 +164,14 @@ describe('App Component - Onboarding Modals', () => {
     expect(localStorage.getItem('bf-welcome-tour-completed')).toBeNull();
   });
 
-  // TESTING MEMORY LEAK FIX: Re-enabled batch 4 - onboarding tests
+  // TESTING MEMORY LEAK FIX: Re-enabled batch 1 - onboarding modals
   it('should handle quick start guide assessment start', async () => {
     const user = userEvent.setup();
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
 
     // Open guide
     const guideButtons = screen.getAllByText((_content, element) => {

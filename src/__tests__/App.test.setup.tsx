@@ -301,17 +301,17 @@ vi.mock('../components/results/exportUtils', () => ({
 
 vi.mock('../components/Routes', () => ({
   Routes: {
-    Home: vi.fn(({ onStartQuestionnaire }: { onStartQuestionnaire: () => void }) => (
+    Home: ({ onStartQuestionnaire }: { onStartQuestionnaire: () => void }) => (
       <div data-testid="home-page">
         <button type="button" aria-label="Start Assessment" role="button" onClick={onStartQuestionnaire}>Start Assessment</button>
       </div>
-    )),
-    Questionnaire: vi.fn(({ onComplete }: { onComplete: (answers: Record<string, unknown>) => void }) => (
+    ),
+    Questionnaire: ({ onComplete }: { onComplete: (answers: Record<string, unknown>) => void }) => (
       <div data-testid="questionnaire-page">
         <button type="button" aria-label="Complete" role="button" onClick={() => onComplete({})}>Complete</button>
       </div>
-    )),
-    Results: vi.fn(({ onNewAssessment, onImportResults }: {
+    ),
+    Results: ({ onNewAssessment, onImportResults }: {
       onNewAssessment: () => void;
       onImportResults: (results: unknown) => Promise<void>;
     }) => (
@@ -319,12 +319,18 @@ vi.mock('../components/Routes', () => ({
         <button type="button" aria-label="New Assessment" role="button" onClick={onNewAssessment}>New Assessment</button>
         <button type="button" aria-label="Import" role="button" onClick={() => void onImportResults({})}>Import</button>
       </div>
-    )),
-    Error: vi.fn(({ onGoHome }: { onGoHome: () => void }) => (
+    ),
+    Error: ({ onGoHome }: { onGoHome: () => void }) => (
       <div data-testid="error-page">
-        <button type="button" aria-label="Go Home" role="button" onClick={onGoHome}>Go Home</button>
+        <h2>Error</h2>
+        <button type="button" aria-label="Return to Home" role="button" onClick={onGoHome}>
+          Return to Home
+        </button>
+        <button type="button" aria-label="Refresh Page" role="button" onClick={() => window.location.reload()}>
+          Refresh Page
+        </button>
       </div>
-    )),
+    ),
   },
 }));
 
@@ -341,7 +347,17 @@ vi.mock('../pages/ResultsPage', () => ({
 }));
 
 vi.mock('../pages/ErrorPage', () => ({
-  ErrorPage: () => <div data-testid="error-page">Error Page</div>,
+  ErrorPage: ({ onGoHome }: { onGoHome: () => void }) => (
+    <div data-testid="error-page">
+      <h2>Error</h2>
+      <button type="button" aria-label="Return to Home" role="button" onClick={onGoHome}>
+        Return to Home
+      </button>
+      <button type="button" aria-label="Refresh Page" role="button" onClick={() => window.location.reload()}>
+        Refresh Page
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock('../components/RoutePreloader', () => ({

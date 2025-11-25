@@ -77,7 +77,12 @@ describe('App Component - Results Display', () => {
       error: null,
     });
 
-    render(<App />);
+    const { container } = render(<App />);
+
+    // Wait for app to initialize
+    await waitFor(() => {
+      expect(container.firstChild).toBeTruthy();
+    }, { timeout: 2000 });
 
     // Flush promises to ensure async operations complete
     await act(async () => {
@@ -115,7 +120,12 @@ describe('App Component - Results Display', () => {
       error: null,
     });
 
-    render(<App />);
+    const { container } = render(<App />);
+
+    // Wait for app to initialize
+    await waitFor(() => {
+      expect(container.firstChild).toBeTruthy();
+    }, { timeout: 2000 });
 
     // Wait for the initial async operations to complete (checkExistingResults)
     await waitFor(() => {

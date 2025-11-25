@@ -58,6 +58,10 @@ describe('App Component - Error Handling', () => {
 
     render(<App />);
 
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
     // The error should be handled gracefully - the app should still render
     expect(screen.getAllByText('BenefitFinder')).toHaveLength(3); // Should appear in 3 responsive breakpoints
 
@@ -73,9 +77,17 @@ describe('App Component - Error Handling', () => {
     // Use the existing mock instead of dynamic import
     const mockInitializeApp = vi.mocked(await import('../utils/initializeApp')).initializeApp;
     mockInitializeApp.mockResolvedValue(undefined);
-    vi.mocked(evaluateAllPrograms).mockRejectedValue(new Error('Evaluation error'));
+    vi.mocked(evaluateAllPrograms).mockRejectedValue(new Error('Database error'));
 
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Start Assessment' })).toBeInTheDocument();
+    }, { timeout: 2000 });
 
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
     await user.click(startButton);
@@ -91,8 +103,8 @@ describe('App Component - Error Handling', () => {
     await waitFor(() => {
       // Should either show error or return to a safe state
       const processingText = screen.queryByText('Processing Your Results');
-      const errorText = screen.queryByText('Go Home');
-      expect(processingText ?? errorText).toBeTruthy();
+      const errorButton = screen.queryByRole('button', { name: 'Return to Home' });
+      expect(processingText ?? errorButton).toBeTruthy();
     }, { timeout: 3000 });
   });
 
@@ -226,11 +238,15 @@ describe('App Component - Error Handling', () => {
   });
 
   // TESTING MEMORY LEAK FIX: Re-enabled batch 5 - error handling tests
-  it('should handle error boundary integration', () => {
+  it('should handle error boundary integration', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
     // This tests that the ErrorBoundary is properly integrated
-    expect(() => render(<App />)).not.toThrow();
+    const { container } = render(<App />);
+
+    await waitFor(() => {
+      expect(container.firstChild).toBeTruthy();
+    }, { timeout: 2000 });
 
     consoleSpy.mockRestore();
   });

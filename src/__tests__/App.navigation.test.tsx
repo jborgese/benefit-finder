@@ -54,6 +54,10 @@ describe('App Component - State Management and Navigation', () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Start Assessment' })).toBeInTheDocument();
+    }, { timeout: 2000 });
+
     // Start questionnaire
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
     await user.click(startButton);
@@ -155,6 +159,10 @@ describe('App Component - State Management and Navigation', () => {
     vi.mocked(initializeApp).mockRejectedValue(new Error('Database error'));
 
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Start Assessment' })).toBeInTheDocument();
+    }, { timeout: 2000 });
 
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
     await user.click(startButton);

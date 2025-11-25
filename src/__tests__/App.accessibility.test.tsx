@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
 
@@ -49,16 +49,24 @@ describe('App Component - Accessibility', () => {
     }
   });
 
-  it('should have proper ARIA labels on navigation buttons', () => {
+  it('should have proper ARIA labels on navigation buttons', async () => {
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
 
     const homeButton = screen.queryByRole('button', { name: 'navigation.home' });
     // Home button should not be visible when on home page
     expect(homeButton).not.toBeInTheDocument();
   });
 
-  it('should have live region for announcements', () => {
+  it('should have live region for announcements', async () => {
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
 
     // The LiveRegion component should be rendered
     // Note: LiveRegion might not render if there's no message
@@ -66,8 +74,12 @@ describe('App Component - Accessibility', () => {
     expect(document.body).toBeInTheDocument();
   });
 
-  it('should have proper ARIA labels on action buttons', () => {
+  it('should have proper ARIA labels on action buttons', async () => {
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Start Assessment' })).toBeInTheDocument();
+    }, { timeout: 2000 });
 
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
     expect(startButton).toBeInTheDocument();
@@ -76,12 +88,19 @@ describe('App Component - Accessibility', () => {
     expect(startButton).toHaveAttribute('aria-label', 'Start Assessment');
   });
 
-  it('should have proper ARIA labels on external links', () => {
+  it('should have proper ARIA labels on external links', async () => {
     render(<App />);
 
-    const frootsnoopsLink = screen.getByRole('link', { name: 'Visit frootsnoops.com - a frootsnoops site' });
-    expect(frootsnoopsLink).toBeInTheDocument();
-    expect(frootsnoopsLink).toHaveAttribute('aria-label', 'Visit frootsnoops.com - a frootsnoops site');
+    await waitFor(() => {
+      const frootsnoopsLinks = screen.getAllByRole('link', { name: 'Visit frootsnoops.com - a frootsnoops site' });
+      expect(frootsnoopsLinks.length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
+    const frootsnoopsLinks = screen.getAllByRole('link', { name: 'Visit frootsnoops.com - a frootsnoops site' });
+    frootsnoopsLinks.forEach(link => {
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('aria-label', 'Visit frootsnoops.com - a frootsnoops site');
+    });
   });
 });
 

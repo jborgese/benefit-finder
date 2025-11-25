@@ -15,18 +15,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
+import App from '../App';
 
 // Import mocks setup
 // (App.test.setup exports the mocks we import above; no side-effect import needed)
-
-let App: (typeof import('../App'))['default'];
-
-beforeEach(async () => {
-  ({ default: App } = await import('../App'));
-});
 
 describe('App Component - Integration', () => {
   beforeEach(() => {
@@ -60,7 +55,16 @@ describe('App Component - Integration', () => {
     }
   });
 
-  it('should import and render without errors', () => {
-    expect(() => render(<App />)).not.toThrow();
+  it('should import and render without errors', async () => {
+    // Simply render and verify the component mounts without throwing
+    const { container, debug } = render(<App />);
+
+    // Wait a bit for any async initialization
+    await waitFor(() => {
+      expect(container.firstChild).toBeTruthy();
+    }, { timeout: 2000 });
+
+    console.log('Container innerHTML:', container.innerHTML);
+    debug();
   });
 });
