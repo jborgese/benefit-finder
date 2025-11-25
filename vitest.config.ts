@@ -135,7 +135,11 @@ export default defineConfig({
 
     // Ensure React can be mocked (inline instead of externalized)
     deps: {
-      inline: ['react'],
+      optimizer: {
+        web: {
+          include: ['react'],
+        },
+      },
     },
   },
 });

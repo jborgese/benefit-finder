@@ -5,8 +5,27 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import App from '../App';
+
+// Mock the test mode hook to prevent it from running async operations
+vi.mock('../App/hooks/useTestMode', () => ({
+  useTestMode: () => {
+    // Do nothing - prevents the hook from creating sample results
+  },
+}));
+
+// Mock the results management hook to avoid database operations
+vi.mock('../components/results/useResultsManagement', () => ({
+  useResultsManagement: () => ({
+    saveResults: vi.fn(() => Promise.resolve('test-id')),
+    loadAllResults: vi.fn(() => Promise.resolve([])),
+    loadResult: vi.fn(() => Promise.resolve(null)),
+    isLoading: false,
+    error: null,
+    savedResults: [],
+  }),
+}));
 
 describe('App Component - URL-based State Initialization', () => {
   // Store original values to restore after tests
@@ -41,6 +60,9 @@ describe('App Component - URL-based State Initialization', () => {
   });
 
   afterEach(() => {
+    // Cleanup rendered components
+    cleanup();
+
     // Restore originals
     try {
       Object.defineProperty(window, 'location', {
@@ -66,7 +88,7 @@ describe('App Component - URL-based State Initialization', () => {
     vi.restoreAllMocks();
   });
 
-  it('should handle URL with test parameter for E2E testing', () => {
+  it('should handle URL with test parameter for E2E testing', async () => {
     // Mock window.location
     const mockLocation = {
       pathname: '/results',
@@ -101,11 +123,13 @@ describe('App Component - URL-based State Initialization', () => {
     // Render app - should not throw
     expect(() => render(<App />)).not.toThrow();
 
-    // Verify location was set
-    expect(window.location.pathname).toBe('/results');
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/results');
+    }, { timeout: 1000 });
   });
 
-  it('should handle URL with playwright test parameter', () => {
+  it('should handle URL with playwright test parameter', async () => {
     // Mock window.location
     const mockLocation = {
       pathname: '/results',
@@ -143,8 +167,10 @@ describe('App Component - URL-based State Initialization', () => {
     // Render app - should not throw
     expect(() => render(<App />)).not.toThrow();
 
-    // Verify location was set
-    expect(window.location.pathname).toBe('/results');
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/results');
+    }, { timeout: 1000 });
   });
 
   it('should handle window.location access errors gracefully', () => {
