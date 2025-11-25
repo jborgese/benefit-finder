@@ -25,7 +25,8 @@ describe('App Component - State Management and Navigation', () => {
     // Store original window.location before any test modifies it
     originalLocation = window.location;
 
-    vi.clearAllMocks();
+    // Avoid clearing all mocks (preserves baseline mocks from App.test.setup)
+    mockUseResultsManagement.mockReset();
     mockUseResultsManagement.mockImplementation(() => ({
       saveResults: vi.fn().mockResolvedValue(undefined),
       loadAllResults: vi.fn().mockResolvedValue([]),
@@ -54,9 +55,9 @@ describe('App Component - State Management and Navigation', () => {
 
     // Reset initializeApp mock to its default implementation
     const { initializeApp } = await import('../utils/initializeApp');
+    vi.mocked(initializeApp).mockClear();
     vi.mocked(initializeApp).mockResolvedValue(undefined);
 
-    vi.restoreAllMocks();
     vi.clearAllTimers();
   }); afterAll(async () => {
     try {

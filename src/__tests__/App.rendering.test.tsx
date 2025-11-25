@@ -19,7 +19,7 @@ beforeEach(async () => {
 
 describe('App Component - Rendering', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockUseResultsManagement.mockReset();
     mockUseResultsManagement.mockImplementation(() => ({
       saveResults: vi.fn().mockResolvedValue(undefined),
       loadAllResults: vi.fn().mockResolvedValue([]),
@@ -38,15 +38,13 @@ describe('App Component - Rendering', () => {
   });
 
   afterEach(async () => {
-    // Reset initializeApp mock to its default implementation
+    // Don't call vi.restoreAllMocks() - it interferes with our mock resets
     const { initializeApp } = await import('../utils/initializeApp');
+    vi.mocked(initializeApp).mockClear();
     vi.mocked(initializeApp).mockResolvedValue(undefined);
 
-    vi.restoreAllMocks();
     vi.clearAllTimers();
-  });
-
-  afterAll(async () => {
+  }); afterAll(async () => {
     try {
       await destroyDatabase();
     } catch (error) {

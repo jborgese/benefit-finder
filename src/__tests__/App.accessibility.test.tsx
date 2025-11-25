@@ -19,7 +19,7 @@ beforeEach(async () => {
 
 describe('App Component - Accessibility', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockUseResultsManagement.mockReset();
     mockUseResultsManagement.mockImplementation(() => ({
       saveResults: vi.fn().mockResolvedValue(undefined),
       loadAllResults: vi.fn().mockResolvedValue([]),
@@ -36,8 +36,15 @@ describe('App Component - Accessibility', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  afterEach(async () => {
+    const { initializeApp } = await import('../utils/initializeApp');
+    if (vi.isMockFunction(initializeApp)) {
+      vi.mocked(initializeApp).mockClear();
+      vi.mocked(initializeApp).mockResolvedValue(undefined);
+    }
+    if (console.warn && typeof (console.warn as any).mockRestore === 'function') {
+      (console.warn as any).mockRestore();
+    }
     vi.clearAllTimers();
   });
 
@@ -51,51 +58,37 @@ describe('App Component - Accessibility', () => {
 
   it('should have proper ARIA labels on navigation buttons', async () => {
     render(<App />);
-
     await waitFor(() => {
       expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
     }, { timeout: 2000 });
-
     const homeButton = screen.queryByRole('button', { name: 'navigation.home' });
-    // Home button should not be visible when on home page
     expect(homeButton).not.toBeInTheDocument();
   });
 
   it('should have live region for announcements', async () => {
     render(<App />);
-
     await waitFor(() => {
       expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
     }, { timeout: 2000 });
-
-    // The LiveRegion component should be rendered
-    // Note: LiveRegion might not render if there's no message
-    // This is a basic check that the component structure exists
     expect(document.body).toBeInTheDocument();
   });
 
   it('should have proper ARIA labels on action buttons', async () => {
     render(<App />);
-
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Start Assessment' })).toBeInTheDocument();
     }, { timeout: 2000 });
-
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
     expect(startButton).toBeInTheDocument();
-
-    // Check for proper aria-label attributes
     expect(startButton).toHaveAttribute('aria-label', 'Start Assessment');
   });
 
   it('should have proper ARIA labels on external links', async () => {
     render(<App />);
-
     await waitFor(() => {
       const frootsnoopsLinks = screen.getAllByRole('link', { name: 'Visit frootsnoops.com - a frootsnoops site' });
       expect(frootsnoopsLinks.length).toBeGreaterThan(0);
     }, { timeout: 2000 });
-
     const frootsnoopsLinks = screen.getAllByRole('link', { name: 'Visit frootsnoops.com - a frootsnoops site' });
     frootsnoopsLinks.forEach(link => {
       expect(link).toBeInTheDocument();

@@ -132,5 +132,10 @@ export default defineConfig({
     mockReset: true,
     restoreMocks: true,
     clearMocks: true,
+
+    // Ensure React can be mocked (inline instead of externalized)
+    deps: {
+      inline: ['react'],
+    },
   },
 });

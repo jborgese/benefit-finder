@@ -18,9 +18,32 @@ if (typeof process !== 'undefined') {
   process.env.VITEST = 'true';
 }
 
+// Import vi early to mock React before anything else pulls it in
+import { vi } from 'vitest';
+
+// Ensure React.lazy never suspends in tests to avoid
+// "A component suspended while responding to synchronous input" errors
+// when components are rendered during event handlers.
+vi.mock('react', async () => {
+  const actual = await vi.importActual<typeof import('react')>('react');
+  const mockedLazy = <T extends React.ComponentType<any>>(
+    _factory: () => Promise<{ default: T }>
+  ) => {
+    return (() => null) as unknown as T;
+  };
+  const mockedReact = { ...actual, lazy: mockedLazy } as typeof actual & { default?: unknown };
+  // Ensure default export also has lazy overridden (for `React.lazy` usage)
+  return {
+    ...mockedReact,
+    default: mockedReact as unknown as typeof actual,
+  };
+});
+
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, beforeAll, vi } from 'vitest';
+import { afterEach, beforeAll } from 'vitest';
+
+// (React.lazy override defined above before any React consumers)
 
 // CRITICAL: Mock database module at global setup level to prevent ANY RxDB initialization
 // This must happen before any test files import modules that use the database
@@ -534,8 +557,9 @@ function cleanupRxDB(): void {
 
 function cleanupModuleCache(): void {
   try {
-    // Clear all registered mocks to prevent stale references
-    vi.clearAllMocks();
+    // NOTE: Do NOT clear all mocks globally.
+    // Global vi.clearAllMocks() interferes with baseline mocks established in test setup modules
+    // and causes cross-file contamination. Per-file tests handle their own mock hygiene.
 
     // Reset store references to force fresh state on next access
     // This helps prevent stale closures and event listeners from accumulating

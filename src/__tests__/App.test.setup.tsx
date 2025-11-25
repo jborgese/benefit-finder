@@ -8,15 +8,19 @@ import { vi } from 'vitest';
 import type { RxDocument } from 'rxdb';
 import type { UserProfile } from '../db/schemas';
 
-// Provide a minimal non-suspending React.lazy mock so tests never hit Suspense fallbacks.
+// Mock React.lazy to return components directly without suspending
+// This prevents suspension errors during synchronous rendering in tests
 vi.mock('react', async () => {
   const actual = await vi.importActual<typeof import('react')>('react');
+  const mockedLazy = <T extends React.ComponentType<any>>(
+    _factory: () => Promise<{ default: T }>
+  ) => {
+    return (() => null) as unknown as T;
+  };
+  const mockedReact = { ...actual, lazy: mockedLazy } as typeof actual & { default?: unknown };
   return {
-    ...actual,
-    lazy: (_factory: unknown) => {
-      // Return a stable stub component (renders nothing, but never suspends)
-      return ((/* props */) => null) as any;
-    },
+    ...mockedReact,
+    default: mockedReact as unknown as typeof actual,
   };
 });
 
@@ -467,6 +471,26 @@ vi.mock('../contexts/ThemeContext', () => ({
 vi.mock('../contexts/TextSizeContext', () => ({
   // Provide a simple TextSizeProvider wrapper for tests that doesn't suspend
   TextSizeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+// Mock hooks that consume the above contexts so components using them don't throw
+vi.mock('../contexts/useTheme', () => ({
+  useTheme: () => ({
+    theme: 'light',
+    actualTheme: 'light',
+    setTheme: vi.fn(),
+    toggleTheme: vi.fn(),
+  }),
+}));
+
+vi.mock('../contexts/useTextSize', () => ({
+  useTextSize: () => ({
+    textSize: 'medium',
+    setTextSize: vi.fn(),
+    increaseTextSize: vi.fn(),
+    decreaseTextSize: vi.fn(),
+    resetTextSize: vi.fn(),
+  }),
 }));
 
 // Mock window.location

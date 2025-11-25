@@ -18,14 +18,18 @@ import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vites
 import { render, waitFor } from '@testing-library/react';
 import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation } from './App.test.setup';
-import App from '../App';
+let App: (typeof import('../App'))['default'];
+
+beforeEach(async () => {
+  ({ default: App } = await import('../App'));
+});
 
 // Import mocks setup
 // (App.test.setup exports the mocks we import above; no side-effect import needed)
 
 describe('App Component - Integration', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockUseResultsManagement.mockReset();
     mockUseResultsManagement.mockImplementation(() => ({
       saveResults: vi.fn().mockResolvedValue(undefined),
       loadAllResults: vi.fn().mockResolvedValue([]),
@@ -40,14 +44,26 @@ describe('App Component - Integration', () => {
     mockLocation.pathname = '/';
     mockLocation.hostname = 'localhost';
     vi.spyOn(console, 'warn').mockImplementation(() => { });
+    // Ensure initializeApp resolves immediately to avoid Suspense-related sync errors
+    // (App.test.setup provides a mock; here we reinforce its resolved value)
+    import('../utils/initializeApp').then(mod => {
+      if (vi.isMockFunction(mod.initializeApp)) {
+        vi.mocked(mod.initializeApp).mockResolvedValue(undefined);
+      }
+    });
   });
 
   afterEach(async () => {
-    // Reset initializeApp mock to its default implementation
+    // Don't call vi.restoreAllMocks() - it interferes with our mock resets
     const { initializeApp } = await import('../utils/initializeApp');
+    vi.mocked(initializeApp).mockClear();
     vi.mocked(initializeApp).mockResolvedValue(undefined);
+    // Restore console spies
+    if (console.warn && typeof (console.warn as any).mockRestore === 'function') {
+      (console.warn as any).mockRestore();
+    }
 
-    vi.restoreAllMocks();
+
     vi.clearAllTimers();
   });
 

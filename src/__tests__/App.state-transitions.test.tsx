@@ -68,7 +68,6 @@ beforeEach(async () => {
 });
 describe('App Component - State Transitions', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     mockUseResultsManagement.mockImplementation(() => ({
       saveResults: vi.fn().mockResolvedValue(undefined),
       loadAllResults: vi.fn().mockResolvedValue([]),
@@ -85,9 +84,18 @@ describe('App Component - State Transitions', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  afterEach(async () => {
+    // Avoid restoreAllMocks which removes baseline stub and other needed mocks
+    const { initializeApp } = await import('../utils/initializeApp');
+    if (vi.isMockFunction(initializeApp)) {
+      vi.mocked(initializeApp).mockClear();
+      vi.mocked(initializeApp).mockResolvedValue(undefined);
+    }
     vi.clearAllTimers();
+    // Restore console spies if present
+    if (console.warn && typeof (console.warn as any).mockRestore === 'function') {
+      (console.warn as any).mockRestore();
+    }
   });
 
   afterAll(async () => {

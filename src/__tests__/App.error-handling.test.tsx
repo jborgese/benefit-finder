@@ -9,9 +9,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { destroyDatabase } from '../db';
 import { mockUseResultsManagement, mockLocation, flushPromises } from './App.test.setup';
-
-// (App.test.setup exports the mocks we import above; no side-effect import needed)
-
 let App: (typeof import('../App'))['default'];
 
 beforeEach(async () => {
@@ -20,7 +17,7 @@ beforeEach(async () => {
 
 describe('App Component - Error Handling', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockUseResultsManagement.mockReset();
     mockUseResultsManagement.mockImplementation(() => ({
       saveResults: vi.fn().mockResolvedValue(undefined),
       loadAllResults: vi.fn().mockResolvedValue([]),
@@ -38,15 +35,43 @@ describe('App Component - Error Handling', () => {
   });
 
   afterEach(async () => {
-    // Reset initializeApp mock to its default implementation
+    // Don't call vi.restoreAllMocks() - it interferes with our mock resets
+    // Instead, explicitly reset the mocks we know about to their defaults
+
     const { initializeApp } = await import('../utils/initializeApp');
+    vi.mocked(initializeApp).mockClear();
     vi.mocked(initializeApp).mockResolvedValue(undefined);
+    // Restore console spies
+    if (console.warn && typeof (console.warn as any).mockRestore === 'function') {
+      (console.warn as any).mockRestore();
+    }
 
-    vi.restoreAllMocks();
+
+    const rules = await import('../rules');
+    if (vi.isMockFunction(rules.evaluateAllPrograms)) {
+      vi.mocked(rules.evaluateAllPrograms).mockClear();
+      vi.mocked(rules.evaluateAllPrograms).mockResolvedValue({
+        profileId: 'test-profile',
+        programResults: new Map(),
+        summary: {
+          total: 0,
+          eligible: 0,
+          ineligible: 0,
+          incomplete: 0,
+          needsReview: 0,
+        },
+        totalTime: 0,
+      });
+    }
+
+    const dbUtils = await import('../db/utils');
+    if (vi.isMockFunction(dbUtils.createUserProfile)) {
+      vi.mocked(dbUtils.createUserProfile).mockClear();
+      vi.mocked(dbUtils.createUserProfile).mockResolvedValue({} as any);
+    }
+
     vi.clearAllTimers();
-  });
-
-  afterAll(async () => {
+  }); afterAll(async () => {
     try {
       await destroyDatabase();
     } catch (error) {
@@ -56,41 +81,35 @@ describe('App Component - Error Handling', () => {
 
   // TESTING MEMORY LEAK FIX: Re-enabled batch 5 - error handling tests
   it('should handle database initialization errors', async () => {
-    // Use the existing mock instead of dynamic import
-    const mockInitializeApp = vi.mocked(await import('../utils/initializeApp')).initializeApp;
-    mockInitializeApp.mockRejectedValue(new Error('Database error'));
+    // Import and mock before rendering
+    const { initializeApp } = await import('../utils/initializeApp');
+    vi.mocked(initializeApp).mockRejectedValue(new Error('Database error'));
 
     render(<App />);
 
+    // Wait for the home page to render despite the error
     await waitFor(() => {
-      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('home-page')).toBeInTheDocument();
     }, { timeout: 2000 });
 
-    // The error should be handled gracefully - the app should still render
-    expect(screen.getAllByText('BenefitFinder')).toHaveLength(3); // Should appear in 3 responsive breakpoints
-
-    // The app should render successfully without crashing
-    expect(screen.getByRole('main')).toBeInTheDocument();
+    // Verify the app still renders (error is handled gracefully)
+    expect(screen.getByTestId('home-page')).toBeInTheDocument();
   });
 
   // TESTING MEMORY LEAK FIX: Re-enabled batch 5 - error handling tests
   it('should handle evaluation errors gracefully', async () => {
     const user = userEvent.setup();
     const { evaluateAllPrograms } = await import('../rules');
+    const { initializeApp } = await import('../utils/initializeApp');
 
-    // Use the existing mock instead of dynamic import
-    const mockInitializeApp = vi.mocked(await import('../utils/initializeApp')).initializeApp;
-    mockInitializeApp.mockResolvedValue(undefined);
-    vi.mocked(evaluateAllPrograms).mockRejectedValue(new Error('Database error'));
+    // Set up mocks before rendering
+    vi.mocked(initializeApp).mockResolvedValue(undefined);
+    vi.mocked(evaluateAllPrograms).mockRejectedValue(new Error('Evaluation error'));
 
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getAllByText('BenefitFinder').length).toBeGreaterThan(0);
-    }, { timeout: 2000 });
-
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Start Assessment' })).toBeInTheDocument();
+      expect(screen.getByTestId('home-page')).toBeInTheDocument();
     }, { timeout: 2000 });
 
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
@@ -103,106 +122,59 @@ describe('App Component - Error Handling', () => {
     const completeButton = screen.getByRole('button', { name: 'Complete' });
     await user.click(completeButton);
 
-    // Should handle error without crashing
+    // Should handle error and show error page
     await waitFor(() => {
-      // Should either show error or return to a safe state
-      const processingText = screen.queryByText('Processing Your Results');
-      const errorButton = screen.queryByRole('button', { name: 'Return to Home' });
-      expect(processingText ?? errorButton).toBeTruthy();
+      expect(screen.getByTestId('error-page')).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 
   // TESTING MEMORY LEAK FIX: Re-enabled batch 5 - error handling tests
   it('should handle database operations errors during questionnaire completion', async () => {
-    console.log('[TEST DEBUG] Test starting');
     const user = userEvent.setup();
     const { createUserProfile } = await import('../db/utils');
+    const { initializeApp } = await import('../utils/initializeApp');
 
-    // Use the existing mock instead of dynamic import
-    const mockInitializeApp = vi.mocked(await import('../utils/initializeApp')).initializeApp;
-    mockInitializeApp.mockResolvedValue(undefined);
-
-    // Mock createUserProfile to reject immediately - this should cause early return
-    // and prevent importRulesWithLogging from being called
-    const mockCreateUserProfile = vi.mocked(createUserProfile);
-    mockCreateUserProfile.mockRejectedValue(new Error('Database operation failed'));
-    console.log('[TEST DEBUG] Mocks set up');
+    // Set up mocks before rendering
+    vi.mocked(initializeApp).mockResolvedValue(undefined);
+    vi.mocked(createUserProfile).mockRejectedValue(new Error('Database operation failed'));
 
     render(<App />);
-    console.log('[TEST DEBUG] App rendered');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('home-page')).toBeInTheDocument();
+    }, { timeout: 2000 });
 
     const startButton = screen.getByRole('button', { name: 'Start Assessment' });
-    console.log('[TEST DEBUG] About to click start button');
     await user.click(startButton);
-    console.log('[TEST DEBUG] Start button clicked');
 
     await waitFor(() => {
       expect(screen.getByTestId('questionnaire-page')).toBeInTheDocument();
     }, { timeout: 2000 });
-    console.log('[TEST DEBUG] Questionnaire page appeared');
 
     const completeButton = screen.getByRole('button', { name: 'Complete' });
-    console.log('[TEST DEBUG] About to click complete button');
-
-    // Click complete - this triggers handleCompleteQuestionnaire which will fail
     await user.click(completeButton);
-    console.log('[TEST DEBUG] Complete button clicked, waiting for error handling');
 
-    // Give a moment for the async error handling to complete
-    // Use flushPromises instead of setTimeout to avoid timer leaks
+    // Wait for error handling
     await flushPromises();
-    console.log('[TEST DEBUG] After flushPromises, checking mocks');
 
-    // Verify createUserProfile was called (which should have failed)
-    // This should happen immediately after the click
-    expect(mockCreateUserProfile).toHaveBeenCalled();
-    console.log('[TEST DEBUG] createUserProfile was called (verified)');
+    // Verify createUserProfile was called
+    expect(vi.mocked(createUserProfile)).toHaveBeenCalled();
 
-    // Debug: Check what's currently rendered
-    const errorPageBeforeWait = screen.queryByTestId('error-page');
-    const resultsPageBeforeWait = screen.queryByTestId('results-page');
-    const questionnairePageBeforeWait = screen.queryByTestId('questionnaire-page');
-    console.log('[TEST DEBUG] Before waitFor - Error page:', !!errorPageBeforeWait, 'Results page:', !!resultsPageBeforeWait, 'Questionnaire page:', !!questionnairePageBeforeWait);
-
-    // Wait for error page to appear - the error state should be set synchronously in the catch block
-    // Add debug logging to track retries
-    let waitForRetryCount = 0;
-    const waitForStartTime = Date.now();
-
-    console.log('[TEST DEBUG] Starting waitFor for error page');
+    // Should show error page
     await waitFor(() => {
-      waitForRetryCount++;
-      const errorPage = screen.queryByTestId('error-page');
-      const resultsPage = screen.queryByTestId('results-page');
-      const questionnairePage = screen.queryByTestId('questionnaire-page');
+      expect(screen.getByTestId('error-page')).toBeInTheDocument();
+    }, { timeout: 2000 });
+  });
 
-      // Log every 10th retry to avoid spam
-      if (waitForRetryCount % 10 === 0 || waitForRetryCount === 1) {
-        const elapsed = Date.now() - waitForStartTime;
-        console.log(`[TEST DEBUG] waitFor retry #${waitForRetryCount}, elapsed: ${elapsed}ms, Error page: ${!!errorPage}, Results: ${!!resultsPage}, Questionnaire: ${!!questionnairePage}`);
-      }
-
-      // If we've been retrying for a while and no error page, log more details
-      if (!errorPage && waitForRetryCount > 20) {
-        const allTestIds = screen.queryAllByTestId(/.*/);
-        console.log(`[TEST DEBUG] waitFor retry #${waitForRetryCount} - All test IDs found:`, allTestIds.map(el => el.getAttribute('data-testid')));
-      }
-
-      expect(errorPage).toBeInTheDocument();
-    }, { timeout: 2000, interval: 50 });
-
-    const totalElapsed = Date.now() - waitForStartTime;
-    console.log(`[TEST DEBUG] waitFor completed after ${waitForRetryCount} retries, total elapsed: ${totalElapsed}ms`);
-    console.log('[TEST DEBUG] Test completing');
-  }, 5000); // Set test timeout to 5 seconds - should complete much faster
-
-  // SKIPPED: This test causes a persistent memory leak (27+ seconds hang).
-  // Similar to other tests that render App and wait for async operations, this test
-  // triggers cleanup issues that cause the test to hang in afterEach. Skip until root cause is resolved.
   // TESTING MEMORY LEAK FIX: Re-enabled batch 6 - results display tests
   it('should handle import results errors', async () => {
     const mockSaveResults = vi.fn().mockRejectedValue(new Error('Save failed'));
     const mockLoadAllResults = vi.fn().mockResolvedValue([]);
+    const { initializeApp } = await import('../utils/initializeApp');
+
+    // Set up mocks before rendering
+    vi.mocked(initializeApp).mockResolvedValue(undefined);
+
     const mockResults = {
       qualified: [{ programId: 'test-program' }],
       maybe: [],
@@ -243,6 +215,9 @@ describe('App Component - Error Handling', () => {
 
   // TESTING MEMORY LEAK FIX: Re-enabled batch 5 - error handling tests
   it('should handle error boundary integration', async () => {
+    const { initializeApp } = await import('../utils/initializeApp');
+    vi.mocked(initializeApp).mockResolvedValue(undefined);
+
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
     // This tests that the ErrorBoundary is properly integrated

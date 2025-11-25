@@ -13,7 +13,8 @@ import { mockUseResultsManagement, mockLocation } from './App.test.setup';
 
 describe('App Component - Helper Functions', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Preserve baseline mocks; only reset the results management hook
+    mockUseResultsManagement.mockReset();
     mockUseResultsManagement.mockImplementation(() => ({
       saveResults: vi.fn().mockResolvedValue(undefined),
       loadAllResults: vi.fn().mockResolvedValue([]),
@@ -30,8 +31,18 @@ describe('App Component - Helper Functions', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  afterEach(async () => {
+    // Avoid restoring all mocks (would remove baseline stubs)
+    // Ensure initializeApp remains resolved for subsequent tests
+    const { initializeApp } = await import('../utils/initializeApp');
+    if (vi.isMockFunction(initializeApp)) {
+      vi.mocked(initializeApp).mockClear();
+      vi.mocked(initializeApp).mockResolvedValue(undefined);
+    }
+    // Restore console spy if applied
+    if (console.warn && typeof (console.warn as any).mockRestore === 'function') {
+      (console.warn as any).mockRestore();
+    }
     vi.clearAllTimers();
   });
 
