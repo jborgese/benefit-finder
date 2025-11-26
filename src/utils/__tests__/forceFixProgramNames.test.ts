@@ -119,43 +119,61 @@ describe('forceFixProgramNames', () => {
 
   it('should handle clearDatabase errors and throw', async () => {
     // Arrange
-    vi.mocked(db.clearDatabase).mockImplementation(() => Promise.reject(new Error('Database clear failed')));
+    const handler = (e: PromiseRejectionEvent) => e.preventDefault();
+    window.addEventListener('unhandledrejection', handler);
+    const nodeHandler = () => {};
+    // @ts-expect-error Node process may not exist in jsdom
+    if (typeof process !== 'undefined' && process.on) {
+      // @ts-expect-error types for process
+      process.on('unhandledRejection', nodeHandler);
+    }
+    try {
+    vi.mocked(db.clearDatabase).mockRejectedValue(new Error('Database clear failed'));
 
     // Act & Assert
-    let thrownError: Error | null = null;
-    try {
-      const promise = forceFixProgramNames();
-      await vi.runAllTimersAsync();
-      await promise;
-    } catch (error) {
-      thrownError = error as Error;
-    }
-
-    expect(thrownError).toBeInstanceOf(Error);
-    expect(thrownError?.message).toBe('Database clear failed');
+    await expect(forceFixProgramNames()).rejects.toThrow('Database clear failed');
     expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', expect.any(Error));
     expect(ruleDiscovery.discoverAndSeedAllRules).not.toHaveBeenCalled();
+    } finally {
+      window.removeEventListener('unhandledrejection', handler);
+      // @ts-expect-error types for process
+      if (typeof process !== 'undefined' && process.off) {
+        // @ts-expect-error types for process
+        process.off('unhandledRejection', nodeHandler);
+      }
+    }
   });
 
   it('should handle discoverAndSeedAllRules errors and throw', async () => {
     // Arrange
-    vi.mocked(db.clearDatabase).mockResolvedValue();
-    vi.mocked(ruleDiscovery.discoverAndSeedAllRules).mockImplementation(() => Promise.reject(new Error('Discovery failed')));
-
-    // Act & Assert
-    let thrownError: Error | null = null;
-    try {
-      const promise = forceFixProgramNames();
-      await vi.runAllTimersAsync();
-      await promise;
-    } catch (error) {
-      thrownError = error as Error;
+    const handler = (e: PromiseRejectionEvent) => e.preventDefault();
+    window.addEventListener('unhandledrejection', handler);
+    const nodeHandler = () => {};
+    // @ts-expect-error Node process may not exist in jsdom
+    if (typeof process !== 'undefined' && process.on) {
+      // @ts-expect-error types for process
+      process.on('unhandledRejection', nodeHandler);
     }
+    try {
+      vi.mocked(db.clearDatabase).mockResolvedValue();
+      vi.mocked(ruleDiscovery.discoverAndSeedAllRules).mockRejectedValue(new Error('Discovery failed'));
 
-    expect(thrownError).toBeInstanceOf(Error);
-    expect(thrownError?.message).toBe('Discovery failed');
+    // Act
+    const p = forceFixProgramNames();
+    await vi.runAllTimersAsync();
+
+    // Assert
+    await expect(p).rejects.toThrow('Discovery failed');
     expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', expect.any(Error));
     expect(db.clearDatabase).toHaveBeenCalledTimes(1);
+    } finally {
+      window.removeEventListener('unhandledrejection', handler);
+      // @ts-expect-error types for process
+      if (typeof process !== 'undefined' && process.off) {
+        // @ts-expect-error types for process
+        process.off('unhandledRejection', nodeHandler);
+      }
+    }
   });
 
   it('should wait 1000ms between clearing and reinitializing', async () => {

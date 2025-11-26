@@ -3,6 +3,10 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { MedicaidExplanation } from '../MedicaidExplanation';
 import type { EligibilityStatus } from '../types';
 import * as Dialog from '@radix-ui/react-dialog';
+// Ensure i18n returns keys for predictable assertions
+vi.mock('../../i18n/hooks', () => ({
+  useI18n: () => ({ t: (k: string) => k })
+}));
 
 // Mock SpecificReasonsSection to avoid dependency complexity
 vi.mock('../SpecificReasonsSection', () => ({
