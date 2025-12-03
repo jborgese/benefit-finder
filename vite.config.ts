@@ -28,35 +28,42 @@ export default defineConfig({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         // Manual chunking to optimize bundle sizes
-        manualChunks: {
+        manualChunks: (id) => {
           // Vendor chunks for better caching
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-rxdb': ['rxdb', 'dexie'],
-          'vendor-ui': ['zustand', 'zod'],
-          'vendor-i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
-          'vendor-logic': ['json-logic-js'],
-          'vendor-crypto': ['crypto-js', 'nanoid'],
-          // Feature-based chunks
-          'rules': [
-            './src/rules/index.ts',
-            './src/rules/core/evaluator.ts',
-            './src/rules/dynamic-loader.ts'
-          ],
-          'database': [
-            './src/db/database.ts',
-            './src/db/utils.ts',
-            './src/db/schemas.ts'
-          ],
-          'components-results': [
-            './src/components/results/index.ts',
-            './src/components/results/ResultsSummary.tsx',
-            './src/components/results/ProgramCard.tsx'
-          ],
-          'components-questionnaire': [
-            './src/questionnaire/index.ts',
-            './src/questionnaire/ui/EnhancedQuestionnaire.tsx',
-            './src/questionnaire/flow-engine.ts'
-          ]
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('rxdb') || id.includes('dexie')) {
+              return 'vendor-rxdb';
+            }
+            if (id.includes('zustand') || id.includes('zod')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('i18next') || id.includes('react-i18next') || id.includes('i18next-browser-languagedetector')) {
+              return 'vendor-i18n';
+            }
+            if (id.includes('json-logic-js')) {
+              return 'vendor-logic';
+            }
+            if (id.includes('crypto-js') || id.includes('nanoid')) {
+              return 'vendor-crypto';
+            }
+          }
+          
+          // Feature-based chunks - use dynamic detection to avoid circular dependencies
+          if (id.includes('/src/rules/') && !id.includes('node_modules')) {
+            return 'rules';
+          }
+          if (id.includes('/src/db/') && !id.includes('node_modules')) {
+            return 'database';
+          }
+          if (id.includes('/src/components/results/') && !id.includes('node_modules')) {
+            return 'components-results';
+          }
+          if (id.includes('/src/questionnaire/') && !id.includes('node_modules')) {
+            return 'components-questionnaire';
+          }
         }
       }
     },
