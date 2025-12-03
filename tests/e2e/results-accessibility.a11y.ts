@@ -25,11 +25,12 @@ test.describe('Results Accessibility', () => {
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();
 
-    // Log violations for debugging
+    // Log violations with per-issue tagging
     if (accessibilityScanResults.violations.length > 0) {
       console.log('Accessibility violations found:');
       accessibilityScanResults.violations.forEach(violation => {
         console.log(`- ${violation.id}: ${violation.description}`);
+        console.log(`  Tags: ${violation.tags ? violation.tags.join(', ') : 'none'}`);
         console.log(`  Elements affected: ${violation.nodes.length}`);
       });
     }

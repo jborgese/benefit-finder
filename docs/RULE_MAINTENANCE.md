@@ -571,6 +571,397 @@ State rules should:
 
 ---
 
+## Rule Maintenance Checklist Template
+
+Use this comprehensive checklist when adding or updating benefit program rules to ensure consistency, accuracy, and completeness.
+
+### 📋 New Rule Set Checklist
+
+**Program Information**
+- [ ] Program name clearly defined (e.g., "SNAP", "Medicaid", "WIC")
+- [ ] Jurisdiction specified (e.g., "US-CA", "US-GA", "US-Federal")
+- [ ] Effective year identified (e.g., 2025)
+- [ ] Program ID follows naming convention (e.g., `snap-federal-gross-income`)
+
+**Research & Documentation**
+- [ ] Official program website reviewed
+- [ ] Current eligibility requirements documented
+- [ ] Income thresholds verified (if applicable)
+- [ ] Asset limits verified (if applicable)
+- [ ] Categorical eligibility rules identified
+- [ ] Special exemptions/waivers documented
+- [ ] State-specific variations researched (if applicable)
+
+**Citations & Sources**
+- [ ] At least one authoritative citation added
+- [ ] Citation includes program name/regulation number
+- [ ] Citation includes URL to official source
+- [ ] Citation includes access/retrieval date
+- [ ] Legal references added (e.g., CFR citations, state statutes)
+- [ ] Backup sources documented (in case primary source changes)
+- [ ] Citations validated with `node scripts/check-citations.js`
+
+**Example Citations:**
+```json
+"citations": [
+  {
+    "title": "SNAP Eligibility Requirements",
+    "url": "https://www.fns.usda.gov/snap/recipient/eligibility",
+    "legalReference": "7 CFR § 273.9",
+    "date": "2025-01-18",
+    "notes": "Federal gross income limit: 130% FPL"
+  },
+  {
+    "title": "Federal Poverty Guidelines 2025",
+    "url": "https://aspe.hhs.gov/2025-poverty-guidelines",
+    "date": "2025-01-18",
+    "notes": "FPL base: $15,541 for 1 person"
+  }
+]
+```
+
+**Rule Logic Implementation**
+- [ ] Rule logic implemented using json-logic-js syntax
+- [ ] Variables clearly named (use snake_case)
+- [ ] Numeric thresholds accurate and current
+- [ ] Boolean conditions properly structured
+- [ ] Complex conditions broken into readable sub-rules
+- [ ] Edge cases handled (e.g., zero income, very large households)
+- [ ] Rule logic tested manually with sample data
+
+**Metadata**
+- [ ] Rule ID unique and descriptive
+- [ ] Version number assigned (start at 1.0.0)
+- [ ] Effective date set (Unix timestamp)
+- [ ] Expiration date set (if known) or null
+- [ ] Description clearly explains what rule checks
+- [ ] Tags added for categorization (e.g., ["income", "federal", "snap"])
+- [ ] Author/creator documented
+
+**Required Documents**
+- [ ] List of required documents complete
+- [ ] Documents match official requirements
+- [ ] Documents described in plain language
+- [ ] State-specific documents included (if applicable)
+
+**Next Steps & Application Info**
+- [ ] Application method documented
+- [ ] Application URL provided (if online application exists)
+- [ ] Phone numbers included (if applicable)
+- [ ] Office locations referenced (if in-person required)
+- [ ] Estimated processing time noted (if known)
+
+**Test Cases**
+- [ ] At least 3 test cases created (pass, fail, boundary)
+- [ ] Boundary conditions tested (exactly at threshold)
+- [ ] Edge cases covered (e.g., household size = 1, 8+)
+- [ ] Real-world scenarios validated
+- [ ] Expected results documented for each test
+- [ ] Test descriptions are clear and specific
+
+**Example Test Cases:**
+```json
+"tests": [
+  {
+    "id": "test-eligible-below-limit",
+    "description": "4-person household well below income limit",
+    "input": {
+      "householdIncome": 4000,
+      "householdSize": 4,
+      "citizenship": true
+    },
+    "expected": true,
+    "tags": ["pass", "typical"]
+  },
+  {
+    "id": "test-ineligible-above-limit",
+    "description": "2-person household above income limit",
+    "input": {
+      "householdIncome": 5000,
+      "householdSize": 2,
+      "citizenship": true
+    },
+    "expected": false,
+    "tags": ["fail", "above-threshold"]
+  },
+  {
+    "id": "test-boundary-exact-limit",
+    "description": "3-person household at exact income limit",
+    "input": {
+      "householdIncome": 5952,
+      "householdSize": 3,
+      "citizenship": true
+    },
+    "expected": true,
+    "tags": ["boundary", "edge-case"]
+  }
+]
+```
+
+**Schema Validation**
+- [ ] Rule validates against schema using `npm run validate-rules`
+- [ ] All required fields present
+- [ ] Field types correct (string, number, boolean, array, object)
+- [ ] No validation errors or warnings
+
+**Integration Testing**
+- [ ] Rule loads correctly in application
+- [ ] Rule appears in questionnaire flow (if applicable)
+- [ ] Results display correctly
+- [ ] Explanation text renders properly
+- [ ] Links/URLs are clickable and correct
+
+**Comparison & Verification**
+- [ ] Results compared to official eligibility calculator (if available)
+- [ ] Test cases validated against official examples
+- [ ] Cross-checked with state/federal policy manuals
+- [ ] Reviewed by subject matter expert (if possible)
+
+**Version Control**
+- [ ] Rule file added to `src/rules/examples/` directory
+- [ ] File named consistently (e.g., `snap-california-rules.json`)
+- [ ] Git commit message describes what was added
+- [ ] Branch created for new rule set (if using Git Flow)
+
+---
+
+### 🔄 Rule Update Checklist
+
+**Change Identification**
+- [ ] Change identified (policy update, FPL increase, correction)
+- [ ] Effective date of change determined
+- [ ] Source of change documented (law, regulation, policy memo)
+- [ ] Scope of change assessed (affects how many rules?)
+
+**Research & Verification**
+- [ ] Official announcement/documentation obtained
+- [ ] New thresholds/criteria verified from multiple sources
+- [ ] Change confirmed to be active (not proposed)
+- [ ] State vs. federal change clarified
+
+**Rule Modification**
+- [ ] Rule logic updated with new values/conditions
+- [ ] Version number incremented appropriately:
+  - [ ] Patch (X.X.1) for threshold updates
+  - [ ] Minor (X.1.0) for new criteria/exemptions
+  - [ ] Major (2.0.0) for breaking changes
+- [ ] Effective date updated
+- [ ] Expiration date set for old rule (if replacing)
+- [ ] `supersedes` field added (referencing old rule ID)
+
+**Changelog**
+- [ ] Changelog entry added to rule
+- [ ] Version, date, and author specified
+- [ ] Clear description of what changed
+- [ ] Breaking change flag set (true/false)
+
+**Example Changelog Entry:**
+```json
+{
+  "changelog": [
+    {
+      "version": { "major": 1, "minor": 0, "patch": 1 },
+      "date": 1737244800000,
+      "author": "Your Name",
+      "description": "Updated gross income limit from $1923 to $1984 per person to reflect 2025 Federal Poverty Guidelines (3.2% increase)",
+      "breaking": false
+    }
+  ]
+}
+```
+
+**Citations Update**
+- [ ] New citations added for policy change
+- [ ] Citation dates updated
+- [ ] Old citations marked as historical (if applicable)
+- [ ] Legal references updated if regulation changed
+
+**Test Cases Update**
+- [ ] Existing test cases updated with new thresholds
+- [ ] New test cases added for new conditions (if applicable)
+- [ ] Boundary test values recalculated
+- [ ] All tests pass with new rule logic
+
+**Validation & Testing**
+- [ ] Schema validation passes (`npm run validate-rules`)
+- [ ] Citations check passes (`node scripts/check-citations.js`)
+- [ ] All embedded tests pass
+- [ ] Manual testing with sample scenarios
+- [ ] Compared results to official calculator (if available)
+
+**Regression Testing**
+- [ ] Related rules still work correctly
+- [ ] No unintended side effects introduced
+- [ ] Application still runs without errors
+- [ ] Results page displays correctly
+
+**Documentation**
+- [ ] Maintenance log updated with change details
+- [ ] README updated (if needed)
+- [ ] User-facing documentation updated (if eligibility criteria changed significantly)
+- [ ] Developer notes added (if complex change)
+
+**Version Control & Release**
+- [ ] Changes committed to version control
+- [ ] Commit message follows convention (e.g., "fix(snap): Update 2025 FPL thresholds")
+- [ ] Pull request created (if using PR workflow)
+- [ ] Code reviewed (if team process)
+- [ ] Tagged release created (e.g., `v1.1.0-snap-federal-2025`)
+- [ ] Release notes written
+
+**Distribution**
+- [ ] Rule package created (if distributing separately)
+- [ ] Checksum calculated for integrity verification
+- [ ] Package tested on target devices (if applicable)
+- [ ] Stakeholders notified of update
+
+---
+
+### 🔍 Annual Review Checklist (January)
+
+Use this checklist every January for Federal Poverty Level updates:
+
+**FPL Research**
+- [ ] Check HHS ASPE website for new FPL guidelines (usually mid-January)
+- [ ] Confirm FPL effective date
+- [ ] Document percent increase from prior year
+- [ ] Download official FPL table/PDF for reference
+
+**Programs to Update**
+- [ ] SNAP (130% FPL gross income, 100% FPL net income)
+- [ ] Medicaid (varies by state, typically 138% FPL for expansion states)
+- [ ] WIC (185% FPL in most states)
+- [ ] LIHEAP (150% FPL federal baseline, states vary)
+- [ ] CHIP (varies by state, typically 200-300% FPL)
+- [ ] Weatherization Assistance (200% FPL)
+- [ ] Free/Reduced School Meals (130%/185% FPL)
+
+**Calculation Updates**
+- [ ] Update base FPL amounts for each household size
+- [ ] Recalculate all percentage-based thresholds (130%, 185%, etc.)
+- [ ] Update monthly income limits
+- [ ] Update annual income limits
+- [ ] Verify calculations with official calculator
+
+**Multi-State Updates**
+- [ ] Update federal baseline rules
+- [ ] Check if any states have different FPL percentages
+- [ ] Update state-specific rules that reference FPL
+- [ ] Document which states differ from federal
+
+**Testing**
+- [ ] Test all FPL-dependent rules
+- [ ] Verify boundary conditions with new thresholds
+- [ ] Compare results to official calculators for each program
+- [ ] Run full test suite
+
+**Documentation**
+- [ ] Update all citations with 2025 FPL reference
+- [ ] Update changelog for each affected rule
+- [ ] Create summary document of all FPL-related changes
+- [ ] Update maintenance log
+
+---
+
+### ✅ Pre-Release Checklist
+
+Before releasing any rule updates, verify:
+
+**Quality Assurance**
+- [ ] All validation checks pass
+- [ ] All tests pass (unit, integration, E2E if applicable)
+- [ ] Citations present and verified
+- [ ] No console errors when rules load
+- [ ] Performance acceptable (rules load in <100ms)
+
+**Documentation**
+- [ ] Changelog complete for all changes
+- [ ] Version numbers correct
+- [ ] Release notes drafted
+- [ ] Migration guide written (if breaking changes)
+
+**Testing**
+- [ ] Tested in development environment
+- [ ] Tested with actual benefit scenarios
+- [ ] Peer reviewed (if possible)
+- [ ] Validated against official sources
+
+**Compliance**
+- [ ] No personal identifiable information (PII) in test cases
+- [ ] Privacy-preserving (offline-first maintained)
+- [ ] Open source license compliance
+- [ ] Accessibility requirements met (if UI changes)
+
+**Distribution Readiness**
+- [ ] Git repository up-to-date
+- [ ] Tagged release created
+- [ ] Package files generated (if applicable)
+- [ ] Checksum/signature created for integrity
+- [ ] Distribution channels identified
+
+---
+
+### 📝 Maintenance Log Template
+
+Keep a running log of all rule maintenance activities:
+
+```markdown
+## Rule Maintenance Log
+
+### 2025-01-18: SNAP Federal FPL Update
+**Program**: SNAP (Federal)
+**Change Type**: Annual FPL Update
+**Version**: 1.0.0 → 1.0.1
+**Effective Date**: January 18, 2025
+**Updated By**: Your Name
+
+**Changes Made**:
+- Updated gross income limit from $1923 to $1984 per person (130% FPL)
+- Updated net income limit from $1480 to $1526 per person (100% FPL)
+- Updated all test cases with new thresholds
+
+**Sources**:
+- [HHS 2025 Poverty Guidelines](https://aspe.hhs.gov/2025-poverty-guidelines)
+- [USDA SNAP FY2025 Update](https://www.fns.usda.gov/snap/fy2025)
+
+**Testing**:
+- ✅ Schema validation passed
+- ✅ All 12 test cases passed
+- ✅ Verified against USDA SNAP calculator
+- ✅ Citations check passed
+
+**Notes**: 3.2% increase from 2024. All 50 states + DC updated.
+
+---
+
+### 2025-03-15: Georgia Medicaid Expansion
+**Program**: Medicaid (Georgia)
+**Change Type**: State Policy Change
+**Version**: 1.0.0 → 2.0.0 (breaking change)
+**Effective Date**: April 1, 2025
+**Updated By**: Your Name
+
+**Changes Made**:
+- Added Medicaid expansion eligibility for adults (138% FPL)
+- Created new rule set for expansion population
+- Updated GA-specific Medicaid rules
+
+**Sources**:
+- [Georgia Department of Community Health](https://dch.georgia.gov/medicaid-expansion)
+- Georgia HB 150 (2025 Session)
+
+**Testing**:
+- ✅ New test cases created for expansion population
+- ✅ Compared to Healthcare.gov eligibility screener
+- ✅ All 18 test cases passed
+
+**Notes**: Major policy change. Marks first Medicaid expansion in Georgia. Work requirements apply for some enrollees.
+
+---
+```
+
+---
+
 ## Contact & Support
 
 For questions about rule maintenance:
@@ -580,5 +971,5 @@ For questions about rule maintenance:
 
 ---
 
-**Remember**: Keeping rules up-to-date is critical for providing accurate benefit information. Set up a sustainable maintenance process and stick to it.
+**Remember**: Keeping rules up-to-date is critical for providing accurate benefit information. Set up a sustainable maintenance process and stick to it. Use these checklists to ensure nothing is overlooked.
 
