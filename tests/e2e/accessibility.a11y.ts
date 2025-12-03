@@ -16,6 +16,25 @@ import {
 } from './utils/accessibility';
 
 test.describe('Accessibility', () => {
+    test.describe('State/County Selector Accessibility', () => {
+      test('should have no accessibility violations on state/county selector', async ({ page }) => {
+        // Go to state/county selector page (adjust route if needed)
+        await page.goto('/?step=location');
+
+        // Run axe accessibility scan
+        const { runA11yScan } = require('./utils/accessibility');
+        const results = await runA11yScan(page, { tags: ['wcag2a', 'wcag2aa', 'wcag21aa'] });
+        if (results.violations.length > 0) {
+          console.log('Accessibility violations found on state/county selector:');
+          results.violations.forEach(v => {
+            console.log(`- ${v.id}: ${v.description}`);
+            console.log(`  Tags: ${v.tags ? v.tags.join(', ') : 'none'}`);
+            console.log(`  Elements affected: ${v.nodes.length}`);
+          });
+        }
+        expect(results.violations).toEqual([]);
+      });
+    });
   test.describe('WCAG Compliance', () => {
     test('homepage should have no accessibility violations', async ({ page }) => {
       await page.goto('/');

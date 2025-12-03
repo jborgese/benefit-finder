@@ -115,6 +115,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
           <Progress.Root
             className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-secondary-700 z-0"
             value={progressPercent}
+            aria-label="Question progress"
           >
             <Progress.Indicator
               className="h-full bg-blue-500 transition-all duration-300 ease-in-out relative z-0"
@@ -321,7 +322,7 @@ export const QuestionBreadcrumb: React.FC<{
               )}
 
               {isCurrentQuestion ? (
-                <span className="text-gray-700 dark:text-secondary-200 font-medium">
+                <span className="text-gray-700 dark:text-secondary-200 font-medium" aria-current="page">
                   Question {questionNumber}
                 </span>
               ) : (

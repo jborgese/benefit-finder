@@ -1,0 +1,2 @@
+# Automate FPL/income threshold refresh nightly
+0 2 * * * /bin/bash /home/frootlab/Documents/GitHub/benefit-finder/scripts/refresh-fpl-thresholds.sh

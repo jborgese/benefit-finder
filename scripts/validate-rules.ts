@@ -159,10 +159,11 @@ function validatePackageStructure(pkg: RulePackage, filepath: string): Validatio
       ruleIds.add(rule.id);
     });
 
-    // Check for missing citations
+    // Check for missing or empty citations (block as error)
     pkg.rules.forEach((rule: RuleDefinition) => {
       if (!rule.citations || rule.citations.length === 0) {
-        report.warnings.push(`Rule ${rule.id} has no citations`);
+        report.errors.push(`Rule ${rule.id} has no citations`);
+        report.valid = false;
       }
     });
 

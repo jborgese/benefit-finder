@@ -2,7 +2,12 @@
  * App initialization utilities
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { initializeDatabase, getDatabase, clearDatabase } from '../db';
+import { initializeOptimizedDatabase, destroyOptimizedDatabase } from '../db/optimized-database';
+import { initializeUltraOptimizedDatabase, destroyUltraOptimizedDatabase } from '../db/ultra-optimized-database';
+import { performance } from 'node:perf_hooks';
 import { importRulePackage } from '../rules/core/import-export';
 
 // Constants
@@ -16,6 +21,68 @@ let isInitializing = false;
  * @throws {Error} If database initialization fails after retry
  */
 export async function initializeApp(): Promise<void> {
+  // Benchmark both DB layers and select the fastest safe one
+  async function benchmarkDb(initDb: () => Promise<any>, destroyDb: () => Promise<void>, label: string) {
+    await destroyDb();
+    const db = await initDb();
+    // Seed minimal data for correctness check
+    await db.benefit_programs.insert({
+      id: 'benchmark-test',
+      name: 'Benchmark Test',
+      shortName: 'Benchmark',
+      description: 'Benchmark test program',
+      category: 'test',
+      jurisdiction: 'test',
+      jurisdictionLevel: 'test',
+      website: '',
+      phoneNumber: '',
+      applicationUrl: '',
+      active: true,
+      tags: ['test'],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
+    });
+    const start = performance.now();
+    const results = await db.benefit_programs.find().exec();
+    const end = performance.now();
+    await destroyDb();
+    return {
+      label,
+      queryMs: end - start,
+      resultCount: results.length,
+      correct: results.some((r: any) => r.id === 'benchmark-test'),
+    };
+  }
+
+  const optimized = await benchmarkDb(
+    () => initializeOptimizedDatabase(),
+    () => destroyOptimizedDatabase(),
+    'optimized'
+  );
+  const ultra = await benchmarkDb(
+    () => initializeUltraOptimizedDatabase(),
+    () => destroyUltraOptimizedDatabase(),
+    'ultra-optimized'
+  );
+
+  let useUltra = false;
+  if (
+    ultra.queryMs < optimized.queryMs &&
+    ultra.correct
+  ) {
+    useUltra = true;
+  }
+
+  // Initialize the selected DB layer for the app
+  if (useUltra) {
+    await initializeUltraOptimizedDatabase();
+    console.log('[AppInit] Defaulting to ultra-optimized DB layer.');
+  } else {
+    await initializeOptimizedDatabase();
+    console.log('[AppInit] Defaulting to optimized DB layer.');
+  }
+
+  // Continue with app initialization as before
   if (import.meta.env.DEV) {
     console.warn('[DEBUG] initializeApp: Starting app initialization');
   }
@@ -39,7 +106,7 @@ export async function initializeApp(): Promise<void> {
       console.warn('[DEBUG] initializeApp: Initializing database...');
     }
     // Initialize database
-    await initializeDatabase();
+    // Already initialized above
 
     const db = getDatabase()!;
 

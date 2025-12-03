@@ -96,3 +96,38 @@ If you need to test the real App component with full async flows:
 3. **Option C:** Use `startTransition` in tests to handle Suspense (complex and fragile)
 
 The current approach balances coverage, speed, and maintainability for unit/integration testing.
+
+## Fast Smoke Suite
+
+To catch regressions quickly, we maintain a lightweight smoke suite that runs in CI on every push/PR:
+
+- Location: `src/__tests__/smoke/`
+- Command: `npm run test:smoke` (single-threaded Vitest)
+- CI: Executed early in `/.github/workflows/ci.yml` as “Smoke Unit Tests”
+
+Guidelines for smoke tests:
+
+- Focus on critical app flows and invariant UI (rendering `App`, presence of key controls).
+- Keep tests resilient to environment and avoid heavy setup (database/i18n/routers).
+- Prefer role-based queries over brittle text checks.
+- Keep runtime minimal so the job provides a fast signal.
+
+### Optional `@smoke` Tagging
+
+You can tag any test or suite name with `@smoke` to allow grep-filtered runs:
+
+- Command: `npm run test:smoke:grep` (runs `vitest run --grep "@smoke"`)
+
+Example:
+
+```ts
+import { describe, it, expect } from 'vitest';
+
+describe('Smoke: App layout @smoke', () => {
+  it('renders header and nav @smoke', () => {
+    // minimal render and resilient assertions
+  });
+});
+```
+
+When adding new smoke tests, prefer placing them under `src/__tests__/smoke/` and optionally include `@smoke` in the test names for grep-based selection.

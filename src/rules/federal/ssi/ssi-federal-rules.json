@@ -68,7 +68,46 @@
         "hasDisability"
       ],
       "priority": 10,
-      "weight": 1
+      "weight": 1,
+      "citations": [
+        {
+          "title": "SSI Overview",
+          "url": "https://www.ssa.gov/ssi/",
+          "notes": "SSI provides benefits to people who are age 65 or older, blind, or disabled.",
+          "date": "2024-01-01"
+        },
+        {
+          "title": "20 CFR § 416.202 — Who is eligible for SSI?",
+          "url": "https://www.ecfr.gov/current/title-20/part-416/subpart-B/section-416.202",
+          "date": "2024-01-01"
+        }
+      ],
+      "testCases": [
+        {
+          "id": "age-eligible-elderly",
+          "description": "Age 70 — eligible by age",
+          "input": { "age": 70, "isBlind": false, "hasDisability": false },
+          "expected": true
+        },
+        {
+          "id": "blind-eligible",
+          "description": "Blind — eligible regardless of age",
+          "input": { "age": 30, "isBlind": true, "hasDisability": false },
+          "expected": true
+        },
+        {
+          "id": "disabled-eligible",
+          "description": "Disabled — eligible regardless of age",
+          "input": { "age": 30, "isBlind": false, "hasDisability": true },
+          "expected": true
+        },
+        {
+          "id": "no-criteria-ineligible",
+          "description": "No age/blind/disability criteria met",
+          "input": { "age": 30, "isBlind": false, "hasDisability": false },
+          "expected": false
+        }
+      ]
     },
     {
       "id": "ssi-federal-income-eligibility",
@@ -118,7 +157,46 @@
         "isMarried"
       ],
       "priority": 20,
-      "weight": 1
+      "weight": 1,
+      "citations": [
+        {
+          "title": "SSI Payment Standards (2024)",
+          "url": "https://www.ssa.gov/oact/cola/SSI.html",
+          "notes": "2024 Federal Benefit Rate: $943 individual, $1,415 couple",
+          "date": "2024-01-01"
+        },
+        {
+          "title": "20 CFR § 416 Subpart K — Income",
+          "url": "https://www.ecfr.gov/current/title-20/part-416/subpart-K",
+          "date": "2024-01-01"
+        }
+      ],
+      "testCases": [
+        {
+          "id": "individual-eligible",
+          "description": "Individual income below limit",
+          "input": { "householdIncome": 900, "isMarried": false },
+          "expected": true
+        },
+        {
+          "id": "individual-ineligible",
+          "description": "Individual income at/above limit",
+          "input": { "householdIncome": 1000, "isMarried": false },
+          "expected": false
+        },
+        {
+          "id": "couple-eligible",
+          "description": "Couple income below limit",
+          "input": { "householdIncome": 1400, "isMarried": true },
+          "expected": true
+        },
+        {
+          "id": "couple-ineligible",
+          "description": "Couple income at/above limit",
+          "input": { "householdIncome": 1500, "isMarried": true },
+          "expected": false
+        }
+      ]
     },
     {
       "id": "ssi-federal-asset-eligibility",
@@ -157,6 +235,46 @@
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000
+      ,
+      "citations": [
+        {
+          "title": "SSI Resource Limits",
+          "url": "https://www.ssa.gov/ssi/spotlights/spot-resources.htm",
+          "notes": "$2,000 individual / $3,000 couple resource limits",
+          "date": "2024-01-01"
+        },
+        {
+          "title": "20 CFR § 416.1205 — Resource limits",
+          "url": "https://www.ecfr.gov/current/title-20/part-416/subpart-L/section-416.1205",
+          "date": "2024-01-01"
+        }
+      ],
+      "testCases": [
+        {
+          "id": "individual-below",
+          "description": "Individual below asset limit",
+          "input": { "totalAssets": 1500, "isMarried": false },
+          "expected": true
+        },
+        {
+          "id": "individual-at-limit",
+          "description": "Individual at limit (not eligible)",
+          "input": { "totalAssets": 2000, "isMarried": false },
+          "expected": false
+        },
+        {
+          "id": "couple-below",
+          "description": "Couple below asset limit",
+          "input": { "totalAssets": 2500, "isMarried": true },
+          "expected": true
+        },
+        {
+          "id": "couple-above",
+          "description": "Couple above asset limit",
+          "input": { "totalAssets": 3500, "isMarried": true },
+          "expected": false
+        }
+      ]
     },
     {
       "id": "ssi-federal-citizenship-eligibility",
@@ -189,6 +307,39 @@
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000
+      ,
+      "citations": [
+        {
+          "title": "SSI Eligibility — Citizenship/Alien Status",
+          "url": "https://www.ssa.gov/ssi/eligibility",
+          "date": "2024-01-01"
+        },
+        {
+          "title": "8 USC § 1611–1613",
+          "url": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title8-section1611",
+          "date": "2024-01-01"
+        }
+      ],
+      "testCases": [
+        {
+          "id": "citizen-eligible",
+          "description": "U.S. citizen eligible",
+          "input": { "isUSCitizen": true, "isQualifiedImmigrant": false },
+          "expected": true
+        },
+        {
+          "id": "qualified-immigrant-eligible",
+          "description": "Qualified immigrant eligible",
+          "input": { "isUSCitizen": false, "isQualifiedImmigrant": true },
+          "expected": true
+        },
+        {
+          "id": "neither-ineligible",
+          "description": "Neither citizen nor qualified immigrant",
+          "input": { "isUSCitizen": false, "isQualifiedImmigrant": false },
+          "expected": false
+        }
+      ]
     },
     {
       "id": "ssi-federal-residence-eligibility",
@@ -213,6 +364,33 @@
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000
+      ,
+      "citations": [
+        {
+          "title": "SSI Residency",
+          "url": "https://www.ssa.gov/ssi/text-resources-ussi.htm",
+          "date": "2024-01-01"
+        },
+        {
+          "title": "20 CFR § 416.1603",
+          "url": "https://www.ecfr.gov/current/title-20/part-416/subpart-P/section-416.1603",
+          "date": "2024-01-01"
+        }
+      ],
+      "testCases": [
+        {
+          "id": "lives-in-us",
+          "description": "Applicant lives in US",
+          "input": { "livesInUS": true },
+          "expected": true
+        },
+        {
+          "id": "not-in-us",
+          "description": "Applicant not living in US",
+          "input": { "livesInUS": false },
+          "expected": false
+        }
+      ]
     },
     {
       "id": "ssi-federal-disability-eligibility",
@@ -262,13 +440,59 @@
       "active": true,
       "createdAt": 1728777600000,
       "updatedAt": 1728777600000
+      ,
+      "citations": [
+        {
+          "title": "SSI Disability Criteria",
+          "url": "https://www.ssa.gov/ssi/spotlights/spot-disability-criteria.htm",
+          "notes": "Definition of disability and SGA threshold",
+          "date": "2024-01-01"
+        },
+        {
+          "title": "20 CFR § 416.905–416.906",
+          "url": "https://www.ecfr.gov/current/title-20/part-416/subpart-I",
+          "date": "2024-01-01"
+        }
+      ],
+      "testCases": [
+        {
+          "id": "elderly-over-65",
+          "description": "Age >= 65 passes regardless of disability",
+          "input": { "age": 66, "isBlind": false, "hasDisability": false, "disabilityPreventsWork": false },
+          "expected": true
+        },
+        {
+          "id": "blind-passes",
+          "description": "Blind passes regardless of disability",
+          "input": { "age": 30, "isBlind": true, "hasDisability": false, "disabilityPreventsWork": false },
+          "expected": true
+        },
+        {
+          "id": "disability-prevents-work",
+          "description": "Disability prevents work — eligible",
+          "input": { "age": 30, "isBlind": false, "hasDisability": true, "disabilityPreventsWork": true },
+          "expected": true
+        },
+        {
+          "id": "disability-not-preventing-work",
+          "description": "Disability does not prevent work — ineligible",
+          "input": { "age": 30, "isBlind": false, "hasDisability": true, "disabilityPreventsWork": false },
+          "expected": false
+        },
+        {
+          "id": "none-criteria",
+          "description": "No criteria met — ineligible",
+          "input": { "age": 30, "isBlind": false, "hasDisability": false, "disabilityPreventsWork": false },
+          "expected": false
+        }
+      ]
     }
   ],
   "requiredFields": [
     "age",
     "isBlind",
     "hasDisability",
-    "monthlyIncome",
+    "householdIncome",
     "isMarried",
     "totalAssets",
     "isUSCitizen",

@@ -902,6 +902,19 @@ test.describe('Questionnaire Flow', () => {
 
         // Should show some completion message
         expect(hasConfirmation).toBeTruthy();
+
+        // Run axe accessibility scan on summary/completion page
+        const { runA11yScan } = require('./utils/accessibility');
+        const results = await runA11yScan(page, { tags: ['wcag2a', 'wcag2aa', 'wcag21aa'] });
+        if (results.violations.length > 0) {
+          console.log('Accessibility violations found on summary page:');
+          results.violations.forEach(v => {
+            console.log(`- ${v.id}: ${v.description}`);
+            console.log(`  Tags: ${v.tags ? v.tags.join(', ') : 'none'}`);
+            console.log(`  Elements affected: ${v.nodes.length}`);
+          });
+        }
+        expect(results.violations).toEqual([]);
       }
     });
   });

@@ -101,6 +101,59 @@ npm run dev
 
 The application will automatically open in your browser. All data is stored locally in IndexedDB.
 
+#### Linux Development Quickstart
+
+**Ubuntu/Debian:**
+```bash
+# Install Node.js 18+ (if not already installed)
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install additional dependencies for Playwright
+sudo npx playwright install-deps
+
+# Clone and start
+git clone https://github.com/jborgese/benefit-finder.git
+cd benefit-finder
+npm install
+npm run dev
+```
+
+**Fedora/RHEL:**
+```bash
+# Install Node.js 18+
+sudo dnf install nodejs npm
+
+# Install Playwright dependencies
+sudo npx playwright install-deps
+
+# Clone and start
+git clone https://github.com/jborgese/benefit-finder.git
+cd benefit-finder
+npm install
+npm run dev
+```
+
+**Arch Linux:**
+```bash
+# Install Node.js
+sudo pacman -S nodejs npm
+
+# Install Playwright dependencies
+sudo npx playwright install-deps
+
+# Clone and start
+git clone https://github.com/jborgese/benefit-finder.git
+cd benefit-finder
+npm install
+npm run dev
+```
+
+**Tips for Linux:**
+- If port 5173 is in use, Vite will automatically select the next available port
+- Use `scripts/kill-dev-linux.sh` to terminate any stuck dev server processes
+- For browser auto-open issues, manually navigate to `http://localhost:5173`
+
 ### Development
 
 ```bash
@@ -150,6 +203,22 @@ npm run test:perf           # Run performance benchmarks
 
 # Rule Validation
 npm run validate-rules      # Validate eligibility rule schemas
+
+# Fast Smoke Suite
+
+For a quick regression signal, run the lightweight smoke suite (single-threaded Vitest):
+
+```bash
+npm run test:smoke
+```
+
+You can also grep for tests tagged with `@smoke`:
+
+```bash
+npm run test:smoke:grep
+```
+
+Smoke tests live under `src/__tests__/smoke/` and focus on resilient checks of critical UI flows.
 ```
 
 ### Linting
@@ -266,6 +335,85 @@ Comprehensive documentation is available in the `docs/` directory:
 - **[FAQ](docs/FAQ.md)** — Frequently asked questions
 - **[Privacy Guide](docs/PRIVACY_GUIDE.md)** — How your data stays private
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** — Common issues and solutions
+
+### Linux Development Troubleshooting
+
+**Port Already in Use:**
+```bash
+# Find and kill process using port 5173
+lsof -ti:5173 | xargs kill -9
+
+# Or use the provided script
+./scripts/kill-dev-linux.sh
+```
+
+**Playwright Browser Installation Issues:**
+```bash
+# Install system dependencies for Playwright
+sudo npx playwright install-deps
+
+# Install browsers manually
+npx playwright install
+```
+
+**Permission Denied Errors:**
+```bash
+# If npm install fails with permission errors, don't use sudo
+# Instead, configure npm to use a different directory:
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# Then retry installation
+npm install
+```
+
+**Memory Issues on Low-End Systems:**
+```bash
+# Use the low-end Playwright config for E2E tests
+npm run test:e2e -- --config=playwright.config.lowend.ts
+
+# Or increase Node.js memory limit
+export NODE_OPTIONS="--max-old-space-size=4096"
+npm run dev
+```
+
+**File Watcher Limit (ENOSPC Error):**
+```bash
+# Increase inotify watchers limit
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+**Build Failures:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm cache clean --force
+npm install
+
+# If TypeScript errors persist
+npm run build -- --mode development
+```
+
+**Database Issues:**
+```bash
+# Clear local database (caution: deletes all local data)
+node clear-db.js
+
+# Or clear browser data manually in DevTools:
+# Application → Storage → Clear site data
+```
+
+**SELinux Issues (Fedora/RHEL):**
+```bash
+# If you encounter permission issues with SELinux
+sudo setenforce 0  # Temporarily disable (not recommended for production)
+
+# Or add proper SELinux context
+sudo chcon -R -t httpd_sys_content_t /path/to/benefit-finder
+```
 
 ### Developer Documentation
 - **[Rule Schema](docs/RULE_SCHEMA.md)** — Eligibility rule format and structure
