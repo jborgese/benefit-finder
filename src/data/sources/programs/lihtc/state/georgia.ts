@@ -4,7 +4,7 @@
  * Georgia state-level LIHTC program data.
  */
 
-import type { BenefitProgram } from '../../../../db/schemas';
+import type { BenefitProgram } from '../../../../../db/schemas';
 
 /**
  * Georgia LIHTC Program

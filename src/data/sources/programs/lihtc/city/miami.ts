@@ -4,7 +4,7 @@
  * Miami city-level LIHTC program data.
  */
 
-import type { BenefitProgram } from '../../../../db/schemas';
+import type { BenefitProgram } from '../../../../../db/schemas';
 
 /**
  * Miami LIHTC Program
