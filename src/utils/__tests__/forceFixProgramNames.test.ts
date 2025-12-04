@@ -119,42 +119,44 @@ describe('forceFixProgramNames', () => {
 
   it('should handle clearDatabase errors and throw', async () => {
     // Arrange
-    vi.mocked(db.clearDatabase).mockImplementation(() => Promise.reject(new Error('Database clear failed')));
+    const mockError = new Error('Database clear failed');
+    vi.mocked(db.clearDatabase).mockRejectedValue(mockError);
 
-    // Act & Assert
-    let thrownError: Error | null = null;
-    try {
-      const promise = forceFixProgramNames();
-      await vi.runAllTimersAsync();
-      await promise;
-    } catch (error) {
-      thrownError = error as Error;
-    }
+    // Act - Create the promise but attach the catch handler immediately
+    // to prevent unhandled rejection warnings
+    let thrownError: Error | undefined;
+    forceFixProgramNames().catch(err => {
+      thrownError = err;
+    });
 
-    expect(thrownError).toBeInstanceOf(Error);
+    await vi.runAllTimersAsync();
+
+    // Assert
+    expect(thrownError).toBeDefined();
     expect(thrownError?.message).toBe('Database clear failed');
-    expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', mockError);
     expect(ruleDiscovery.discoverAndSeedAllRules).not.toHaveBeenCalled();
   });
 
   it('should handle discoverAndSeedAllRules errors and throw', async () => {
     // Arrange
+    const mockError = new Error('Discovery failed');
     vi.mocked(db.clearDatabase).mockResolvedValue();
-    vi.mocked(ruleDiscovery.discoverAndSeedAllRules).mockImplementation(() => Promise.reject(new Error('Discovery failed')));
+    vi.mocked(ruleDiscovery.discoverAndSeedAllRules).mockRejectedValue(mockError);
 
-    // Act & Assert
-    let thrownError: Error | null = null;
-    try {
-      const promise = forceFixProgramNames();
-      await vi.runAllTimersAsync();
-      await promise;
-    } catch (error) {
-      thrownError = error as Error;
-    }
+    // Act - Create the promise but attach the catch handler immediately
+    // to prevent unhandled rejection warnings
+    let thrownError: Error | undefined;
+    forceFixProgramNames().catch(err => {
+      thrownError = err;
+    });
 
-    expect(thrownError).toBeInstanceOf(Error);
+    await vi.runAllTimersAsync();
+
+    // Assert
+    expect(thrownError).toBeDefined();
     expect(thrownError?.message).toBe('Discovery failed');
-    expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', mockError);
     expect(db.clearDatabase).toHaveBeenCalledTimes(1);
   });
 

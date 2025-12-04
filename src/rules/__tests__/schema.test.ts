@@ -95,6 +95,7 @@ describe('Rule Schema', () => {
         active: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        citations: [{ title: 'Test Citation' }],
       };
 
       const result = validateRuleDefinition(rule);

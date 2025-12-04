@@ -26,7 +26,7 @@ export default defineConfig({
   build: {
     // Production optimizations
     target: 'es2020',
-    minify: 'esbuild',
+    minify: 'swc' as unknown as 'terser',
     sourcemap: false, // Disable for production
 
     // Code splitting configuration

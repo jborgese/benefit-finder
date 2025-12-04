@@ -71,7 +71,12 @@ export const useI18n = (): {
    * @param lng - Language code (e.g., 'en', 'es')
    */
   const changeLanguage = async (lng: string): Promise<void> => {
-    await i18n.changeLanguage(lng);
+    if (typeof i18n.changeLanguage === 'function') {
+      await i18n.changeLanguage(lng);
+    } else {
+      console.warn('i18n.changeLanguage is not available');
+      return;
+    }
 
     // Update document direction for RTL support
     const isRTL = isRightToLeft(lng);

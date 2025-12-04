@@ -4,7 +4,7 @@
  * Federal-level Low-Income Housing Tax Credit program data.
  */
 
-import type { BenefitProgram } from '../../../db/schemas';
+import type { BenefitProgram } from '../../../../db/schemas';
 
 /**
  * Federal LIHTC Program

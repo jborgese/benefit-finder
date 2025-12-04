@@ -6,6 +6,7 @@ import { getDatabase } from '../../../db/database';
 import { formatVersion, compareVersions, type RuleDefinition, type RuleImportResult, type RuleExportOptions } from '../schema';
 import type { EligibilityRule } from '../../../db/schemas';
 import { IMPORT_ERROR_CODES } from './constants';
+import type { RuleCitation } from '../schema';
 
 export async function checkExistingRuleConflicts(
   rule: RuleDefinition,
@@ -127,6 +128,7 @@ export function convertDatabaseRuleToDefinition(
     createdAt: dbRule.createdAt,
     updatedAt: dbRule.updatedAt,
     createdBy: dbRule.createdBy,
+    citations: ('citations' in dbRule ? (dbRule as Record<string, unknown>).citations as RuleCitation[] : null) ?? [{ title: 'Unknown Source' }],
   };
 
   if (options.includeTests !== false && dbRule.testCases) {

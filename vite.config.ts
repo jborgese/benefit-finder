@@ -69,20 +69,8 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 500, // Reduced from 1500 for better optimization awareness
     target: 'es2020', // Modern target for better optimization
-    // Switch to terser and keep names to reduce TDZ-related issues
-    minify: 'terser',
-    terserOptions: {
-      keep_fnames: true,
-      keep_classnames: true,
-      compress: {
-        unsafe_arrows: false,
-        reduce_vars: false,
-      },
-      mangle: {
-        keep_classnames: true,
-        keep_fnames: true,
-      },
-    },
+    // Switched to @swc/core for better performance and security (no vulnerable dependencies)
+    minify: 'swc' as unknown as 'terser',
     sourcemap: false, // Disable sourcemaps in production for smaller bundles
     // Add build timestamp for cache busting (moved to top-level `define` below)
   },

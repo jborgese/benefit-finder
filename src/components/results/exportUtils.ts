@@ -5,7 +5,7 @@
  */
 
 import type { EligibilityResults, ProgramEligibilityResult } from './types';
-import { encrypt, decrypt, deriveKeyFromPassphrase } from '../../utils/encryption';
+import { encryptToString, decryptFromString, deriveKeyFromPassphrase } from '../../utils/encryption';
 import DOMPurify from 'isomorphic-dompurify';
 
 /**
@@ -75,9 +75,11 @@ export function exportToPDF(
   // Note: This opens the native print dialog where user can save as PDF
   window.print();
 
-  // Clean up
+  // Clean up - check if container still exists before removing
   setTimeout(() => {
-    document.body.removeChild(container);
+    if (container.parentNode === document.body) {
+      document.body.removeChild(container);
+    }
   }, 100);
 }
 
@@ -175,6 +177,11 @@ function buildProgramHTML(program: ProgramEligibilityResult): string {
 
       <div style="margin: 15px 0;">
         <strong>Why:</strong> ${explanationReason}
+        ${program.explanation.details && program.explanation.details.length > 0 ? `
+          <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+            ${program.explanation.details.map(detail => `<li>${sanitizeText(detail)}</li>`).join('')}
+          </ul>
+        ` : ''}
       </div>
 
       ${program.requiredDocuments.length > 0 ? `
@@ -228,13 +235,20 @@ export async function exportEncrypted(
 ): Promise<Blob> {
   const { profileSnapshot, metadata } = options ?? {};
 
+  // Sanitize metadata to prevent XSS
+  const sanitizedMetadata = metadata ? {
+    userName: sanitizeText(metadata.userName),
+    state: sanitizeText(metadata.state),
+    notes: sanitizeText(metadata.notes),
+  } : undefined;
+
   // Prepare data for export
   const exportData = {
     version: '1.0.0',
     exportedAt: new Date().toISOString(),
     results,
     profileSnapshot,
-    metadata,
+    metadata: sanitizedMetadata,
   };
 
   // Convert to JSON string
@@ -243,8 +257,8 @@ export async function exportEncrypted(
   // Derive encryption key from password
   const { key, salt } = await deriveKeyFromPassphrase(password);
 
-  // Encrypt the data
-  const encrypted = await encrypt(jsonString, key);
+  // Encrypt the data (returns a string)
+  const encrypted = await encryptToString(jsonString, key);
 
   // Create export package with salt and encrypted data
   const exportPackage = {
@@ -273,8 +287,19 @@ export async function importEncrypted(
   exportedAt: Date;
 }> {
   try {
-    // Read file as text
-    const fileText = await file.text();
+    // Read file as text with fallback for environments where .text() is not available
+    let fileText: string;
+    if (typeof file.text === 'function') {
+      fileText = await file.text();
+    } else {
+      // Fallback to FileReader for environments without Blob.text() support
+      fileText = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(file);
+      });
+    }
 
     // Parse export package
     const exportPackage = JSON.parse(fileText);
@@ -285,8 +310,8 @@ export async function importEncrypted(
     // Derive key from password using stored salt
     const { key } = await deriveKeyFromPassphrase(password, exportPackage.salt);
 
-    // Decrypt the data
-    const decrypted = await decrypt(exportPackage.encrypted, key);
+    // Decrypt the data (from string format)
+    const decrypted = await decryptFromString(exportPackage.encrypted, key);
 
     // Parse JSON
     const data = JSON.parse(decrypted);
@@ -295,6 +320,13 @@ export async function importEncrypted(
     if (!data.version || data.version !== '1.0.0') {
       throw new Error('Unsupported file format version');
     }
+
+    // Sanitize imported metadata to prevent XSS
+    const sanitizedMetadata = data.metadata ? {
+      userName: sanitizeText(data.metadata.userName),
+      state: sanitizeText(data.metadata.state),
+      notes: sanitizeText(data.metadata.notes),
+    } : undefined;
 
     // Helper to reconstruct program result with Date objects
     interface SerializedProgramResult extends Omit<ProgramEligibilityResult, 'evaluatedAt' | 'applicationDeadline'> {
@@ -321,7 +353,7 @@ export async function importEncrypted(
     return {
       results,
       profileSnapshot: data.profileSnapshot,
-      metadata: data.metadata,
+      metadata: sanitizedMetadata,
       exportedAt: new Date(data.exportedAt),
     };
   } catch (err) {
