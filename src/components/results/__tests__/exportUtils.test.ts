@@ -385,13 +385,24 @@ describe('Export Utils - Security & Sanitization', () => {
 
     it('should reject invalid version numbers', async () => {
       const password = 'test123';
-      const blob = await exportEncrypted(mockResults, password);
       
-      // Tamper with version
-      const decryptedText = await readBlobAsText(blob);
+      // Create a blob with invalid version
+      const invalidData = {
+        version: '0.0.1', // Invalid version
+        exportedAt: new Date().toISOString(),
+        results: mockResults,
+      };
       
-      // This test verifies version checking exists
-      expect(decryptedText).toContain('version');
+      // Manually encrypt with invalid version
+      const { key, salt } = await (await import('../../../utils/encryption')).deriveKeyFromPassphrase(password);
+      const encrypted = await (await import('../../../utils/encryption')).encryptToString(JSON.stringify(invalidData), key);
+      
+      const invalidBlob = new Blob([JSON.stringify({ salt, encrypted })]);
+      
+      // Should reject due to invalid version
+      await expect(
+        importEncrypted(invalidBlob, password)
+      ).rejects.toThrow(/version/i);
     });
 
     it('should handle corrupted encrypted data', async () => {
