@@ -75,9 +75,11 @@ export function exportToPDF(
   // Note: This opens the native print dialog where user can save as PDF
   window.print();
 
-  // Clean up
+  // Clean up - check if container still exists before removing
   setTimeout(() => {
-    document.body.removeChild(container);
+    if (container.parentNode === document.body) {
+      document.body.removeChild(container);
+    }
   }, 100);
 }
 
@@ -175,6 +177,11 @@ function buildProgramHTML(program: ProgramEligibilityResult): string {
 
       <div style="margin: 15px 0;">
         <strong>Why:</strong> ${explanationReason}
+        ${program.explanation.details && program.explanation.details.length > 0 ? `
+          <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+            ${program.explanation.details.map(detail => `<li>${sanitizeText(detail)}</li>`).join('')}
+          </ul>
+        ` : ''}
       </div>
 
       ${program.requiredDocuments.length > 0 ? `
