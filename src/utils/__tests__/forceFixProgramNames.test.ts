@@ -122,12 +122,18 @@ describe('forceFixProgramNames', () => {
     const mockError = new Error('Database clear failed');
     vi.mocked(db.clearDatabase).mockRejectedValue(mockError);
 
-    // Act & Assert - wrap in promise to catch the rejection
-    const promise = forceFixProgramNames();
-    await vi.runAllTimersAsync();
-    
-    await expect(promise).rejects.toThrow('Database clear failed');
+    // Act - Create the promise but attach the catch handler immediately
+    // to prevent unhandled rejection warnings
+    let thrownError: Error | undefined;
+    forceFixProgramNames().catch(err => {
+      thrownError = err;
+    });
 
+    await vi.runAllTimersAsync();
+
+    // Assert
+    expect(thrownError).toBeDefined();
+    expect(thrownError?.message).toBe('Database clear failed');
     expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', mockError);
     expect(ruleDiscovery.discoverAndSeedAllRules).not.toHaveBeenCalled();
   });
@@ -138,12 +144,18 @@ describe('forceFixProgramNames', () => {
     vi.mocked(db.clearDatabase).mockResolvedValue();
     vi.mocked(ruleDiscovery.discoverAndSeedAllRules).mockRejectedValue(mockError);
 
-    // Act & Assert - wrap in promise to catch the rejection
-    const promise = forceFixProgramNames();
-    await vi.runAllTimersAsync();
-    
-    await expect(promise).rejects.toThrow('Discovery failed');
+    // Act - Create the promise but attach the catch handler immediately
+    // to prevent unhandled rejection warnings
+    let thrownError: Error | undefined;
+    forceFixProgramNames().catch(err => {
+      thrownError = err;
+    });
 
+    await vi.runAllTimersAsync();
+
+    // Assert
+    expect(thrownError).toBeDefined();
+    expect(thrownError?.message).toBe('Discovery failed');
     expect(consoleErrorSpy).toHaveBeenCalledWith('[DEBUG] Error during force fix:', mockError);
     expect(db.clearDatabase).toHaveBeenCalledTimes(1);
   });
