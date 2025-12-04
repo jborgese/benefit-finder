@@ -273,8 +273,19 @@ export async function importEncrypted(
   exportedAt: Date;
 }> {
   try {
-    // Read file as text
-    const fileText = await file.text();
+    // Read file as text with fallback for environments where .text() is not available
+    let fileText: string;
+    if (typeof file.text === 'function') {
+      fileText = await file.text();
+    } else {
+      // Fallback to FileReader for environments without Blob.text() support
+      fileText = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(file);
+      });
+    }
 
     // Parse export package
     const exportPackage = JSON.parse(fileText);

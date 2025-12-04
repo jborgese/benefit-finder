@@ -8,6 +8,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { exportToPDF, exportEncrypted, importEncrypted } from '../exportUtils';
 import type { EligibilityResults, ProgramEligibilityResult } from '../types';
 
+/**
+ * Helper to read blob as text with fallback for environments without .text() support
+ */
+async function readBlobAsText(blob: Blob): Promise<string> {
+  if (typeof blob.text === 'function') {
+    return await blob.text();
+  }
+  // Fallback to FileReader for environments without Blob.text() support
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(blob);
+  });
+}
+
 describe('Export Utils - Security & Sanitization', () => {
   let mockResults: EligibilityResults;
   let mockContainer: HTMLDivElement;
@@ -251,7 +267,7 @@ describe('Export Utils - Security & Sanitization', () => {
       const password = 'SuperSecret123!';
       
       const blob = await exportEncrypted(mockResults, password);
-      const text = await blob.text();
+      const text = await readBlobAsText(blob);
       
       expect(text).not.toContain(password);
     });
@@ -268,7 +284,7 @@ describe('Export Utils - Security & Sanitization', () => {
       };
       
       const blob = await exportEncrypted(mockResults, password, options);
-      const text = await blob.text();
+      const text = await readBlobAsText(blob);
       
       // Sensitive data should not appear in plaintext
       expect(text).not.toContain('John');
@@ -281,7 +297,7 @@ describe('Export Utils - Security & Sanitization', () => {
       const password = 'test123';
       
       const blob = await exportEncrypted(mockResults, password);
-      const text = await blob.text();
+      const text = await readBlobAsText(blob);
       const parsed = JSON.parse(text);
       
       expect(parsed).toHaveProperty('salt');
@@ -312,7 +328,7 @@ describe('Export Utils - Security & Sanitization', () => {
       const password = 'test123';
       
       const blob = await exportEncrypted(mockResults, password);
-      const text = await blob.text();
+      const text = await readBlobAsText(blob);
       const parsed = JSON.parse(text);
       
       expect(parsed.salt).toBeDefined();
@@ -372,7 +388,7 @@ describe('Export Utils - Security & Sanitization', () => {
       const blob = await exportEncrypted(mockResults, password);
       
       // Tamper with version
-      const decryptedText = await blob.text();
+      const decryptedText = await readBlobAsText(blob);
       
       // This test verifies version checking exists
       expect(decryptedText).toContain('version');
