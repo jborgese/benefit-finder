@@ -131,7 +131,7 @@ export const DateInput: React.FC<DateInputProps> = ({
       {question.description && resolveQuestionString(question.description) && (
         <p
           id={descId}
-          className="text-sm text-gray-600 mb-2"
+          className="text-sm text-secondary-700 dark:text-secondary-200 mb-2"
         >
           {resolveQuestionString(question.description)}
         </p>
@@ -183,14 +183,14 @@ export const DateInput: React.FC<DateInputProps> = ({
       </div>
 
       {value && !showError && (
-        <p className="mt-1 text-xs text-gray-600">
+        <p className="mt-1 text-xs text-secondary-700 dark:text-secondary-100">
           {formatDateForDisplay(value)}
           {age !== null && ` (Age: ${age})`}
         </p>
       )}
 
       {question.helpText && !showError && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-secondary-700 dark:text-secondary-100">
           {resolveQuestionString(question.helpText)}
         </p>
       )}
