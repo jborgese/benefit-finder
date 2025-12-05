@@ -19,7 +19,7 @@ export const QuestionnairePage: React.FC<QuestionnairePageProps> = ({ onComplete
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-secondary-900 dark:text-secondary-100 mb-2">
           Benefit Eligibility Assessment
         </h2>
-        <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base">
+        <p className="text-secondary-700 dark:text-secondary-200 text-sm sm:text-base">
           Complete this questionnaire to check your eligibility for government benefits
         </p>
       </div>

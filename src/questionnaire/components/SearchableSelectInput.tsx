@@ -282,7 +282,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
                 ))}
               </ul>
             ) : (
-              <div className="px-3 py-2 text-sm text-gray-500">
+              <div className="px-3 py-2 text-sm text-secondary-600 dark:text-secondary-300">
                 {noResultsText}
               </div>
             )}
@@ -299,7 +299,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
       {/* Help text */}
       {question.helpText && !hasError && (
-        <div className="mt-1 text-sm text-gray-500">
+        <div className="mt-1 text-sm text-secondary-700 dark:text-secondary-200">
           {question.helpText}
         </div>
       )}

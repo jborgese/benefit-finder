@@ -193,7 +193,7 @@ export const SelectInput: React.FC<SelectProps> = ({
                     </div>
 
                     {option.description && (
-                      <p className="mt-1 text-sm text-secondary-600 dark:text-secondary-300">
+                      <p className="mt-1 text-sm text-secondary-700 dark:text-secondary-200">
                         {option.description}
                       </p>
                     )}

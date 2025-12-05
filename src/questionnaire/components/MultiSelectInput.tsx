@@ -282,7 +282,7 @@ export const MultiSelectInput: React.FC<MultiSelectProps> = ({
                   </div>
 
                   {option.description && (
-                    <p id={`${optionId}-desc`} className="mt-1 text-sm text-gray-500 dark:text-secondary-400">
+                    <p id={`${optionId}-desc`} className="mt-1 text-sm text-secondary-700 dark:text-secondary-200">
                       {option.description}
                     </p>
                   )}

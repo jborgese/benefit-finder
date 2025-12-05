@@ -104,10 +104,10 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
       {showProgress && progress && (
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-secondary-200">
+            <span className="text-sm font-medium text-secondary-800 dark:text-secondary-100">
               Question {currentQuestionNumber} of {totalQuestions}
             </span>
-            <span className="text-sm text-gray-500 dark:text-secondary-400">
+            <span className="text-sm text-secondary-700 dark:text-secondary-200">
               {progressPercent}% Complete
             </span>
           </div>
@@ -124,7 +124,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
           </Progress.Root>
 
           {progress.requiredQuestions > 0 && (
-            <p className="mt-1 text-xs text-gray-500 dark:text-secondary-400">
+            <p className="mt-1 text-xs text-secondary-700 dark:text-secondary-200">
               {progress.answeredQuestions} of {progress.requiredQuestions} required questions answered
             </p>
           )}

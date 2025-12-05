@@ -127,7 +127,7 @@ export const ResumeDialog: React.FC<SaveResumeProps> = ({
             Resume Previous Session?
           </Dialog.Title>
 
-          <Dialog.Description className="text-gray-600 mb-6">
+          <Dialog.Description className="text-secondary-700 dark:text-secondary-200 mb-6">
             {metadata.encrypted && (
               <div className="mb-3 flex items-center gap-2 text-green-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@ export const ExitConfirmDialog: React.FC<{
             Are you sure you want to exit?
           </AlertDialog.Title>
 
-          <AlertDialog.Description className="text-gray-600 mb-6">
+          <AlertDialog.Description className="text-secondary-700 dark:text-secondary-200 mb-6">
             Your progress has been automatically saved. You can resume this questionnaire later.
           </AlertDialog.Description>
 
