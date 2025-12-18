@@ -147,7 +147,7 @@ export const RuleDefinitionSchema = z.object({
 
   // Source & Attribution
   author: RuleAuthorSchema.optional().describe('Rule author'),
-  citations: z.array(RuleCitationSchema).optional().describe('Rule sources and citations'),
+  citations: z.array(RuleCitationSchema).min(1).describe('Rule sources and citations'),
   source: z.string().url().optional().describe('Primary source URL'),
   legalReference: z.string().max(200).optional().describe('Legal citation'),
 

@@ -95,6 +95,7 @@ describe('Rule Schema', () => {
         active: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        citations: [{ title: 'Test Citation' }],
       };
 
       const result = validateRuleDefinition(rule);
@@ -201,6 +202,12 @@ describe('Rule Schema', () => {
             active: true,
             createdAt: Date.now(),
             updatedAt: Date.now(),
+            citations: [
+              {
+                title: 'SNAP Eligibility Requirements',
+                url: 'https://example.gov/snap-rules',
+              },
+            ],
           },
         ],
       };

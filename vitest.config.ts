@@ -22,6 +22,8 @@ export default defineConfig({
     include: [
       'src/__tests__/**/*.test.{ts,tsx}',
       'src/**/__tests__/**/*.test.{ts,tsx}',
+      // Smoke suite: quick critical path checks
+      'src/__tests__/smoke/**/*.smoke.{ts,tsx}',
       // Allow targeted utility tests placed directly alongside source (e.g., initializeApp.test.ts)
       'src/utils/*.test.{ts,tsx}',
     ],
@@ -86,16 +88,14 @@ export default defineConfig({
       },
     },
 
-    // Performance
-    // Use threads for better stability and performance
+    // Performance: keep strictly single-threaded and sequential
     isolate: true,
     pool: 'threads',
     poolOptions: {
       threads: {
-        singleThread: true, // Run tests sequentially to reduce memory usage
+        singleThread: true,
         maxThreads: 1,
         minThreads: 1,
-        // Ensure workers inherit NODE_OPTIONS for memory limits
         isolate: true,
       },
     },
@@ -106,7 +106,7 @@ export default defineConfig({
 
     // Additional memory optimization
     sequence: {
-      concurrent: false, // Run tests sequentially to reduce memory pressure
+      concurrent: false,
     },
 
     // Additional memory optimization

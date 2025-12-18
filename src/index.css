@@ -239,17 +239,17 @@
   }
 
   .question-description {
-    @apply text-base text-secondary-600 mb-4;
+    @apply text-base text-secondary-700 dark:text-secondary-100 mb-4;
     font-size: var(--font-size-readable);
     line-height: var(--spacing-readable);
     max-width: 65ch; /* Optimal reading width */
   }
 
   .question-help-text {
-    @apply text-sm text-secondary-500 mt-2;
+    @apply text-sm text-secondary-700 dark:text-secondary-50 mt-2;
     font-size: 0.875rem;
     line-height: 1.5;
-    background: rgba(30, 64, 175, 0.05);
+    background: rgba(30, 64, 175, 0.08);
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
     border-left: 3px solid var(--color-trust);
@@ -483,6 +483,11 @@
       left: -1.5rem;
       width: 6px;
       height: 24px;
+    }
+
+    .question-description {
+      font-size: 1rem;
+      line-height: 1.6;
     }
 
     .question-input {

@@ -1,11 +1,13 @@
 /**
  * Auto-Save Hook
  *
- * Automatically saves questionnaire progress to localStorage
+ * Automatically saves questionnaire progress to localStorage with encryption
  */
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useQuestionFlowStore } from '../store';
+import { useEncryptionStore } from '../../stores/encryptionStore';
+import { encrypt, decrypt, type EncryptedData } from '../../utils/encryption';
 
 /**
  * Default storage key for auto-save functionality
@@ -25,6 +27,15 @@ export interface SavedProgressData {
   updatedAt: number;
 }
 
+/**
+ * Wrapper for saved progress with encryption metadata
+ */
+interface SavedProgressWrapper {
+  version: number;
+  encrypted: boolean;
+  data: string | SavedProgressData; // Encrypted string or plain data
+}
+
 export interface AutoSaveOptions {
   /** Storage key prefix */
   storageKey?: string;
@@ -39,7 +50,7 @@ export interface AutoSaveOptions {
 }
 
 /**
- * Hook for auto-saving questionnaire progress
+ * Hook for auto-saving questionnaire progress with encryption
  */
 export function useAutoSave(options: AutoSaveOptions = {}): {
   save: () => void;
@@ -54,10 +65,11 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
   } = options;
 
   const store = useQuestionFlowStore();
+  const encryptionStore = useEncryptionStore();
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastSavedRef = useRef<string>('');
 
-  const saveToStorage = useCallback(() => {
+  const saveToStorage = useCallback(async () => {
     if (!enabled || !store.started) {return;}
 
     try {
@@ -83,7 +95,29 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
         return;
       }
 
-      localStorage.setItem(storageKey, serialized);
+      // Check if encryption is available
+      const encryptionKey = encryptionStore.getKey();
+      
+      let wrapper: SavedProgressWrapper;
+      
+      if (encryptionKey) {
+        // Encrypt the data
+        const encrypted = await encrypt(serialized, encryptionKey);
+        wrapper = {
+          version: 1,
+          encrypted: true,
+          data: JSON.stringify(encrypted),
+        };
+      } else {
+        // Store unencrypted (fallback for when encryption not set up)
+        wrapper = {
+          version: 1,
+          encrypted: false,
+          data,
+        };
+      }
+
+      localStorage.setItem(storageKey, JSON.stringify(wrapper));
       lastSavedRef.current = serialized;
 
       onSave?.(data);
@@ -91,7 +125,7 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
       console.error('Auto-save failed:', error);
       onError?.(error as Error);
     }
-  }, [enabled, store, storageKey, onSave, onError]);
+  }, [enabled, store, storageKey, onSave, onError, encryptionStore]);
 
   // Debounced save on any change
   useEffect(() => {
@@ -103,7 +137,9 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
     }
 
     // Set new timeout
-    timeoutRef.current = setTimeout(saveToStorage, debounceMs);
+    timeoutRef.current = setTimeout(() => {
+      void saveToStorage();
+    }, debounceMs);
 
     return () => {
       if (timeoutRef.current) {
@@ -122,7 +158,7 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
   useEffect(() => {
     return () => {
       if (enabled) {
-        saveToStorage();
+        void saveToStorage();
       }
     };
   }, [enabled, saveToStorage]);
@@ -137,9 +173,11 @@ export function useAutoSave(options: AutoSaveOptions = {}): {
 }
 
 /**
- * Load saved progress from localStorage
+ * Load saved progress from localStorage (with decryption support)
  */
-export function loadSavedProgress(storageKey = DEFAULT_STORAGE_KEY): SavedProgressData | null {
+export async function loadSavedProgress(
+  storageKey = DEFAULT_STORAGE_KEY
+): Promise<SavedProgressData | null> {
   try {
     const saved = localStorage.getItem(storageKey);
 
@@ -147,7 +185,54 @@ export function loadSavedProgress(storageKey = DEFAULT_STORAGE_KEY): SavedProgre
       return null;
     }
 
-    const data = JSON.parse(saved);
+    const parsed = JSON.parse(saved);
+
+    // Handle new wrapper format
+    if (parsed.version === 1) {
+      const wrapper = parsed as SavedProgressWrapper;
+
+      if (wrapper.encrypted) {
+        // Encrypted data - need encryption key to decrypt
+        const encryptionStore = useEncryptionStore.getState();
+        const encryptionKey = encryptionStore.getKey();
+
+        if (!encryptionKey) {
+          console.warn('Saved progress is encrypted but encryption key not available');
+          return null;
+        }
+
+        try {
+          const encryptedData = JSON.parse(wrapper.data as string) as EncryptedData;
+          const decrypted = await decrypt(encryptedData, encryptionKey);
+          const data = JSON.parse(decrypted) as SavedProgressData;
+
+          // Validate required fields
+          if (!data.sessionId || !data.flowId || !data.currentNodeId) {
+            console.warn('Invalid saved progress data');
+            return null;
+          }
+
+          return data;
+        } catch (error) {
+          console.error('Failed to decrypt saved progress:', error);
+          return null;
+        }
+      } else {
+        // Unencrypted data
+        const data = wrapper.data as SavedProgressData;
+
+        // Validate required fields
+        if (!data.sessionId || !data.flowId || !data.currentNodeId) {
+          console.warn('Invalid saved progress data');
+          return null;
+        }
+
+        return data;
+      }
+    }
+
+    // Handle legacy format (unencrypted, no wrapper)
+    const data = parsed as SavedProgressData;
 
     // Validate required fields
     if (!data.sessionId || !data.flowId || !data.currentNodeId) {
@@ -179,20 +264,38 @@ export function clearSavedProgress(storageKey = DEFAULT_STORAGE_KEY): void {
 /**
  * Get saved progress metadata
  */
-export function getSavedProgressMetadata(storageKey = DEFAULT_STORAGE_KEY): {
+export async function getSavedProgressMetadata(storageKey = DEFAULT_STORAGE_KEY): Promise<{
   exists: boolean;
+  encrypted?: boolean;
   lastSaved?: Date;
   flowId?: string;
   progress?: number;
-} {
-  const saved = loadSavedProgress(storageKey);
+}> {
+  const saved = await loadSavedProgress(storageKey);
 
   if (!saved) {
+    // Check if data exists but couldn't be loaded (encrypted without key)
+    const raw = localStorage.getItem(storageKey);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed.version === 1 && parsed.encrypted) {
+          return {
+            exists: true,
+            encrypted: true,
+          };
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    }
+
     return { exists: false };
   }
 
   return {
     exists: true,
+    encrypted: false, // If we could load it, we had the key or it wasn't encrypted
     lastSaved: new Date(saved.updatedAt),
     flowId: saved.flowId,
   };

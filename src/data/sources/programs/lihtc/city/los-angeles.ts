@@ -4,7 +4,7 @@
  * Los Angeles city-level LIHTC program data.
  */
 
-import type { BenefitProgram } from '../../../../db/schemas';
+import type { BenefitProgram } from '../../../../../db/schemas';
 
 /**
  * Los Angeles LIHTC Program

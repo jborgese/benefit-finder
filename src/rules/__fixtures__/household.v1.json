@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "householdId": "hh001",
+  "members": [
+    { "name": "Alice", "age": 35, "relationship": "self", "income": 1200 },
+    { "name": "Bob", "age": 8, "relationship": "child", "income": 0 }
+  ],
+  "location": { "state": "CA", "county": "Los Angeles" },
+  "benefits": ["SSI"]
+}

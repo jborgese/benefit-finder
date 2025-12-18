@@ -169,6 +169,10 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
   }, [isOpen]);
 
   const hasError = error && error.length > 0;
+  const listboxId = `${question.id}-listbox`;
+  const activeDescendantId = isOpen && highlightedIndex >= 0 && highlightedIndex < filteredOptions.length
+    ? `${question.id}-option-${String(filteredOptions[highlightedIndex].value)}`
+    : undefined;
 
   return (
     <div ref={containerRef} className="relative">
@@ -201,6 +205,8 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
+        aria-controls={listboxId}
+        aria-activedescendant={activeDescendantId}
         aria-label={resolveQuestionString(question.ariaLabel) || resolveQuestionString(question.text)}
         aria-describedby={hasError ? `${question.id}-error` : undefined}
       >
@@ -252,11 +258,13 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
               <ul
                 ref={listRef}
                 role="listbox"
+                id={listboxId}
                 className="py-1"
               >
                 {filteredOptions.map((option, index) => (
                   <li
                     key={option.value}
+                    id={`${question.id}-option-${String(option.value)}`}
                     className={`
                       px-3 py-2 cursor-pointer text-sm transition-colors duration-150
                       ${index === highlightedIndex
@@ -274,7 +282,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
                 ))}
               </ul>
             ) : (
-              <div className="px-3 py-2 text-sm text-gray-500">
+              <div className="px-3 py-2 text-sm text-secondary-600 dark:text-secondary-300">
                 {noResultsText}
               </div>
             )}
@@ -291,7 +299,7 @@ export const SearchableSelectInput: React.FC<SearchableSelectInputProps> = ({
 
       {/* Help text */}
       {question.helpText && !hasError && (
-        <div className="mt-1 text-sm text-gray-500">
+        <div className="mt-1 text-sm text-secondary-700 dark:text-secondary-200">
           {question.helpText}
         </div>
       )}

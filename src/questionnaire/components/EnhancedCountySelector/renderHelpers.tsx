@@ -164,7 +164,7 @@ export const renderHelpText = (
   if (!question.helpText || showError) { return null; }
 
   return (
-    <p className="mt-2 text-xs text-gray-500 dark:text-secondary-400">
+    <p className="mt-2 text-xs text-secondary-700 dark:text-secondary-100">
       {question.helpText}
     </p>
   );

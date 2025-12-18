@@ -5,7 +5,7 @@
  * and utility functions for program management.
  */
 
-import type { BenefitProgram } from '../../../db/schemas';
+import type { BenefitProgram } from '../../../../db/schemas';
 
 // Import all LIHTC programs
 import { FEDERAL_LIHTC_PROGRAM } from './federal';

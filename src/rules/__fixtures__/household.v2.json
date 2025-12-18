@@ -1,0 +1,10 @@
+{
+  "version": "v2",
+  "householdId": "hh002",
+  "members": [
+    { "name": "Carlos", "age": 60, "relationship": "self", "income": 900 },
+    { "name": "Maria", "age": 58, "relationship": "spouse", "income": 700 }
+  ],
+  "location": { "state": "TX", "county": "Travis" },
+  "benefits": ["SNAP"]
+}

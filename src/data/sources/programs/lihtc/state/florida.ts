@@ -4,7 +4,7 @@
  * Florida state-level LIHTC program data.
  */
 
-import type { BenefitProgram } from '../../../../db/schemas';
+import type { BenefitProgram } from '../../../../../db/schemas';
 
 /**
  * Florida LIHTC Program

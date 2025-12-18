@@ -1,9 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { MedicaidExplanation } from '../MedicaidExplanation';
 import type { EligibilityStatus } from '../types';
 import * as Dialog from '@radix-ui/react-dialog';
 // Ensure i18n returns keys for predictable assertions
+vi.mock('../../i18n/hooks', () => ({
+  useI18n: () => ({ t: (k: string) => k })
+}));
+
+// Mock i18n hook to return key directly (same as other explanation tests)
 vi.mock('../../i18n/hooks', () => ({
   useI18n: () => ({ t: (k: string) => k })
 }));
@@ -31,7 +36,13 @@ function renderExplanation(status: EligibilityStatus | string, userProfile: any 
 }
 
 describe('MedicaidExplanation Component', () => {
-  afterEach(() => cleanup());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
 
   describe('Status messaging variations', () => {
     it('shows qualified status message', () => {

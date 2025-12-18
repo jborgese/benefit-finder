@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Smoke Unit Tests
+        run: npm run test:smoke
+
       - name: Lint
         run: npm run lint
 
@@ -33,6 +36,9 @@ jobs:
 
       - name: Validate Rules
         run: npm run validate-rules
+
+      - name: Check Rule Citations
+        run: node scripts/check-citations.js
 
       - name: Unit Tests
         run: npm run test:run
