@@ -1,0 +1,41 @@
+name: Cloudflare Cache Purge
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  purge-cache:
+    name: Purge Cloudflare Cache
+    runs-on: ubuntu-latest
+    # Only run after successful deployment
+    # Note: Cloudflare Pages automatically deploys on push to master
+    
+    steps:
+      - name: Wait for Cloudflare Pages Deployment
+        run: |
+          echo "Waiting 60 seconds for Cloudflare Pages to complete deployment..."
+          sleep 60
+
+      - name: Purge Cloudflare Cache
+        if: ${{ secrets.CLOUDFLARE_ZONE_ID != '' && secrets.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}' \
+            --fail-with-body
+
+      - name: Cache Purge Skipped
+        if: ${{ secrets.CLOUDFLARE_ZONE_ID == '' || secrets.CLOUDFLARE_API_TOKEN == '' }}
+        run: |
+          echo "⚠️  Cloudflare cache purge skipped - secrets not configured"
+          echo "To enable automatic cache purging on deployments:"
+          echo "1. Go to Cloudflare dashboard > Select your domain"
+          echo "2. Copy the Zone ID from the right sidebar"
+          echo "3. Go to My Profile > API Tokens > Create Token"
+          echo "4. Use 'Edit zone DNS' template or create custom token with 'Zone.Cache Purge' permission"
+          echo "5. Add these secrets to your GitHub repository:"
+          echo "   - CLOUDFLARE_ZONE_ID"
+          echo "   - CLOUDFLARE_API_TOKEN"
