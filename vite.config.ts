@@ -27,43 +27,59 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        // Manual chunking to optimize bundle sizes
+        // Manual chunking to optimize bundle sizes - more granular splits
         manualChunks: (id) => {
-          // Vendor chunks for better caching
+          // Vendor splitting
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
+            // React core
+            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
               return 'vendor-react';
             }
-            if (id.includes('rxdb') || id.includes('dexie')) {
-              return 'vendor-rxdb';
+
+            // Radix UI components
+            if (id.includes('@radix-ui')) {
+              if (id.includes('dialog') || id.includes('alert-dialog')) return 'radix-dialogs';
+              if (id.includes('dropdown') || id.includes('select') || id.includes('popover')) return 'radix-menus';
+              return 'radix-ui';
             }
-            if (id.includes('zustand') || id.includes('zod')) {
-              return 'vendor-ui';
-            }
-            if (id.includes('i18next') || id.includes('react-i18next') || id.includes('i18next-browser-languagedetector')) {
-              return 'vendor-i18n';
-            }
-            if (id.includes('json-logic-js')) {
-              return 'vendor-logic';
-            }
-            if (id.includes('crypto-js') || id.includes('nanoid')) {
-              return 'vendor-crypto';
-            }
+
+            // Database libs
+            if (id.includes('rxdb')) return 'vendor-rxdb';
+            if (id.includes('dexie')) return 'vendor-dexie';
+
+            // Logic / validation / crypto
+            if (id.includes('json-logic-js')) return 'vendor-logic';
+            if (id.includes('zod') || id.includes('ajv')) return 'vendor-validation';
+            if (id.includes('crypto-js')) return 'vendor-crypto';
+
+            // i18n
+            if (id.includes('i18next') || id.includes('react-i18next') || id.includes('i18next-browser-languagedetector')) return 'vendor-i18n';
+
+            // Utilities
+            if (id.includes('nanoid') || id.includes('date-fns') || id.includes('lodash')) return 'vendor-utils';
+
+            // Default vendor
+            return 'vendor';
           }
-          
-          // Feature-based chunks - use dynamic detection to avoid circular dependencies
-          if (id.includes('/src/rules/') && !id.includes('node_modules')) {
-            return 'rules';
-          }
-          if (id.includes('/src/db/') && !id.includes('node_modules')) {
-            return 'database';
-          }
-          if (id.includes('/src/components/results/') && !id.includes('node_modules')) {
+
+          // Application code splitting - split large features into smaller chunks
+          if (id.includes('/src/rules/state/california/')) return 'rules-california';
+          if (id.includes('/src/rules/state/florida/')) return 'rules-florida';
+          if (id.includes('/src/rules/state/georgia/')) return 'rules-georgia';
+          if (id.includes('/src/rules/federal/')) return 'rules-federal';
+
+          // DB related code
+          if (id.includes('/src/db/') ) return 'database';
+
+          // Large UI areas
+          if (id.includes('/src/components/results/') ) {
+            if (id.includes('ProgramCard')) return 'component-program-card';
             return 'components-results';
           }
-          if (id.includes('/src/questionnaire/') && !id.includes('node_modules')) {
-            return 'components-questionnaire';
-          }
+          if (id.includes('/src/questionnaire/') ) return 'components-questionnaire';
+
+          // Fallback: let Rollup decide
+          return undefined;
         }
       }
     },

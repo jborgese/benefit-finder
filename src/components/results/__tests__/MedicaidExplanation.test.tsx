@@ -1,17 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+// Mock i18n hook early so the mock is applied before modules import it
+vi.mock('../../i18n/hooks', () => ({
+  useI18n: () => ({ t: (k: string) => k })
+}));
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { MedicaidExplanation } from '../MedicaidExplanation';
 import type { EligibilityStatus } from '../types';
 import * as Dialog from '@radix-ui/react-dialog';
-// Ensure i18n returns keys for predictable assertions
-vi.mock('../../i18n/hooks', () => ({
-  useI18n: () => ({ t: (k: string) => k })
-}));
-
-// Mock i18n hook to return key directly (same as other explanation tests)
-vi.mock('../../i18n/hooks', () => ({
-  useI18n: () => ({ t: (k: string) => k })
-}));
 
 // Mock SpecificReasonsSection to avoid dependency complexity
 vi.mock('../SpecificReasonsSection', () => ({

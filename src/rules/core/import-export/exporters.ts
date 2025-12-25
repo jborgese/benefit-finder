@@ -3,7 +3,7 @@
  */
 
 import { getDatabase } from '../../../db/database';
-import { type RuleDefinition, type RuleExportOptions, type RulePackage } from '../schema';
+import { type RuleDefinition, type RuleExportOptions, type RulePackage, calculateChecksum } from '../schema';
 import { convertDatabaseRuleToDefinition } from './database';
 
 export async function exportRule(
@@ -56,7 +56,6 @@ export async function exportRulePackage(
     rules,
   };
 
-  const { calculateChecksum } = await import('../schema');
   pkg.checksum = await calculateChecksum({
     metadata: pkg.metadata,
     rules: pkg.rules,

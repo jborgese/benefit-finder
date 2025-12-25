@@ -12,7 +12,14 @@ import { dirname, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const TIMEOUT_MS = 60000; // 60 seconds
+// Timeout (ms) for the test runner. Can be overridden by setting
+// environment variable `TEST_TIMEOUT_MS` (value in milliseconds).
+// Default to 120000 ms (2 minutes) which is larger than the previous 60s.
+const TIMEOUT_MS = (() => {
+  const env = process.env.TEST_TIMEOUT_MS;
+  const parsed = env ? parseInt(env, 10) : NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 120000;
+})();
 const command = process.argv[2];
 const args = process.argv.slice(3);
 

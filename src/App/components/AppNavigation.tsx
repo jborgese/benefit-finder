@@ -3,7 +3,7 @@
  * Responsive navigation bar with desktop, tablet, and mobile layouts
  */
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../../components/Button';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
@@ -32,6 +32,86 @@ export function AppNavigation({
 }: AppNavigationProps): React.ReactElement {
   const { t } = useI18n();
   const NAVIGATION_HOME_KEY = 'navigation.home';
+
+  // Simple accessible overflow menu for small screens
+  const OverflowMenu: React.FC = () => {
+    const [open, setOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      const onDocClick = (e: MouseEvent) => {
+        if (!containerRef.current) return;
+        if (open && !containerRef.current.contains(e.target as Node)) {
+          setOpen(false);
+        }
+      };
+      document.addEventListener('click', onDocClick);
+      return () => document.removeEventListener('click', onDocClick);
+    }, [open]);
+
+    return (
+      <div ref={containerRef} className="relative">
+        <button
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen(v => !v)}
+          className="inline-flex items-center justify-center p-2 rounded-md bg-transparent hover:bg-secondary-100 dark:hover:bg-secondary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
+          aria-label={t('navigation.more') || 'More'}
+        >
+          <span className="sr-only">{t('navigation.more') || 'More'}</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+            <path d="M10 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM10 8.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM10 13a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" fill="currentColor" />
+          </svg>
+        </button>
+
+        {open && (
+          <div
+            role="menu"
+            className="absolute right-0 mt-2 w-44 bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-md shadow-lg z-50"
+          >
+            <ul className="py-1">
+              <li>
+                <button
+                  role="menuitem"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-secondary-100 dark:hover:bg-secondary-700"
+                  onClick={() => { setOpen(false); onStartWelcomeTour(); }}
+                >
+                  🎯 {t('navigation.tour')}
+                </button>
+              </li>
+              <li>
+                <button
+                  role="menuitem"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-secondary-100 dark:hover:bg-secondary-700"
+                  onClick={() => { setOpen(false); onShowPrivacyExplainer(); }}
+                >
+                  🔒 {t('navigation.privacy')}
+                </button>
+              </li>
+              <li>
+                <button
+                  role="menuitem"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-secondary-100 dark:hover:bg-secondary-700"
+                  onClick={() => { setOpen(false); onStartQuickStartGuide(); }}
+                >
+                  📖 {t('navigation.guide')}
+                </button>
+              </li>
+              <li>
+                <button
+                  role="menuitem"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-secondary-100 dark:hover:bg-secondary-700"
+                  onClick={() => { setOpen(false); onShowShortcutsHelp(); }}
+                >
+                  ⌨️ {t('navigation.shortcuts')}
+                </button>
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <nav className="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700 px-4 py-4 shadow-sm overflow-hidden">
@@ -176,59 +256,9 @@ export function AppNavigation({
             )}
 
             {appState === 'home' && (
+              // Use an overflow menu on tablet/portrait to save space
               <div className="flex items-center gap-0.5 flex-shrink-0">
-                <HelpTooltip
-                  content="Take a guided tour of the app to learn about key features"
-                  trigger="hover"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onStartWelcomeTour}
-                    className="text-xs px-1.5"
-                  >
-                    🎯 Tour
-                  </Button>
-                </HelpTooltip>
-                <HelpTooltip
-                  content="Learn about how we protect your privacy and data"
-                  trigger="hover"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onShowPrivacyExplainer}
-                    className="text-xs px-1.5"
-                  >
-                    🔒 Privacy
-                  </Button>
-                </HelpTooltip>
-                <HelpTooltip
-                  content="Get a quick start guide to using the app"
-                  trigger="hover"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onStartQuickStartGuide}
-                    className="text-xs px-1.5"
-                  >
-                    📖 Guide
-                  </Button>
-                </HelpTooltip>
-                <HelpTooltip
-                  content="View keyboard shortcuts for faster navigation"
-                  trigger="hover"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onShowShortcutsHelp}
-                    className="text-xs px-1.5"
-                  >
-                    ⌨️ Shortcuts
-                  </Button>
-                </HelpTooltip>
+                <OverflowMenu />
               </div>
             )}
 
@@ -279,67 +309,15 @@ export function AppNavigation({
               <TextSizeControls size="sm" variant="minimal" />
               <ThemeSwitcher size="sm" variant="minimal" />
               <LanguageSwitcher size="sm" />
+              {appState === 'home' && (
+                // Use overflow menu on mobile onboarding row to reduce vertical space
+                <OverflowMenu />
+              )}
             </div>
           </div>
         </div>
 
-        {/* Mobile onboarding row for home page */}
-        {appState === 'home' && (
-          <div className="flex md:hidden items-center justify-center mt-3 space-x-1">
-            <HelpTooltip
-              content="Take a guided tour of the app to learn about key features"
-              trigger="hover"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onStartWelcomeTour}
-                className="text-xs px-2"
-              >
-                🎯 Tour
-              </Button>
-            </HelpTooltip>
-            <HelpTooltip
-              content="Learn about how we protect your privacy and data"
-              trigger="hover"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onShowPrivacyExplainer}
-                className="text-xs px-2"
-              >
-                🔒 Privacy
-              </Button>
-            </HelpTooltip>
-            <HelpTooltip
-              content="Get a quick start guide to using the app"
-              trigger="hover"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onStartQuickStartGuide}
-                className="text-xs px-2"
-              >
-                📖 Guide
-              </Button>
-            </HelpTooltip>
-            <HelpTooltip
-              content="View keyboard shortcuts for faster navigation"
-              trigger="hover"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onShowShortcutsHelp}
-                className="text-xs px-2"
-              >
-                ⌨️ Shortcuts
-              </Button>
-            </HelpTooltip>
-          </div>
-        )}
+        {/* Mobile onboarding — replaced with overflow menu to save vertical space */}
       </div>
     </nav>
   );

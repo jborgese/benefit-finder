@@ -185,15 +185,13 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
             ${activeFilter === NOT_QUALIFIED_STATUS ? `${getStatusColor(NOT_QUALIFIED_STATUS)}${ACTIVE_FILTER_RING} ring-gray-200` : DEFAULT_BUTTON_STYLE}
             print:p-2 print:border
           `}
-          aria-label={`Show ${
-             
-            statusCounts[NOT_QUALIFIED_STATUS]
+          aria-label={`Show ${statusCounts[NOT_QUALIFIED_STATUS]
             } not qualified programs`}
         >
           <span className={`text-2xl mb-1 ${activeFilter === NOT_QUALIFIED_STATUS ? 'text-gray-800' : 'text-gray-600'}`}>{getStatusIcon(NOT_QUALIFIED_STATUS)}</span>
           <span className="text-sm font-medium">{t('results.summary.notQualified')}</span>
           <span className="text-xl font-bold text-gray-600">{
-             
+
             statusCounts[NOT_QUALIFIED_STATUS]
           }</span>
         </button>

@@ -1,12 +1,12 @@
-import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as Dialog from '@radix-ui/react-dialog';
-import { SsiExplanation } from '../SsiExplanation';
-import { EligibilityStatus } from '../types';
-// Ensure i18n returns keys in tests
+// Mock i18n early so components import the mocked hook
 vi.mock('../../i18n/hooks', () => ({
   useI18n: () => ({ t: (k: string) => k })
 }));
+import { render, screen, fireEvent } from '@testing-library/react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { SsiExplanation } from '../SsiExplanation';
+import { EligibilityStatus } from '../types';
 
 // Helper function to render with Dialog context
 const renderWithDialog = (component: React.ReactElement): ReturnType<typeof render> => {

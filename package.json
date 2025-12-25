@@ -108,6 +108,7 @@
     "ajv": "^8.17.1",
     "autoprefixer": "^10.4.18",
     "axe-core": "^4.10.3",
+    "baseline-browser-mapping": "^2.9.11",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react": "^7.37.5",

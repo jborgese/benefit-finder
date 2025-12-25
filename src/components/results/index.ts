@@ -26,14 +26,40 @@ import useEligibilityEvaluation from './useEligibilityEvaluation';
 export { useEligibilityEvaluation };
 export { useResultsManagement } from './useResultsManagement';
 
-// Utilities
-export {
-  exportToPDF,
-  exportEncrypted,
-  importEncrypted,
-  downloadBlob,
-  generateExportFilename,
+// Utilities (lazy-loaded to avoid bundling heavy export logic into main results chunk)
+// Import types for the exported functions so we can wrap dynamic imports
+import type {
+  exportToPDF as ExportToPDFType,
+  exportEncrypted as ExportEncryptedType,
+  importEncrypted as ImportEncryptedType,
+  downloadBlob as DownloadBlobType,
+  generateExportFilename as GenerateExportFilenameType,
 } from './exportUtils';
+
+export const exportToPDF = async (...args: Parameters<ExportToPDFType>) => {
+  const m = await import('./exportUtils');
+  return m.exportToPDF(...args);
+};
+
+export const exportEncrypted = async (...args: Parameters<ExportEncryptedType>) => {
+  const m = await import('./exportUtils');
+  return m.exportEncrypted(...args);
+};
+
+export const importEncrypted = async (...args: Parameters<ImportEncryptedType>) => {
+  const m = await import('./exportUtils');
+  return m.importEncrypted(...args);
+};
+
+export const downloadBlob = async (...args: Parameters<DownloadBlobType>) => {
+  const m = await import('./exportUtils');
+  return m.downloadBlob(...args);
+};
+
+export const generateExportFilename = async (...args: Parameters<GenerateExportFilenameType>) => {
+  const m = await import('./exportUtils');
+  return m.generateExportFilename(...args);
+};
 
 // Types
 export type {

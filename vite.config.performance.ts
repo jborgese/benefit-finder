@@ -32,96 +32,51 @@ export default defineConfig({
     // Code splitting configuration
     rollupOptions: {
       output: {
-        // Manual chunks for better caching
+        // Manual chunks for better caching and smaller chunks
         manualChunks: (id) => {
-          // Vendor splitting
+          if (!id) return undefined;
+
+          // Vendor splitting - more granular
           if (id.includes('node_modules')) {
-            // React core
-            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-              return 'react-vendor';
-            }
-            
-            // Radix UI components - split by usage
+            if (id.includes('react') || id.includes('scheduler')) return 'react-vendor';
+            if (id.includes('react-dom')) return 'react-dom-vendor';
+
+            // Radix UI splits
             if (id.includes('@radix-ui')) {
-              // Split frequently used components
-              if (id.includes('dialog') || id.includes('alert-dialog')) {
-                return 'radix-dialogs';
-              }
-              if (id.includes('dropdown') || id.includes('select') || id.includes('popover')) {
-                return 'radix-menus';
-              }
+              if (id.includes('dialog') || id.includes('alert-dialog')) return 'radix-dialogs';
+              if (id.includes('dropdown') || id.includes('select') || id.includes('popover')) return 'radix-menus';
               return 'radix-ui';
             }
-            
-            // Database - split RxDB and Dexie separately
-            if (id.includes('rxdb')) {
-              return 'database-rxdb';
-            }
-            if (id.includes('dexie')) {
-              return 'database-dexie';
-            }
-            
-            // State management
-            if (id.includes('zustand') || id.includes('immer')) {
-              return 'state';
-            }
-            
-            // Visualization (lazy load candidates)
-            if (id.includes('reactflow') || id.includes('elkjs')) {
-              return 'visualization';
-            }
-            
-            // i18n
-            if (id.includes('i18next') || id.includes('react-i18next')) {
-              return 'i18n';
-            }
-            
-            // Rule engine
-            if (id.includes('json-logic-js')) {
-              return 'rules-engine';
-            }
-            
-            // Validation
-            if (id.includes('zod')) {
-              return 'validation';
-            }
-            
-            // Crypto utilities
-            if (id.includes('crypto-js')) {
-              return 'crypto';
-            }
-            
-            // Other utilities
-            if (id.includes('nanoid') || id.includes('date-fns') || id.includes('lodash')) {
-              return 'utils';
-            }
-            
-            // Default vendor chunk for other dependencies
+
+            if (id.includes('rxdb/plugins')) return 'vendor-rxdb-plugins';
+            if (id.includes('rxdb')) return 'vendor-rxdb-core';
+            if (id.includes('dexie')) return 'vendor-dexie';
+            if (id.includes('json-logic-js')) return 'vendor-logic';
+            if (id.includes('zod')) return 'vendor-zod';
+            if (id.includes('ajv')) return 'vendor-ajv';
+            if (id.includes('crypto-js')) return 'vendor-crypto';
+            if (id.includes('i18next') || id.includes('react-i18next')) return 'vendor-i18n';
+            if (id.includes('reactflow') || id.includes('elkjs')) return 'vendor-visualization';
+            if (id.includes('nanoid') || id.includes('date-fns') || id.includes('lodash')) return 'vendor-utils';
+
             return 'vendor';
           }
-          
-          // Application code splitting
-          // Split rule definitions by state
-          if (id.includes('/rules/state/california/')) {
-            return 'rules-california';
-          }
-          if (id.includes('/rules/state/florida/')) {
-            return 'rules-florida';
-          }
-          if (id.includes('/rules/state/georgia/')) {
-            return 'rules-georgia';
-          }
-          if (id.includes('/rules/federal/')) {
-            return 'rules-federal';
-          }
-          
-          // Split large components
-          if (id.includes('/components/results/ProgramCard')) {
-            return 'component-program-card';
-          }
-          if (id.includes('/components/onboarding/')) {
-            return 'component-onboarding';
-          }
+
+          // Application splits - rules by state and feature
+          if (id.includes('/src/rules/state/california/') || id.includes('/rules/state/california/')) return 'rules-california';
+          if (id.includes('/src/rules/state/florida/') || id.includes('/rules/state/florida/')) return 'rules-florida';
+          if (id.includes('/src/rules/state/georgia/') || id.includes('/rules/state/georgia/')) return 'rules-georgia';
+          if (id.includes('/src/rules/federal/') || id.includes('/rules/federal/')) return 'rules-federal';
+
+          // Large components
+          if (id.includes('/src/components/results/ProgramCard') || id.includes('/components/results/ProgramCard')) return 'component-program-card';
+          if (id.includes('/src/components/results/') || id.includes('/components/results/')) return 'components-results';
+          if (id.includes('/src/components/questionnaire/') || id.includes('/components/questionnaire/')) return 'components-questionnaire';
+
+          // DB related code
+          if (id.includes('/src/db/') || id.includes('/db/')) return 'database';
+
+          return undefined;
         },
       },
     },

@@ -7,7 +7,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { EligibilityResults } from './types';
 import * as Dialog from '@radix-ui/react-dialog';
-import { exportToPDF, exportEncrypted, downloadBlob, generateExportFilename } from './exportUtils';
+// Lazy wrappers are exported from the results index to avoid bundling heavy export logic
+import { exportToPDF, exportEncrypted, downloadBlob, generateExportFilename } from './index';
 import { useI18n } from '../../i18n/hooks';
 
 interface ResultsExportProps {
@@ -66,7 +67,7 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
   const handlePDFExport = (): void => {
     try {
       setIsExporting(true);
-      exportToPDF(results, {
+      void exportToPDF(results, {
         userInfo: {
           name: userInfo?.name,
           evaluationDate: results.evaluatedAt,
@@ -102,8 +103,8 @@ export const ResultsExport: React.FC<ResultsExportProps> = ({
       });
 
       // Download
-      const filename = `${generateExportFilename('benefit-results')}.bfx`;
-      downloadBlob(blob, filename);
+      const filename = `${(await generateExportFilename('benefit-results'))}.bfx`;
+      await downloadBlob(blob, filename);
 
       setIsExporting(false);
       setShowEncryptDialog(false);

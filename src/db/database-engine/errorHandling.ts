@@ -7,7 +7,6 @@ import { collections } from '../collections';
 import { DB_NAME } from './config';
 import { handleDuplicateDatabaseError } from './creation';
 import { isDevMode } from './config';
-import { clearDatabase } from './clearing';
 import { getDefaultEncryptionPassword, clearStoredEncryptionKey } from './encryption';
 import type { BenefitFinderCollections, BenefitFinderDatabase } from './types';
 
@@ -29,6 +28,7 @@ export async function logEncryptionMismatchDebug(dbInstance: BenefitFinderDataba
 export async function handleEncryptionKeyMismatch(): Promise<BenefitFinderDatabase> {
   console.warn('Encryption key mismatch detected - resetting');
   await logEncryptionMismatchDebug(null);
+  const { clearDatabase } = await import('./clearing');
   await clearDatabase();
   clearStoredEncryptionKey();
   const newPassword = getDefaultEncryptionPassword();
