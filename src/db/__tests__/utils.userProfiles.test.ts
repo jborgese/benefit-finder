@@ -42,7 +42,7 @@ describe('user_profiles utils', () => {
 
   it('defaults householdIncome to 0 when updating a profile with null income', async () => {
     // Mock an existing profile document with an update method
-    const updateMock = vi.fn(async (_payload: unknown) => ({ updated: true }));
+    const updateMock = vi.fn(async (_payload: any) => ({ updated: true }));
     const fakeProfile = { update: updateMock };
 
     mockFindOneExec.mockResolvedValue(fakeProfile);
