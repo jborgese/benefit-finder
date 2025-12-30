@@ -19,6 +19,7 @@ import { useExitConfirmation } from './hooks';
 import { useQuestionnaireKeyboard } from '../accessibility';
 import { useDynamicCountyOptions } from '../hooks/useDynamicCountyOptions';
 import type { QuestionFlow } from '../types';
+import { Spinner } from '../../components/ui/Spinner';
 
 export interface QuestionFlowUIProps {
   /** Question flow definition */
@@ -228,20 +229,8 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
     return (
       <div className={`questionnaire-complete ${className} animate-fade-in-up`}>
         <div className="text-center p-12">
-          <div className="mb-6 animate-bounce-gentle">
-            <svg
-              className="w-20 h-20 text-success-500 mx-auto"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+          <div className="mb-6">
+            <Spinner size={80} className="mx-auto text-white" label="Processing results" />
           </div>
 
           <h2 className="text-3xl font-display font-bold text-white mb-4">
