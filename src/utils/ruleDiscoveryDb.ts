@@ -37,7 +37,8 @@ export async function createBenefitProgram(discoveredFile: DiscoveredRuleFile): 
       createdAt: Date.now(),
       lastUpdated: Date.now(),
     };
-    await db.benefit_programs.insert(program);
+    // Use upsert to avoid conflicts if the program already exists (prevents CONFLICT errors)
+    await db.benefit_programs.upsert(program);
     return true;
   } catch (error) {
     console.error('[RuleDiscoveryDb] Error creating benefit program:', error);
