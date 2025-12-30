@@ -22,6 +22,41 @@ function isIncomeHardStop(result: EligibilityEvaluationResult): boolean {
     (result.confidence >= 90 && result.ruleId.includes('income'));
 }
 
+function isDefinitiveDisqualifier(result: EligibilityEvaluationResult): boolean {
+  if (!result || !result.reason) { return false; }
+  const r = result.reason.toLowerCase();
+
+  // Explicit, deterministic disqualifiers where additional info won't change
+  // basic eligibility: e.g., 'no disability', 'not elderly', 'not blind',
+  // 'not pregnant and no children', or explicit rule ids indicating hard
+  // categorical disqualification.
+  const definitivePhrases = [
+    'no disability',
+    'not disabled',
+    'not elderly',
+    'under age',
+    'not blind',
+    'not pregnant',
+    'no children',
+    'ineligible due to age',
+    'ineligible due to disability'
+  ];
+
+  for (const phrase of definitivePhrases) {
+    if (r.includes(phrase)) { return true; }
+  }
+
+  // Some rules are explicit by id (definitive disqualifiers)
+  if (result.ruleId) {
+    const id = result.ruleId.toLowerCase();
+    if (id.includes('age-disqualification') || id.includes('no-disability')) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function categorizeResults(evaluationResults: EligibilityEvaluationResult[]): {
   qualified: EligibilityEvaluationResult[];
   maybe: EligibilityEvaluationResult[];
@@ -37,6 +72,7 @@ export function categorizeResults(evaluationResults: EligibilityEvaluationResult
     .filter((result) => {
       if (!result.eligible) {
         if (isIncomeHardStop(result)) { return false; }
+        if (isDefinitiveDisqualifier(result)) { return false; }
         return (result.incomplete ?? false) || result.confidence < 70;
       }
       return false;
@@ -46,6 +82,7 @@ export function categorizeResults(evaluationResults: EligibilityEvaluationResult
     .filter((result) => {
       if (!result.eligible) {
         if (isIncomeHardStop(result)) { return false; }
+        if (isDefinitiveDisqualifier(result)) { return true; }
         return !result.incomplete && result.confidence >= 70;
       }
       return false;

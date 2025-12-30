@@ -23,15 +23,28 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
 
   // Memoize the expensive filtering operations
   const answeredQuestions = useMemo(() => {
-    if (!flow) {return [];}
+    if (!flow) { return []; }
 
     // Get all questions from the flow to display them in order
     const questions = Array.from(flow.nodes.values());
 
-    // Filter to only show questions that have answers
+    // Filter to only show questions that have answers.
+    // For numeric/currency fields, also show questions where value is null/undefined
+    // because the questionnaire submission may default those to 0 and we want
+    // to display that explicitly on the results page.
     return questions.filter((node: { question: QuestionDefinition }) => {
       const answer = answers.get(node.question.id);
-      return answer && answer.value !== null && answer.value !== undefined && answer.value !== '';
+      if (!answer) { return false; }
+
+      const val = answer.value;
+
+      // If the value is null/undefined/empty string, include it when the input
+      // type is numeric so we can render it as 0. Otherwise, exclude it.
+      if (val === null || val === undefined || val === '') {
+        return node.question.inputType === 'currency' || node.question.inputType === 'number';
+      }
+
+      return true;
     });
   }, [answers, flow]);
 
@@ -80,7 +93,16 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
   };
 
   const formatValue = (value: unknown, question: QuestionDefinition): string => {
+    // Treat null/undefined/empty for numeric inputs as 0 so they display as if
+    // the user had entered 0 (submission may default these to 0).
     if (value === null || value === undefined || value === '') {
+      if (question.inputType === 'currency') {
+        return `$${(0).toLocaleString()}`;
+      }
+      if (question.inputType === 'number') {
+        return (0).toLocaleString();
+      }
+
       return 'Not answered';
     }
 
@@ -133,7 +155,7 @@ export const QuestionnaireAnswersCard: React.FC<QuestionnaireAnswersCardProps> =
         {answeredQuestions.map(({ question }: { question: QuestionDefinition }) => {
           const answer = answers.get(question.id);
 
-          if (!answer) {return null;}
+          if (!answer) { return null; }
 
           return (
             <div key={question.id} className="bg-gray-50 rounded-lg p-4 print:border print:bg-white">
