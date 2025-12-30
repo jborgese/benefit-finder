@@ -82,6 +82,23 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
     }
   };
 
+  const Spinner: React.FC<{ size?: number; className?: string; label?: string }> = ({ size = 56, className = '', label = 'Processing results' }) => (
+    <div className={`flex flex-col items-center justify-center ${className}`} role="status" aria-live="polite">
+      <svg
+        className={`animate-spin motion-reduce:animate-none text-green-500`}
+        style={{ width: size, height: size }}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.15" />
+        <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+      </svg>
+      <span className="sr-only">{label}</span>
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6 print:shadow-none">
       {/* Header */}
@@ -92,6 +109,10 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
             time: evaluatedAt.toLocaleTimeString()
           })}
         </p>
+        <div className="mt-6 flex flex-col items-center">
+          <Spinner size={72} />
+          <p className="mt-4 text-lg font-semibold text-gray-800">{t('results.processingMessage')}</p>
+        </div>
       </div>
 
       {/* Summary Stats */}

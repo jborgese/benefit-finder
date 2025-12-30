@@ -244,11 +244,11 @@ export const QuestionFlowUI: React.FC<QuestionFlowUIProps> = ({
             </svg>
           </div>
 
-          <h2 className="text-3xl font-display font-bold text-secondary-900 mb-4">
+          <h2 className="text-3xl font-display font-bold text-white mb-4">
             Questionnaire Complete!
           </h2>
 
-          <p className="text-secondary-600 mb-8 text-lg">
+          <p className="text-white text-opacity-90 mb-8 text-lg">
             Thank you for completing the questionnaire. Your results are being processed.
           </p>
 

@@ -109,7 +109,7 @@ export async function createUserProfile(
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth,
     householdSize: data.householdSize,
-    householdIncome: data.householdIncome,
+    householdIncome: data.householdIncome == null ? 0 : data.householdIncome,
     state: data.state,
     zipCode: data.zipCode,
     county: data.county,
@@ -150,7 +150,17 @@ export async function updateUserProfile(
 
   return profile.update({
     $set: {
-      ...data,
+      ...(() => {
+        const sanitized = { ...data } as Partial<typeof data>;
+        if (sanitized.householdIncome === null) {
+          // If householdIncome is explicitly null, treat as no income -> 0
+          // Use strict null check to avoid overwriting 0 or undefined
+          // and preserve other fields as provided.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (sanitized as any).householdIncome = 0;
+        }
+        return sanitized;
+      })(),
       updatedAt: Date.now(),
     },
   });
