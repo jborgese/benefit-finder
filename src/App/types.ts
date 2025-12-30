@@ -16,6 +16,8 @@ export interface ProfileData {
   hasDisability: boolean;
   isPregnant: boolean;
   hasChildren: boolean;
+  isBlind?: boolean;
+  isElderly?: boolean;
 }
 
 export interface UserProfile {
@@ -28,4 +30,6 @@ export interface UserProfile {
   hasDisability: boolean;
   isPregnant: boolean;
   hasChildren: boolean;
+  isBlind?: boolean;
+  isElderly?: boolean;
 }

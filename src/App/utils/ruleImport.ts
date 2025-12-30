@@ -15,6 +15,11 @@ export async function importRulesWithLogging(state?: string): Promise<void> {
       timeout: 15000
     });
 
+    if (!result) {
+      console.warn('⚠️ [DEBUG] importRulesWithLogging: importRulesDynamically returned no result');
+      return;
+    }
+
     if (result.success) {
       console.log(`✅ [DEBUG] Dynamic rule import completed successfully:`, {
         imported: result.imported,
