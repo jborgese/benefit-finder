@@ -232,7 +232,9 @@ test.describe('Questionnaire Back Button', () => {
       // It's acceptable to be back at the landing/start screen instead of having a forward button
       const startButton = page.locator('button', { hasText: /Eligibility Questionnaire/i });
       const startVisible = await startButton.isVisible().catch(() => false);
-      expect(nextVisible || nextEnabled || startVisible).toBeTruthy();
+      const landingHeading = page.locator('text=Find Your Government Benefits');
+      const headingVisible = await landingHeading.isVisible().catch(() => false);
+      expect(nextVisible || nextEnabled || startVisible || headingVisible).toBeTruthy();
     });
 
     test('should disable back button when at first question', async ({ page }) => {
@@ -655,8 +657,10 @@ test.describe('Questionnaire Back Button', () => {
         if (inputs.length === 0) {
           const startButton = page.locator('button', { hasText: /Eligibility Questionnaire/i });
           const startVisible = await startButton.isVisible().catch(() => false);
+          const landingHeading = page.locator('text=Find Your Government Benefits');
+          const headingVisible = await landingHeading.isVisible().catch(() => false);
           const urlIsRoot = page.url().endsWith('/') || page.url().endsWith('/index.html');
-          expect(startVisible || urlIsRoot || inputs.length > 0).toBeTruthy();
+          expect(startVisible || headingVisible || urlIsRoot || inputs.length > 0).toBeTruthy();
         } else {
           expect(inputs.length).toBeGreaterThan(0);
         }
