@@ -9,9 +9,20 @@ export function convertAnswersToProfileData(answers: Record<string, unknown>): {
   profileData: ProfileData;
   userProfile: UserProfile;
 } {
-  const householdIncome = answers.householdIncome as number;
-  const incomePeriod = answers.incomePeriod as string;
-  const householdSize = answers.householdSize as number;
+  const rawIncome = answers.householdIncome as unknown;
+  const incomePeriod = (answers.incomePeriod as string) ?? 'annual';
+  const householdSize = Number(answers.householdSize) || 1;
+
+  // Normalize income: accept numbers or numeric strings, default to 0 when null/invalid
+  let householdIncome = 0;
+  if (rawIncome == null) {
+    householdIncome = 0;
+  } else if (typeof rawIncome === 'number' && !Number.isNaN(rawIncome)) {
+    householdIncome = rawIncome;
+  } else {
+    const parsed = Number(String(rawIncome).replace(/[,\s]+/g, ''));
+    householdIncome = Number.isFinite(parsed) ? parsed : 0;
+  }
   const dateOfBirth = answers.dateOfBirth as string;
   const state = answers.state as string;
   const county = answers.county as string;
@@ -27,9 +38,9 @@ export function convertAnswersToProfileData(answers: Record<string, unknown>): {
   const annualIncome = incomePeriod === 'monthly' ? householdIncome * 12 : householdIncome;
 
   // Add SNAP-specific debug logging for income conversion
-  if (import.meta.env.DEV && typeof householdIncome === 'number') {
+  if (import.meta.env.DEV) {
     console.warn(`🔍 [SNAP DEBUG] Income conversion in convertAnswersToProfileData:`);
-    console.warn(`  - Original Income: $${householdIncome.toLocaleString()}`);
+    console.warn(`  - Original Income (normalized): $${householdIncome.toLocaleString()}`);
     console.warn(`  - Income Period: ${incomePeriod}`);
     console.warn(`  - Converted Annual Income: $${annualIncome.toLocaleString()}`);
     console.warn(`  - Household Size: ${householdSize}`);

@@ -94,9 +94,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
             time: evaluatedAt.toLocaleTimeString()
           })}
         </p>
-        <div className="mt-6 flex flex-col items-center">
-          <p className="mt-4 text-lg font-semibold text-gray-800">{t('results.processingMessage')}</p>
-        </div>
+        {/* Processing message removed: not shown on summary page */}
       </div>
 
       {/* Summary Stats */}

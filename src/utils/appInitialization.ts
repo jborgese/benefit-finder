@@ -153,7 +153,7 @@ export async function initializeApp(): Promise<void> {
  */
 async function loadSamplePrograms(db: NonNullable<ReturnType<typeof getDatabase>>): Promise<void> {
   // Create SNAP program with explicit ID to match rules
-  await db!.benefit_programs.insert({
+    await db!.benefit_programs.upsert({
     id: 'snap-federal',
     name: 'Supplemental Nutrition Assistance Program (SNAP)',
     shortName: 'SNAP',
@@ -171,7 +171,7 @@ async function loadSamplePrograms(db: NonNullable<ReturnType<typeof getDatabase>
   });
 
   // Create Medicaid program with explicit ID to match rules
-  await db!.benefit_programs.insert({
+  await db!.benefit_programs.upsert({
     id: 'medicaid-federal',
     name: 'Medicaid',
     shortName: 'Medicaid',
@@ -189,7 +189,7 @@ async function loadSamplePrograms(db: NonNullable<ReturnType<typeof getDatabase>
   });
 
   // Create WIC program with explicit ID to match rules
-  await db!.benefit_programs.insert({
+  await db!.benefit_programs.upsert({
     id: 'wic-federal',
     name: 'Special Supplemental Nutrition Program for Women, Infants, and Children (WIC)',
     shortName: 'WIC',
@@ -207,7 +207,7 @@ async function loadSamplePrograms(db: NonNullable<ReturnType<typeof getDatabase>
   });
 
   // Create TANF program with explicit ID to match rules
-  await db.benefit_programs.insert({
+  await db.benefit_programs.upsert({
     id: 'tanf-federal',
     name: 'Temporary Assistance for Needy Families (TANF)',
     shortName: 'TANF',
@@ -225,7 +225,7 @@ async function loadSamplePrograms(db: NonNullable<ReturnType<typeof getDatabase>
   });
 
   // Create SSI program with explicit ID to match rules
-  await db!.benefit_programs.insert({
+  await db!.benefit_programs.upsert({
     id: 'ssi-federal',
     name: 'Supplemental Security Income (SSI)',
     shortName: 'SSI',
