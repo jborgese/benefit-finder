@@ -53,7 +53,7 @@
     "test:smoke:grep": "node scripts/test-timeout.js cross-env NODE_OPTIONS=\"--max-old-space-size=16384\" vitest run --grep=\"@smoke\"",
     "test:related": "cross-env NODE_OPTIONS=\"--max-old-space-size=16384\" vitest related --run",
     "test:smart": "node scripts/test-related.js",
-    "test:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=32768 --max-semi-space-size=256\" vitest run --coverage",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "cross-env NODE_OPTIONS=\"--max-old-space-size=16384\" vitest watch",
     "test:cleanup": "node scripts/kill-test-processes.js",
     "test:e2e": "playwright test",

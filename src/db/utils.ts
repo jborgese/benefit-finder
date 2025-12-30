@@ -109,7 +109,7 @@ export async function createUserProfile(
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth,
     householdSize: data.householdSize,
-    householdIncome: data.householdIncome == null ? 0 : data.householdIncome,
+    householdIncome: data.householdIncome,
     state: data.state,
     zipCode: data.zipCode,
     county: data.county,

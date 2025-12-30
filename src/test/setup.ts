@@ -21,6 +21,61 @@ if (typeof process !== 'undefined') {
 // Import vi early to mock React before anything else pulls it in
 import { vi } from 'vitest';
 
+// Mock i18n hook globally so component tests consistently receive readable strings
+vi.mock('../i18n/hooks', () => ({
+  useI18n: () => {
+    const humanize = (key: string) => {
+      const last = String(key).split('.').pop() ?? String(key);
+      const spaced = last.replace(/[-_]/g, ' ');
+      return spaced
+        .split(' ')
+        .map(w => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+        .join(' ');
+    };
+
+    const overrides: Record<string, string> = {
+      'results.processingMessage': 'Processing results',
+      'results.actions.whyThisResult': 'Why this result?',
+      'results.status.qualified': 'You Qualify',
+      'results.summary.all': 'All',
+      'results.summary.qualified': 'Qualified',
+      'results.summary.likely': 'Likely',
+      'results.summary.maybe': 'Maybe',
+      'results.summary.notQualified': 'Not Qualified',
+      'benefits.medicaid': 'Medicaid',
+      'results.additionalInfo.title': 'Additional Information',
+      'results.actions.export': 'Export',
+      // Common keys used by results explanation tests (WIC)
+      'results.wic.benefits.title': 'WIC Benefits',
+      'results.wic.nextSteps.title': 'Next Steps',
+      'results.wic.requirements.title': 'Requirements',
+    };
+
+    const t = (k: string) => {
+      if (!k) return k;
+      if (overrides[k]) return overrides[k];
+      return humanize(k);
+    };
+
+    const availableLanguages = ['en', 'es'];
+    const languageDisplayNames: Record<string, string> = { en: 'English', es: 'Español' };
+    const languageFlags: Record<string, string> = { en: '🇺🇸', es: '🇪🇸' };
+
+    const getLanguageDisplayName = (lang: string) => languageDisplayNames[lang] ?? lang;
+    const getLanguageFlag = (lang: string) => languageFlags[lang] ?? '🏳️';
+
+    return {
+      t,
+      language: 'en',
+      changeLanguage: (_l: string) => {},
+      i18n: { language: 'en' },
+      availableLanguages,
+      getLanguageDisplayName,
+      getLanguageFlag,
+    };
+  },
+}));
+
 // Ensure React.lazy never suspends in tests to avoid
 // "A component suspended while responding to synchronous input" errors
 // when components are rendered during event handlers.
